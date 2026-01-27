@@ -10,6 +10,7 @@ import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { DataEntryModal } from "@/components/dashboard/DataEntryModal";
 import { BulkDataEntry } from "@/components/dashboard/BulkDataEntry";
+import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   DollarSign, 
@@ -126,6 +127,7 @@ const Index = () => {
           {metrics && trainingHours && (
             <BulkDataEntry metrics={metrics} trainingHours={trainingHours} />
           )}
+          {metrics && <MetricHistoryModal metrics={metrics} />}
         </div>
         
         <FilterBar
