@@ -9,10 +9,10 @@ interface SectionHeaderProps {
 }
 
 const variantStyles = {
-  primary: "bg-primary/10 text-primary",
-  accent: "bg-accent/10 text-accent",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
+  primary: "bg-primary/15 text-primary border-primary/20",
+  accent: "bg-primary/15 text-primary border-primary/20",
+  success: "bg-success/15 text-success border-success/20",
+  warning: "bg-warning/15 text-warning border-warning/20",
 };
 
 export function SectionHeader({
@@ -22,18 +22,19 @@ export function SectionHeader({
   variant = "primary",
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-center gap-3 mb-6">
+    <div className="flex items-center gap-4 mb-8">
       {Icon && (
-        <div className={cn("p-2.5 rounded-lg", variantStyles[variant])}>
+        <div className={cn("p-3 rounded border", variantStyles[variant])}>
           <Icon className="h-5 w-5" />
         </div>
       )}
       <div>
-        <h2 className="section-title mb-0">{title}</h2>
+        <h2 className="section-title mb-0 text-xl">{title}</h2>
         {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+          <p className="text-sm text-muted-foreground tracking-wide mt-0.5">{subtitle}</p>
         )}
       </div>
+      <div className="flex-1 h-px bg-gradient-to-r from-border/50 to-transparent ml-4" />
     </div>
   );
 }
