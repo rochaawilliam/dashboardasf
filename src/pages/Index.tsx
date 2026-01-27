@@ -8,15 +8,15 @@ import { FilterBar } from "@/components/dashboard/FilterBar";
 import { AlertsSummary } from "@/components/dashboard/AlertsSummary";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
+import { DataEntryModal } from "@/components/dashboard/DataEntryModal";
+import { BulkDataEntry } from "@/components/dashboard/BulkDataEntry";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   DollarSign, 
-  Shield, 
   Heart, 
   Users, 
   Zap, 
   GraduationCap,
-  BarChart3
 } from "lucide-react";
 import {
   useMetrics,
@@ -119,6 +119,14 @@ const Index = () => {
       <PrintStyles />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardHeader />
+        
+        {/* Action Bar */}
+        <div className="flex flex-wrap items-center gap-3 mb-6 print:hidden">
+          {metrics && <DataEntryModal metrics={metrics} />}
+          {metrics && trainingHours && (
+            <BulkDataEntry metrics={metrics} trainingHours={trainingHours} />
+          )}
+        </div>
         
         <FilterBar
           filters={filters}
