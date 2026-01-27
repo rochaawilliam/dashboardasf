@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      metric_history: {
+        Row: {
+          created_at: string
+          id: string
+          metric_id: string
+          period_type: string
+          recorded_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_id: string
+          period_type?: string
+          recorded_at?: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_id?: string
+          period_type?: string
+          recorded_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metric_history_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "metrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metrics: {
+        Row: {
+          category: Database["public"]["Enums"]["metric_category"]
+          created_at: string
+          current_value: number
+          description: string | null
+          division: Database["public"]["Enums"]["division"] | null
+          id: string
+          name: string
+          target_value: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["metric_category"]
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          division?: Database["public"]["Enums"]["division"] | null
+          id?: string
+          name: string
+          target_value: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["metric_category"]
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          division?: Database["public"]["Enums"]["division"] | null
+          id?: string
+          name?: string
+          target_value?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      training_hours: {
+        Row: {
+          created_at: string
+          current_hours: number
+          division: Database["public"]["Enums"]["division"] | null
+          id: string
+          role: string
+          target_hours: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_hours?: number
+          division?: Database["public"]["Enums"]["division"] | null
+          id?: string
+          role: string
+          target_hours: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_hours?: number
+          division?: Database["public"]["Enums"]["division"] | null
+          id?: string
+          role?: string
+          target_hours?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +126,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      division: "juridico" | "crescimento" | "marketing" | "administrativo"
+      metric_category:
+        | "lucratividade"
+        | "experiencia_cliente"
+        | "produtividade"
+        | "gestao_pessoas"
+        | "aprendizado_crescimento"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +259,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      division: ["juridico", "crescimento", "marketing", "administrativo"],
+      metric_category: [
+        "lucratividade",
+        "experiencia_cliente",
+        "produtividade",
+        "gestao_pessoas",
+        "aprendizado_crescimento",
+      ],
+    },
   },
 } as const
