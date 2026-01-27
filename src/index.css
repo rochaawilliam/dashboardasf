@@ -108,6 +108,7 @@
 @layer base {
   * {
     @apply border-border;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
   }
 
   body {
@@ -118,6 +119,11 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Cormorant Garamond', Georgia, serif;
     letter-spacing: 0.02em;
+  }
+
+  /* Prevent transition on page load */
+  .no-transitions * {
+    transition: none !important;
   }
 }
 
