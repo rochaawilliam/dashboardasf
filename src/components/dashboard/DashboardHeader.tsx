@@ -1,5 +1,6 @@
 import { Calendar } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "@/components/dashboard/UserMenu";
 import asfLogo from "@/assets/asf-logo.png";
 
 export function DashboardHeader() {
@@ -36,6 +37,7 @@ export function DashboardHeader() {
             <span className="capitalize tracking-wide">{currentDate}</span>
           </div>
           <ThemeToggle />
+          <UserMenu />
         </div>
       </div>
     </header>
