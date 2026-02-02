@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { parseISO } from "date-fns";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SummaryCardsLive } from "@/components/dashboard/SummaryCardsLive";
-import { MetricCardEditable } from "@/components/dashboard/MetricCardEditable";
+import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { FilterBar } from "@/components/dashboard/FilterBar";
@@ -11,7 +12,7 @@ import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { DataEntryModal } from "@/components/dashboard/DataEntryModal";
 import { BulkDataEntry } from "@/components/dashboard/BulkDataEntry";
 import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
-import { MonthlyDataGrid } from "@/components/dashboard/MonthlyDataGrid";
+import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   DollarSign, 
@@ -26,7 +27,6 @@ import {
   useTrainingHours,
   type Filters,
   type MetricCategory,
-  type MetricHistory,
 } from "@/hooks/useMetrics";
 
 const categoryConfig: Record<MetricCategory, { title: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
@@ -67,6 +67,10 @@ const Index = () => {
     period: "quarter",
     division: "all",
   });
+  
+  // Month/Year selection state
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const { data: metrics, isLoading: metricsLoading } = useMetrics(filters);
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
@@ -76,26 +80,75 @@ const Index = () => {
     window.print();
   }, []);
 
+  // Get monthly values for selected month/year
+  const monthlyValues = useMemo(() => {
+    if (!historyData || selectedMonth === null) return {};
+    
+    const values: Record<string, number> = {};
+    historyData.forEach((h) => {
+      const date = parseISO(h.recorded_at);
+      if (date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth) {
+        values[h.metric_id] = h.value;
+      }
+    });
+    return values;
+  }, [historyData, selectedMonth, selectedYear]);
+
+  // Calculate accumulated values per metric for "Todo o Período" (selected year)
+  const accumulatedValues = useMemo(() => {
+    if (!historyData) return {};
+    
+    const values: Record<string, number> = {};
+    historyData.forEach((h) => {
+      const date = parseISO(h.recorded_at);
+      if (date.getFullYear() === selectedYear) {
+        values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
+      }
+    });
+    return values;
+  }, [historyData, selectedYear]);
+
+  // Create metrics with adjusted values based on selection
+  const adjustedMetrics = useMemo(() => {
+    if (!metrics) return [];
+    
+    return metrics.map((metric) => ({
+      ...metric,
+      current_value: selectedMonth === null 
+        ? (accumulatedValues[metric.id] ?? 0)
+        : metric.current_value, // will use monthlyValues in the card
+    }));
+  }, [metrics, selectedMonth, accumulatedValues]);
+
   // Group metrics by category
-  const groupedMetrics = metrics?.reduce((acc, metric) => {
+  const groupedMetrics = adjustedMetrics.reduce((acc, metric) => {
     if (!acc[metric.category]) {
       acc[metric.category] = [];
     }
     acc[metric.category].push(metric);
     return acc;
-  }, {} as Record<MetricCategory, typeof metrics>);
+  }, {} as Record<MetricCategory, typeof adjustedMetrics>);
 
-  // Group history by category for charts
-  const historyByCategory = historyData?.reduce((acc, item) => {
-    const metric = metrics?.find((m) => m.id === item.metric_id);
-    if (metric) {
-      if (!acc[metric.category]) {
-        acc[metric.category] = [];
+  // Group history by category for charts (filter by year)
+  const historyByCategory = useMemo(() => {
+    if (!historyData || !metrics) return {};
+    
+    const filtered = historyData.filter((h) => {
+      const date = parseISO(h.recorded_at);
+      return date.getFullYear() === selectedYear;
+    });
+    
+    return filtered.reduce((acc, item) => {
+      const metric = metrics.find((m) => m.id === item.metric_id);
+      if (metric) {
+        if (!acc[metric.category]) {
+          acc[metric.category] = [];
+        }
+        acc[metric.category].push(item);
       }
-      acc[metric.category].push(item);
-    }
-    return acc;
-  }, {} as Record<MetricCategory, typeof historyData>);
+      return acc;
+    }, {} as Record<MetricCategory, typeof historyData>);
+  }, [historyData, metrics, selectedYear]);
 
   if (metricsLoading) {
     return (
@@ -138,17 +191,20 @@ const Index = () => {
           onPrint={handlePrint}
         />
         
-        {metrics && <AlertsSummary metrics={metrics} />}
+        {/* Month Selector */}
+        <MonthSelector
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={setSelectedMonth}
+          onYearChange={setSelectedYear}
+        />
         
-        {metrics && <SummaryCardsLive metrics={metrics} />}
-
-        {/* Monthly Data Grid */}
-        {metrics && historyData && (
-          <MonthlyDataGrid metrics={metrics} historyData={historyData as MetricHistory[]} />
-        )}
+        {metrics && <AlertsSummary metrics={adjustedMetrics} />}
+        
+        {metrics && <SummaryCardsLive metrics={adjustedMetrics} />}
 
         {/* Render each category */}
-        {groupedMetrics && Object.entries(groupedMetrics).map(([category, categoryMetrics]) => {
+        {Object.entries(groupedMetrics).map(([category, categoryMetrics]) => {
           const config = categoryConfig[category as MetricCategory];
           if (!config || !categoryMetrics) return null;
           
@@ -165,7 +221,12 @@ const Index = () => {
               
               <div className="dashboard-grid mb-6">
                 {categoryMetrics.map((metric) => (
-                  <MetricCardEditable key={metric.id} metric={metric} />
+                  <MetricCardMonthly 
+                    key={metric.id} 
+                    metric={metric} 
+                    monthlyValue={monthlyValues[metric.id] ?? null}
+                    isMonthSelected={selectedMonth !== null}
+                  />
                 ))}
               </div>
               
@@ -174,7 +235,7 @@ const Index = () => {
                 <MetricChart
                   data={categoryHistory}
                   metrics={metrics}
-                  title={`Evolução - ${config.title}`}
+                  title={`Evolução - ${config.title} (${selectedYear})`}
                 />
               )}
             </section>
