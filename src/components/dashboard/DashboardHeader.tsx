@@ -1,14 +1,10 @@
 import { Calendar, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { UserMenu } from "@/components/dashboard/UserMenu";
 import { Button } from "@/components/ui/button";
-import { useUserRole } from "@/hooks/useUserRole";
 import asfLogo from "@/assets/asf-logo.png";
 
 export function DashboardHeader() {
-  const { isAdmin } = useUserRole();
-  
   const currentDate = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     year: "numeric",
@@ -41,15 +37,12 @@ export function DashboardHeader() {
             <Calendar className="h-4 w-4 text-primary" />
             <span className="capitalize tracking-wide">{currentDate}</span>
           </div>
-          {isAdmin && (
-            <Link to="/admin">
-              <Button variant="ghost" size="icon" className="h-9 w-9 border border-border/50" title="Painel Administrativo">
-                <Shield className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
+          <Link to="/admin">
+            <Button variant="ghost" size="icon" className="h-9 w-9 border border-border/50" title="Painel Administrativo">
+              <Shield className="h-4 w-4" />
+            </Button>
+          </Link>
           <ThemeToggle />
-          <UserMenu />
         </div>
       </div>
     </header>
