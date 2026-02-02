@@ -11,6 +11,7 @@ import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { DataEntryModal } from "@/components/dashboard/DataEntryModal";
 import { BulkDataEntry } from "@/components/dashboard/BulkDataEntry";
 import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
+import { MonthlyDataGrid } from "@/components/dashboard/MonthlyDataGrid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   DollarSign, 
@@ -25,6 +26,7 @@ import {
   useTrainingHours,
   type Filters,
   type MetricCategory,
+  type MetricHistory,
 } from "@/hooks/useMetrics";
 
 const categoryConfig: Record<MetricCategory, { title: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
@@ -139,6 +141,11 @@ const Index = () => {
         {metrics && <AlertsSummary metrics={metrics} />}
         
         {metrics && <SummaryCardsLive metrics={metrics} />}
+
+        {/* Monthly Data Grid */}
+        {metrics && historyData && (
+          <MonthlyDataGrid metrics={metrics} historyData={historyData as MetricHistory[]} />
+        )}
 
         {/* Render each category */}
         {groupedMetrics && Object.entries(groupedMetrics).map(([category, categoryMetrics]) => {
