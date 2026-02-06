@@ -22,14 +22,16 @@ export function SectionHeader({
   variant = "primary",
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-center gap-4 mb-8">
+    <div className="flex items-center gap-4 mb-6">
       {Icon && (
         <div className={cn("p-3 rounded border", variantStyles[variant])}>
           <Icon className="h-5 w-5" />
         </div>
       )}
       <div>
-        <h2 className="section-title mb-0 text-xl">{title}</h2>
+        <h2 className="font-cinzel text-2xl md:text-3xl font-semibold tracking-wide text-foreground leading-tight">
+          {title}
+        </h2>
         {subtitle && (
           <p className="text-sm text-muted-foreground tracking-wide mt-0.5">{subtitle}</p>
         )}
