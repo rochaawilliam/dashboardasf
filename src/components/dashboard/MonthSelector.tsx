@@ -1,12 +1,16 @@
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
+import { parseISO } from "date-fns";
+import type { MetricHistory } from "@/hooks/useMetrics";
 
 interface MonthSelectorProps {
   selectedMonth: number | null; // null = "Todo o Período"
   selectedYear: number;
   onMonthChange: (month: number | null) => void;
   onYearChange: (year: number) => void;
+  historyData?: MetricHistory[];
 }
 
 const months = [
@@ -28,10 +32,25 @@ export function MonthSelector({
   selectedMonth, 
   selectedYear, 
   onMonthChange, 
-  onYearChange 
+  onYearChange,
+  historyData
 }: MonthSelectorProps) {
   const currentYear = new Date().getFullYear();
   const years = [currentYear - 1, currentYear, currentYear + 1];
+
+  // Calculate which months have data
+  const monthsWithData = useMemo(() => {
+    if (!historyData) return new Set<number>();
+    
+    const launched = new Set<number>();
+    historyData.forEach((h) => {
+      const date = parseISO(h.recorded_at);
+      if (date.getFullYear() === selectedYear) {
+        launched.add(date.getMonth() + 1);
+      }
+    });
+    return launched;
+  }, [historyData, selectedYear]);
 
   return (
     <div className="mb-6 space-y-3">
@@ -68,21 +87,43 @@ export function MonthSelector({
         
         <div className="h-6 w-px bg-border mx-1" />
         
-        {months.map((month) => (
-          <Button
-            key={month.value}
-            variant={selectedMonth === month.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => onMonthChange(month.value)}
-            className={cn(
-              "h-9 px-3 min-w-[50px]",
-              selectedMonth === month.value && "bg-primary text-primary-foreground"
-            )}
-          >
-            <span className="hidden sm:inline">{month.fullLabel}</span>
-            <span className="sm:hidden">{month.label}</span>
-          </Button>
-        ))}
+        {months.map((month) => {
+          const hasData = monthsWithData.has(month.value);
+          const isSelected = selectedMonth === month.value;
+          
+          return (
+            <Button
+              key={month.value}
+              variant={isSelected ? "default" : "outline"}
+              size="sm"
+              onClick={() => onMonthChange(month.value)}
+              className={cn(
+                "h-9 px-3 min-w-[50px] relative",
+                isSelected && "bg-primary text-primary-foreground",
+                !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
+                !isSelected && !hasData && "border-border"
+              )}
+            >
+              <span className="hidden sm:inline">{month.fullLabel}</span>
+              <span className="sm:hidden">{month.label}</span>
+              {hasData && !isSelected && (
+                <Check className="h-3 w-3 ml-1 inline-block" />
+              )}
+            </Button>
+          );
+        })}
+      </div>
+      
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded border border-success/50 bg-success/10" />
+          <span>Com lançamentos</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded border border-border bg-transparent" />
+          <span>Sem lançamentos</span>
+        </div>
       </div>
     </div>
   );

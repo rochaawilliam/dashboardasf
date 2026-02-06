@@ -264,6 +264,7 @@ const Index = () => {
           selectedYear={selectedYear}
           onMonthChange={setSelectedMonth}
           onYearChange={setSelectedYear}
+          historyData={historyData}
         />
         
         {/* Months Summary */}
@@ -296,17 +297,23 @@ const Index = () => {
               />
               
               <div className="dashboard-grid mb-6">
-                {categoryMetrics.map((metric) => (
-                  <MetricCardMonthly 
-                    key={metric.id} 
-                    metric={metric} 
-                    monthlyValue={monthlyValues[metric.id] ?? null}
-                    isMonthSelected={selectedMonth !== null}
-                    accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                    onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                    isSaving={savingMetricId === metric.id}
-                  />
-                ))}
+                {categoryMetrics.map((metric) => {
+                  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                  const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                  
+                  return (
+                    <MetricCardMonthly 
+                      key={metric.id} 
+                      metric={metric} 
+                      monthlyValue={monthlyValues[metric.id] ?? null}
+                      isMonthSelected={selectedMonth !== null}
+                      accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                      onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                      isSaving={savingMetricId === metric.id}
+                      selectedMonthName={selectedMonthName}
+                    />
+                  );
+                })}
               </div>
               
               {/* Chart for this category */}

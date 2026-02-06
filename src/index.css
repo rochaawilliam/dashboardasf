@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Roboto:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root,
@@ -113,11 +113,11 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Montserrat', system-ui, sans-serif;
+    font-family: 'Roboto', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Cinzel', Georgia, serif;
     letter-spacing: 0.02em;
   }
 
@@ -140,7 +140,7 @@
 
   .metric-value {
     @apply text-3xl font-semibold tracking-tight text-foreground;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Roboto', sans-serif;
   }
 
   .metric-label {
@@ -149,7 +149,7 @@
 
   .section-title {
     @apply text-xl font-semibold text-foreground mb-4;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cinzel', serif;
     letter-spacing: 0.05em;
   }
 
