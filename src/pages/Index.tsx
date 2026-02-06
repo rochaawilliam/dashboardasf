@@ -19,6 +19,7 @@ import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { 
   DollarSign, 
@@ -35,38 +36,51 @@ import {
   type MetricCategory,
 } from "@/hooks/useMetrics";
 
-const categoryConfig: Record<MetricCategory, { title: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
+const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
   lucratividade: {
     title: "Lucratividade",
+    shortTitle: "Lucro",
     subtitle: "Aumentar lucratividade e margem do negócio",
     icon: DollarSign,
     variant: "primary",
   },
   experiencia_cliente: {
     title: "Experiência do Cliente",
+    shortTitle: "Clientes",
     subtitle: "Entregar experiência consistente e previsível",
     icon: Heart,
     variant: "accent",
   },
   produtividade: {
     title: "Produtividade",
+    shortTitle: "Produtiv.",
     subtitle: "Garantir eficiência do time jurídico",
     icon: Zap,
     variant: "warning",
   },
   gestao_pessoas: {
     title: "Gestão de Pessoas",
+    shortTitle: "Pessoas",
     subtitle: "Construir um time estável, produtivo e engajado",
     icon: Users,
     variant: "success",
   },
   aprendizado_crescimento: {
     title: "Aprendizado e Crescimento",
+    shortTitle: "Aprend.",
     subtitle: "Desenvolver competências técnicas e lideranças internas",
     icon: GraduationCap,
     variant: "primary",
   },
 };
+
+const categoryOrder: MetricCategory[] = [
+  "lucratividade",
+  "experiencia_cliente",
+  "produtividade",
+  "gestao_pessoas",
+  "aprendizado_crescimento",
+];
 
 const Index = () => {
   const queryClient = useQueryClient();
@@ -75,6 +89,7 @@ const Index = () => {
     division: "all",
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<MetricCategory>("lucratividade");
   
   // Month/Year selection state
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -282,75 +297,96 @@ const Index = () => {
         
         {metrics && <SummaryCardsLive metrics={adjustedMetrics} />}
 
-        {/* Render each category */}
-        {Object.entries(groupedMetrics).map(([category, categoryMetrics]) => {
-          const config = categoryConfig[category as MetricCategory];
-          if (!config || !categoryMetrics) return null;
-          
-          const categoryHistory = historyByCategory?.[category as MetricCategory];
-          const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category as MetricCategory);
-          
-          return (
-            <section key={category} className="mb-8 print:break-inside-avoid">
-              <SectionHeader
-                title={config.title}
-                subtitle={config.subtitle}
-                icon={config.icon}
-                variant={config.variant}
-              />
+        {/* Category Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-6">
+          <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1">
+            {categoryOrder.map((category) => {
+              const config = categoryConfig[category];
+              const Icon = config.icon;
+              const categoryMetricsCount = groupedMetrics[category]?.length || 0;
               
-              {/* Render subcategories */}
-              {organizedSubcategories.map((subcat) => {
-                const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+              return (
+                <TabsTrigger
+                  key={category}
+                  value={category}
+                  className="flex-1 min-w-[100px] gap-1.5 data-[state=active]:bg-background"
+                >
+                  <Icon className="h-4 w-4 hidden sm:block" />
+                  <span className="hidden md:inline">{config.title}</span>
+                  <span className="md:hidden">{config.shortTitle}</span>
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
+                    {categoryMetricsCount}
+                  </span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {categoryOrder.map((category) => {
+            const config = categoryConfig[category];
+            const categoryMetrics = groupedMetrics[category];
+            if (!categoryMetrics) return null;
+            
+            const categoryHistory = historyByCategory?.[category];
+            const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
+            
+            return (
+              <TabsContent key={category} value={category} className="mt-6">
+                <SectionHeader
+                  title={config.title}
+                  subtitle={config.subtitle}
+                  icon={config.icon}
+                  variant={config.variant}
+                />
                 
-                return (
-                  <div key={subcat.name} className="mb-6">
-                    <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                {/* Render subcategories */}
+                {organizedSubcategories.map((subcat) => {
+                  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                  const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                  
+                  return (
+                    <div key={subcat.name} className="mb-6">
+                      <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                      <div className="dashboard-grid">
+                        {subcat.metrics.map((metric) => (
+                          <MetricCardMonthly 
+                            key={metric.id} 
+                            metric={metric} 
+                            monthlyValue={monthlyValues[metric.id] ?? null}
+                            isMonthSelected={selectedMonth !== null}
+                            accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                            onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                            isSaving={savingMetricId === metric.id}
+                            selectedMonthName={selectedMonthName}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Chart for this category */}
+                {categoryHistory && categoryHistory.length > 0 && metrics && (
+                  <MetricChart
+                    data={categoryHistory}
+                    metrics={metrics}
+                    title={`Evolução - ${config.title} (${selectedYear})`}
+                  />
+                )}
+
+                {/* Training Hours - only in aprendizado_crescimento tab */}
+                {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 && (
+                  <div className="mt-6">
+                    <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
                     <div className="dashboard-grid">
-                      {subcat.metrics.map((metric) => (
-                        <MetricCardMonthly 
-                          key={metric.id} 
-                          metric={metric} 
-                          monthlyValue={monthlyValues[metric.id] ?? null}
-                          isMonthSelected={selectedMonth !== null}
-                          accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                          onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                          isSaving={savingMetricId === metric.id}
-                          selectedMonthName={selectedMonthName}
-                        />
-                      ))}
+                      <TrainingCardEditable items={trainingHours} />
                     </div>
                   </div>
-                );
-              })}
-              
-              {/* Chart for this category */}
-              {categoryHistory && categoryHistory.length > 0 && metrics && (
-                <MetricChart
-                  data={categoryHistory}
-                  metrics={metrics}
-                  title={`Evolução - ${config.title} (${selectedYear})`}
-                />
-              )}
-            </section>
-          );
-        })}
-
-        {/* Training Hours */}
-        {trainingHours && trainingHours.length > 0 && (
-          <section className="mb-8 print:break-inside-avoid">
-            <SectionHeader
-              title="Aprendizado e Crescimento"
-              subtitle="Desenvolver competências técnicas e lideranças internas"
-              icon={GraduationCap}
-              variant="primary"
-            />
-            <div className="dashboard-grid">
-              <TrainingCardEditable items={trainingHours} />
-            </div>
-          </section>
-        )}
+                )}
+              </TabsContent>
+            );
+          })}
+        </Tabs>
       </div>
     </div>
   );
