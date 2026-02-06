@@ -7,6 +7,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SummaryCardsLive } from "@/components/dashboard/SummaryCardsLive";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { FilterBar } from "@/components/dashboard/FilterBar";
 import { AlertsSummary } from "@/components/dashboard/AlertsSummary";
@@ -18,6 +19,7 @@ import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { Skeleton } from "@/components/ui/skeleton";
+import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { 
   DollarSign, 
   Heart, 
@@ -286,6 +288,7 @@ const Index = () => {
           if (!config || !categoryMetrics) return null;
           
           const categoryHistory = historyByCategory?.[category as MetricCategory];
+          const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category as MetricCategory);
           
           return (
             <section key={category} className="mb-8 print:break-inside-avoid">
@@ -296,25 +299,31 @@ const Index = () => {
                 variant={config.variant}
               />
               
-              <div className="dashboard-grid mb-6">
-                {categoryMetrics.map((metric) => {
-                  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                  const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
-                  
-                  return (
-                    <MetricCardMonthly 
-                      key={metric.id} 
-                      metric={metric} 
-                      monthlyValue={monthlyValues[metric.id] ?? null}
-                      isMonthSelected={selectedMonth !== null}
-                      accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                      onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                      isSaving={savingMetricId === metric.id}
-                      selectedMonthName={selectedMonthName}
-                    />
-                  );
-                })}
-              </div>
+              {/* Render subcategories */}
+              {organizedSubcategories.map((subcat) => {
+                const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                
+                return (
+                  <div key={subcat.name} className="mb-6">
+                    <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                    <div className="dashboard-grid">
+                      {subcat.metrics.map((metric) => (
+                        <MetricCardMonthly 
+                          key={metric.id} 
+                          metric={metric} 
+                          monthlyValue={monthlyValues[metric.id] ?? null}
+                          isMonthSelected={selectedMonth !== null}
+                          accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                          onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                          isSaving={savingMetricId === metric.id}
+                          selectedMonthName={selectedMonthName}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
               
               {/* Chart for this category */}
               {categoryHistory && categoryHistory.length > 0 && metrics && (
