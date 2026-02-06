@@ -216,7 +216,7 @@ export function MetricCardMonthly({
                 🎯 Meta {isNonAccumulative ? "(Mensal = Anual)" : "Anual (Objetivo)"}
               </div>
               <div className="text-lg font-bold">
-                {formatMetricValue(metric.target_value, metric.unit)}
+                {formatMetricValue(metric.target_value, metric.unit, metric.name)}
               </div>
             </div>
             
@@ -227,7 +227,7 @@ export function MetricCardMonthly({
                   📊 Meta Mensal (Referência)
                 </div>
                 <div className="text-sm font-medium text-muted-foreground">
-                  {formatMetricValue(monthlyTarget, metric.unit)}
+                  {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                 </div>
               </div>
             )}
@@ -248,7 +248,7 @@ export function MetricCardMonthly({
                   status === "warning" && "text-warning",
                   status === "danger" && "text-destructive"
                 )}>
-                  {formatMetricValue(displayValue, metric.unit)}
+                  {formatMetricValue(displayValue, metric.unit, metric.name)}
                 </div>
               </div>
             )}
@@ -290,7 +290,7 @@ export function MetricCardMonthly({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Lançamento</AlertDialogTitle>
             <AlertDialogDescription>
-              Você está prestes a salvar o valor <strong>{pendingValue !== null ? formatMetricValue(pendingValue, metric.unit) : ""}</strong> para a métrica <strong>{metric.name}</strong>
+              Você está prestes a salvar o valor <strong>{pendingValue !== null ? formatMetricValue(pendingValue, metric.unit, metric.name) : ""}</strong> para a métrica <strong>{metric.name}</strong>
               {selectedMonthName && <> em <strong>{selectedMonthName}</strong></>}.
               <br /><br />
               Deseja confirmar este lançamento?

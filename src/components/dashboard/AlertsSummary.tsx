@@ -148,10 +148,10 @@ export function AlertsSummary({ metrics }: AlertsSummaryProps) {
                   "font-semibold",
                   status === "danger" ? "text-destructive" : "text-warning"
                 )}>
-                  Atual: {formatMetricValue(metric.current_value, metric.unit)}
+                  Atual: {formatMetricValue(metric.current_value, metric.unit, metric.name)}
                 </p>
                 <p className="text-muted-foreground">
-                  Meta: {formatMetricValue(metric.target_value, metric.unit)}
+                  Meta: {formatMetricValue(metric.target_value, metric.unit, metric.name)}
                 </p>
               </div>
             </PopoverContent>

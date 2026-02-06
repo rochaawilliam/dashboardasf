@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { SummaryCardsLive } from "@/components/dashboard/SummaryCardsLive";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
@@ -20,6 +19,8 @@ import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { 
   DollarSign, 
@@ -27,6 +28,8 @@ import {
   Users, 
   Zap, 
   GraduationCap,
+  ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import {
   useMetrics,
@@ -45,8 +48,8 @@ const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string
     variant: "primary",
   },
   experiencia_cliente: {
-    title: "Experiência do Cliente",
-    shortTitle: "Clientes",
+    title: "Gestão de Crescimento",
+    shortTitle: "Crescimento",
     subtitle: "Entregar experiência consistente e previsível",
     icon: Heart,
     variant: "accent",
@@ -90,6 +93,7 @@ const Index = () => {
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<MetricCategory>("lucratividade");
+  const [alertsOpen, setAlertsOpen] = useState(false);
   
   // Month/Year selection state
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -293,9 +297,23 @@ const Index = () => {
           />
         )}
         
-        {metrics && <AlertsSummary metrics={adjustedMetrics} />}
-        
-        {metrics && <SummaryCardsLive metrics={adjustedMetrics} />}
+        {/* Collapsible Alerts Summary */}
+        {metrics && (
+          <Collapsible open={alertsOpen} onOpenChange={setAlertsOpen} className="mb-6">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  <span>Resumo de Alertas</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${alertsOpen ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <AlertsSummary metrics={adjustedMetrics} />
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         {/* Category Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-6">
