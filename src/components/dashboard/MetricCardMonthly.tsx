@@ -3,6 +3,16 @@ import { cn } from "@/lib/utils";
 import { Edit2, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Metric } from "@/hooks/useMetrics";
 
 interface MetricCardMonthlyProps {
@@ -12,6 +22,7 @@ interface MetricCardMonthlyProps {
   accumulatedValue: number;
   onSave?: (metricId: string, value: number) => void;
   isSaving?: boolean;
+  selectedMonthName?: string;
 }
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
@@ -43,10 +54,13 @@ export function MetricCardMonthly({
   isMonthSelected,
   accumulatedValue,
   onSave,
-  isSaving 
+  isSaving,
+  selectedMonthName
 }: MetricCardMonthlyProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingValue, setPendingValue] = useState<number | null>(null);
 
   const isInverse = inverseMetrics.includes(metric.name);
   
@@ -73,12 +87,26 @@ export function MetricCardMonthly({
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleRequestSave = () => {
     const numValue = parseFloat(editValue);
-    if (!isNaN(numValue) && onSave) {
-      onSave(metric.id, numValue);
+    if (!isNaN(numValue)) {
+      setPendingValue(numValue);
+      setShowConfirmDialog(true);
     }
+  };
+
+  const handleConfirmSave = () => {
+    if (pendingValue !== null && onSave) {
+      onSave(metric.id, pendingValue);
+    }
+    setShowConfirmDialog(false);
     setIsEditing(false);
+    setPendingValue(null);
+  };
+
+  const handleCancelConfirm = () => {
+    setShowConfirmDialog(false);
+    setPendingValue(null);
   };
 
   const handleCancel = () => {
@@ -87,118 +115,141 @@ export function MetricCardMonthly({
   };
 
   return (
-    <div className={cn(
-      "metric-card group relative",
-      status === "danger" && !hasNoData && "ring-2 ring-destructive/50"
-    )}>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <span className="metric-label flex-1 text-sm font-medium">{metric.name}</span>
-        {isMonthSelected && onSave && !isEditing && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleStartEdit}
-            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Edit2 className="h-3.5 w-3.5" />
-          </Button>
-        )}
-      </div>
-      
-      {/* Editing mode */}
-      {isEditing ? (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              step="0.01"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              className="h-9"
-              autoFocus
-            />
-            <span className="text-sm text-muted-foreground">{metric.unit}</span>
-          </div>
-          <div className="flex gap-2">
+    <>
+      <div className={cn(
+        "metric-card group relative",
+        status === "danger" && !hasNoData && "ring-2 ring-destructive/50"
+      )}>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <span className="metric-label flex-1 text-sm font-medium">{metric.name}</span>
+          {isMonthSelected && onSave && !isEditing && (
             <Button
+              variant="ghost"
               size="sm"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex-1"
+              onClick={handleStartEdit}
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <Check className="h-4 w-4 mr-1" />
-              Salvar
+              <Edit2 className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSaving}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          )}
         </div>
-      ) : (
-        <>
-          {/* Target info */}
-          <div className="mb-3">
-            <div className="text-xs text-muted-foreground mb-1">
-              {isMonthSelected ? "Meta mensal" : "Meta anual"}
+        
+        {/* Editing mode */}
+        {isEditing ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                step="0.01"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                className="h-9"
+                autoFocus
+              />
+              <span className="text-sm text-muted-foreground">{metric.unit}</span>
             </div>
-            <div className="text-lg font-semibold">
-              {targetForProgress.toFixed(2)}{metric.unit}
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleRequestSave}
+                disabled={isSaving}
+                className="flex-1"
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Salvar
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSaving}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-          
-          {/* Current value */}
-          {hasNoData ? (
-            <div className="text-center py-2 mb-3">
-              <span className="text-muted-foreground text-sm italic">Sem lançamento</span>
-            </div>
-          ) : (
+        ) : (
+          <>
+            {/* Target info */}
             <div className="mb-3">
               <div className="text-xs text-muted-foreground mb-1">
-                {isMonthSelected ? "Valor lançado" : "Acumulado"}
+                {isMonthSelected ? "Meta mensal" : "Meta anual"}
               </div>
-              <div className={cn(
-                "text-2xl font-bold",
-                status === "success" && "text-success",
-                status === "warning" && "text-warning",
-                status === "danger" && "text-destructive"
-              )}>
-                {displayValue.toFixed(2)}{metric.unit}
+              <div className="text-lg font-semibold">
+                {targetForProgress.toFixed(2)}{metric.unit}
               </div>
             </div>
-          )}
-          
-          {/* Progress bar */}
-          <div className="space-y-2">
-            <div className="progress-bar h-3 rounded-full bg-muted overflow-hidden">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-300",
-                  hasNoData ? "bg-muted" : getStatusColor(status)
-                )}
-                style={{ width: `${hasNoData ? 0 : progress}%` }}
-              />
+            
+            {/* Current value */}
+            {hasNoData ? (
+              <div className="text-center py-2 mb-3">
+                <span className="text-muted-foreground text-sm italic">Sem lançamento</span>
+              </div>
+            ) : (
+              <div className="mb-3">
+                <div className="text-xs text-muted-foreground mb-1">
+                  {isMonthSelected ? "Valor lançado" : "Acumulado"}
+                </div>
+                <div className={cn(
+                  "text-2xl font-bold",
+                  status === "success" && "text-success",
+                  status === "warning" && "text-warning",
+                  status === "danger" && "text-destructive"
+                )}>
+                  {displayValue.toFixed(2)}{metric.unit}
+                </div>
+              </div>
+            )}
+            
+            {/* Progress bar */}
+            <div className="space-y-2">
+              <div className="progress-bar h-3 rounded-full bg-muted overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all duration-300",
+                    hasNoData ? "bg-muted" : getStatusColor(status)
+                  )}
+                  style={{ width: `${hasNoData ? 0 : progress}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>0%</span>
+                <span className={cn(
+                  "font-medium",
+                  !hasNoData && status === "success" && "text-success",
+                  !hasNoData && status === "warning" && "text-warning",
+                  !hasNoData && status === "danger" && "text-destructive"
+                )}>
+                  {hasNoData ? "—" : `${progress.toFixed(0)}%`}
+                </span>
+                <span>100%</span>
+              </div>
             </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0%</span>
-              <span className={cn(
-                "font-medium",
-                !hasNoData && status === "success" && "text-success",
-                !hasNoData && status === "warning" && "text-warning",
-                !hasNoData && status === "danger" && "text-destructive"
-              )}>
-                {hasNoData ? "—" : `${progress.toFixed(0)}%`}
-              </span>
-              <span>100%</span>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Lançamento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a salvar o valor <strong>{pendingValue?.toFixed(2)}{metric.unit}</strong> para a métrica <strong>{metric.name}</strong>
+              {selectedMonthName && <> em <strong>{selectedMonthName}</strong></>}.
+              <br /><br />
+              Deseja confirmar este lançamento?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelConfirm}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSave} disabled={isSaving}>
+              {isSaving ? "Salvando..." : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
