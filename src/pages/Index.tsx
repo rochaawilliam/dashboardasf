@@ -31,6 +31,8 @@ import {
   type Filters,
   type MetricCategory,
 } from "@/hooks/useMetrics";
+import { useMetricNotifications } from "@/hooks/useMetricNotifications";
+import { Rocket } from "lucide-react";
 
 const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
   lucratividade: {
@@ -44,7 +46,7 @@ const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string
     title: "Gestão de Crescimento",
     shortTitle: "Crescimento",
     subtitle: "Entregar experiência consistente e previsível",
-    icon: Heart,
+    icon: Rocket,
     variant: "accent",
   },
   produtividade: {
@@ -95,6 +97,8 @@ const Index = () => {
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
 
+  // Enable push notifications for metric goal changes
+  useMetricNotifications(metrics, historyData, selectedYear);
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
@@ -356,6 +360,7 @@ const Index = () => {
                             isSaving={savingMetricId === metric.id}
                             selectedMonthName={selectedMonthName}
                             historyData={historyData}
+                            selectedYear={selectedYear}
                           />
                         ))}
                       </div>
