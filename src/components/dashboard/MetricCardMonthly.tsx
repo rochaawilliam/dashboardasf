@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Metric } from "@/hooks/useMetrics";
+import { formatMetricValue, formatNumber } from "@/utils/formatters";
 
 interface MetricCardMonthlyProps {
   metric: Metric;
@@ -171,13 +172,23 @@ export function MetricCardMonthly({
           </div>
         ) : (
           <>
-            {/* Target info */}
+            {/* Annual target (main goal) */}
+            <div className="mb-3 p-2 rounded-lg bg-muted/50">
+              <div className="text-xs text-muted-foreground mb-1">
+                🎯 Meta Anual (Objetivo)
+              </div>
+              <div className="text-lg font-bold">
+                {formatMetricValue(metric.target_value, metric.unit)}
+              </div>
+            </div>
+            
+            {/* Monthly target (progress reference) */}
             <div className="mb-3">
               <div className="text-xs text-muted-foreground mb-1">
-                {isMonthSelected ? "Meta mensal" : "Meta anual"}
+                📊 Meta Mensal (Referência)
               </div>
-              <div className="text-lg font-semibold">
-                {targetForProgress.toFixed(2)}{metric.unit}
+              <div className="text-sm font-medium text-muted-foreground">
+                {formatMetricValue(monthlyTarget, metric.unit)}
               </div>
             </div>
             
@@ -189,7 +200,7 @@ export function MetricCardMonthly({
             ) : (
               <div className="mb-3">
                 <div className="text-xs text-muted-foreground mb-1">
-                  {isMonthSelected ? "Valor lançado" : "Acumulado"}
+                  {isMonthSelected ? "📝 Valor Lançado" : "📈 Acumulado no Ano"}
                 </div>
                 <div className={cn(
                   "text-2xl font-bold",
@@ -197,13 +208,16 @@ export function MetricCardMonthly({
                   status === "warning" && "text-warning",
                   status === "danger" && "text-destructive"
                 )}>
-                  {displayValue.toFixed(2)}{metric.unit}
+                  {formatMetricValue(displayValue, metric.unit)}
                 </div>
               </div>
             )}
             
-            {/* Progress bar */}
+            {/* Progress bar - shows progress toward annual goal */}
             <div className="space-y-2">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                <span>Progresso para meta anual</span>
+              </div>
               <div className="progress-bar h-3 rounded-full bg-muted overflow-hidden">
                 <div
                   className={cn(
@@ -221,7 +235,7 @@ export function MetricCardMonthly({
                   !hasNoData && status === "warning" && "text-warning",
                   !hasNoData && status === "danger" && "text-destructive"
                 )}>
-                  {hasNoData ? "—" : `${progress.toFixed(0)}%`}
+                  {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
                 <span>100%</span>
               </div>
@@ -236,7 +250,7 @@ export function MetricCardMonthly({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Lançamento</AlertDialogTitle>
             <AlertDialogDescription>
-              Você está prestes a salvar o valor <strong>{pendingValue?.toFixed(2)}{metric.unit}</strong> para a métrica <strong>{metric.name}</strong>
+              Você está prestes a salvar o valor <strong>{pendingValue !== null ? formatMetricValue(pendingValue, metric.unit) : ""}</strong> para a métrica <strong>{metric.name}</strong>
               {selectedMonthName && <> em <strong>{selectedMonthName}</strong></>}.
               <br /><br />
               Deseja confirmar este lançamento?

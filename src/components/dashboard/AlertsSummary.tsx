@@ -1,6 +1,7 @@
 import { AlertTriangle, CheckCircle, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metric } from "@/hooks/useMetrics";
+import { formatMetricValue } from "@/utils/formatters";
 
 interface AlertsSummaryProps {
   metrics: Metric[];
@@ -88,10 +89,10 @@ export function AlertsSummary({ metrics }: AlertsSummaryProps) {
                 "font-semibold",
                 status === "danger" ? "text-destructive" : "text-warning"
               )}>
-                {metric.current_value}{metric.unit}
+                {formatMetricValue(metric.current_value, metric.unit)}
               </span>
               <span className="text-muted-foreground ml-2">
-                (meta: {metric.target_value}{metric.unit})
+                (meta: {formatMetricValue(metric.target_value, metric.unit)})
               </span>
             </div>
           </div>
