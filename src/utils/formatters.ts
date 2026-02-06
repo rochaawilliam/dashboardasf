@@ -34,9 +34,19 @@ export function formatPercent(value: number, decimals: number = 2): string {
 /**
  * Format a metric value with its unit in Brazilian format
  */
-export function formatMetricValue(value: number, unit: string): string {
+export function formatMetricValue(value: number, unit: string, metricName?: string): string {
   // Determine decimal places based on value magnitude
-  const decimals = Math.abs(value) >= 1000 ? 0 : 2;
+  let decimals = Math.abs(value) >= 1000 ? 0 : 2;
+  
+  // Check if this is a contract metric (always integers)
+  const isContract = metricName?.toLowerCase().includes("contrato") || 
+                     unit.toLowerCase().includes("contrato") ||
+                     unit.toLowerCase() === "un" ||
+                     unit.toLowerCase() === "unidades";
+  
+  if (isContract) {
+    decimals = 0;
+  }
   
   // Currency units
   if (unit === "R$" || unit.toLowerCase().includes("real") || unit.toLowerCase().includes("reais")) {
@@ -66,6 +76,11 @@ export function formatMetricValue(value: number, unit: string): string {
   // Months units
   if (unit.toLowerCase().includes("mes") || unit.toLowerCase().includes("mês") || unit.toLowerCase().includes("meses")) {
     return `${formatNumber(value, 0)} meses`;
+  }
+  
+  // Contract units (integer)
+  if (isContract) {
+    return `${formatNumber(value, 0)}`;
   }
   
   // Generic number with unit
