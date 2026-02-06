@@ -28,6 +28,37 @@ interface MetricCardMonthlyProps {
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
 
+// Metrics where annual target = monthly target (averages, rates, percentages)
+// These are metrics that don't accumulate over time
+const nonAccumulativeKeywords = [
+  "Ticket Médio",
+  "Margem",
+  "Churn",
+  "Custo Fixo",
+  "Folha sobre Receita",
+  "Inadimplência",
+  "Cumprimento do Orçamento",
+  "Lead Time",
+  "SLA",
+  "NPS",
+  "ENPS",
+  "Taxa",
+  "Turnover",
+  "LTV",
+  "Upsell",
+];
+
+function isNonAccumulativeMetric(name: string, unit: string): boolean {
+  // Check if unit is percentage
+  if (unit === "%" || unit.toLowerCase().includes("percent")) {
+    return true;
+  }
+  // Check if name contains any non-accumulative keyword
+  return nonAccumulativeKeywords.some(keyword => 
+    name.toLowerCase().includes(keyword.toLowerCase())
+  );
+}
+
 const getStatus = (current: number, target: number, isInverse: boolean = false) => {
   if (target === 0) return "warning";
   const ratio = current / target;
@@ -64,13 +95,20 @@ export function MetricCardMonthly({
   const [pendingValue, setPendingValue] = useState<number | null>(null);
 
   const isInverse = inverseMetrics.includes(metric.name);
+  const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
   
-  // Monthly target = annual target / 12
-  const monthlyTarget = metric.target_value / 12;
+  // For non-accumulative metrics, monthly target = annual target
+  // For accumulative metrics, monthly target = annual target / 12
+  const monthlyTarget = isNonAccumulative ? metric.target_value : metric.target_value / 12;
   
-  // For display: use monthlyValue if month selected, otherwise accumulated value
+  // For non-accumulative metrics: use average instead of sum
+  // For display: use monthlyValue if month selected, otherwise calculate appropriately
   const displayValue = isMonthSelected ? (monthlyValue ?? 0) : accumulatedValue;
-  const targetForProgress = isMonthSelected ? monthlyTarget : metric.target_value;
+  
+  // For non-accumulative metrics, target is always the same (monthly = annual)
+  const targetForProgress = isNonAccumulative 
+    ? metric.target_value 
+    : (isMonthSelected ? monthlyTarget : metric.target_value);
   
   const status = getStatus(displayValue, targetForProgress, isInverse);
   const progress = isInverse 
@@ -175,22 +213,24 @@ export function MetricCardMonthly({
             {/* Annual target (main goal) */}
             <div className="mb-3 p-2 rounded-lg bg-muted/50">
               <div className="text-xs text-muted-foreground mb-1">
-                🎯 Meta Anual (Objetivo)
+                🎯 Meta {isNonAccumulative ? "(Mensal = Anual)" : "Anual (Objetivo)"}
               </div>
               <div className="text-lg font-bold">
                 {formatMetricValue(metric.target_value, metric.unit)}
               </div>
             </div>
             
-            {/* Monthly target (progress reference) */}
-            <div className="mb-3">
-              <div className="text-xs text-muted-foreground mb-1">
-                📊 Meta Mensal (Referência)
+            {/* Monthly target (progress reference) - only show if accumulative */}
+            {!isNonAccumulative && (
+              <div className="mb-3">
+                <div className="text-xs text-muted-foreground mb-1">
+                  📊 Meta Mensal (Referência)
+                </div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  {formatMetricValue(monthlyTarget, metric.unit)}
+                </div>
               </div>
-              <div className="text-sm font-medium text-muted-foreground">
-                {formatMetricValue(monthlyTarget, metric.unit)}
-              </div>
-            </div>
+            )}
             
             {/* Current value */}
             {hasNoData ? (
