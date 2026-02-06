@@ -3,6 +3,7 @@ import { Clock, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUpdateTrainingHours, type TrainingHours } from "@/hooks/useMetrics";
+import { formatNumber } from "@/utils/formatters";
 
 interface TrainingCardEditableProps {
   items: TrainingHours[];
@@ -96,7 +97,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
         <>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-foreground">
-              {item.current_hours.toString().padStart(2, "0")}
+              {formatNumber(item.current_hours, 0)}
             </span>
             <span className="text-sm text-muted-foreground">hrs</span>
           </div>
@@ -113,7 +114,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
             />
           </div>
           <span className="text-xs text-muted-foreground mt-1 block">
-            Meta: {item.target_hours}hrs
+            Meta: {formatNumber(item.target_hours, 0)}hrs
           </span>
         </>
       )}

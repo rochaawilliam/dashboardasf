@@ -1,6 +1,7 @@
 import { Target, TrendingUp, Users, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metric } from "@/hooks/useMetrics";
+import { formatMetricValue, formatNumber } from "@/utils/formatters";
 
 interface SummaryCardsLiveProps {
   metrics: Metric[];
@@ -14,12 +15,12 @@ function getChange(metric: Metric): { text: string; type: "positive" | "negative
   
   if (isInverse) {
     if (ratio <= 1) return { text: "No alvo", type: "positive" };
-    return { text: `+${((ratio - 1) * 100).toFixed(1)}%`, type: "negative" };
+    return { text: `+${formatNumber((ratio - 1) * 100, 1)}%`, type: "negative" };
   }
   
   if (ratio >= 1) return { text: "No alvo", type: "positive" };
   if (ratio >= 0.95) return { text: "Quase lá", type: "neutral" };
-  return { text: `-${((1 - ratio) * 100).toFixed(1)}%`, type: "negative" };
+  return { text: `-${formatNumber((1 - ratio) * 100, 1)}%`, type: "negative" };
 }
 
 const summaryConfig = [
@@ -39,7 +40,7 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
     return {
       ...config,
       metric,
-      value: `${metric.current_value}${metric.unit}`,
+      value: formatMetricValue(metric.current_value, metric.unit),
       change: change.text,
       changeType: change.type,
     };

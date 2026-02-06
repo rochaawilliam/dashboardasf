@@ -13,6 +13,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Metric } from "@/hooks/useMetrics";
+import { formatNumber } from "@/utils/formatters";
 
 interface MetricChartProps {
   data: Array<{
@@ -95,6 +96,7 @@ export function MetricChart({ data, metrics, title }: MetricChartProps) {
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
+              tickFormatter={(value) => formatNumber(value, 0)}
             />
             <Tooltip
               contentStyle={{
@@ -104,6 +106,7 @@ export function MetricChart({ data, metrics, title }: MetricChartProps) {
                 fontSize: "12px",
               }}
               labelStyle={{ color: "hsl(var(--foreground))" }}
+              formatter={(value: number) => formatNumber(value, 2)}
             />
             <Legend 
               wrapperStyle={{ fontSize: "12px" }}
