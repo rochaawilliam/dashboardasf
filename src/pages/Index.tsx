@@ -1,5 +1,8 @@
 import { useState, useCallback, useMemo } from "react";
-import { parseISO } from "date-fns";
+import { parseISO, format } from "date-fns";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SummaryCardsLive } from "@/components/dashboard/SummaryCardsLive";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
@@ -13,6 +16,7 @@ import { DataEntryModal } from "@/components/dashboard/DataEntryModal";
 import { BulkDataEntry } from "@/components/dashboard/BulkDataEntry";
 import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
+import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   DollarSign, 
@@ -63,10 +67,12 @@ const categoryConfig: Record<MetricCategory, { title: string; subtitle: string; 
 };
 
 const Index = () => {
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState<Filters>({
     period: "quarter",
     division: "all",
   });
+  const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
   
   // Month/Year selection state
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -79,6 +85,67 @@ const Index = () => {
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
+
+  // Get history record ID for a specific metric/month/year
+  const getHistoryId = useCallback((metricId: string) => {
+    if (!historyData || selectedMonth === null) return null;
+    const record = historyData.find((h) => {
+      const date = parseISO(h.recorded_at);
+      return h.metric_id === metricId && 
+             date.getFullYear() === selectedYear && 
+             date.getMonth() + 1 === selectedMonth;
+    });
+    return record?.id ?? null;
+  }, [historyData, selectedMonth, selectedYear]);
+
+  // Save/update monthly value mutation
+  const saveMonthlyValue = useMutation({
+    mutationFn: async ({ metricId, value }: { metricId: string; value: number }) => {
+      if (selectedMonth === null) return;
+      
+      const recordedAt = format(new Date(selectedYear, selectedMonth - 1, 1), "yyyy-MM-dd");
+      const existingId = getHistoryId(metricId);
+      
+      if (existingId) {
+        const { error } = await supabase
+          .from("metric_history")
+          .update({ value })
+          .eq("id", existingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("metric_history")
+          .insert({
+            metric_id: metricId,
+            value,
+            recorded_at: recordedAt,
+            period_type: "monthly",
+          });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["metric_history"] });
+      toast({
+        title: "Valor salvo",
+        description: "O lançamento foi atualizado com sucesso.",
+      });
+      setSavingMetricId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message,
+        variant: "destructive",
+      });
+      setSavingMetricId(null);
+    },
+  });
+
+  const handleSaveMonthlyValue = useCallback((metricId: string, value: number) => {
+    setSavingMetricId(metricId);
+    saveMonthlyValue.mutate({ metricId, value });
+  }, [saveMonthlyValue]);
 
   // Get monthly values for selected month/year
   const monthlyValues = useMemo(() => {
@@ -199,6 +266,15 @@ const Index = () => {
           onYearChange={setSelectedYear}
         />
         
+        {/* Months Summary */}
+        {historyData && metrics && (
+          <MonthsSummary
+            historyData={historyData}
+            selectedYear={selectedYear}
+            metricsCount={metrics.length}
+          />
+        )}
+        
         {metrics && <AlertsSummary metrics={adjustedMetrics} />}
         
         {metrics && <SummaryCardsLive metrics={adjustedMetrics} />}
@@ -226,6 +302,9 @@ const Index = () => {
                     metric={metric} 
                     monthlyValue={monthlyValues[metric.id] ?? null}
                     isMonthSelected={selectedMonth !== null}
+                    accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                    onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                    isSaving={savingMetricId === metric.id}
                   />
                 ))}
               </div>
