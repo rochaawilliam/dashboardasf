@@ -9,7 +9,6 @@ import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { AlertCenter } from "@/components/dashboard/AlertCenter";
 import { DataEntrySection } from "@/components/dashboard/DataEntrySection";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
@@ -255,7 +254,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <PrintStyles />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <DashboardHeader />
+        <DashboardHeader 
+          metrics={adjustedMetrics}
+          historyData={historyData}
+          selectedYear={selectedYear}
+        />
         
         {/* Data Entry Section */}
         {metrics && (
@@ -289,14 +292,6 @@ const Index = () => {
           />
         )}
         
-        {/* Alert Center */}
-        {metrics && historyData && (
-          <AlertCenter 
-            metrics={adjustedMetrics} 
-            historyData={historyData}
-            selectedYear={selectedYear}
-          />
-        )}
 
         {/* Category Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-6">
