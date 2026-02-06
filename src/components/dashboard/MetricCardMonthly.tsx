@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Sparkline } from "./Sparkline";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { parseISO } from "date-fns";
@@ -31,6 +32,7 @@ interface MetricCardMonthlyProps {
   isSaving?: boolean;
   selectedMonthName?: string;
   historyData?: MetricHistory[];
+  selectedYear?: number;
 }
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
@@ -128,7 +130,8 @@ export function MetricCardMonthly({
   onSave,
   isSaving,
   selectedMonthName,
-  historyData = []
+  historyData = [],
+  selectedYear = new Date().getFullYear(),
 }: MetricCardMonthlyProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -343,6 +346,19 @@ export function MetricCardMonthly({
                 </div>
               </div>
             )}
+            
+            {/* Sparkline - Historical Evolution */}
+            <div className="mb-3 p-2 rounded-lg bg-muted/30">
+              <div className="text-xs text-muted-foreground mb-1">📊 Evolução</div>
+              <Sparkline
+                metricId={metric.id}
+                metricName={metric.name}
+                unit={metric.unit}
+                historyData={historyData}
+                selectedYear={selectedYear}
+                height={40}
+              />
+            </div>
             
             {/* Progress bar - shows progress toward annual goal */}
             <div className="space-y-2">
