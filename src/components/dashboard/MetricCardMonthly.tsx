@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Edit2, Check, X } from "lucide-react";
+import { Edit2, Check, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,8 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Metric } from "@/hooks/useMetrics";
+import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
+import { parseISO } from "date-fns";
 
 interface MetricCardMonthlyProps {
   metric: Metric;
@@ -24,6 +30,7 @@ interface MetricCardMonthlyProps {
   onSave?: (metricId: string, value: number) => void;
   isSaving?: boolean;
   selectedMonthName?: string;
+  historyData?: MetricHistory[];
 }
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
@@ -80,6 +87,39 @@ const getStatusColor = (status: "success" | "warning" | "danger") => {
   }
 };
 
+// Calculate trend from history
+function calculateTrend(
+  metricId: string,
+  historyData: MetricHistory[]
+): { trend: "up" | "down" | "stable" | "unknown"; percent: number; monthsCount: number } {
+  const metricHistory = historyData
+    .filter(h => h.metric_id === metricId)
+    .sort((a, b) => parseISO(b.recorded_at).getTime() - parseISO(a.recorded_at).getTime());
+  
+  if (metricHistory.length < 2) {
+    return { trend: "unknown", percent: 0, monthsCount: metricHistory.length };
+  }
+  
+  const current = metricHistory[0]?.value ?? 0;
+  const previous = metricHistory[1]?.value ?? 0;
+  
+  if (previous === 0) {
+    return { trend: current > 0 ? "up" : "stable", percent: 100, monthsCount: metricHistory.length };
+  }
+  
+  const percentChange = ((current - previous) / Math.abs(previous)) * 100;
+  
+  if (Math.abs(percentChange) < 1) {
+    return { trend: "stable", percent: 0, monthsCount: metricHistory.length };
+  }
+  
+  return {
+    trend: percentChange > 0 ? "up" : "down",
+    percent: Math.abs(percentChange),
+    monthsCount: metricHistory.length
+  };
+}
+
 export function MetricCardMonthly({ 
   metric, 
   monthlyValue, 
@@ -87,7 +127,8 @@ export function MetricCardMonthly({
   accumulatedValue,
   onSave,
   isSaving,
-  selectedMonthName
+  selectedMonthName,
+  historyData = []
 }: MetricCardMonthlyProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -96,6 +137,10 @@ export function MetricCardMonthly({
 
   const isInverse = inverseMetrics.includes(metric.name);
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
+  
+  // Calculate trend
+  const { trend, percent: trendPercent, monthsCount } = calculateTrend(metric.id, historyData);
+  const hasTrend = trend !== "unknown" && monthsCount >= 2;
   
   // For non-accumulative metrics, monthly target = annual target
   // For accumulative metrics, monthly target = annual target / 12
@@ -120,6 +165,20 @@ export function MetricCardMonthly({
       : 0;
 
   const hasNoData = isMonthSelected && monthlyValue === null;
+  
+  // Trend styling
+  const isPositiveTrend = isInverse ? trend === "down" : trend === "up";
+  const isNegativeTrend = isInverse ? trend === "up" : trend === "down";
+  
+  const getTrendIcon = () => {
+    if (trend === "up") {
+      return <TrendingUp className={cn("h-3 w-3", isPositiveTrend ? "text-success" : "text-destructive")} />;
+    }
+    if (trend === "down") {
+      return <TrendingDown className={cn("h-3 w-3", isNegativeTrend ? "text-destructive" : "text-success")} />;
+    }
+    return <Minus className="h-3 w-3 text-muted-foreground" />;
+  };
 
   const handleStartEdit = () => {
     setEditValue(monthlyValue?.toString() ?? "0");
@@ -160,18 +219,50 @@ export function MetricCardMonthly({
         status === "danger" && !hasNoData && "ring-2 ring-destructive/50"
       )}>
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <span className="metric-label flex-1 text-sm font-medium">{metric.name}</span>
-          {isMonthSelected && onSave && !isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleStartEdit}
-              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Edit2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1 min-w-0">
+            <span className="metric-label text-sm font-medium line-clamp-2">{metric.name}</span>
+          </div>
+          <div className="flex items-center gap-1 ml-2">
+            {/* Trend indicator */}
+            {hasTrend && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    className={cn(
+                      "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium transition-colors",
+                      isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
+                      isNegativeTrend && "bg-destructive/10 text-destructive hover:bg-destructive/20",
+                      trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
+                  >
+                    {getTrendIcon()}
+                    <span>{trendPercent > 0 ? `${formatNumber(trendPercent, 0)}%` : "—"}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-2" side="top">
+                  <div className="text-xs">
+                    <p className="font-medium">
+                      {trend === "up" && "Crescimento"}
+                      {trend === "down" && "Queda"}
+                      {trend === "stable" && "Estável"}
+                    </p>
+                    <p className="text-muted-foreground">vs. período anterior</p>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+            {isMonthSelected && onSave && !isEditing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleStartEdit}
+                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Edit2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
         
         {/* Editing mode */}

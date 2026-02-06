@@ -9,18 +9,14 @@ import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { AlertsSummary } from "@/components/dashboard/AlertsSummary";
+import { AlertCenter } from "@/components/dashboard/AlertCenter";
+import { DataEntrySection } from "@/components/dashboard/DataEntrySection";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
-import { DataEntryModal } from "@/components/dashboard/DataEntryModal";
-import { BulkDataEntry } from "@/components/dashboard/BulkDataEntry";
-import { MetricHistoryModal } from "@/components/dashboard/MetricHistoryModal";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { 
   DollarSign, 
@@ -28,8 +24,6 @@ import {
   Users, 
   Zap, 
   GraduationCap,
-  ChevronDown,
-  AlertTriangle,
 } from "lucide-react";
 import {
   useMetrics,
@@ -93,7 +87,6 @@ const Index = () => {
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<MetricCategory>("lucratividade");
-  const [alertsOpen, setAlertsOpen] = useState(false);
   
   // Month/Year selection state
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -264,14 +257,13 @@ const Index = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardHeader />
         
-        {/* Action Bar */}
-        <div className="flex flex-wrap items-center gap-3 mb-6 print:hidden">
-          {metrics && <DataEntryModal metrics={metrics} />}
-          {metrics && trainingHours && (
-            <BulkDataEntry metrics={metrics} trainingHours={trainingHours} />
-          )}
-          {metrics && <MetricHistoryModal metrics={metrics} />}
-        </div>
+        {/* Data Entry Section */}
+        {metrics && (
+          <DataEntrySection 
+            metrics={metrics} 
+            trainingHours={trainingHours} 
+          />
+        )}
         
         <FilterBar
           filters={filters}
@@ -297,27 +289,18 @@ const Index = () => {
           />
         )}
         
-        {/* Collapsible Alerts Summary */}
-        {metrics && (
-          <Collapsible open={alertsOpen} onOpenChange={setAlertsOpen} className="mb-6">
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-warning" />
-                  <span>Resumo de Alertas</span>
-                </div>
-                <ChevronDown className={`h-4 w-4 transition-transform ${alertsOpen ? "rotate-180" : ""}`} />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-2">
-              <AlertsSummary metrics={adjustedMetrics} />
-            </CollapsibleContent>
-          </Collapsible>
+        {/* Alert Center */}
+        {metrics && historyData && (
+          <AlertCenter 
+            metrics={adjustedMetrics} 
+            historyData={historyData}
+            selectedYear={selectedYear}
+          />
         )}
 
         {/* Category Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-6">
-          <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1">
+          <TabsList className="w-full grid grid-cols-5 h-auto p-1.5 bg-muted/40 rounded-xl gap-1">
             {categoryOrder.map((category) => {
               const config = categoryConfig[category];
               const Icon = config.icon;
@@ -327,12 +310,13 @@ const Index = () => {
                 <TabsTrigger
                   key={category}
                   value={category}
-                  className="flex-1 min-w-[100px] gap-1.5 data-[state=active]:bg-background"
+                  className="flex flex-col items-center gap-1 py-3 px-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
                 >
-                  <Icon className="h-4 w-4 hidden sm:block" />
-                  <span className="hidden md:inline">{config.title}</span>
-                  <span className="md:hidden">{config.shortTitle}</span>
-                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
+                  <Icon className="h-5 w-5" />
+                  <span className="text-xs font-medium text-center leading-tight hidden sm:block">
+                    {config.shortTitle}
+                  </span>
+                  <span className="text-[10px] bg-muted/70 px-1.5 py-0.5 rounded-full font-medium">
                     {categoryMetricsCount}
                   </span>
                 </TabsTrigger>
@@ -376,6 +360,7 @@ const Index = () => {
                             onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
                             isSaving={savingMetricId === metric.id}
                             selectedMonthName={selectedMonthName}
+                            historyData={historyData}
                           />
                         ))}
                       </div>
