@@ -3,6 +3,7 @@ import { toast } from "@/hooks/use-toast";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { parseISO } from "date-fns";
 import { formatMetricValue } from "@/utils/formatters";
+import { areNotificationsEnabled } from "@/components/dashboard/NotificationToggle";
 
 interface MetricStatus {
   metricId: string;
@@ -102,17 +103,19 @@ export function useMetricNotifications(
       if (!previous || !metric) return;
 
       const accumulated = accumulatedValues[current.metricId] || 0;
+      const notificationsEnabled = areNotificationsEnabled();
 
       // Goal was achieved!
       if (!previous.achievedGoal && current.achievedGoal) {
+        // Always show toast
         toast({
           title: "🎉 Meta Atingida!",
           description: `"${metric.name}" atingiu a meta! Atual: ${formatMetricValue(accumulated, metric.unit, metric.name)} | Meta: ${formatMetricValue(metric.target_value, metric.unit, metric.name)}`,
           duration: 8000,
         });
 
-        // Try browser notification
-        if ("Notification" in window && Notification.permission === "granted") {
+        // Browser notification only if enabled
+        if (notificationsEnabled) {
           new Notification("🎉 Meta Atingida!", {
             body: `"${metric.name}" atingiu a meta anual!`,
             icon: "/favicon.ico",
@@ -123,6 +126,7 @@ export function useMetricNotifications(
 
       // Goal was lost
       if (previous.achievedGoal && !current.achievedGoal) {
+        // Always show toast
         toast({
           title: "⚠️ Meta Perdida",
           description: `"${metric.name}" está abaixo da meta. Atual: ${formatMetricValue(accumulated, metric.unit, metric.name)} | Meta: ${formatMetricValue(metric.target_value, metric.unit, metric.name)}`,
@@ -130,8 +134,8 @@ export function useMetricNotifications(
           duration: 8000,
         });
 
-        // Try browser notification
-        if ("Notification" in window && Notification.permission === "granted") {
+        // Browser notification only if enabled
+        if (notificationsEnabled) {
           new Notification("⚠️ Meta Perdida", {
             body: `"${metric.name}" caiu abaixo da meta anual.`,
             icon: "/favicon.ico",

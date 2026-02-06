@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
+import { NotificationToggle } from "./NotificationToggle";
 import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 
@@ -52,6 +53,7 @@ export function DashboardHeader({ metrics, historyData, selectedYear = new Date(
               selectedYear={selectedYear}
             />
           )}
+          <NotificationToggle />
           <Link to="/admin">
             <Button variant="ghost" size="icon" className="h-9 w-9 border border-border/50" title="Painel Administrativo">
               <Shield className="h-4 w-4" />
