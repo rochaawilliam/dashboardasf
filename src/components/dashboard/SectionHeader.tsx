@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
 interface SectionHeaderProps {
@@ -8,31 +7,16 @@ interface SectionHeaderProps {
   variant?: "primary" | "accent" | "success" | "warning";
 }
 
-const variantStyles = {
-  primary: "bg-primary/10 text-primary",
-  accent: "bg-accent/10 text-accent-foreground",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-};
-
 export function SectionHeader({ title, subtitle, icon: Icon, variant = "primary" }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-      <div className={cn(
-        "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex-shrink-0",
-        variantStyles[variant]
-      )}>
-        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-      </div>
-      <div className="min-w-0">
-        <h3 
-          className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground leading-tight"
-          style={{ fontFamily: "'Cinzel', serif" }}
-        >
+    <div className="mb-6">
+      <div className="flex items-center gap-3 mb-1">
+        <Icon className="h-5 w-5 text-primary" />
+        <h3 className="text-lg font-semibold text-foreground">
           {title}
         </h3>
-        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
+      <p className="text-sm text-muted-foreground ml-8">{subtitle}</p>
     </div>
   );
 }

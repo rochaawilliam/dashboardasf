@@ -53,86 +53,66 @@ export function MonthSelector({
   }, [historyData, selectedYear]);
 
   return (
-    <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-card rounded-xl border border-border print:hidden">
-      {/* Single row: Year selector + All months */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground shrink-0">
-          <CalendarDays className="h-3.5 w-3.5 text-primary" />
-        </div>
-        
-        {/* Year navigation */}
-        <div className="flex items-center gap-0.5 bg-muted/50 rounded-lg p-0.5 shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => onYearChange(selectedYear - 1)}
-            disabled={selectedYear <= years[0]}
-          >
-            <ChevronLeft className="h-3 w-3" />
-          </Button>
-          <span className="text-xs font-semibold w-8 text-center">{selectedYear}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => onYearChange(selectedYear + 1)}
-            disabled={selectedYear >= years[years.length - 1]}
-          >
-            <ChevronRight className="h-3 w-3" />
-          </Button>
-        </div>
-
-        {/* All Year + Month buttons - fill remaining space */}
-        <div className="flex-1 flex gap-0.5 sm:gap-1">
-          {/* All year button */}
-          <Button
-            variant={selectedMonth === null ? "default" : "outline"}
-            size="sm"
-            onClick={() => onMonthChange(null)}
-            className={cn(
-              "flex-1 h-7 text-[8px] sm:text-[10px] px-0",
-              selectedMonth === null && "bg-primary text-primary-foreground"
-            )}
-          >
-            Ano
-          </Button>
-          
-          {/* Month buttons */}
-          {months.map((month) => {
-            const hasData = monthsWithData.has(month.value);
-            const isSelected = selectedMonth === month.value;
-            
-            return (
-              <Button
-                key={month.value}
-                variant={isSelected ? "default" : "outline"}
-                size="sm"
-                onClick={() => onMonthChange(month.value)}
-                className={cn(
-                  "flex-1 h-7 text-[8px] sm:text-[10px] px-0",
-                  isSelected && "bg-primary text-primary-foreground",
-                  !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
-                  !isSelected && !hasData && "border-border"
-                )}
-              >
-                {month.label}
-              </Button>
-            );
-          })}
-        </div>
+    <div className="mb-6 flex items-center gap-3">
+      {/* Year navigation */}
+      <div className="flex items-center gap-1 shrink-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-lg"
+          onClick={() => onYearChange(selectedYear - 1)}
+          disabled={selectedYear <= years[0]}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm font-semibold w-12 text-center">{selectedYear}</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-lg"
+          onClick={() => onYearChange(selectedYear + 1)}
+          disabled={selectedYear >= years[years.length - 1]}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
-      
-      {/* Legend - compact */}
-      <div className="flex flex-wrap gap-2 sm:gap-4 text-[9px] sm:text-[11px] text-muted-foreground mt-2">
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded border border-success/50 bg-success/10" />
-          <span>Com lançamentos</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded border border-border bg-transparent" />
-          <span>Sem lançamentos</span>
-        </div>
+
+      {/* All Year + Month buttons */}
+      <div className="flex-1 flex gap-1 overflow-x-auto">
+        <Button
+          variant={selectedMonth === null ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onMonthChange(null)}
+          className={cn(
+            "h-8 px-3 rounded-lg text-xs font-medium shrink-0",
+            selectedMonth === null && "bg-primary text-primary-foreground"
+          )}
+        >
+          Ano
+        </Button>
+        
+        {months.map((month) => {
+          const hasData = monthsWithData.has(month.value);
+          const isSelected = selectedMonth === month.value;
+          
+          return (
+            <Button
+              key={month.value}
+              variant={isSelected ? "default" : "ghost"}
+              size="sm"
+              onClick={() => onMonthChange(month.value)}
+              className={cn(
+                "h-8 px-2 rounded-lg text-xs font-medium shrink-0",
+                isSelected && "bg-primary text-primary-foreground",
+                !isSelected && hasData && "text-primary",
+                !isSelected && !hasData && "text-muted-foreground"
+              )}
+            >
+              {month.label}
+              {hasData && !isSelected && <span className="ml-0.5 w-1 h-1 rounded-full bg-primary inline-block" />}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );
