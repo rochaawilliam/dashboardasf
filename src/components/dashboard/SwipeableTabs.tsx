@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, ReactNode } from "react";
+import { useRef, useState, ReactNode, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -10,13 +10,16 @@ interface SwipeableTabsProps<T extends string> {
   className?: string;
 }
 
-export function SwipeableTabs<T extends string>({ 
-  tabs, 
-  activeTab, 
-  onTabChange, 
-  children,
-  className 
-}: SwipeableTabsProps<T>) {
+function SwipeableTabsInner<T extends string>(
+  { 
+    tabs, 
+    activeTab, 
+    onTabChange, 
+    children,
+    className 
+  }: SwipeableTabsProps<T>,
+  ref: React.ForwardedRef<HTMLDivElement>
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -51,17 +54,17 @@ export function SwipeableTabs<T extends string>({
       onTabChange(tabs[currentIndex - 1]);
     }
     
-    setTouchStart(null);
-    setTouchEnd(null);
+    touchStart && setTouchStart(null);
+    touchEnd && setTouchEnd(null);
   };
 
   if (!isMobile) {
-    return <div className={className}>{children}</div>;
+    return <div ref={ref} className={className}>{children}</div>;
   }
 
   return (
     <div 
-      ref={containerRef}
+      ref={ref || containerRef}
       className={cn("touch-pan-y", className)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -71,7 +74,7 @@ export function SwipeableTabs<T extends string>({
       
       {/* Swipe indicator dots */}
       <div className="flex items-center justify-center gap-1.5 py-3 sm:hidden">
-        {tabs.map((tab, index) => (
+        {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
@@ -87,3 +90,7 @@ export function SwipeableTabs<T extends string>({
     </div>
   );
 }
+
+export const SwipeableTabs = forwardRef(SwipeableTabsInner) as <T extends string>(
+  props: SwipeableTabsProps<T> & { ref?: React.ForwardedRef<HTMLDivElement> }
+) => ReturnType<typeof SwipeableTabsInner>;
