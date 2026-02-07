@@ -7,7 +7,8 @@ export type MetricCategory =
   | "experiencia_cliente" 
   | "produtividade" 
   | "gestao_pessoas" 
-  | "aprendizado_crescimento";
+  | "aprendizado_crescimento"
+  | "execucao_comercial";
 
 export type Division = "juridico" | "crescimento" | "marketing" | "administrativo";
 

@@ -29,6 +29,7 @@ import {
   Zap, 
   GraduationCap,
   Rocket,
+  Briefcase,
 } from "lucide-react";
 import {
   useMetrics,
@@ -46,6 +47,13 @@ const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string
     subtitle: "Aumentar lucratividade e margem do negócio",
     icon: DollarSign,
     variant: "primary",
+  },
+  execucao_comercial: {
+    title: "Execução Comercial",
+    shortTitle: "Comercial",
+    subtitle: "Acompanhar pipeline e conversão de vendas",
+    icon: Briefcase,
+    variant: "accent",
   },
   experiencia_cliente: {
     title: "Gestão de Crescimento",
@@ -79,6 +87,7 @@ const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string
 
 const categoryOrder: MetricCategory[] = [
   "lucratividade",
+  "execucao_comercial",
   "experiencia_cliente",
   "produtividade",
   "gestao_pessoas",
@@ -385,8 +394,8 @@ const Index = () => {
           onTabChange={(tab) => setActiveTab(tab)}
         >
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
-            {/* Chrome-style tabs */}
-            <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5 overflow-x-auto">
+            {/* Chrome-style tabs - full width */}
+            <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
               {categoryOrder.map((category) => {
                 const config = categoryConfig[category];
                 const Icon = config.icon;
@@ -398,17 +407,17 @@ const Index = () => {
                     key={category}
                     onClick={() => setActiveTab(category)}
                     className={cn(
-                      "flex items-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-lg transition-all relative shrink-0",
-                      "text-[10px] sm:text-xs font-medium",
+                      "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
+                      "text-[9px] sm:text-xs font-medium",
                       isActive 
                         ? "bg-primary text-primary-foreground shadow-sm z-10" 
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                    <span className="hidden sm:inline">{config.shortTitle}</span>
+                    <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="hidden md:inline truncate">{config.shortTitle}</span>
                     <span className={cn(
-                      "text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full font-semibold",
+                      "text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
                       isActive 
                         ? "bg-primary-foreground/20 text-primary-foreground" 
                         : "bg-muted text-muted-foreground"
@@ -429,7 +438,7 @@ const Index = () => {
               const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
               
               return (
-                <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4">
+                <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4 animate-fade-in">
                   <SectionHeader
                     title={config.title}
                     subtitle={config.subtitle}
