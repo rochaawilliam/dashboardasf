@@ -20,8 +20,9 @@ import { AutoStartTour } from "@/components/dashboard/GuidedTour";
 import { useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
 import { SyncStatusFooter } from "@/components/dashboard/SyncStatusFooter";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
+import { cn } from "@/lib/utils";
 import { 
   DollarSign, 
   Users, 
@@ -384,29 +385,40 @@ const Index = () => {
           onTabChange={(tab) => setActiveTab(tab)}
         >
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
-            <TabsList data-tour="category-tabs" className="w-full grid grid-cols-5 h-auto p-1 sm:p-1.5 bg-muted/40 rounded-lg sm:rounded-xl gap-0.5 sm:gap-1">
+            {/* Chrome-style tabs */}
+            <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5 overflow-x-auto">
               {categoryOrder.map((category) => {
                 const config = categoryConfig[category];
                 const Icon = config.icon;
                 const categoryMetricsCount = groupedMetrics[category]?.length || 0;
+                const isActive = activeTab === category;
                 
                 return (
-                  <TabsTrigger
+                  <button
                     key={category}
-                    value={category}
-                    className="flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-1 sm:px-2 rounded-md sm:rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                    onClick={() => setActiveTab(category)}
+                    className={cn(
+                      "flex items-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-lg transition-all relative shrink-0",
+                      "text-[10px] sm:text-xs font-medium",
+                      isActive 
+                        ? "bg-primary text-primary-foreground shadow-sm z-10" 
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
                   >
                     <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                    <span className="text-[9px] sm:text-xs font-medium text-center leading-tight hidden xs:inline sm:inline">
-                      {config.shortTitle}
-                    </span>
-                    <span className="text-[8px] sm:text-[10px] bg-muted/70 px-1 sm:px-1.5 py-0.5 rounded-full font-medium">
+                    <span className="hidden sm:inline">{config.shortTitle}</span>
+                    <span className={cn(
+                      "text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full font-semibold",
+                      isActive 
+                        ? "bg-primary-foreground/20 text-primary-foreground" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
                       {categoryMetricsCount}
                     </span>
-                  </TabsTrigger>
+                  </button>
                 );
               })}
-            </TabsList>
+            </div>
 
             {categoryOrder.map((category) => {
               const config = categoryConfig[category];
@@ -417,7 +429,7 @@ const Index = () => {
               const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
               
               return (
-                <TabsContent key={category} value={category} className="mt-4 sm:mt-6">
+                <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4">
                   <SectionHeader
                     title={config.title}
                     subtitle={config.subtitle}

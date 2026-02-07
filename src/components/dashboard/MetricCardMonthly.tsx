@@ -37,7 +37,6 @@ interface MetricCardMonthlyProps {
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
 
-// Metrics where annual target = monthly target (averages, rates, percentages)
 const nonAccumulativeKeywords = [
   "Ticket Médio",
   "Margem",
@@ -206,21 +205,19 @@ export function MetricCardMonthly({
   return (
     <>
       <div className={cn(
-        "metric-card group relative",
-        status === "danger" && !hasNoData && "ring-2 ring-destructive/50"
+        "metric-card group relative p-3",
+        status === "danger" && !hasNoData && "ring-1 ring-destructive/50"
       )}>
-        {/* Header */}
-        <div className="flex items-start justify-between mb-2 sm:mb-3">
-          <div className="flex-1 min-w-0">
-            <span className="metric-label text-xs sm:text-sm font-medium line-clamp-2">{metric.name}</span>
-          </div>
-          <div className="flex items-center gap-1 ml-2">
+        {/* Header with name and trend */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <span className="metric-label text-[11px] sm:text-xs font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
                     className={cn(
-                      "flex items-center gap-0.5 px-1 sm:px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium transition-colors",
+                      "flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium transition-colors",
                       isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
                       isNegativeTrend && "bg-destructive/10 text-destructive hover:bg-destructive/20",
                       trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -230,14 +227,14 @@ export function MetricCardMonthly({
                     <span>{trendPercent > 0 ? `${formatNumber(trendPercent, 0)}%` : "—"}</span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-40 p-2" side="top">
-                  <div className="text-xs">
+                <PopoverContent className="w-32 p-2" side="top">
+                  <div className="text-[10px]">
                     <p className="font-medium">
                       {trend === "up" && "Crescimento"}
                       {trend === "down" && "Queda"}
                       {trend === "stable" && "Estável"}
                     </p>
-                    <p className="text-muted-foreground">vs. período anterior</p>
+                    <p className="text-muted-foreground">vs. mês anterior</p>
                   </div>
                 </PopoverContent>
               </Popover>
@@ -247,7 +244,7 @@ export function MetricCardMonthly({
                 variant="ghost"
                 size="sm"
                 onClick={handleStartEdit}
-                className="h-6 w-6 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                className="h-5 w-5 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 <Edit2 className="h-3 w-3" />
               </Button>
@@ -257,26 +254,26 @@ export function MetricCardMonthly({
         
         {/* Editing mode */}
         {isEditing ? (
-          <div className="space-y-2 sm:space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Input
                 type="number"
                 step="0.01"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="h-8 sm:h-9 text-sm"
+                className="h-7 text-xs"
                 autoFocus
               />
-              <span className="text-xs sm:text-sm text-muted-foreground">{metric.unit}</span>
+              <span className="text-[10px] text-muted-foreground">{metric.unit}</span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               <Button
                 size="sm"
                 onClick={handleRequestSave}
                 disabled={isSaving}
-                className="flex-1 h-8 text-xs sm:text-sm"
+                className="flex-1 h-6 text-[10px]"
               >
-                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <Check className="h-3 w-3 mr-1" />
                 Salvar
               </Button>
               <Button
@@ -284,76 +281,57 @@ export function MetricCardMonthly({
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isSaving}
-                className="h-8"
+                className="h-6 px-2"
               >
-                <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                <X className="h-3 w-3" />
               </Button>
             </div>
           </div>
         ) : (
           <>
-            {/* Annual target */}
-            <div className="mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-lg bg-muted/50">
-              <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
-                🎯 Meta {isNonAccumulative ? "(Mensal = Anual)" : "Anual"}
+            {/* Main value and target - compact row layout */}
+            <div className="flex items-end justify-between gap-2 mb-2">
+              {/* Current value - prominent */}
+              <div className="flex-1">
+                {hasNoData ? (
+                  <span className="text-muted-foreground text-[10px] italic">Sem dados</span>
+                ) : (
+                  <div className={cn(
+                    "text-lg sm:text-xl font-bold leading-none",
+                    status === "success" && "text-success",
+                    status === "warning" && "text-warning",
+                    status === "danger" && "text-destructive"
+                  )}>
+                    {formatMetricValue(displayValue, metric.unit, metric.name)}
+                  </div>
+                )}
+                <div className="text-[9px] text-muted-foreground mt-0.5">
+                  {isMonthSelected ? "Lançado" : "Acumulado"}
+                </div>
               </div>
-              <div className="text-base sm:text-lg font-bold">
-                {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+              
+              {/* Target - smaller */}
+              <div className="text-right">
+                <div className="text-xs sm:text-sm font-semibold text-primary">
+                  {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                </div>
+                <div className="text-[9px] text-muted-foreground">
+                  Meta {isNonAccumulative ? "" : "Anual"}
+                </div>
               </div>
             </div>
             
-            {/* Monthly target - only show if accumulative */}
+            {/* Monthly target - only if accumulative, inline */}
             {!isNonAccumulative && (
-              <div className="mb-2 sm:mb-3">
-                <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
-                  📊 Meta Mensal
-                </div>
-                <div className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
-                </div>
+              <div className="text-[9px] text-muted-foreground mb-2 flex items-center gap-1">
+                <span>Meta mensal:</span>
+                <span className="font-medium">{formatMetricValue(monthlyTarget, metric.unit, metric.name)}</span>
               </div>
             )}
             
-            {/* Current value */}
-            {hasNoData ? (
-              <div className="text-center py-1.5 sm:py-2 mb-2 sm:mb-3">
-                <span className="text-muted-foreground text-xs sm:text-sm italic">Sem lançamento</span>
-              </div>
-            ) : (
-              <div className="mb-2 sm:mb-3">
-                <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
-                  {isMonthSelected ? "📝 Valor Lançado" : "📈 Acumulado"}
-                </div>
-                <div className={cn(
-                  "text-xl sm:text-2xl font-bold",
-                  status === "success" && "text-success",
-                  status === "warning" && "text-warning",
-                  status === "danger" && "text-destructive"
-                )}>
-                  {formatMetricValue(displayValue, metric.unit, metric.name)}
-                </div>
-              </div>
-            )}
-            
-            {/* Sparkline */}
-            <div className="mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-lg bg-muted/30">
-              <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">📊 Evolução</div>
-              <Sparkline
-                metricId={metric.id}
-                metricName={metric.name}
-                unit={metric.unit}
-                historyData={historyData}
-                selectedYear={selectedYear}
-                height={32}
-              />
-            </div>
-            
-            {/* Progress bar */}
-            <div className="space-y-1.5 sm:space-y-2">
-              <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
-                <span>Progresso</span>
-              </div>
-              <div className="progress-bar h-2 sm:h-3 rounded-full bg-muted overflow-hidden">
+            {/* Compact Progress bar */}
+            <div className="space-y-1">
+              <div className="progress-bar h-1.5 rounded-full bg-muted overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-300",
@@ -362,17 +340,24 @@ export function MetricCardMonthly({
                   style={{ width: `${hasNoData ? 0 : progress}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[9px] sm:text-xs text-muted-foreground">
-                <span>0%</span>
+              <div className="flex justify-between items-center">
+                <Sparkline
+                  metricId={metric.id}
+                  metricName={metric.name}
+                  unit={metric.unit}
+                  historyData={historyData}
+                  selectedYear={selectedYear}
+                  height={20}
+                  className="flex-1 max-w-[60%]"
+                />
                 <span className={cn(
-                  "font-medium",
+                  "text-[10px] font-medium",
                   !hasNoData && status === "success" && "text-success",
                   !hasNoData && status === "warning" && "text-warning",
                   !hasNoData && status === "danger" && "text-destructive"
                 )}>
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
-                <span>100%</span>
               </div>
             </div>
           </>
@@ -383,17 +368,15 @@ export function MetricCardMonthly({
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base sm:text-lg">Confirmar Lançamento</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs sm:text-sm">
-              Você está prestes a salvar o valor <strong>{pendingValue !== null ? formatMetricValue(pendingValue, metric.unit, metric.name) : ""}</strong> para a métrica <strong>{metric.name}</strong>
-              {selectedMonthName && <> em <strong>{selectedMonthName}</strong></>}.
-              <br /><br />
-              Deseja confirmar este lançamento?
+            <AlertDialogTitle className="text-base">Confirmar Lançamento</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              Salvar <strong>{pendingValue !== null ? formatMetricValue(pendingValue, metric.unit, metric.name) : ""}</strong> para <strong>{metric.name}</strong>
+              {selectedMonthName && <> em <strong>{selectedMonthName}</strong></>}?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel onClick={handleCancelConfirm} className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSave} disabled={isSaving} className="w-full sm:w-auto">
+          <AlertDialogFooter className="flex-row gap-2">
+            <AlertDialogCancel onClick={handleCancelConfirm} className="flex-1 h-8 text-xs">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSave} disabled={isSaving} className="flex-1 h-8 text-xs">
               {isSaving ? "Salvando..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>
