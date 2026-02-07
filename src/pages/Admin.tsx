@@ -6,9 +6,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,15 +16,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, Shield, Loader2, UserPlus, ShieldCheck, ShieldOff, Eye } from "lucide-react";
@@ -35,6 +23,8 @@ import { Link, Navigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TabPermissionsDialog } from "@/components/dashboard/TabPermissionsDialog";
+import { CreateUserDialog, type CreateUserData } from "@/components/dashboard/CreateUserDialog";
+import { useUpdateTabPermissions } from "@/hooks/useTabPermissions";
 
 interface User {
   id: string;
@@ -51,9 +41,7 @@ export default function Admin() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [userForPermissions, setUserForPermissions] = useState<User | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
+  const updateTabPermissions = useUpdateTabPermissions();
 
   const { data: users, isLoading: isUsersLoading } = useQuery({
     queryKey: ["adminUsers"],
@@ -130,21 +118,30 @@ export default function Admin() {
   });
 
   const createUserMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("create-user", {
+    mutationFn: async (data: CreateUserData) => {
+      const { data: result, error } = await supabase.functions.invoke("create-user", {
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
         body: { 
-          email: newUserEmail, 
-          password: newUserPassword,
-          makeAdmin: newUserIsAdmin,
+          email: data.email, 
+          password: data.password,
+          makeAdmin: data.isAdmin,
         },
       });
 
       if (error) throw error;
-      if (data.error) throw new Error(data.error);
-      return data;
+      if (result.error) throw new Error(result.error);
+      
+      // If not admin, save tab permissions
+      if (!data.isAdmin && result.user?.id) {
+        await updateTabPermissions.mutateAsync({
+          userId: result.user.id,
+          permissions: data.permissions,
+        });
+      }
+      
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -153,9 +150,6 @@ export default function Admin() {
       });
       queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
       setIsCreateDialogOpen(false);
-      setNewUserEmail("");
-      setNewUserPassword("");
-      setNewUserIsAdmin(false);
     },
     onError: (error: Error) => {
       toast({
@@ -165,6 +159,10 @@ export default function Admin() {
       });
     },
   });
+
+  const handleCreateUser = (data: CreateUserData) => {
+    createUserMutation.mutate(data);
+  };
 
   if (isRoleLoading) {
     return (
@@ -196,68 +194,10 @@ export default function Admin() {
               <Shield className="h-5 w-5 text-primary" />
               <CardTitle>Painel Administrativo</CardTitle>
             </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Novo Usuário
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Criar Novo Usuário</DialogTitle>
-                  <DialogDescription>
-                    Preencha os dados para criar um novo usuário no sistema.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="usuario@exemplo.com"
-                      value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Mínimo 6 caracteres"
-                      value={newUserPassword}
-                      onChange={(e) => setNewUserPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="isAdmin" 
-                      checked={newUserIsAdmin}
-                      onCheckedChange={(checked) => setNewUserIsAdmin(checked === true)}
-                    />
-                    <Label htmlFor="isAdmin" className="text-sm font-normal cursor-pointer">
-                      Criar como administrador
-                    </Label>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button 
-                    onClick={() => createUserMutation.mutate()}
-                    disabled={createUserMutation.isPending || !newUserEmail || !newUserPassword}
-                  >
-                    {createUserMutation.isPending && (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    )}
-                    Criar Usuário
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Novo Usuário
+            </Button>
           </div>
           <CardDescription>
             Gerencie os usuários do sistema
@@ -382,6 +322,14 @@ export default function Admin() {
         onOpenChange={(open) => !open && setUserForPermissions(null)}
         userId={userForPermissions?.id || null}
         userEmail={userForPermissions?.email || ""}
+      />
+
+      {/* Create User Dialog */}
+      <CreateUserDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onCreateUser={handleCreateUser}
+        isCreating={createUserMutation.isPending}
       />
     </div>
   );
