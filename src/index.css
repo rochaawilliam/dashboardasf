@@ -2,20 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Roboto:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Driver.js custom styles */
 .driver-popover {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
   border: 1px solid hsl(var(--border)) !important;
-  border-radius: 0.75rem !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
 }
 
 .driver-popover-title {
-  font-family: 'Cinzel', serif !important;
-  font-size: 1.125rem !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
   color: hsl(var(--foreground)) !important;
 }
 
@@ -60,138 +61,139 @@
 }
 
 .driver-overlay {
-  background: rgba(0, 0, 0, 0.6) !important;
+  background: rgba(0, 0, 0, 0.75) !important;
 }
 
 @layer base {
   :root,
   .light {
-    /* Cream/Beige theme with golden accents */
-    --background: 40 30% 95%;
-    --foreground: 30 15% 20%;
+    /* Minimal light theme */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
 
-    --card: 40 25% 98%;
-    --card-foreground: 30 15% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
 
-    --popover: 40 25% 98%;
-    --popover-foreground: 30 15% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
 
-    /* Gold accent - matching logo */
-    --primary: 42 75% 45%;
+    /* Teal accent */
+    --primary: 168 76% 42%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 20% 90%;
-    --secondary-foreground: 30 15% 20%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 40 20% 88%;
-    --muted-foreground: 30 15% 45%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 42 75% 45%;
+    --accent: 168 76% 42%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 42 75% 45%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 50% 40%;
+    --success: 168 76% 42%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 70% 50%;
-    --warning-foreground: 30 15% 20%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 9%;
 
-    --border: 40 20% 82%;
-    --input: 40 20% 82%;
-    --ring: 42 75% 45%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 168 76% 42%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --chart-1: 42 75% 45%;
-    --chart-2: 42 60% 35%;
-    --chart-3: 142 50% 40%;
-    --chart-4: 38 70% 50%;
-    --chart-5: 42 75% 55%;
+    --chart-1: 168 76% 42%;
+    --chart-2: 168 60% 35%;
+    --chart-3: 200 80% 50%;
+    --chart-4: 45 93% 47%;
+    --chart-5: 168 76% 52%;
 
     /* Tab colors */
-    --tab-active: 42 75% 45%;
-    --tab-inactive: 40 20% 90%;
-    --tab-hover: 40 25% 85%;
+    --tab-active: 168 76% 42%;
+    --tab-inactive: 0 0% 96%;
+    --tab-hover: 0 0% 92%;
 
-    --sidebar-background: 40 25% 93%;
-    --sidebar-foreground: 30 15% 20%;
-    --sidebar-primary: 42 75% 45%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 168 76% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 20% 88%;
-    --sidebar-accent-foreground: 30 15% 20%;
-    --sidebar-border: 40 20% 82%;
-    --sidebar-ring: 42 75% 45%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 168 76% 42%;
   }
 
   .dark {
-    /* Microsoft Fluent Dark Theme inspired palette */
-    --background: 0 0% 8%;
+    /* Ultra-dark minimal theme inspired by reference */
+    --background: 0 0% 5%;
     --foreground: 0 0% 95%;
 
-    --card: 0 0% 11%;
+    --card: 0 0% 9%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 13%;
+    --popover: 0 0% 9%;
     --popover-foreground: 0 0% 95%;
 
-    /* Gold accent - matching logo */
-    --primary: 42 75% 55%;
-    --primary-foreground: 0 0% 8%;
+    /* Teal accent for positive/interactive elements */
+    --primary: 168 76% 42%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
+    --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 42 75% 55%;
-    --accent-foreground: 0 0% 8%;
+    --accent: 168 76% 42%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 60% 45%;
+    --success: 168 76% 42%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 85% 55%;
-    --warning-foreground: 0 0% 8%;
+    --warning: 45 93% 58%;
+    --warning-foreground: 0 0% 9%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 42 75% 55%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 168 76% 42%;
 
     /* Tab colors */
-    --tab-active: 42 75% 55%;
-    --tab-inactive: 0 0% 15%;
-    --tab-hover: 0 0% 20%;
+    --tab-active: 168 76% 42%;
+    --tab-inactive: 0 0% 9%;
+    --tab-hover: 0 0% 14%;
 
-    --sidebar-background: 0 0% 7%;
+    --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 42 75% 55%;
-    --sidebar-primary-foreground: 0 0% 7%;
-    --sidebar-accent: 0 0% 14%;
+    --sidebar-primary: 168 76% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 12%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 42 75% 55%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 168 76% 42%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Roboto', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cinzel', Georgia, serif;
-    letter-spacing: 0.02em;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   /* Prevent transition on page load */
@@ -202,7 +204,7 @@
 
 @layer utilities {
   .dashboard-grid {
-    @apply grid gap-3 sm:gap-4 md:gap-5;
+    @apply grid gap-4;
     grid-template-columns: 1fr;
   }
   
@@ -225,27 +227,31 @@
   }
 
   .metric-card {
-    @apply bg-card rounded-lg border border-border/50 p-4 sm:p-5 md:p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/30;
-    background: linear-gradient(135deg, hsl(0 0% 11%) 0%, hsl(0 0% 9%) 100%);
+    @apply bg-card rounded-2xl p-5 transition-all duration-300;
+    border: 1px solid transparent;
+  }
+  
+  .metric-card:hover {
+    @apply border-border;
   }
 
   .metric-value {
-    @apply text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-foreground;
-    font-family: 'Roboto', sans-serif;
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight text-foreground;
+    font-family: 'Inter', sans-serif;
   }
 
   .metric-label {
-    @apply text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider;
+    @apply text-xs font-medium text-muted-foreground tracking-wide;
   }
 
   .section-title {
-    @apply text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4;
-    font-family: 'Cinzel', serif;
-    letter-spacing: 0.05em;
+    @apply text-base sm:text-lg font-semibold text-foreground mb-4;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
   }
 
   .progress-bar {
-    @apply h-1.5 rounded-full bg-muted/50 overflow-hidden;
+    @apply h-1 rounded-full bg-muted/60 overflow-hidden;
   }
 
   .progress-fill {
@@ -265,11 +271,11 @@
   }
 
   .category-badge {
-    @apply inline-flex items-center px-2 sm:px-3 py-1 rounded text-xs font-medium uppercase tracking-wider;
+    @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium;
   }
 
   .gold-gradient {
-    background: linear-gradient(135deg, hsl(40 45% 58%) 0%, hsl(40 35% 45%) 100%);
+    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 60% 35%) 100%);
   }
 
   .gold-text {

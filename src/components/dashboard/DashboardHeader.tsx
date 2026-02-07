@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { TourButton } from "./GuidedTour";
 import { UserSettingsPanel } from "./UserSettingsPanel";
-import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { ReactNode } from "react";
 
@@ -22,28 +21,22 @@ export function DashboardHeader({
   mobileDrawer 
 }: DashboardHeaderProps) {
   return (
-    <header className="mb-4 sm:mb-6 pb-4 sm:pb-5 border-b border-border/30">
-      <div className="flex items-center gap-3 sm:gap-4">
+    <header className="mb-6 pb-4">
+      <div className="flex items-center gap-4">
         {/* Mobile drawer trigger */}
         {mobileDrawer}
         
-        <img 
-          src={asfLogo} 
-          alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
-          className="h-10 sm:h-12 md:h-14 w-auto"
-        />
-        <div className="h-8 sm:h-10 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground tracking-wide truncate">
-            Dashboard de Metas
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">
+            Dashboard
           </h1>
-          <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider mt-0.5 truncate">
+          <p className="text-muted-foreground text-xs mt-0.5">
             Setor de Crescimento • Comercial & Marketing
           </p>
         </div>
         
-        {/* Action buttons - inline with header */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
           <div data-tour="notifications">
             {metrics && (
               <NotificationBell 
@@ -56,8 +49,8 @@ export function DashboardHeader({
           <TourButton />
           <UserSettingsPanel />
           <Link to="/admin">
-            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 border border-border/50" title="Painel Administrativo">
-              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" title="Painel Administrativo">
+              <Shield className="h-4 w-4" />
             </Button>
           </Link>
         </div>

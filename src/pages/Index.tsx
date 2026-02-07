@@ -393,9 +393,9 @@ const Index = () => {
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab)}
         >
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
-            {/* Chrome-style tabs - full width */}
-            <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-6">
+            {/* Minimal tabs */}
+            <div data-tour="category-tabs" className="flex items-center gap-1 mb-6 overflow-x-auto pb-1">
               {categoryOrder.map((category) => {
                 const config = categoryConfig[category];
                 const Icon = config.icon;
@@ -407,20 +407,20 @@ const Index = () => {
                     key={category}
                     onClick={() => setActiveTab(category)}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
-                      "text-[9px] sm:text-xs font-medium",
+                      "flex items-center gap-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap",
+                      "text-xs font-medium",
                       isActive 
-                        ? "bg-primary text-primary-foreground shadow-sm z-10" 
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        ? "bg-primary text-primary-foreground" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     )}
                   >
-                    <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                    <span className="hidden md:inline truncate">{config.shortTitle}</span>
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{config.shortTitle}</span>
                     <span className={cn(
-                      "text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
+                      "text-[10px] px-1.5 py-0.5 rounded-md",
                       isActive 
-                        ? "bg-primary-foreground/20 text-primary-foreground" 
-                        : "bg-muted text-muted-foreground"
+                        ? "bg-primary-foreground/20" 
+                        : "bg-muted"
                     )}>
                       {categoryMetricsCount}
                     </span>
@@ -438,7 +438,7 @@ const Index = () => {
               const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
               
               return (
-                <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4 animate-fade-in">
+                <TabsContent key={category} value={category} className="mt-0 animate-fade-in">
                   <SectionHeader
                     title={config.title}
                     subtitle={config.subtitle}
