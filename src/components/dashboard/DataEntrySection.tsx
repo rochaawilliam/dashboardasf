@@ -7,7 +7,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { DataEntryModal } from "./DataEntryModal";
-import { BulkDataEntry } from "./BulkDataEntry";
 import { MetricHistoryModal } from "./MetricHistoryModal";
 import { MetricGoalEditor } from "./MetricGoalEditor";
 import type { Metric, TrainingHours } from "@/hooks/useMetrics";
@@ -41,7 +40,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
                 "text-[10px] sm:text-xs mt-0.5 hidden sm:block",
                 isOpen ? "text-primary-foreground/80" : "text-muted-foreground"
               )}>
-                Entrada de dados, importação em massa, histórico e ajuste de metas
+                Entrada de dados, histórico e ajuste de metas
               </p>
             </div>
           </div>
@@ -51,7 +50,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
       
       <CollapsibleContent className="mt-2 sm:mt-3">
         <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
             {/* Single Entry */}
             <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
               <div className="sm:mb-2">
@@ -68,23 +67,6 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
               <DataEntryModal metrics={metrics} />
             </div>
             
-            {/* Bulk Entry */}
-            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
-              <div className="sm:mb-2">
-                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <FileSpreadsheet className="h-4 w-4 text-accent-foreground" />
-                </div>
-              </div>
-              <div className="flex-1 sm:flex-none">
-                <h4 className="font-medium text-xs mb-0.5">Lançamento em Massa</h4>
-                <p className="text-[10px] text-muted-foreground sm:mb-2 hidden sm:block">
-                  Importe múltiplos valores
-                </p>
-              </div>
-              {trainingHours && (
-                <BulkDataEntry metrics={metrics} trainingHours={trainingHours} />
-              )}
-            </div>
             
             {/* History */}
             <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
