@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem("asf-theme") as Theme;
       if (stored) return stored;
     }
-    return "dark"; // Default to dark theme
+    return "light"; // Default to light theme
   });
 
   useEffect(() => {

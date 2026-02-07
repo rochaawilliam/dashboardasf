@@ -30,6 +30,7 @@ import {
   GraduationCap,
   Rocket,
   Briefcase,
+  Lock,
 } from "lucide-react";
 import {
   useMetrics,
@@ -39,6 +40,8 @@ import {
   type MetricCategory,
 } from "@/hooks/useMetrics";
 import { useMetricNotifications } from "@/hooks/useMetricNotifications";
+import { useUserTabPermissions } from "@/hooks/useTabPermissions";
+import { useAuth } from "@/hooks/useAuth";
 
 const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
   lucratividade: {
@@ -96,6 +99,9 @@ const categoryOrder: MetricCategory[] = [
 
 const Index = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { allowedTabs, hasTabAccess, isAdmin } = useUserTabPermissions();
+  
   const [filters, setFilters] = useState<Filters>({
     period: "quarter",
     division: "all",
@@ -401,28 +407,38 @@ const Index = () => {
                 const Icon = config.icon;
                 const categoryMetricsCount = groupedMetrics[category]?.length || 0;
                 const isActive = activeTab === category;
+                const canAccess = hasTabAccess(category);
                 
                 return (
                   <button
                     key={category}
-                    onClick={() => setActiveTab(category)}
+                    onClick={() => canAccess && setActiveTab(category)}
+                    disabled={!canAccess}
                     className={cn(
                       "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
                       "text-[9px] sm:text-xs font-medium",
-                      isActive 
+                      !canAccess && "opacity-50 cursor-not-allowed",
+                      isActive && canAccess
                         ? "bg-primary text-primary-foreground shadow-sm z-10" 
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        : canAccess 
+                          ? "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          : "bg-muted/30 text-muted-foreground"
                     )}
+                    title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : undefined}
                   >
-                    <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                    {!canAccess ? (
+                      <Lock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                    ) : (
+                      <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                    )}
                     <span className="hidden md:inline truncate">{config.shortTitle}</span>
                     <span className={cn(
                       "text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
-                      isActive 
+                      isActive && canAccess
                         ? "bg-primary-foreground/20 text-primary-foreground" 
                         : "bg-muted text-muted-foreground"
                     )}>
-                      {categoryMetricsCount}
+                      {canAccess ? categoryMetricsCount : "🔒"}
                     </span>
                   </button>
                 );
@@ -432,19 +448,33 @@ const Index = () => {
             {categoryOrder.map((category) => {
               const config = categoryConfig[category];
               const categoryMetrics = groupedMetrics[category] || [];
-              // Show all categories even without metrics
+              const canAccess = hasTabAccess(category);
               
               const categoryHistory = historyByCategory?.[category];
               const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
               
               return (
                 <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4 animate-fade-in">
-                  <SectionHeader
-                    title={config.title}
-                    subtitle={config.subtitle}
-                    icon={config.icon}
-                    variant={config.variant}
-                  />
+                  {/* Show locked state if user doesn't have access */}
+                  {!canAccess ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                      <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                        Acesso Restrito
+                      </h3>
+                      <p className="text-sm text-muted-foreground max-w-md">
+                        Você não tem permissão para visualizar esta aba. 
+                        Entre em contato com o administrador para solicitar acesso.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <SectionHeader
+                        title={config.title}
+                        subtitle={config.subtitle}
+                        icon={config.icon}
+                        variant={config.variant}
+                      />
                   
                   {/* Render subcategories */}
                   {organizedSubcategories.map((subcat) => {
@@ -495,6 +525,8 @@ const Index = () => {
                         <TrainingCardEditable items={trainingHours} />
                       </div>
                     </div>
+                  )}
+                    </>
                   )}
                 </TabsContent>
               );

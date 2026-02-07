@@ -30,10 +30,11 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Trash2, Shield, Loader2, UserPlus, ShieldCheck, ShieldOff } from "lucide-react";
+import { ArrowLeft, Trash2, Shield, Loader2, UserPlus, ShieldCheck, ShieldOff, Eye } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { TabPermissionsDialog } from "@/components/dashboard/TabPermissionsDialog";
 
 interface User {
   id: string;
@@ -48,6 +49,7 @@ export default function Admin() {
   const { isAdmin, isLoading: isRoleLoading } = useUserRole();
   const queryClient = useQueryClient();
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userForPermissions, setUserForPermissions] = useState<User | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
@@ -295,6 +297,18 @@ export default function Admin() {
                         : "Nunca"}
                     </TableCell>
                     <TableCell className="text-right space-x-1">
+                      {/* Tab Permissions Button - only for non-admin users */}
+                      {u.role !== "admin" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => setUserForPermissions(u)}
+                          title="Gerenciar permissões de abas"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -361,6 +375,14 @@ export default function Admin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Tab Permissions Dialog */}
+      <TabPermissionsDialog
+        open={!!userForPermissions}
+        onOpenChange={(open) => !open && setUserForPermissions(null)}
+        userId={userForPermissions?.id || null}
+        userEmail={userForPermissions?.email || ""}
+      />
     </div>
   );
 }
