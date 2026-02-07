@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, X, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight, Briefcase } from "lucide-react";
+import { Menu, X, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight, Briefcase, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import type { MetricCategory } from "@/hooks/useMetrics";
+import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import asfLogo from "@/assets/asf-logo.png";
 
 interface MobileDrawerProps {
@@ -36,10 +37,13 @@ const variantStyles: Record<string, string> = {
 
 export function MobileDrawer({ activeTab, onTabChange, categoryMetricsCounts }: MobileDrawerProps) {
   const [open, setOpen] = useState(false);
+  const { hasTabAccess } = useUserTabPermissions();
 
   const handleTabClick = (tab: MetricCategory) => {
-    onTabChange(tab);
-    setOpen(false);
+    if (hasTabAccess(tab)) {
+      onTabChange(tab);
+      setOpen(false);
+    }
   };
 
   return (
@@ -77,36 +81,45 @@ export function MobileDrawer({ activeTab, onTabChange, categoryMetricsCounts }: 
               const Icon = category.icon;
               const isActive = activeTab === category.id;
               const count = categoryMetricsCounts[category.id] || 0;
+              const canAccess = hasTabAccess(category.id);
               
               return (
                 <button
                   key={category.id}
                   onClick={() => handleTabClick(category.id)}
+                  disabled={!canAccess}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left",
-                    isActive 
+                    !canAccess && "opacity-50 cursor-not-allowed",
+                    isActive && canAccess
                       ? "bg-primary/10 text-foreground" 
-                      : "hover:bg-muted/50 text-muted-foreground"
+                      : canAccess 
+                        ? "hover:bg-muted/50 text-muted-foreground"
+                        : "text-muted-foreground"
                   )}
                 >
                   <div className={cn(
                     "flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0",
                     variantStyles[category.variant]
                   )}>
-                    <Icon className="h-4 w-4" />
+                    {canAccess ? (
+                      <Icon className="h-4 w-4" />
+                    ) : (
+                      <Lock className="h-4 w-4" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn(
                       "text-sm font-medium truncate",
-                      isActive && "text-foreground"
+                      isActive && canAccess && "text-foreground"
                     )}>
                       {category.title}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {count} indicadores
+                      {canAccess ? `${count} indicadores` : "Acesso restrito"}
                     </p>
                   </div>
-                  {isActive && (
+                  {isActive && canAccess && (
                     <ChevronRight className="h-4 w-4 text-primary flex-shrink-0" />
                   )}
                 </button>
