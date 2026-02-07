@@ -1,4 +1,4 @@
-import { useRef, useState, ReactNode, forwardRef } from "react";
+import { useRef, useState, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -10,16 +10,13 @@ interface SwipeableTabsProps<T extends string> {
   className?: string;
 }
 
-function SwipeableTabsInner<T extends string>(
-  { 
-    tabs, 
-    activeTab, 
-    onTabChange, 
-    children,
-    className 
-  }: SwipeableTabsProps<T>,
-  ref: React.ForwardedRef<HTMLDivElement>
-) {
+export function SwipeableTabs<T extends string>({ 
+  tabs, 
+  activeTab, 
+  onTabChange, 
+  children,
+  className 
+}: SwipeableTabsProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -54,17 +51,17 @@ function SwipeableTabsInner<T extends string>(
       onTabChange(tabs[currentIndex - 1]);
     }
     
-    touchStart && setTouchStart(null);
-    touchEnd && setTouchEnd(null);
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   if (!isMobile) {
-    return <div ref={ref} className={className}>{children}</div>;
+    return <div className={className}>{children}</div>;
   }
 
   return (
     <div 
-      ref={ref || containerRef}
+      ref={containerRef}
       className={cn("touch-pan-y", className)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -90,7 +87,3 @@ function SwipeableTabsInner<T extends string>(
     </div>
   );
 }
-
-export const SwipeableTabs = forwardRef(SwipeableTabsInner) as <T extends string>(
-  props: SwipeableTabsProps<T> & { ref?: React.ForwardedRef<HTMLDivElement> }
-) => ReturnType<typeof SwipeableTabsInner>;
