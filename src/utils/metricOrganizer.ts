@@ -16,6 +16,12 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo"], order: 5 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
+  execucao_comercial: [
+    { name: "Pipeline de Vendas", keywords: ["Pipeline", "Leads", "Oportunidades"], order: 1 },
+    { name: "Conversão", keywords: ["Conversão", "Taxa de Fechamento", "Win Rate"], order: 2 },
+    { name: "Metas Comerciais", keywords: ["Meta", "Cumprimento"], order: 3 },
+    { name: "Outros Indicadores", keywords: [], order: 99 },
+  ],
   experiencia_cliente: [
     { name: "Contratos - Empresarial", keywords: ["Contratos Empresarial"], order: 1 },
     { name: "Contratos - Tributário", keywords: ["Contratos Tributário"], order: 2 },

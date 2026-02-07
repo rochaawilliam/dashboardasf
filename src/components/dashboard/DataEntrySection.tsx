@@ -1,4 +1,4 @@
-import { FileSpreadsheet, Upload, History, ChevronDown } from "lucide-react";
+import { FileSpreadsheet, Upload, History, ChevronDown, Target } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,16 +9,19 @@ import {
 import { DataEntryModal } from "./DataEntryModal";
 import { BulkDataEntry } from "./BulkDataEntry";
 import { MetricHistoryModal } from "./MetricHistoryModal";
+import { MetricCardEditable } from "./MetricCardEditable";
 import type { Metric, TrainingHours } from "@/hooks/useMetrics";
 import { cn } from "@/lib/utils";
 
 interface DataEntrySectionProps {
   metrics: Metric[];
   trainingHours?: TrainingHours[];
+  showGoalEditor?: boolean;
 }
 
-export function DataEntrySection({ metrics, trainingHours }: DataEntrySectionProps) {
+export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true }: DataEntrySectionProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showGoals, setShowGoals] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4 sm:mb-6 print:hidden">
@@ -32,7 +35,7 @@ export function DataEntrySection({ metrics, trainingHours }: DataEntrySectionPro
             <div className="text-left">
               <span className="text-sm sm:text-base font-semibold">Central de Lançamentos</span>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">
-                Entrada de dados, importação em massa e histórico
+                Entrada de dados, importação em massa, histórico e ajuste de metas
               </p>
             </div>
           </div>
@@ -42,34 +45,34 @@ export function DataEntrySection({ metrics, trainingHours }: DataEntrySectionPro
       
       <CollapsibleContent className="mt-2 sm:mt-3">
         <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3">
             {/* Single Entry */}
-            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 sm:p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
-              <div className="sm:mb-3">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
+              <div className="sm:mb-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Upload className="h-4 w-4 text-primary" />
                 </div>
               </div>
               <div className="flex-1 sm:flex-none">
-                <h4 className="font-medium text-xs sm:text-sm mb-0.5 sm:mb-1">Lançamento Individual</h4>
-                <p className="text-[10px] sm:text-xs text-muted-foreground sm:mb-3 hidden sm:block">
-                  Insira valores para uma métrica específica
+                <h4 className="font-medium text-xs mb-0.5">Lançamento Individual</h4>
+                <p className="text-[10px] text-muted-foreground sm:mb-2 hidden sm:block">
+                  Insira valores para uma métrica
                 </p>
               </div>
               <DataEntryModal metrics={metrics} />
             </div>
             
             {/* Bulk Entry */}
-            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 sm:p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
-              <div className="sm:mb-3">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-accent-foreground" />
+            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
+              <div className="sm:mb-2">
+                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
+                  <FileSpreadsheet className="h-4 w-4 text-accent-foreground" />
                 </div>
               </div>
               <div className="flex-1 sm:flex-none">
-                <h4 className="font-medium text-xs sm:text-sm mb-0.5 sm:mb-1">Lançamento em Massa</h4>
-                <p className="text-[10px] sm:text-xs text-muted-foreground sm:mb-3 hidden sm:block">
-                  Importe múltiplos valores de uma vez
+                <h4 className="font-medium text-xs mb-0.5">Lançamento em Massa</h4>
+                <p className="text-[10px] text-muted-foreground sm:mb-2 hidden sm:block">
+                  Importe múltiplos valores
                 </p>
               </div>
               {trainingHours && (
@@ -78,21 +81,69 @@ export function DataEntrySection({ metrics, trainingHours }: DataEntrySectionPro
             </div>
             
             {/* History */}
-            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 sm:p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
-              <div className="sm:mb-3">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-success/10 flex items-center justify-center">
-                  <History className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+            <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
+              <div className="sm:mb-2">
+                <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
+                  <History className="h-4 w-4 text-success" />
                 </div>
               </div>
               <div className="flex-1 sm:flex-none">
-                <h4 className="font-medium text-xs sm:text-sm mb-0.5 sm:mb-1">Histórico</h4>
-                <p className="text-[10px] sm:text-xs text-muted-foreground sm:mb-3 hidden sm:block">
-                  Visualize e edite lançamentos anteriores
+                <h4 className="font-medium text-xs mb-0.5">Histórico</h4>
+                <p className="text-[10px] text-muted-foreground sm:mb-2 hidden sm:block">
+                  Visualize lançamentos anteriores
                 </p>
               </div>
               <MetricHistoryModal metrics={metrics} />
             </div>
+
+            {/* Goal Editor */}
+            {showGoalEditor && (
+              <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
+                <div className="sm:mb-2">
+                  <div className="h-8 w-8 rounded-full bg-warning/10 flex items-center justify-center">
+                    <Target className="h-4 w-4 text-warning" />
+                  </div>
+                </div>
+                <div className="flex-1 sm:flex-none">
+                  <h4 className="font-medium text-xs mb-0.5">Ajustar Metas</h4>
+                  <p className="text-[10px] text-muted-foreground sm:mb-2 hidden sm:block">
+                    Edite as metas anuais
+                  </p>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant={showGoals ? "default" : "outline"}
+                  className="h-7 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowGoals(!showGoals);
+                  }}
+                >
+                  {showGoals ? "Ocultar" : "Exibir"}
+                </Button>
+              </div>
+            )}
           </div>
+
+          {/* Goal Editor Panel */}
+          {showGoals && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                Ajuste de Metas Anuais
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {metrics.slice(0, 12).map((metric) => (
+                  <MetricCardEditable key={metric.id} metric={metric} />
+                ))}
+              </div>
+              {metrics.length > 12 && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Mostrando 12 de {metrics.length} métricas. Use as abas do dashboard para ver todas.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>

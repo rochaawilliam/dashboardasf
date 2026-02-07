@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, X, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight } from "lucide-react";
+import { Menu, X, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,6 +20,7 @@ interface MobileDrawerProps {
 
 const categories: { id: MetricCategory; title: string; icon: any; variant: string }[] = [
   { id: "lucratividade", title: "Lucratividade", icon: DollarSign, variant: "primary" },
+  { id: "execucao_comercial", title: "Execução Comercial", icon: Briefcase, variant: "accent" },
   { id: "experiencia_cliente", title: "Gestão de Crescimento", icon: Rocket, variant: "accent" },
   { id: "produtividade", title: "Produtividade", icon: Zap, variant: "warning" },
   { id: "gestao_pessoas", title: "Gestão de Pessoas", icon: Users, variant: "success" },

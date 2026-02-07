@@ -66,56 +66,63 @@
 @layer base {
   :root,
   .light {
-    --background: 40 20% 97%;
-    --foreground: 30 10% 15%;
+    /* Cream/Beige theme with golden accents */
+    --background: 40 30% 95%;
+    --foreground: 30 15% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 30 10% 15%;
+    --card: 40 25% 98%;
+    --card-foreground: 30 15% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 10% 15%;
+    --popover: 40 25% 98%;
+    --popover-foreground: 30 15% 20%;
 
-    --primary: 35 50% 45%;
+    /* Gold accent - matching logo */
+    --primary: 42 75% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 15% 92%;
-    --secondary-foreground: 30 10% 15%;
+    --secondary: 40 20% 90%;
+    --secondary-foreground: 30 15% 20%;
 
-    --muted: 40 15% 92%;
-    --muted-foreground: 30 10% 40%;
+    --muted: 40 20% 88%;
+    --muted-foreground: 30 15% 45%;
 
-    --accent: 35 50% 45%;
+    --accent: 42 75% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 50%;
+    --destructive: 42 75% 45%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 142 50% 40%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 70% 50%;
-    --warning-foreground: 30 10% 15%;
+    --warning-foreground: 30 15% 20%;
 
-    --border: 40 15% 85%;
-    --input: 40 15% 85%;
-    --ring: 35 50% 45%;
+    --border: 40 20% 82%;
+    --input: 40 20% 82%;
+    --ring: 42 75% 45%;
 
     --radius: 0.5rem;
 
-    --chart-1: 35 50% 45%;
-    --chart-2: 35 40% 35%;
+    --chart-1: 42 75% 45%;
+    --chart-2: 42 60% 35%;
     --chart-3: 142 50% 40%;
     --chart-4: 38 70% 50%;
-    --chart-5: 0 62% 50%;
+    --chart-5: 42 75% 55%;
 
-    --sidebar-background: 40 20% 95%;
-    --sidebar-foreground: 30 10% 15%;
-    --sidebar-primary: 35 50% 45%;
+    /* Tab colors */
+    --tab-active: 42 75% 45%;
+    --tab-inactive: 40 20% 90%;
+    --tab-hover: 40 25% 85%;
+
+    --sidebar-background: 40 25% 93%;
+    --sidebar-foreground: 30 15% 20%;
+    --sidebar-primary: 42 75% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 15% 90%;
-    --sidebar-accent-foreground: 30 10% 15%;
-    --sidebar-border: 40 15% 85%;
-    --sidebar-ring: 35 50% 45%;
+    --sidebar-accent: 40 20% 88%;
+    --sidebar-accent-foreground: 30 15% 20%;
+    --sidebar-border: 40 20% 82%;
+    --sidebar-ring: 42 75% 45%;
   }
 
   .dark {
