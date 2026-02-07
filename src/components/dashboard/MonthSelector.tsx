@@ -54,11 +54,10 @@ export function MonthSelector({
 
   return (
     <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-card rounded-xl border border-border print:hidden">
-      {/* Year navigation + All Year + Months - full width grid */}
-      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+      {/* Single row: Year selector + All months */}
+      <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground shrink-0">
           <CalendarDays className="h-3.5 w-3.5 text-primary" />
-          <span className="hidden sm:inline">Período</span>
         </div>
         
         {/* Year navigation */}
@@ -72,7 +71,7 @@ export function MonthSelector({
           >
             <ChevronLeft className="h-3 w-3" />
           </Button>
-          <span className="text-xs font-semibold w-10 text-center">{selectedYear}</span>
+          <span className="text-xs font-semibold w-8 text-center">{selectedYear}</span>
           <Button
             variant="ghost"
             size="icon"
@@ -83,45 +82,45 @@ export function MonthSelector({
             <ChevronRight className="h-3 w-3" />
           </Button>
         </div>
-      </div>
 
-      {/* All Year + Month buttons - full width flex */}
-      <div className="flex gap-1">
-        {/* All year button */}
-        <Button
-          variant={selectedMonth === null ? "default" : "outline"}
-          size="sm"
-          onClick={() => onMonthChange(null)}
-          className={cn(
-            "flex-1 h-7 text-[9px] sm:text-[10px] px-0.5",
-            selectedMonth === null && "bg-primary text-primary-foreground"
-          )}
-        >
-          Ano
-        </Button>
-        
-        {/* Month buttons */}
-        {months.map((month) => {
-          const hasData = monthsWithData.has(month.value);
-          const isSelected = selectedMonth === month.value;
+        {/* All Year + Month buttons - fill remaining space */}
+        <div className="flex-1 flex gap-0.5 sm:gap-1">
+          {/* All year button */}
+          <Button
+            variant={selectedMonth === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => onMonthChange(null)}
+            className={cn(
+              "flex-1 h-7 text-[8px] sm:text-[10px] px-0",
+              selectedMonth === null && "bg-primary text-primary-foreground"
+            )}
+          >
+            Ano
+          </Button>
           
-          return (
-            <Button
-              key={month.value}
-              variant={isSelected ? "default" : "outline"}
-              size="sm"
-              onClick={() => onMonthChange(month.value)}
-              className={cn(
-                "flex-1 h-7 text-[9px] sm:text-[10px] px-0.5",
-                isSelected && "bg-primary text-primary-foreground",
-                !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
-                !isSelected && !hasData && "border-border"
-              )}
-            >
-              {month.label}
-            </Button>
-          );
-        })}
+          {/* Month buttons */}
+          {months.map((month) => {
+            const hasData = monthsWithData.has(month.value);
+            const isSelected = selectedMonth === month.value;
+            
+            return (
+              <Button
+                key={month.value}
+                variant={isSelected ? "default" : "outline"}
+                size="sm"
+                onClick={() => onMonthChange(month.value)}
+                className={cn(
+                  "flex-1 h-7 text-[8px] sm:text-[10px] px-0",
+                  isSelected && "bg-primary text-primary-foreground",
+                  !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
+                  !isSelected && !hasData && "border-border"
+                )}
+              >
+                {month.label}
+              </Button>
+            );
+          })}
+        </div>
       </div>
       
       {/* Legend - compact */}
