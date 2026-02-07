@@ -4,6 +4,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { NotificationToggle } from "./NotificationToggle";
+import { TourButton } from "./GuidedTour";
 import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { ReactNode } from "react";
@@ -62,14 +63,17 @@ export function DashboardHeader({
           
           {/* Action buttons */}
           <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-            {metrics && (
-              <NotificationBell 
-                metrics={metrics} 
-                historyData={historyData}
-                selectedYear={selectedYear}
-              />
-            )}
+            <div data-tour="notifications">
+              {metrics && (
+                <NotificationBell 
+                  metrics={metrics} 
+                  historyData={historyData}
+                  selectedYear={selectedYear}
+                />
+              )}
+            </div>
             <NotificationToggle />
+            <TourButton />
             <Link to="/admin">
               <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 border border-border/50" title="Painel Administrativo">
                 <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
