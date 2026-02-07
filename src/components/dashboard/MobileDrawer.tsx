@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import type { MetricCategory } from "@/hooks/useMetrics";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
+import { useAuth } from "@/hooks/useAuth";
 import asfLogo from "@/assets/asf-logo.png";
 
 interface MobileDrawerProps {
@@ -37,7 +38,7 @@ const variantStyles: Record<string, string> = {
 
 export function MobileDrawer({ activeTab, onTabChange, categoryMetricsCounts }: MobileDrawerProps) {
   const [open, setOpen] = useState(false);
-  const { hasTabAccess } = useUserTabPermissions();
+  const { hasTabAccess, isAuthenticated } = useUserTabPermissions();
 
   const handleTabClick = (tab: MetricCategory) => {
     if (hasTabAccess(tab)) {
@@ -116,7 +117,7 @@ export function MobileDrawer({ activeTab, onTabChange, categoryMetricsCounts }: 
                       {category.title}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {canAccess ? `${count} indicadores` : "Acesso restrito"}
+                      {canAccess ? `${count} indicadores` : (!isAuthenticated ? "Faça login" : "Acesso restrito")}
                     </p>
                   </div>
                   {isActive && canAccess && (

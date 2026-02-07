@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { parseISO, format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ import { AutoStartTour } from "@/components/dashboard/GuidedTour";
 import { useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
 import { SyncStatusFooter } from "@/components/dashboard/SyncStatusFooter";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { cn } from "@/lib/utils";
@@ -31,6 +33,7 @@ import {
   Rocket,
   Briefcase,
   Lock,
+  LogIn,
 } from "lucide-react";
 import {
   useMetrics,
@@ -100,7 +103,7 @@ const categoryOrder: MetricCategory[] = [
 const Index = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { allowedTabs, hasTabAccess, isAdmin } = useUserTabPermissions();
+  const { allowedTabs, hasTabAccess, isAdmin, isAuthenticated } = useUserTabPermissions();
   
   const [filters, setFilters] = useState<Filters>({
     period: "quarter",
@@ -460,12 +463,22 @@ const Index = () => {
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                       <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
                       <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                        Acesso Restrito
+                        {!isAuthenticated ? "Faça login para acessar" : "Acesso Restrito"}
                       </h3>
-                      <p className="text-sm text-muted-foreground max-w-md">
-                        Você não tem permissão para visualizar esta aba. 
-                        Entre em contato com o administrador para solicitar acesso.
+                      <p className="text-sm text-muted-foreground max-w-md mb-4">
+                        {!isAuthenticated 
+                          ? "Entre com sua conta para visualizar o conteúdo desta aba."
+                          : "Você não tem permissão para visualizar esta aba. Entre em contato com o administrador para solicitar acesso."
+                        }
                       </p>
+                      {!isAuthenticated && (
+                        <Link to="/login">
+                          <Button className="gap-2">
+                            <LogIn className="h-4 w-4" />
+                            Fazer Login
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   ) : (
                     <>
