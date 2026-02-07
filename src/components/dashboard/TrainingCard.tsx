@@ -14,31 +14,31 @@ export function TrainingCard({ items }: TrainingCardProps) {
   return (
     <div className="metric-card col-span-full lg:col-span-2">
       <div className="flex items-center gap-2 mb-4">
-        <Clock className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-medium text-foreground">
-          Horas de Treinamento
+        <Clock className="h-5 w-5 text-primary" />
+        <h3 className="font-semibold text-foreground">
+          Horas de Treinamento por Colaborador
         </h3>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.map((item) => {
           const progress = (item.hours / item.target) * 100;
           const status = progress >= 100 ? "success" : progress >= 75 ? "warning" : "danger";
           
           return (
-            <div key={item.role} className="bg-muted/30 rounded-xl p-3">
-              <span className="text-xs text-muted-foreground block mb-2">
+            <div key={item.role} className="bg-muted/50 rounded-lg p-4">
+              <span className="text-sm font-medium text-muted-foreground block mb-2">
                 {item.role}
               </span>
               <div className="flex items-baseline gap-1">
-                <span className="text-xl font-semibold text-foreground">
-                  {item.hours}
+                <span className="text-2xl font-bold text-foreground">
+                  {item.hours.toString().padStart(2, "0")}
                 </span>
-                <span className="text-xs text-muted-foreground">/{item.target}h</span>
+                <span className="text-sm text-muted-foreground">hrs</span>
               </div>
-              <div className="mt-2 h-1 rounded-full bg-muted/60 overflow-hidden">
+              <div className="mt-2 progress-bar">
                 <div
-                  className={`h-full rounded-full ${
+                  className={`progress-fill ${
                     status === "success"
                       ? "bg-success"
                       : status === "warning"
@@ -48,6 +48,9 @@ export function TrainingCard({ items }: TrainingCardProps) {
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 />
               </div>
+              <span className="text-xs text-muted-foreground mt-1 block">
+                Meta: {item.target}hrs
+              </span>
             </div>
           );
         })}

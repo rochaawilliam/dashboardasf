@@ -205,19 +205,19 @@ export function MetricCardMonthly({
   return (
     <>
       <div className={cn(
-        "metric-card group relative",
-        status === "danger" && !hasNoData && "ring-1 ring-destructive/30"
+        "metric-card group relative p-3",
+        status === "danger" && !hasNoData && "ring-1 ring-destructive/50"
       )}>
-        {/* Header with name */}
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <span className="text-xs font-medium text-muted-foreground line-clamp-2 flex-1">{metric.name}</span>
+        {/* Header with name and trend */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <span className="metric-label text-[11px] sm:text-xs font-medium line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
                     className={cn(
-                      "flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-medium transition-colors",
+                      "flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium transition-colors",
                       isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
                       isNegativeTrend && "bg-destructive/10 text-destructive hover:bg-destructive/20",
                       trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -244,7 +244,7 @@ export function MetricCardMonthly({
                 variant="ghost"
                 size="sm"
                 onClick={handleStartEdit}
-                className="h-6 w-6 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity rounded-lg"
+                className="h-5 w-5 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 <Edit2 className="h-3 w-3" />
               </Button>
@@ -289,26 +289,52 @@ export function MetricCardMonthly({
           </div>
         ) : (
           <>
-            {/* Main value display - clean and prominent */}
-            <div className="mb-3">
-              {hasNoData ? (
-                <span className="text-muted-foreground text-xs italic">Sem dados</span>
-              ) : (
-                <div className="text-2xl font-semibold tracking-tight text-foreground">
-                  {formatMetricValue(displayValue, metric.unit, metric.name)}
+            {/* Main value and target - compact row layout */}
+            <div className="flex items-end justify-between gap-2 mb-2">
+              {/* Current value - prominent */}
+              <div className="flex-1">
+                {hasNoData ? (
+                  <span className="text-muted-foreground text-[10px] italic">Sem dados</span>
+                ) : (
+                  <div className={cn(
+                    "text-lg sm:text-xl font-bold leading-none",
+                    status === "success" && "text-success",
+                    status === "warning" && "text-warning",
+                    status === "danger" && "text-destructive"
+                  )}>
+                    {formatMetricValue(displayValue, metric.unit, metric.name)}
+                  </div>
+                )}
+                <div className="text-[9px] text-muted-foreground mt-0.5">
+                  {isMonthSelected ? "Lançado" : "Acumulado"}
                 </div>
-              )}
-              <div className="text-[10px] text-muted-foreground mt-0.5">
-                {isMonthSelected ? "Lançado" : "Acumulado"} • Meta: {formatMetricValue(isNonAccumulative ? metric.target_value : (isMonthSelected ? monthlyTarget : metric.target_value), metric.unit, metric.name)}
+              </div>
+              
+              {/* Target - smaller */}
+              <div className="text-right">
+                <div className="text-xs sm:text-sm font-semibold text-primary">
+                  {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                </div>
+                <div className="text-[9px] text-muted-foreground">
+                  Meta {isNonAccumulative ? "" : "Anual"}
+                </div>
               </div>
             </div>
             
-            {/* Progress bar - minimal */}
-            <div className="space-y-2">
-              <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
+            {/* Monthly target - only if accumulative, inline */}
+            {!isNonAccumulative && (
+              <div className="text-[9px] text-muted-foreground mb-2 flex items-center gap-1">
+                <span>Meta mensal:</span>
+                <span className="font-medium">{formatMetricValue(monthlyTarget, metric.unit, metric.name)}</span>
+              </div>
+            )}
+            
+            {/* Compact Progress bar */}
+            <div className="space-y-1">
+              <div className="progress-bar h-1.5 rounded-full bg-muted overflow-hidden">
                 <div
                   className={cn(
-                    "h-full rounded-full transition-all duration-500",
+                    "h-full rounded-full transition-all duration-300",
                     hasNoData ? "bg-muted" : getStatusColor(status)
                   )}
                   style={{ width: `${hasNoData ? 0 : progress}%` }}
@@ -321,10 +347,15 @@ export function MetricCardMonthly({
                   unit={metric.unit}
                   historyData={historyData}
                   selectedYear={selectedYear}
-                  height={16}
-                  className="flex-1 max-w-[50%]"
+                  height={20}
+                  className="flex-1 max-w-[60%]"
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className={cn(
+                  "text-[10px] font-medium",
+                  !hasNoData && status === "success" && "text-success",
+                  !hasNoData && status === "warning" && "text-warning",
+                  !hasNoData && status === "danger" && "text-destructive"
+                )}>
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
               </div>
