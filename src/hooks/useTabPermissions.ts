@@ -55,9 +55,9 @@ export interface TabPermissionSet {
 
 export function useUserTabPermissions() {
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isLoading: roleLoading } = useUserRole();
 
-  const { data: permissions, isLoading } = useQuery({
+  const { data: permissions, isLoading: permissionsLoading } = useQuery({
     queryKey: ["userTabPermissions", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -73,17 +73,24 @@ export function useUserTabPermissions() {
     enabled: !!user?.id,
   });
 
+  // If not logged in, no access to any tab
+  const isAuthenticated = !!user;
+
   // Get tabs that user can view
-  const allowedTabs: TabKey[] = isAdmin 
-    ? ALL_TABS 
-    : [...new Set(permissions?.filter(p => p.permission_type === "view").map(p => p.tab_key as TabKey) || [])];
+  const allowedTabs: TabKey[] = !isAuthenticated 
+    ? [] 
+    : isAdmin 
+      ? ALL_TABS 
+      : [...new Set(permissions?.filter(p => p.permission_type === "view").map(p => p.tab_key as TabKey) || [])];
 
   const hasTabAccess = (tabKey: TabKey, permissionType: PermissionType = "view"): boolean => {
+    if (!isAuthenticated) return false;
     if (isAdmin) return true;
     return permissions?.some(p => p.tab_key === tabKey && p.permission_type === permissionType) || false;
   };
 
   const getTabPermissions = (tabKey: TabKey): TabPermissionSet => {
+    if (!isAuthenticated) return { view: false, edit: false, delete: false };
     if (isAdmin) return { view: true, edit: true, delete: true };
     return {
       view: permissions?.some(p => p.tab_key === tabKey && p.permission_type === "view") || false,
@@ -96,8 +103,9 @@ export function useUserTabPermissions() {
     allowedTabs, 
     hasTabAccess, 
     getTabPermissions,
-    isLoading,
+    isLoading: permissionsLoading || roleLoading,
     isAdmin,
+    isAuthenticated,
   };
 }
 
