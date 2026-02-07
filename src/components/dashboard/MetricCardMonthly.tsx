@@ -86,11 +86,11 @@ const getStatusColor = (status: "success" | "warning" | "danger") => {
 };
 
 const getProgressBorderColor = (progress: number): string => {
-  if (progress <= 35) return "border-l-red-500";
-  if (progress <= 50) return "border-l-orange-500";
-  if (progress <= 70) return "border-l-blue-500";
-  if (progress <= 95) return "border-l-cyan-500";
-  return "border-l-emerald-500";
+  if (progress <= 35) return "#ef4444"; // red-500
+  if (progress <= 50) return "#f97316"; // orange-500
+  if (progress <= 70) return "#3b82f6"; // blue-500
+  if (progress <= 95) return "#06b6d4"; // cyan-500
+  return "#10b981"; // emerald-500
 };
 
 function calculateTrend(
@@ -212,11 +212,13 @@ export function MetricCardMonthly({
 
   return (
     <>
-      <div className={cn(
-        "metric-card group relative p-3 border-l-4",
-        getProgressBorderColor(progress),
-        status === "danger" && !hasNoData && "ring-1 ring-primary/50"
-      )}>
+      <div 
+        className={cn(
+          "metric-card group relative p-3 border-l-4",
+          status === "danger" && !hasNoData && "ring-1 ring-primary/50"
+        )}
+        style={{ borderLeftColor: getProgressBorderColor(progress) }}
+      >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <span className="metric-label text-[11px] sm:text-xs font-medium line-clamp-2 flex-1">{metric.name}</span>
