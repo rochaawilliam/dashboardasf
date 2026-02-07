@@ -28,13 +28,19 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
       <CollapsibleTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4"
+          className={cn(
+            "w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4",
+            isOpen && "bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground"
+          )}
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <FileSpreadsheet className={cn("h-4 w-4 sm:h-5 sm:w-5", isOpen ? "text-primary-foreground" : "text-primary")} />
             <div className="text-left">
-              <span className="text-sm sm:text-base font-semibold">Central de Lançamentos</span>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">
+              <span className="text-sm sm:text-base font-semibold">{isOpen ? "Central de Lançamentos" : "Central de Lançamentos"}</span>
+              <p className={cn(
+                "text-[10px] sm:text-xs mt-0.5 hidden sm:block",
+                isOpen ? "text-primary-foreground/80" : "text-muted-foreground"
+              )}>
                 Entrada de dados, importação em massa, histórico e ajuste de metas
               </p>
             </div>
