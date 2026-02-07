@@ -12,6 +12,8 @@ export type TabKey =
   | "gestao_pessoas" 
   | "aprendizado_crescimento";
 
+export type PermissionType = "view" | "edit" | "delete";
+
 export const ALL_TABS: TabKey[] = [
   "lucratividade",
   "execucao_comercial",
@@ -30,12 +32,25 @@ export const TAB_LABELS: Record<TabKey, string> = {
   aprendizado_crescimento: "Aprendizado e Crescimento",
 };
 
-interface TabPermission {
+export const PERMISSION_LABELS: Record<PermissionType, string> = {
+  view: "Visualizar",
+  edit: "Editar",
+  delete: "Apagar",
+};
+
+export interface TabPermission {
   id: string;
   user_id: string;
   tab_key: string;
+  permission_type: PermissionType;
   created_at: string;
   granted_by: string | null;
+}
+
+export interface TabPermissionSet {
+  view: boolean;
+  edit: boolean;
+  delete: boolean;
 }
 
 export function useUserTabPermissions() {
@@ -58,19 +73,29 @@ export function useUserTabPermissions() {
     enabled: !!user?.id,
   });
 
-  // Admins have access to all tabs
+  // Get tabs that user can view
   const allowedTabs: TabKey[] = isAdmin 
     ? ALL_TABS 
-    : (permissions?.map(p => p.tab_key as TabKey) || []);
+    : [...new Set(permissions?.filter(p => p.permission_type === "view").map(p => p.tab_key as TabKey) || [])];
 
-  const hasTabAccess = (tabKey: TabKey): boolean => {
+  const hasTabAccess = (tabKey: TabKey, permissionType: PermissionType = "view"): boolean => {
     if (isAdmin) return true;
-    return allowedTabs.includes(tabKey);
+    return permissions?.some(p => p.tab_key === tabKey && p.permission_type === permissionType) || false;
+  };
+
+  const getTabPermissions = (tabKey: TabKey): TabPermissionSet => {
+    if (isAdmin) return { view: true, edit: true, delete: true };
+    return {
+      view: permissions?.some(p => p.tab_key === tabKey && p.permission_type === "view") || false,
+      edit: permissions?.some(p => p.tab_key === tabKey && p.permission_type === "edit") || false,
+      delete: permissions?.some(p => p.tab_key === tabKey && p.permission_type === "delete") || false,
+    };
   };
 
   return { 
     allowedTabs, 
     hasTabAccess, 
+    getTabPermissions,
     isLoading,
     isAdmin,
   };
@@ -94,7 +119,7 @@ export function useAllTabPermissions() {
 // Hook for admin to get permissions for a specific user
 export function useUserTabPermissionsForAdmin(userId: string | null) {
   return useQuery({
-    queryKey: ["userTabPermissions", userId],
+    queryKey: ["adminUserTabPermissions", userId],
     queryFn: async () => {
       if (!userId) return [];
       
@@ -110,13 +135,13 @@ export function useUserTabPermissionsForAdmin(userId: string | null) {
   });
 }
 
-// Mutation to update user tab permissions
+// Mutation to update user tab permissions with granular actions
 export function useUpdateTabPermissions() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ userId, tabs }: { userId: string; tabs: TabKey[] }) => {
+    mutationFn: async ({ userId, permissions }: { userId: string; permissions: Record<TabKey, TabPermissionSet> }) => {
       // First, delete all existing permissions for this user
       const { error: deleteError } = await supabase
         .from("user_tab_permissions")
@@ -125,14 +150,38 @@ export function useUpdateTabPermissions() {
       
       if (deleteError) throw deleteError;
 
-      // Then, insert new permissions
-      if (tabs.length > 0) {
-        const newPermissions = tabs.map(tab => ({
-          user_id: userId,
-          tab_key: tab,
-          granted_by: user?.id || null,
-        }));
+      // Build new permissions array
+      const newPermissions: { user_id: string; tab_key: string; permission_type: PermissionType; granted_by: string | null }[] = [];
+      
+      for (const [tabKey, permSet] of Object.entries(permissions)) {
+        if (permSet.view) {
+          newPermissions.push({
+            user_id: userId,
+            tab_key: tabKey,
+            permission_type: "view",
+            granted_by: user?.id || null,
+          });
+        }
+        if (permSet.edit) {
+          newPermissions.push({
+            user_id: userId,
+            tab_key: tabKey,
+            permission_type: "edit",
+            granted_by: user?.id || null,
+          });
+        }
+        if (permSet.delete) {
+          newPermissions.push({
+            user_id: userId,
+            tab_key: tabKey,
+            permission_type: "delete",
+            granted_by: user?.id || null,
+          });
+        }
+      }
 
+      // Insert new permissions
+      if (newPermissions.length > 0) {
         const { error: insertError } = await supabase
           .from("user_tab_permissions")
           .insert(newPermissions);
@@ -141,11 +190,12 @@ export function useUpdateTabPermissions() {
       }
     },
     onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["adminUserTabPermissions", variables.userId] });
       queryClient.invalidateQueries({ queryKey: ["userTabPermissions", variables.userId] });
       queryClient.invalidateQueries({ queryKey: ["allTabPermissions"] });
       toast({
         title: "Permissões atualizadas",
-        description: "As permissões de abas foram salvas com sucesso.",
+        description: "As permissões foram salvas com sucesso.",
       });
     },
     onError: (error: any) => {

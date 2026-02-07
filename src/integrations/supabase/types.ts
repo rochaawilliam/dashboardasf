@@ -201,6 +201,7 @@ export type Database = {
           created_at: string
           granted_by: string | null
           id: string
+          permission_type: string
           tab_key: string
           user_id: string
         }
@@ -208,6 +209,7 @@ export type Database = {
           created_at?: string
           granted_by?: string | null
           id?: string
+          permission_type?: string
           tab_key: string
           user_id: string
         }
@@ -215,6 +217,7 @@ export type Database = {
           created_at?: string
           granted_by?: string | null
           id?: string
+          permission_type?: string
           tab_key?: string
           user_id?: string
         }
