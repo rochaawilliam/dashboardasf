@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, X, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight, Briefcase, Lock } from "lucide-react";
+import { Menu, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight, Briefcase, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/sheet";
 import type { MetricCategory } from "@/hooks/useMetrics";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
-import { useAuth } from "@/hooks/useAuth";
 import asfLogo from "@/assets/asf-logo.png";
 
 interface MobileDrawerProps {
