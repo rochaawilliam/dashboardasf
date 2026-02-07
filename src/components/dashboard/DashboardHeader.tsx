@@ -1,9 +1,10 @@
-import { Shield, LogIn, User } from "lucide-react";
+import { Shield, LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { TourButton } from "./GuidedTour";
 import { UserSettingsPanel } from "./UserSettingsPanel";
+import { UserMenu } from "./UserMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import asfLogo from "@/assets/asf-logo.png";
@@ -72,21 +73,21 @@ export function DashboardHeader({
             </>
           )}
           
-          {/* Login button - always visible */}
-          <Link to="/login">
-            <Button 
-              variant={user ? "ghost" : "default"} 
-              size="icon" 
-              className="h-8 w-8 sm:h-9 sm:w-9"
-              title={user ? `Logado como ${user.email}` : "Entrar"}
-            >
-              {user ? (
-                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              ) : (
+          {/* Login button or User menu */}
+          {user ? (
+            <UserMenu />
+          ) : (
+            <Link to="/login">
+              <Button 
+                variant="default" 
+                size="icon" 
+                className="h-8 w-8 sm:h-9 sm:w-9"
+                title="Entrar"
+              >
                 <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              )}
-            </Button>
-          </Link>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>
