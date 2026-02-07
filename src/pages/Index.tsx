@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { parseISO, format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,8 @@ import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
+import { AutoStartTour } from "@/components/dashboard/GuidedTour";
+import { OfflineIndicator, useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
@@ -97,6 +99,21 @@ const Index = () => {
   const { data: metrics, isLoading: metricsLoading } = useMetrics(filters);
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
+
+  // Offline mode hooks
+  const isOnline = useOnlineStatus();
+  const { cacheMetrics, cacheHistory, getCachedMetrics, getCachedHistory } = useOfflineCache();
+  const { pendingCount, addPendingMutation, clearPendingMutations, getPendingMutations } = usePendingMutations();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Cache data when it loads
+  useEffect(() => {
+    if (metrics) cacheMetrics(metrics);
+  }, [metrics, cacheMetrics]);
+
+  useEffect(() => {
+    if (historyData) cacheHistory(historyData);
+  }, [historyData, cacheHistory]);
 
   // Enable push notifications for metric goal changes
   useMetricNotifications(metrics, historyData, selectedYear);
@@ -247,6 +264,34 @@ const Index = () => {
     }, {} as Record<MetricCategory, typeof historyData>);
   }, [historyData, metrics, selectedYear]);
 
+  // Sync pending mutations when back online
+  const handleSync = useCallback(async () => {
+    if (!isOnline) return;
+    
+    setIsSyncing(true);
+    const pending = getPendingMutations();
+    
+    for (const mutation of pending) {
+      try {
+        if (mutation.action === "insert") {
+          await supabase.from("metric_history").insert(mutation.data);
+        } else if (mutation.action === "update") {
+          await supabase.from("metric_history").update(mutation.data).eq("id", mutation.data.id);
+        }
+      } catch (error) {
+        console.error("Sync failed for mutation:", mutation, error);
+      }
+    }
+    
+    clearPendingMutations();
+    queryClient.invalidateQueries({ queryKey: ["metric_history"] });
+    toast({
+      title: "✅ Sincronização concluída",
+      description: `${pending.length} alteração(ões) sincronizada(s).`,
+    });
+    setIsSyncing(false);
+  }, [isOnline, getPendingMutations, clearPendingMutations, queryClient]);
+
   if (metricsLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -270,42 +315,59 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <PrintStyles />
+      <AutoStartTour />
+      <OfflineIndicator 
+        pendingCount={pendingCount} 
+        onSync={handleSync} 
+        isSyncing={isSyncing} 
+      />
+      
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
-        <DashboardHeader 
-          metrics={adjustedMetrics}
-          historyData={historyData}
-          selectedYear={selectedYear}
-          mobileDrawer={
-            <MobileDrawer 
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              categoryMetricsCounts={categoryMetricsCounts}
-            />
-          }
-        />
+        <div data-tour="header">
+          <DashboardHeader 
+            metrics={adjustedMetrics}
+            historyData={historyData}
+            selectedYear={selectedYear}
+            mobileDrawer={
+              <div data-tour="mobile-menu">
+                <MobileDrawer 
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  categoryMetricsCounts={categoryMetricsCounts}
+                />
+              </div>
+            }
+          />
+        </div>
         
         {/* Data Entry Section */}
         {metrics && (
-          <DataEntrySection 
-            metrics={metrics} 
-            trainingHours={trainingHours} 
-          />
+          <div data-tour="data-entry">
+            <DataEntrySection 
+              metrics={metrics} 
+              trainingHours={trainingHours} 
+            />
+          </div>
         )}
         
-        <FilterBar
-          filters={filters}
-          onFiltersChange={setFilters}
-          onPrint={handlePrint}
-        />
+        <div data-tour="filters">
+          <FilterBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            onPrint={handlePrint}
+          />
+        </div>
         
         {/* Month Selector */}
-        <MonthSelector
-          selectedMonth={selectedMonth}
-          selectedYear={selectedYear}
-          onMonthChange={setSelectedMonth}
-          onYearChange={setSelectedYear}
-          historyData={historyData}
-        />
+        <div data-tour="month-selector">
+          <MonthSelector
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onMonthChange={setSelectedMonth}
+            onYearChange={setSelectedYear}
+            historyData={historyData}
+          />
+        </div>
         
         {/* Months Summary */}
         {historyData && metrics && (
@@ -324,7 +386,7 @@ const Index = () => {
           onTabChange={(tab) => setActiveTab(tab)}
         >
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
-            <TabsList className="w-full grid grid-cols-5 h-auto p-1 sm:p-1.5 bg-muted/40 rounded-lg sm:rounded-xl gap-0.5 sm:gap-1">
+            <TabsList data-tour="category-tabs" className="w-full grid grid-cols-5 h-auto p-1 sm:p-1.5 bg-muted/40 rounded-lg sm:rounded-xl gap-0.5 sm:gap-1">
               {categoryOrder.map((category) => {
                 const config = categoryConfig[category];
                 const Icon = config.icon;
@@ -374,19 +436,23 @@ const Index = () => {
                       <div key={subcat.name} className="mb-4 sm:mb-6">
                         <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
                         <div className="dashboard-grid">
-                          {subcat.metrics.map((metric) => (
-                            <MetricCardMonthly 
-                              key={metric.id} 
-                              metric={metric} 
-                              monthlyValue={monthlyValues[metric.id] ?? null}
-                              isMonthSelected={selectedMonth !== null}
-                              accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                              onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                              isSaving={savingMetricId === metric.id}
-                              selectedMonthName={selectedMonthName}
-                              historyData={historyData}
-                              selectedYear={selectedYear}
-                            />
+                          {subcat.metrics.map((metric, metricIndex) => (
+                            <div 
+                              key={metric.id}
+                              data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
+                            >
+                              <MetricCardMonthly 
+                                metric={metric} 
+                                monthlyValue={monthlyValues[metric.id] ?? null}
+                                isMonthSelected={selectedMonth !== null}
+                                accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                                onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                                isSaving={savingMetricId === metric.id}
+                                selectedMonthName={selectedMonthName}
+                                historyData={historyData}
+                                selectedYear={selectedYear}
+                              />
+                            </div>
                           ))}
                         </div>
                       </div>
