@@ -85,6 +85,14 @@ const getStatusColor = (status: "success" | "warning" | "danger") => {
   }
 };
 
+const getProgressBorderColor = (progress: number): string => {
+  if (progress <= 35) return "border-l-red-500";
+  if (progress <= 50) return "border-l-orange-500";
+  if (progress <= 70) return "border-l-blue-500";
+  if (progress <= 95) return "border-l-cyan-500";
+  return "border-l-emerald-500";
+};
+
 function calculateTrend(
   metricId: string,
   historyData: MetricHistory[]
@@ -205,7 +213,8 @@ export function MetricCardMonthly({
   return (
     <>
       <div className={cn(
-        "metric-card group relative p-3",
+        "metric-card group relative p-3 border-l-4",
+        getProgressBorderColor(progress),
         status === "danger" && !hasNoData && "ring-1 ring-primary/50"
       )}>
         {/* Header with name and trend */}
