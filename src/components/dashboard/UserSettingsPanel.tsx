@@ -8,6 +8,8 @@ import {
   TrendingUp,
   Globe,
   RotateCcw,
+  RefreshCw,
+  Cloud,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,27 +32,36 @@ import {
 } from "@/components/ui/select";
 import { useTheme } from "@/hooks/useTheme";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useTranslationSafe } from "@/hooks/useTranslation";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export function UserSettingsPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const { preferences, updatePreference, resetPreferences } = useUserPreferences();
+  const { preferences, updatePreference, resetPreferences, syncPreferences, isSyncing, lastSyncedAt, isLoggedIn } = useUserPreferences();
+  const { t } = useTranslationSafe();
 
   const handleResetPreferences = () => {
     resetPreferences();
     toast({
-      title: "Preferências restauradas",
-      description: "Todas as configurações foram resetadas para os valores padrão.",
+      title: t.settings.preferencesRestored,
+      description: t.settings.preferencesRestoredDesc,
     });
   };
 
   const handleLanguageChange = (lang: string) => {
     updatePreference("language", lang as "pt-BR" | "en-US" | "es-ES");
     toast({
-      title: "Idioma alterado",
-      description: "O idioma será aplicado em toda a interface.",
+      title: t.settings.languageChanged,
+      description: t.settings.languageChangedDesc,
+    });
+  };
+
+  const handleSync = async () => {
+    await syncPreferences();
+    toast({
+      title: t.offline.syncSuccess,
     });
   };
 
@@ -61,7 +72,7 @@ export function UserSettingsPanel() {
           variant="ghost"
           size="icon"
           className="h-8 w-8 sm:h-9 sm:w-9 border border-border/50"
-          title="Configurações"
+          title={t.settings.title}
         >
           <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </Button>
@@ -70,19 +81,47 @@ export function UserSettingsPanel() {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Configurações
+            {t.settings.title}
           </SheetTitle>
           <SheetDescription>
-            Personalize sua experiência no dashboard
+            {t.settings.description}
           </SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
+          {/* Sync Status */}
+          {isLoggedIn && (
+            <>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2">
+                  <Cloud className="h-4 w-4 text-muted-foreground" />
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">
+                      {lastSyncedAt 
+                        ? `${t.offline.lastSync}: ${lastSyncedAt.toLocaleTimeString()}`
+                        : t.offline.sync
+                      }
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                >
+                  <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                </Button>
+              </div>
+              <Separator />
+            </>
+          )}
+
           {/* Theme Section */}
           <SettingsSection
             icon={theme === "dark" ? Moon : Sun}
-            title="Tema"
-            description="Escolha o modo de visualização"
+            title={t.settings.theme}
+            description={t.settings.themeDescription}
           >
             <div className="flex gap-2">
               <Button
@@ -92,7 +131,7 @@ export function UserSettingsPanel() {
                 className="flex-1"
               >
                 <Sun className="h-4 w-4 mr-2" />
-                Claro
+                {t.settings.light}
               </Button>
               <Button
                 variant={theme === "dark" ? "default" : "outline"}
@@ -101,7 +140,7 @@ export function UserSettingsPanel() {
                 className="flex-1"
               >
                 <Moon className="h-4 w-4 mr-2" />
-                Escuro
+                {t.settings.dark}
               </Button>
             </div>
           </SettingsSection>
@@ -111,37 +150,37 @@ export function UserSettingsPanel() {
           {/* Notifications Section */}
           <SettingsSection
             icon={Bell}
-            title="Notificações"
-            description="Configure alertas e avisos"
+            title={t.settings.notifications}
+            description={t.settings.notificationsDescription}
           >
             <div className="space-y-4">
               <SettingsToggle
                 id="notify-enabled"
-                label="Ativar notificações"
-                description="Receber alertas no navegador"
+                label={t.settings.enableNotifications}
+                description={t.settings.enableNotificationsDesc}
                 checked={preferences.notificationsEnabled}
                 onCheckedChange={(checked) => updatePreference("notificationsEnabled", checked)}
               />
               <SettingsToggle
                 id="notify-goal-reached"
-                label="Meta atingida"
-                description="Avisar quando uma meta for alcançada"
+                label={t.settings.goalReached}
+                description={t.settings.goalReachedDesc}
                 checked={preferences.notifyOnGoalReached}
                 onCheckedChange={(checked) => updatePreference("notifyOnGoalReached", checked)}
                 disabled={!preferences.notificationsEnabled}
               />
               <SettingsToggle
                 id="notify-goal-missed"
-                label="Meta perdida"
-                description="Avisar quando uma meta não for atingida"
+                label={t.settings.goalMissed}
+                description={t.settings.goalMissedDesc}
                 checked={preferences.notifyOnGoalMissed}
                 onCheckedChange={(checked) => updatePreference("notifyOnGoalMissed", checked)}
                 disabled={!preferences.notificationsEnabled}
               />
               <SettingsToggle
                 id="notify-trend-change"
-                label="Mudança de tendência"
-                description="Avisar sobre alterações significativas"
+                label={t.settings.trendChange}
+                description={t.settings.trendChangeDesc}
                 checked={preferences.notifyOnTrendChange}
                 onCheckedChange={(checked) => updatePreference("notifyOnTrendChange", checked)}
                 disabled={!preferences.notificationsEnabled}
@@ -154,35 +193,35 @@ export function UserSettingsPanel() {
           {/* Goals Display Section */}
           <SettingsSection
             icon={Target}
-            title="Exibição de Metas"
-            description="Customize a visualização dos cards"
+            title={t.settings.goalDisplay}
+            description={t.settings.goalDisplayDescription}
           >
             <div className="space-y-4">
               <SettingsToggle
                 id="show-monthly-goals"
-                label="Metas mensais"
-                description="Exibir referência mensal nos cards"
+                label={t.settings.showMonthlyGoals}
+                description={t.settings.showMonthlyGoalsDesc}
                 checked={preferences.showMonthlyGoals}
                 onCheckedChange={(checked) => updatePreference("showMonthlyGoals", checked)}
               />
               <SettingsToggle
                 id="show-annual-goals"
-                label="Metas anuais"
-                description="Exibir meta anual nos cards"
+                label={t.settings.showAnnualGoals}
+                description={t.settings.showAnnualGoalsDesc}
                 checked={preferences.showAnnualGoals}
                 onCheckedChange={(checked) => updatePreference("showAnnualGoals", checked)}
               />
               <SettingsToggle
                 id="show-progress"
-                label="Percentual de progresso"
-                description="Mostrar % de conclusão da meta"
+                label={t.settings.showProgress}
+                description={t.settings.showProgressDesc}
                 checked={preferences.showProgressPercentage}
                 onCheckedChange={(checked) => updatePreference("showProgressPercentage", checked)}
               />
               <SettingsToggle
                 id="show-sparklines"
-                label="Mini gráficos"
-                description="Exibir sparklines nos cards"
+                label={t.settings.showSparklines}
+                description={t.settings.showSparklinesDesc}
                 checked={preferences.showSparklines}
                 onCheckedChange={(checked) => updatePreference("showSparklines", checked)}
               />
@@ -194,20 +233,20 @@ export function UserSettingsPanel() {
           {/* Trends Section */}
           <SettingsSection
             icon={TrendingUp}
-            title="Relatório de Tendências"
-            description="Configure análises e indicadores"
+            title={t.settings.trends}
+            description={t.settings.trendsDescription}
           >
             <div className="space-y-4">
               <SettingsToggle
                 id="show-trend-indicators"
-                label="Indicadores de tendência"
-                description="Mostrar setas de subida/descida"
+                label={t.settings.showTrendIndicators}
+                description={t.settings.showTrendIndicatorsDesc}
                 checked={preferences.showTrendIndicators}
                 onCheckedChange={(checked) => updatePreference("showTrendIndicators", checked)}
               />
               <div className="space-y-2">
                 <Label htmlFor="trend-period" className="text-sm font-medium">
-                  Período de análise
+                  {t.settings.trendPeriod}
                 </Label>
                 <Select
                   value={String(preferences.trendPeriodMonths)}
@@ -217,13 +256,13 @@ export function UserSettingsPanel() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="3">Últimos 3 meses</SelectItem>
-                    <SelectItem value="6">Últimos 6 meses</SelectItem>
-                    <SelectItem value="12">Últimos 12 meses</SelectItem>
+                    <SelectItem value="3">{t.settings.last3Months}</SelectItem>
+                    <SelectItem value="6">{t.settings.last6Months}</SelectItem>
+                    <SelectItem value="12">{t.settings.last12Months}</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Período usado para calcular tendências e comparações
+                  {t.settings.trendPeriodDesc}
                 </p>
               </div>
             </div>
@@ -234,8 +273,8 @@ export function UserSettingsPanel() {
           {/* Language Section */}
           <SettingsSection
             icon={Globe}
-            title="Idioma"
-            description="Selecione o idioma da interface"
+            title={t.settings.language}
+            description={t.settings.languageDescription}
           >
             <Select
               value={preferences.language}
@@ -274,7 +313,7 @@ export function UserSettingsPanel() {
               onClick={handleResetPreferences}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              Restaurar padrões
+              {t.settings.resetDefaults}
             </Button>
           </div>
         </div>
