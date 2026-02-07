@@ -54,33 +54,33 @@ export function MonthSelector({
 
   return (
     <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-card rounded-xl border border-border print:hidden">
-      {/* Header with Year selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
+      {/* Single row with Year, Ano Todo button, and Month buttons */}
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-muted-foreground shrink-0">
           <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-          <span>Período</span>
+          <span className="hidden sm:inline">Período</span>
         </div>
         
         {/* Year navigation */}
-        <div className="flex items-center gap-1 sm:gap-2 bg-muted/50 rounded-lg p-1">
+        <div className="flex items-center gap-0.5 sm:gap-1 bg-muted/50 rounded-lg p-0.5 sm:p-1 shrink-0">
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
+            className="h-6 w-6 sm:h-7 sm:w-7"
             onClick={() => onYearChange(selectedYear - 1)}
             disabled={selectedYear <= years[0]}
           >
-            <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </Button>
-          <span className="text-sm sm:text-base font-semibold w-12 sm:w-14 text-center">{selectedYear}</span>
+          <span className="text-xs sm:text-sm font-semibold w-10 sm:w-12 text-center">{selectedYear}</span>
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
+            className="h-6 w-6 sm:h-7 sm:w-7"
             onClick={() => onYearChange(selectedYear + 1)}
             disabled={selectedYear >= years[years.length - 1]}
           >
-            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </Button>
         </div>
         
@@ -90,53 +90,53 @@ export function MonthSelector({
           size="sm"
           onClick={() => onMonthChange(null)}
           className={cn(
-            "h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm whitespace-nowrap",
+            "h-6 sm:h-7 px-2 sm:px-3 text-[10px] sm:text-xs whitespace-nowrap shrink-0",
             selectedMonth === null && "bg-primary text-primary-foreground"
           )}
         >
           Ano Todo
         </Button>
+        
+        {/* Month selector - inline, scrollable on mobile */}
+        <ScrollArea className="flex-1">
+          <div className="flex items-center gap-0.5 sm:gap-1">
+            {months.map((month) => {
+              const hasData = monthsWithData.has(month.value);
+              const isSelected = selectedMonth === month.value;
+              
+              return (
+                <Button
+                  key={month.value}
+                  variant={isSelected ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onMonthChange(month.value)}
+                  className={cn(
+                    "h-6 sm:h-7 px-1.5 sm:px-2 min-w-[32px] sm:min-w-[38px] text-[9px] sm:text-[11px] flex-shrink-0",
+                    isSelected && "bg-primary text-primary-foreground",
+                    !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
+                    !isSelected && !hasData && "border-border"
+                  )}
+                >
+                  {month.label}
+                  {hasData && !isSelected && (
+                    <Check className="h-2 w-2 ml-0.5" />
+                  )}
+                </Button>
+              );
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" className="h-1" />
+        </ScrollArea>
       </div>
       
-      {/* Month selector - scrollable on mobile */}
-      <ScrollArea className="w-full">
-        <div className="flex items-center gap-1 sm:gap-1.5 pb-2">
-          {months.map((month) => {
-            const hasData = monthsWithData.has(month.value);
-            const isSelected = selectedMonth === month.value;
-            
-            return (
-              <Button
-                key={month.value}
-                variant={isSelected ? "default" : "outline"}
-                size="sm"
-                onClick={() => onMonthChange(month.value)}
-                className={cn(
-                  "h-7 sm:h-8 px-2 sm:px-3 min-w-[36px] sm:min-w-[42px] text-[10px] sm:text-xs flex-shrink-0",
-                  isSelected && "bg-primary text-primary-foreground",
-                  !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
-                  !isSelected && !hasData && "border-border"
-                )}
-              >
-                {month.label}
-                {hasData && !isSelected && (
-                  <Check className="h-2 w-2 sm:h-2.5 sm:w-2.5 ml-0.5" />
-                )}
-              </Button>
-            );
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" className="h-1.5" />
-      </ScrollArea>
-      
-      {/* Legend - compact on mobile */}
-      <div className="flex flex-wrap gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3">
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded border border-success/50 bg-success/10" />
+      {/* Legend - compact */}
+      <div className="flex flex-wrap gap-2 sm:gap-4 text-[9px] sm:text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-success/50 bg-success/10" />
           <span>Com lançamentos</span>
         </div>
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded border border-border bg-transparent" />
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-border bg-transparent" />
           <span>Sem lançamentos</span>
         </div>
       </div>
