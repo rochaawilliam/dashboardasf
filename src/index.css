@@ -126,11 +126,11 @@
   }
 
   .dark {
-    /* Microsoft Fluent Dark Theme inspired palette */
-    --background: 0 0% 8%;
+    /* Pure black background dark theme */
+    --background: 0 0% 0%;
     --foreground: 0 0% 95%;
 
-    --card: 0 0% 11%;
+    --card: 0 0% 6%;
     --card-foreground: 0 0% 95%;
 
     --popover: 0 0% 13%;
@@ -167,7 +167,7 @@
     --tab-inactive: 0 0% 15%;
     --tab-hover: 0 0% 20%;
 
-    --sidebar-background: 0 0% 7%;
+    --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 42 75% 55%;
     --sidebar-primary-foreground: 0 0% 7%;

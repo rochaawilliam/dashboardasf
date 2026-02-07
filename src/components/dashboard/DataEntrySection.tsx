@@ -28,23 +28,24 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
         <Button 
           variant="outline" 
           className={cn(
-            "w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4",
-            isOpen && "bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground"
+            "w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4 border-2",
+            "bg-gradient-to-r from-amber-500/90 to-yellow-500/90 text-white border-amber-400/50",
+            "hover:from-amber-500 hover:to-yellow-500 hover:border-amber-400",
+            "dark:from-amber-600/90 dark:to-yellow-600/90 dark:border-amber-500/50",
+            "dark:hover:from-amber-600 dark:hover:to-yellow-600",
+            "shadow-md hover:shadow-lg transition-all"
           )}
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <FileSpreadsheet className={cn("h-4 w-4 sm:h-5 sm:w-5", isOpen ? "text-primary-foreground" : "text-primary")} />
+            <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             <div className="text-left">
-              <span className="text-sm sm:text-base font-semibold">{isOpen ? "Central de Lançamentos" : "Central de Lançamentos"}</span>
-              <p className={cn(
-                "text-[10px] sm:text-xs mt-0.5 hidden sm:block",
-                isOpen ? "text-primary-foreground/80" : "text-muted-foreground"
-              )}>
+              <span className="text-sm sm:text-base font-semibold text-white">Central de Lançamentos</span>
+              <p className="text-[10px] sm:text-xs mt-0.5 hidden sm:block text-white/80">
                 Entrada de dados, histórico e ajuste de metas
               </p>
             </div>
           </div>
-          <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+          <ChevronDown className={cn("h-4 w-4 text-white transition-transform", isOpen && "rotate-180")} />
         </Button>
       </CollapsibleTrigger>
       
