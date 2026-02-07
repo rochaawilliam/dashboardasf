@@ -85,15 +85,15 @@ export function MonthSelector({
         </div>
       </div>
 
-      {/* All Year + Month buttons - full width */}
-      <div className="grid grid-cols-13 gap-1">
+      {/* All Year + Month buttons - full width flex */}
+      <div className="flex gap-1">
         {/* All year button */}
         <Button
           variant={selectedMonth === null ? "default" : "outline"}
           size="sm"
           onClick={() => onMonthChange(null)}
           className={cn(
-            "h-7 text-[9px] sm:text-[10px] px-1",
+            "flex-1 h-7 text-[9px] sm:text-[10px] px-0.5",
             selectedMonth === null && "bg-primary text-primary-foreground"
           )}
         >
@@ -112,7 +112,7 @@ export function MonthSelector({
               size="sm"
               onClick={() => onMonthChange(month.value)}
               className={cn(
-                "h-7 text-[9px] sm:text-[10px] px-1",
+                "flex-1 h-7 text-[9px] sm:text-[10px] px-0.5",
                 isSelected && "bg-primary text-primary-foreground",
                 !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
                 !isSelected && !hasData && "border-border"
