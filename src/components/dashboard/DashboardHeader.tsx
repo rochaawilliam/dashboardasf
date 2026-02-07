@@ -1,10 +1,9 @@
 import { Calendar, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
-import { NotificationToggle } from "./NotificationToggle";
 import { TourButton } from "./GuidedTour";
+import { UserSettingsPanel } from "./UserSettingsPanel";
 import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { ReactNode } from "react";
@@ -72,14 +71,13 @@ export function DashboardHeader({
                 />
               )}
             </div>
-            <NotificationToggle />
             <TourButton />
+            <UserSettingsPanel />
             <Link to="/admin">
               <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 border border-border/50" title="Painel Administrativo">
                 <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </div>
