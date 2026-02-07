@@ -431,8 +431,8 @@ const Index = () => {
 
             {categoryOrder.map((category) => {
               const config = categoryConfig[category];
-              const categoryMetrics = groupedMetrics[category];
-              if (!categoryMetrics) return null;
+              const categoryMetrics = groupedMetrics[category] || [];
+              // Show all categories even without metrics
               
               const categoryHistory = historyByCategory?.[category];
               const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);

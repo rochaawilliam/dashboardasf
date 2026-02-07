@@ -32,7 +32,7 @@ const getStatusColor = (status: "success" | "warning" | "danger") => {
     case "warning":
       return "bg-warning";
     case "danger":
-      return "bg-destructive";
+      return "bg-primary";
   }
 };
 
@@ -43,7 +43,7 @@ const getStatusBg = (status: "success" | "warning" | "danger") => {
     case "warning":
       return "bg-warning/10 text-warning";
     case "danger":
-      return "bg-destructive/10 text-destructive";
+      return "bg-primary/10 text-primary";
   }
 };
 
@@ -82,12 +82,12 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
   return (
     <div className={cn(
       "metric-card group relative",
-      showAlert && status === "danger" && "ring-2 ring-destructive/50 animate-pulse"
+      showAlert && status === "danger" && "ring-2 ring-primary/50 animate-pulse"
     )}>
       {/* Alert indicator */}
       {showAlert && status === "danger" && (
-        <div className="absolute -top-2 -right-2 p-1.5 bg-destructive rounded-full shadow-lg">
-          <AlertTriangle className="h-4 w-4 text-destructive-foreground" />
+        <div className="absolute -top-2 -right-2 p-1.5 bg-primary rounded-full shadow-lg">
+          <AlertTriangle className="h-4 w-4 text-primary-foreground" />
         </div>
       )}
       
@@ -165,7 +165,7 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
             {isAboveTarget ? (
               <TrendingUp className="h-4 w-4 text-success" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive" />
+              <TrendingDown className="h-4 w-4 text-primary" />
             )}
           </div>
         </>
