@@ -14,15 +14,17 @@ import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
+import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
+import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { 
   DollarSign, 
-  Heart, 
   Users, 
   Zap, 
   GraduationCap,
+  Rocket,
 } from "lucide-react";
 import {
   useMetrics,
@@ -32,7 +34,6 @@ import {
   type MetricCategory,
 } from "@/hooks/useMetrics";
 import { useMetricNotifications } from "@/hooks/useMetricNotifications";
-import { Rocket } from "lucide-react";
 
 const categoryConfig: Record<MetricCategory, { title: string; shortTitle: string; subtitle: string; icon: any; variant: "primary" | "accent" | "success" | "warning" }> = {
   lucratividade: {
@@ -99,6 +100,7 @@ const Index = () => {
 
   // Enable push notifications for metric goal changes
   useMetricNotifications(metrics, historyData, selectedYear);
+  
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
@@ -200,18 +202,29 @@ const Index = () => {
       ...metric,
       current_value: selectedMonth === null 
         ? (accumulatedValues[metric.id] ?? 0)
-        : metric.current_value, // will use monthlyValues in the card
+        : metric.current_value,
     }));
   }, [metrics, selectedMonth, accumulatedValues]);
 
   // Group metrics by category
-  const groupedMetrics = adjustedMetrics.reduce((acc, metric) => {
-    if (!acc[metric.category]) {
-      acc[metric.category] = [];
-    }
-    acc[metric.category].push(metric);
-    return acc;
-  }, {} as Record<MetricCategory, typeof adjustedMetrics>);
+  const groupedMetrics = useMemo(() => {
+    return adjustedMetrics.reduce((acc, metric) => {
+      if (!acc[metric.category]) {
+        acc[metric.category] = [];
+      }
+      acc[metric.category].push(metric);
+      return acc;
+    }, {} as Record<MetricCategory, typeof adjustedMetrics>);
+  }, [adjustedMetrics]);
+
+  // Calculate metrics count per category for mobile drawer
+  const categoryMetricsCounts = useMemo(() => {
+    const counts: Record<MetricCategory, number> = {} as Record<MetricCategory, number>;
+    categoryOrder.forEach((cat) => {
+      counts[cat] = groupedMetrics[cat]?.length || 0;
+    });
+    return counts;
+  }, [groupedMetrics]);
 
   // Group history by category for charts (filter by year)
   const historyByCategory = useMemo(() => {
@@ -262,6 +275,13 @@ const Index = () => {
           metrics={adjustedMetrics}
           historyData={historyData}
           selectedYear={selectedYear}
+          mobileDrawer={
+            <MobileDrawer 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              categoryMetricsCounts={categoryMetricsCounts}
+            />
+          }
         />
         
         {/* Data Entry Section */}
@@ -297,99 +317,105 @@ const Index = () => {
         )}
         
 
-        {/* Category Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
-          <TabsList className="w-full grid grid-cols-5 h-auto p-1 sm:p-1.5 bg-muted/40 rounded-lg sm:rounded-xl gap-0.5 sm:gap-1">
+        {/* Category Tabs with Swipe Support */}
+        <SwipeableTabs<MetricCategory>
+          tabs={categoryOrder}
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab)}
+        >
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
+            <TabsList className="w-full grid grid-cols-5 h-auto p-1 sm:p-1.5 bg-muted/40 rounded-lg sm:rounded-xl gap-0.5 sm:gap-1">
+              {categoryOrder.map((category) => {
+                const config = categoryConfig[category];
+                const Icon = config.icon;
+                const categoryMetricsCount = groupedMetrics[category]?.length || 0;
+                
+                return (
+                  <TabsTrigger
+                    key={category}
+                    value={category}
+                    className="flex flex-col items-center gap-0.5 sm:gap-1 py-2 sm:py-3 px-1 sm:px-2 rounded-md sm:rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                  >
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-[9px] sm:text-xs font-medium text-center leading-tight hidden xs:block sm:block">
+                      {config.shortTitle}
+                    </span>
+                    <span className="text-[8px] sm:text-[10px] bg-muted/70 px-1 sm:px-1.5 py-0.5 rounded-full font-medium">
+                      {categoryMetricsCount}
+                    </span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+
             {categoryOrder.map((category) => {
               const config = categoryConfig[category];
-              const Icon = config.icon;
-              const categoryMetricsCount = groupedMetrics[category]?.length || 0;
+              const categoryMetrics = groupedMetrics[category];
+              if (!categoryMetrics) return null;
+              
+              const categoryHistory = historyByCategory?.[category];
+              const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
               
               return (
-                <TabsTrigger
-                  key={category}
-                  value={category}
-                  className="flex flex-col items-center gap-0.5 sm:gap-1 py-2 sm:py-3 px-1 sm:px-2 rounded-md sm:rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-[9px] sm:text-xs font-medium text-center leading-tight hidden xs:block sm:block">
-                    {config.shortTitle}
-                  </span>
-                  <span className="text-[8px] sm:text-[10px] bg-muted/70 px-1 sm:px-1.5 py-0.5 rounded-full font-medium">
-                    {categoryMetricsCount}
-                  </span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          {categoryOrder.map((category) => {
-            const config = categoryConfig[category];
-            const categoryMetrics = groupedMetrics[category];
-            if (!categoryMetrics) return null;
-            
-            const categoryHistory = historyByCategory?.[category];
-            const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
-            
-            return (
-              <TabsContent key={category} value={category} className="mt-6">
-                <SectionHeader
-                  title={config.title}
-                  subtitle={config.subtitle}
-                  icon={config.icon}
-                  variant={config.variant}
-                />
-                
-                {/* Render subcategories */}
-                {organizedSubcategories.map((subcat) => {
-                  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                  const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                <TabsContent key={category} value={category} className="mt-4 sm:mt-6">
+                  <SectionHeader
+                    title={config.title}
+                    subtitle={config.subtitle}
+                    icon={config.icon}
+                    variant={config.variant}
+                  />
                   
-                  return (
-                    <div key={subcat.name} className="mb-6">
-                      <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                  {/* Render subcategories */}
+                  {organizedSubcategories.map((subcat) => {
+                    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                    const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                    
+                    return (
+                      <div key={subcat.name} className="mb-4 sm:mb-6">
+                        <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                        <div className="dashboard-grid">
+                          {subcat.metrics.map((metric) => (
+                            <MetricCardMonthly 
+                              key={metric.id} 
+                              metric={metric} 
+                              monthlyValue={monthlyValues[metric.id] ?? null}
+                              isMonthSelected={selectedMonth !== null}
+                              accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                              onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                              isSaving={savingMetricId === metric.id}
+                              selectedMonthName={selectedMonthName}
+                              historyData={historyData}
+                              selectedYear={selectedYear}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Chart for this category */}
+                  {categoryHistory && categoryHistory.length > 0 && metrics && (
+                    <MetricChart
+                      data={categoryHistory}
+                      metrics={metrics}
+                      title={`Evolução - ${config.title} (${selectedYear})`}
+                    />
+                  )}
+
+                  {/* Training Hours - only in aprendizado_crescimento tab */}
+                  {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 && (
+                    <div className="mt-4 sm:mt-6">
+                      <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
                       <div className="dashboard-grid">
-                        {subcat.metrics.map((metric) => (
-                          <MetricCardMonthly 
-                            key={metric.id} 
-                            metric={metric} 
-                            monthlyValue={monthlyValues[metric.id] ?? null}
-                            isMonthSelected={selectedMonth !== null}
-                            accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                            onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                            isSaving={savingMetricId === metric.id}
-                            selectedMonthName={selectedMonthName}
-                            historyData={historyData}
-                            selectedYear={selectedYear}
-                          />
-                        ))}
+                        <TrainingCardEditable items={trainingHours} />
                       </div>
                     </div>
-                  );
-                })}
-                
-                {/* Chart for this category */}
-                {categoryHistory && categoryHistory.length > 0 && metrics && (
-                  <MetricChart
-                    data={categoryHistory}
-                    metrics={metrics}
-                    title={`Evolução - ${config.title} (${selectedYear})`}
-                  />
-                )}
-
-                {/* Training Hours - only in aprendizado_crescimento tab */}
-                {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 && (
-                  <div className="mt-6">
-                    <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
-                    <div className="dashboard-grid">
-                      <TrainingCardEditable items={trainingHours} />
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-            );
-          })}
-        </Tabs>
+                  )}
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+        </SwipeableTabs>
       </div>
     </div>
   );

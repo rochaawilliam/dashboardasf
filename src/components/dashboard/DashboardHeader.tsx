@@ -6,14 +6,21 @@ import { NotificationBell } from "./NotificationBell";
 import { NotificationToggle } from "./NotificationToggle";
 import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
+import { ReactNode } from "react";
 
 interface DashboardHeaderProps {
   metrics?: Metric[];
   historyData?: MetricHistory[];
   selectedYear?: number;
+  mobileDrawer?: ReactNode;
 }
 
-export function DashboardHeader({ metrics, historyData, selectedYear = new Date().getFullYear() }: DashboardHeaderProps) {
+export function DashboardHeader({ 
+  metrics, 
+  historyData, 
+  selectedYear = new Date().getFullYear(),
+  mobileDrawer 
+}: DashboardHeaderProps) {
   const currentDate = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     year: "numeric",
@@ -26,6 +33,9 @@ export function DashboardHeader({ metrics, historyData, selectedYear = new Date(
       <div className="flex flex-col gap-4 sm:gap-6">
         {/* Logo and Title */}
         <div className="flex items-center gap-3 sm:gap-5">
+          {/* Mobile drawer trigger */}
+          {mobileDrawer}
+          
           <img 
             src={asfLogo} 
             alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
