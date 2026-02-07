@@ -162,10 +162,10 @@ export function MetricCardMonthly({
   
   const getTrendIcon = () => {
     if (trend === "up") {
-      return <TrendingUp className={cn("h-3 w-3", isPositiveTrend ? "text-success" : "text-destructive")} />;
+      return <TrendingUp className={cn("h-3 w-3", isPositiveTrend ? "text-success" : "text-primary")} />;
     }
     if (trend === "down") {
-      return <TrendingDown className={cn("h-3 w-3", isNegativeTrend ? "text-destructive" : "text-success")} />;
+      return <TrendingDown className={cn("h-3 w-3", isNegativeTrend ? "text-primary" : "text-success")} />;
     }
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
@@ -206,7 +206,7 @@ export function MetricCardMonthly({
     <>
       <div className={cn(
         "metric-card group relative p-3",
-        status === "danger" && !hasNoData && "ring-1 ring-destructive/50"
+        status === "danger" && !hasNoData && "ring-1 ring-primary/50"
       )}>
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-2 mb-2">
@@ -219,7 +219,7 @@ export function MetricCardMonthly({
                     className={cn(
                       "flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium transition-colors",
                       isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
-                      isNegativeTrend && "bg-destructive/10 text-destructive hover:bg-destructive/20",
+                      isNegativeTrend && "bg-primary/10 text-primary hover:bg-primary/20",
                       trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
                     )}
                   >
@@ -296,12 +296,7 @@ export function MetricCardMonthly({
                 {hasNoData ? (
                   <span className="text-muted-foreground text-[10px] italic">Sem dados</span>
                 ) : (
-                  <div className={cn(
-                    "text-lg sm:text-xl font-bold leading-none",
-                    status === "success" && "text-success",
-                    status === "warning" && "text-warning",
-                    status === "danger" && "text-destructive"
-                  )}>
+                  <div className="text-lg sm:text-xl font-bold leading-none text-primary">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
@@ -350,12 +345,7 @@ export function MetricCardMonthly({
                   height={20}
                   className="flex-1 max-w-[60%]"
                 />
-                <span className={cn(
-                  "text-[10px] font-medium",
-                  !hasNoData && status === "success" && "text-success",
-                  !hasNoData && status === "warning" && "text-warning",
-                  !hasNoData && status === "danger" && "text-destructive"
-                )}>
+                <span className="text-[10px] font-medium text-primary">
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
               </div>

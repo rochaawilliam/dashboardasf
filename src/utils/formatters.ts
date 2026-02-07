@@ -35,32 +35,32 @@ export function formatPercent(value: number, decimals: number = 2): string {
  * Format a metric value with its unit in Brazilian format
  */
 export function formatMetricValue(value: number, unit: string, metricName?: string): string {
-  // Determine decimal places based on value magnitude
-  let decimals = Math.abs(value) >= 1000 ? 0 : 2;
+  // Check if this is a financial metric (uses decimals)
+  const isFinancial = unit === "R$" || 
+                      unit.toLowerCase().includes("real") || 
+                      unit.toLowerCase().includes("reais");
   
-  // Check if this is a contract metric (always integers)
-  const isContract = metricName?.toLowerCase().includes("contrato") || 
-                     unit.toLowerCase().includes("contrato") ||
-                     unit.toLowerCase() === "un" ||
-                     unit.toLowerCase() === "unidades";
+  // Default: no decimals unless financial
+  let decimals = isFinancial ? 2 : 0;
   
-  if (isContract) {
+  // For large financial values, remove decimals
+  if (isFinancial && Math.abs(value) >= 1000) {
     decimals = 0;
   }
   
   // Currency units
-  if (unit === "R$" || unit.toLowerCase().includes("real") || unit.toLowerCase().includes("reais")) {
+  if (isFinancial) {
     return formatCurrency(value, decimals);
   }
   
-  // Percentage units
+  // Percentage units - no decimals
   if (unit === "%" || unit.toLowerCase().includes("percent")) {
-    return formatPercent(value, decimals);
+    return formatPercent(value, 0);
   }
   
-  // Points/Score units
+  // Points/Score units - no decimals
   if (unit.toLowerCase().includes("pts") || unit.toLowerCase().includes("ponto")) {
-    return `${formatNumber(value, decimals)} pts`;
+    return `${formatNumber(value, 0)} pts`;
   }
   
   // Days units
@@ -78,13 +78,8 @@ export function formatMetricValue(value: number, unit: string, metricName?: stri
     return `${formatNumber(value, 0)} meses`;
   }
   
-  // Contract units (integer)
-  if (isContract) {
-    return `${formatNumber(value, 0)}`;
-  }
-  
-  // Generic number with unit
-  return `${formatNumber(value, decimals)}${unit ? ` ${unit}` : ""}`;
+  // Generic number with unit - no decimals
+  return `${formatNumber(value, 0)}${unit ? ` ${unit}` : ""}`;
 }
 
 /**
