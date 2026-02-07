@@ -17,9 +17,10 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   execucao_comercial: [
-    { name: "Pipeline de Vendas", keywords: ["Pipeline", "Leads", "Oportunidades"], order: 1 },
-    { name: "Conversão", keywords: ["Conversão", "Taxa de Fechamento", "Win Rate"], order: 2 },
-    { name: "Metas Comerciais", keywords: ["Meta", "Cumprimento"], order: 3 },
+    { name: "Alcance e Impressões", keywords: ["impressões", "alcance", "conversas iniciadas"], order: 1 },
+    { name: "Geração de Leads", keywords: ["Leads"], order: 2 },
+    { name: "Reuniões Agendadas", keywords: ["Reuniões agendadas"], order: 3 },
+    { name: "Propostas Elaboradas", keywords: ["Propostas elaboradas"], order: 4 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   experiencia_cliente: [

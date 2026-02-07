@@ -9,7 +9,7 @@ import {
 import { DataEntryModal } from "./DataEntryModal";
 import { BulkDataEntry } from "./BulkDataEntry";
 import { MetricHistoryModal } from "./MetricHistoryModal";
-import { MetricCardEditable } from "./MetricCardEditable";
+import { MetricGoalEditor } from "./MetricGoalEditor";
 import type { Metric, TrainingHours } from "@/hooks/useMetrics";
 import { cn } from "@/lib/utils";
 
@@ -132,16 +132,11 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
                 <Target className="h-4 w-4 text-primary" />
                 Ajuste de Metas Anuais
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {metrics.slice(0, 12).map((metric) => (
-                  <MetricCardEditable key={metric.id} metric={metric} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
+                {metrics.map((metric) => (
+                  <MetricGoalEditor key={metric.id} metric={metric} />
                 ))}
               </div>
-              {metrics.length > 12 && (
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Mostrando 12 de {metrics.length} métricas. Use as abas do dashboard para ver todas.
-                </p>
-              )}
             </div>
           )}
         </div>
