@@ -38,7 +38,6 @@ interface MetricCardMonthlyProps {
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
 
 // Metrics where annual target = monthly target (averages, rates, percentages)
-// These are metrics that don't accumulate over time
 const nonAccumulativeKeywords = [
   "Ticket Médio",
   "Margem",
@@ -58,11 +57,9 @@ const nonAccumulativeKeywords = [
 ];
 
 function isNonAccumulativeMetric(name: string, unit: string): boolean {
-  // Check if unit is percentage
   if (unit === "%" || unit.toLowerCase().includes("percent")) {
     return true;
   }
-  // Check if name contains any non-accumulative keyword
   return nonAccumulativeKeywords.some(keyword => 
     name.toLowerCase().includes(keyword.toLowerCase())
   );
@@ -89,7 +86,6 @@ const getStatusColor = (status: "success" | "warning" | "danger") => {
   }
 };
 
-// Calculate trend from history
 function calculateTrend(
   metricId: string,
   historyData: MetricHistory[]
@@ -141,19 +137,12 @@ export function MetricCardMonthly({
   const isInverse = inverseMetrics.includes(metric.name);
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
   
-  // Calculate trend
   const { trend, percent: trendPercent, monthsCount } = calculateTrend(metric.id, historyData);
   const hasTrend = trend !== "unknown" && monthsCount >= 2;
   
-  // For non-accumulative metrics, monthly target = annual target
-  // For accumulative metrics, monthly target = annual target / 12
   const monthlyTarget = isNonAccumulative ? metric.target_value : metric.target_value / 12;
-  
-  // For non-accumulative metrics: use average instead of sum
-  // For display: use monthlyValue if month selected, otherwise calculate appropriately
   const displayValue = isMonthSelected ? (monthlyValue ?? 0) : accumulatedValue;
   
-  // For non-accumulative metrics, target is always the same (monthly = annual)
   const targetForProgress = isNonAccumulative 
     ? metric.target_value 
     : (isMonthSelected ? monthlyTarget : metric.target_value);
@@ -169,7 +158,6 @@ export function MetricCardMonthly({
 
   const hasNoData = isMonthSelected && monthlyValue === null;
   
-  // Trend styling
   const isPositiveTrend = isInverse ? trend === "down" : trend === "up";
   const isNegativeTrend = isInverse ? trend === "up" : trend === "down";
   
@@ -222,18 +210,17 @@ export function MetricCardMonthly({
         status === "danger" && !hasNoData && "ring-2 ring-destructive/50"
       )}>
         {/* Header */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-2 sm:mb-3">
           <div className="flex-1 min-w-0">
-            <span className="metric-label text-sm font-medium line-clamp-2">{metric.name}</span>
+            <span className="metric-label text-xs sm:text-sm font-medium line-clamp-2">{metric.name}</span>
           </div>
           <div className="flex items-center gap-1 ml-2">
-            {/* Trend indicator */}
             {hasTrend && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
                     className={cn(
-                      "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium transition-colors",
+                      "flex items-center gap-0.5 px-1 sm:px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium transition-colors",
                       isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
                       isNegativeTrend && "bg-destructive/10 text-destructive hover:bg-destructive/20",
                       trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -260,7 +247,7 @@ export function MetricCardMonthly({
                 variant="ghost"
                 size="sm"
                 onClick={handleStartEdit}
-                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 <Edit2 className="h-3 w-3" />
               </Button>
@@ -270,26 +257,26 @@ export function MetricCardMonthly({
         
         {/* Editing mode */}
         {isEditing ? (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center gap-2">
               <Input
                 type="number"
                 step="0.01"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="h-9"
+                className="h-8 sm:h-9 text-sm"
                 autoFocus
               />
-              <span className="text-sm text-muted-foreground">{metric.unit}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">{metric.unit}</span>
             </div>
             <div className="flex gap-2">
               <Button
                 size="sm"
                 onClick={handleRequestSave}
                 disabled={isSaving}
-                className="flex-1"
+                className="flex-1 h-8 text-xs sm:text-sm"
               >
-                <Check className="h-4 w-4 mr-1" />
+                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Salvar
               </Button>
               <Button
@@ -297,30 +284,31 @@ export function MetricCardMonthly({
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isSaving}
+                className="h-8"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
         ) : (
           <>
-            {/* Annual target (main goal) */}
-            <div className="mb-3 p-2 rounded-lg bg-muted/50">
-              <div className="text-xs text-muted-foreground mb-1">
-                🎯 Meta {isNonAccumulative ? "(Mensal = Anual)" : "Anual (Objetivo)"}
+            {/* Annual target */}
+            <div className="mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-lg bg-muted/50">
+              <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
+                🎯 Meta {isNonAccumulative ? "(Mensal = Anual)" : "Anual"}
               </div>
-              <div className="text-lg font-bold">
+              <div className="text-base sm:text-lg font-bold">
                 {formatMetricValue(metric.target_value, metric.unit, metric.name)}
               </div>
             </div>
             
-            {/* Monthly target (progress reference) - only show if accumulative */}
+            {/* Monthly target - only show if accumulative */}
             {!isNonAccumulative && (
-              <div className="mb-3">
-                <div className="text-xs text-muted-foreground mb-1">
-                  📊 Meta Mensal (Referência)
+              <div className="mb-2 sm:mb-3">
+                <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
+                  📊 Meta Mensal
                 </div>
-                <div className="text-sm font-medium text-muted-foreground">
+                <div className="text-xs sm:text-sm font-medium text-muted-foreground">
                   {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                 </div>
               </div>
@@ -328,16 +316,16 @@ export function MetricCardMonthly({
             
             {/* Current value */}
             {hasNoData ? (
-              <div className="text-center py-2 mb-3">
-                <span className="text-muted-foreground text-sm italic">Sem lançamento</span>
+              <div className="text-center py-1.5 sm:py-2 mb-2 sm:mb-3">
+                <span className="text-muted-foreground text-xs sm:text-sm italic">Sem lançamento</span>
               </div>
             ) : (
-              <div className="mb-3">
-                <div className="text-xs text-muted-foreground mb-1">
-                  {isMonthSelected ? "📝 Valor Lançado" : "📈 Acumulado no Ano"}
+              <div className="mb-2 sm:mb-3">
+                <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
+                  {isMonthSelected ? "📝 Valor Lançado" : "📈 Acumulado"}
                 </div>
                 <div className={cn(
-                  "text-2xl font-bold",
+                  "text-xl sm:text-2xl font-bold",
                   status === "success" && "text-success",
                   status === "warning" && "text-warning",
                   status === "danger" && "text-destructive"
@@ -347,25 +335,25 @@ export function MetricCardMonthly({
               </div>
             )}
             
-            {/* Sparkline - Historical Evolution */}
-            <div className="mb-3 p-2 rounded-lg bg-muted/30">
-              <div className="text-xs text-muted-foreground mb-1">📊 Evolução</div>
+            {/* Sparkline */}
+            <div className="mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-lg bg-muted/30">
+              <div className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">📊 Evolução</div>
               <Sparkline
                 metricId={metric.id}
                 metricName={metric.name}
                 unit={metric.unit}
                 historyData={historyData}
                 selectedYear={selectedYear}
-                height={40}
+                height={32}
               />
             </div>
             
-            {/* Progress bar - shows progress toward annual goal */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                <span>Progresso para meta anual</span>
+            {/* Progress bar */}
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
+                <span>Progresso</span>
               </div>
-              <div className="progress-bar h-3 rounded-full bg-muted overflow-hidden">
+              <div className="progress-bar h-2 sm:h-3 rounded-full bg-muted overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-300",
@@ -374,7 +362,7 @@ export function MetricCardMonthly({
                   style={{ width: `${hasNoData ? 0 : progress}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-[9px] sm:text-xs text-muted-foreground">
                 <span>0%</span>
                 <span className={cn(
                   "font-medium",
@@ -393,19 +381,19 @@ export function MetricCardMonthly({
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Lançamento</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Confirmar Lançamento</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
               Você está prestes a salvar o valor <strong>{pendingValue !== null ? formatMetricValue(pendingValue, metric.unit, metric.name) : ""}</strong> para a métrica <strong>{metric.name}</strong>
               {selectedMonthName && <> em <strong>{selectedMonthName}</strong></>}.
               <br /><br />
               Deseja confirmar este lançamento?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelConfirm}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSave} disabled={isSaving}>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={handleCancelConfirm} className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSave} disabled={isSaving} className="w-full sm:w-auto">
               {isSaving ? "Salvando..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -3,40 +3,36 @@ import { LucideIcon } from "lucide-react";
 
 interface SectionHeaderProps {
   title: string;
-  subtitle?: string;
-  icon?: LucideIcon;
+  subtitle: string;
+  icon: LucideIcon;
   variant?: "primary" | "accent" | "success" | "warning";
 }
 
 const variantStyles = {
-  primary: "bg-primary/15 text-primary border-primary/20",
-  accent: "bg-primary/15 text-primary border-primary/20",
-  success: "bg-success/15 text-success border-success/20",
-  warning: "bg-warning/15 text-warning border-warning/20",
+  primary: "bg-primary/10 text-primary",
+  accent: "bg-accent/10 text-accent-foreground",
+  success: "bg-success/10 text-success",
+  warning: "bg-warning/10 text-warning",
 };
 
-export function SectionHeader({
-  title,
-  subtitle,
-  icon: Icon,
-  variant = "primary",
-}: SectionHeaderProps) {
+export function SectionHeader({ title, subtitle, icon: Icon, variant = "primary" }: SectionHeaderProps) {
   return (
-    <div className="flex items-center gap-4 mb-6">
-      {Icon && (
-        <div className={cn("p-3 rounded border", variantStyles[variant])}>
-          <Icon className="h-5 w-5" />
-        </div>
-      )}
-      <div>
-        <h2 className="font-cinzel text-2xl md:text-3xl font-semibold tracking-wide text-foreground leading-tight">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground tracking-wide mt-0.5">{subtitle}</p>
-        )}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+      <div className={cn(
+        "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex-shrink-0",
+        variantStyles[variant]
+      )}>
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
-      <div className="flex-1 h-px bg-gradient-to-r from-border/50 to-transparent ml-4" />
+      <div className="min-w-0">
+        <h3 
+          className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground leading-tight"
+          style={{ fontFamily: "'Cinzel', serif" }}
+        >
+          {title}
+        </h3>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+      </div>
     </div>
   );
 }

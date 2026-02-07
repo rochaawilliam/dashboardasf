@@ -257,7 +257,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <PrintStyles />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <DashboardHeader 
           metrics={adjustedMetrics}
           historyData={historyData}
@@ -298,8 +298,8 @@ const Index = () => {
         
 
         {/* Category Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-6">
-          <TabsList className="w-full grid grid-cols-5 h-auto p-1.5 bg-muted/40 rounded-xl gap-1">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
+          <TabsList className="w-full grid grid-cols-5 h-auto p-1 sm:p-1.5 bg-muted/40 rounded-lg sm:rounded-xl gap-0.5 sm:gap-1">
             {categoryOrder.map((category) => {
               const config = categoryConfig[category];
               const Icon = config.icon;
@@ -309,13 +309,13 @@ const Index = () => {
                 <TabsTrigger
                   key={category}
                   value={category}
-                  className="flex flex-col items-center gap-1 py-3 px-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                  className="flex flex-col items-center gap-0.5 sm:gap-1 py-2 sm:py-3 px-1 sm:px-2 rounded-md sm:rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="text-xs font-medium text-center leading-tight hidden sm:block">
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-[9px] sm:text-xs font-medium text-center leading-tight hidden xs:block sm:block">
                     {config.shortTitle}
                   </span>
-                  <span className="text-[10px] bg-muted/70 px-1.5 py-0.5 rounded-full font-medium">
+                  <span className="text-[8px] sm:text-[10px] bg-muted/70 px-1 sm:px-1.5 py-0.5 rounded-full font-medium">
                     {categoryMetricsCount}
                   </span>
                 </TabsTrigger>
