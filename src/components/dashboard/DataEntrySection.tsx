@@ -27,25 +27,18 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
       <CollapsibleTrigger asChild>
         <Button 
           variant="outline" 
-          className={cn(
-            "w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4 border-2",
-            "bg-gradient-to-r from-amber-500/90 to-yellow-500/90 text-white border-amber-400/50",
-            "hover:from-amber-500 hover:to-yellow-500 hover:border-amber-400",
-            "dark:from-amber-600/90 dark:to-yellow-600/90 dark:border-amber-500/50",
-            "dark:hover:from-amber-600 dark:hover:to-yellow-600",
-            "shadow-md hover:shadow-lg transition-all"
-          )}
+          className="w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+            <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5" />
             <div className="text-left">
-              <span className="text-sm sm:text-base font-semibold text-white">Central de Lançamentos</span>
-              <p className="text-[10px] sm:text-xs mt-0.5 hidden sm:block text-white/80">
+              <span className="text-sm sm:text-base font-semibold">Central de Lançamentos</span>
+              <p className="text-[10px] sm:text-xs mt-0.5 hidden sm:block opacity-80">
                 Entrada de dados, histórico e ajuste de metas
               </p>
             </div>
           </div>
-          <ChevronDown className={cn("h-4 w-4 text-white transition-transform", isOpen && "rotate-180")} />
+          <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
         </Button>
       </CollapsibleTrigger>
       
