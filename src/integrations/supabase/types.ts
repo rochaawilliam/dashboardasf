@@ -118,6 +118,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          notifications_enabled: boolean
+          notify_on_goal_missed: boolean
+          notify_on_goal_reached: boolean
+          notify_on_trend_change: boolean
+          show_annual_goals: boolean
+          show_monthly_goals: boolean
+          show_progress_percentage: boolean
+          show_sparklines: boolean
+          show_trend_indicators: boolean
+          theme: string
+          trend_period_months: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language?: string
+          notifications_enabled?: boolean
+          notify_on_goal_missed?: boolean
+          notify_on_goal_reached?: boolean
+          notify_on_trend_change?: boolean
+          show_annual_goals?: boolean
+          show_monthly_goals?: boolean
+          show_progress_percentage?: boolean
+          show_sparklines?: boolean
+          show_trend_indicators?: boolean
+          theme?: string
+          trend_period_months?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          notifications_enabled?: boolean
+          notify_on_goal_missed?: boolean
+          notify_on_goal_reached?: boolean
+          notify_on_trend_change?: boolean
+          show_annual_goals?: boolean
+          show_monthly_goals?: boolean
+          show_progress_percentage?: boolean
+          show_sparklines?: boolean
+          show_trend_indicators?: boolean
+          theme?: string
+          trend_period_months?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
