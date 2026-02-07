@@ -17,7 +17,8 @@ import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
 import { AutoStartTour } from "@/components/dashboard/GuidedTour";
-import { OfflineIndicator, useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
+import { useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
+import { SyncStatusFooter } from "@/components/dashboard/SyncStatusFooter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
@@ -105,6 +106,7 @@ const Index = () => {
   const { cacheMetrics, cacheHistory, getCachedMetrics, getCachedHistory } = useOfflineCache();
   const { pendingCount, addPendingMutation, clearPendingMutations, getPendingMutations } = usePendingMutations();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
 
   // Cache data when it loads
   useEffect(() => {
@@ -285,6 +287,7 @@ const Index = () => {
     
     clearPendingMutations();
     queryClient.invalidateQueries({ queryKey: ["metric_history"] });
+    setLastSyncedAt(new Date());
     toast({
       title: "✅ Sincronização concluída",
       description: `${pending.length} alteração(ões) sincronizada(s).`,
@@ -313,14 +316,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-14">
       <PrintStyles />
       <AutoStartTour />
-      <OfflineIndicator 
-        pendingCount={pendingCount} 
-        onSync={handleSync} 
-        isSyncing={isSyncing} 
-      />
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div data-tour="header">
@@ -396,10 +394,10 @@ const Index = () => {
                   <TabsTrigger
                     key={category}
                     value={category}
-                    className="flex flex-col items-center gap-0.5 sm:gap-1 py-2 sm:py-3 px-1 sm:px-2 rounded-md sm:rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                    className="flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-1 sm:px-2 rounded-md sm:rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
                   >
-                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-[9px] sm:text-xs font-medium text-center leading-tight hidden xs:block sm:block">
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="text-[9px] sm:text-xs font-medium text-center leading-tight hidden xs:inline sm:inline">
                       {config.shortTitle}
                     </span>
                     <span className="text-[8px] sm:text-[10px] bg-muted/70 px-1 sm:px-1.5 py-0.5 rounded-full font-medium">
@@ -483,6 +481,15 @@ const Index = () => {
           </Tabs>
         </SwipeableTabs>
       </div>
+      
+      {/* Sync Status Footer */}
+      <SyncStatusFooter
+        isOnline={isOnline}
+        pendingCount={pendingCount}
+        isSyncing={isSyncing}
+        onSync={handleSync}
+        lastSyncedAt={lastSyncedAt}
+      />
     </div>
   );
 };
