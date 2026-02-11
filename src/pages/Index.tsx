@@ -389,14 +389,12 @@ const Index = () => {
           />
         </div>
         
-        {/* Months Summary - Interactive Panel */}
+        {/* Months Summary */}
         {historyData && metrics && (
           <MonthsSummary
             historyData={historyData}
             selectedYear={selectedYear}
             metricsCount={metrics.length}
-            metrics={metrics}
-            monthlyTargets={monthlyTargets}
           />
         )}
 
