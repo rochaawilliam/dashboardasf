@@ -80,11 +80,11 @@ export function DashboardHeader({
             <Link to="/login">
               <Button 
                 variant="default" 
-                size="icon" 
-                className="h-8 w-8 sm:h-9 sm:w-9"
+                className="h-8 sm:h-9 px-3 gap-1.5"
                 title="Entrar"
               >
                 <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm font-medium">Entrar</span>
               </Button>
             </Link>
           )}
