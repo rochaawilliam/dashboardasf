@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeError } from "@/lib/error-handler";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import type { Metric, TrainingHours } from "@/hooks/useMetrics";
@@ -155,7 +156,7 @@ export function BulkDataEntry({ metrics, trainingHours }: BulkDataEntryProps) {
     } catch (error: any) {
       toast({
         title: "Erro ao salvar",
-        description: error.message,
+        description: sanitizeError(error),
         variant: "destructive",
       });
     } finally {

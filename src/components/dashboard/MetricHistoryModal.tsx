@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/error-handler";
 import { History, Pencil, Trash2, Check, X, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -105,7 +106,7 @@ export function MetricHistoryModal({ metrics }: MetricHistoryModalProps) {
     onError: (error) => {
       toast({
         title: "Erro ao atualizar",
-        description: error.message,
+        description: sanitizeError(error),
         variant: "destructive",
       });
     },
@@ -132,7 +133,7 @@ export function MetricHistoryModal({ metrics }: MetricHistoryModalProps) {
     onError: (error) => {
       toast({
         title: "Erro ao excluir",
-        description: error.message,
+        description: sanitizeError(error),
         variant: "destructive",
       });
     },

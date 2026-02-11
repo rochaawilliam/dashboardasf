@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/error-handler";
 import { Loader2, LogIn, UserPlus } from "lucide-react";
 import asfLogo from "@/assets/asf-logo.png";
 
@@ -61,7 +62,7 @@ export default function Login() {
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message || "Ocorreu um erro. Tente novamente.",
+        description: sanitizeError(error),
         variant: "destructive",
       });
     } finally {
