@@ -162,9 +162,10 @@ export function MetricCardMonthly({
   
   const displayValue = isMonthSelected ? (monthlyValue ?? 0) : accumulatedValue;
   
-  const targetForProgress = isNonAccumulative 
-    ? metric.target_value 
-    : (isMonthSelected ? monthlyTarget : metric.target_value);
+  // When month selected, always compare against monthly target
+  const targetForProgress = isMonthSelected 
+    ? monthlyTarget 
+    : metric.target_value;
   
   const status = getStatus(displayValue, targetForProgress, isInverse);
   const progress = isInverse 
@@ -328,22 +329,35 @@ export function MetricCardMonthly({
                 </div>
               </div>
               
-              {/* Target - smaller */}
+              {/* Target - shows monthly when month selected, annual otherwise */}
               <div className="text-right">
-                <div className="text-xs sm:text-sm font-semibold text-primary">
-                  {formatMetricValue(metric.target_value, metric.unit, metric.name)}
-                </div>
-                <div className="text-[9px] text-muted-foreground">
-                  Meta {isNonAccumulative ? "" : "Anual"}
-                </div>
+                {isMonthSelected ? (
+                  <>
+                    <div className="text-xs sm:text-sm font-semibold text-primary">
+                      {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
+                    </div>
+                    <div className="text-[9px] text-muted-foreground">
+                      Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-xs sm:text-sm font-semibold text-primary">
+                      {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                    </div>
+                    <div className="text-[9px] text-muted-foreground">
+                      Meta {isNonAccumulative ? "" : "Anual"}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             
-            {/* Monthly target - only if accumulative, inline */}
-            {!isNonAccumulative && (
+            {/* Annual target reference when month is selected */}
+            {isMonthSelected && !isNonAccumulative && (
               <div className="text-[9px] text-muted-foreground mb-2 flex items-center gap-1">
-                <span>Meta mensal:</span>
-                <span className="font-medium">{formatMetricValue(monthlyTarget, metric.unit, metric.name)}</span>
+                <span>Meta anual:</span>
+                <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
               </div>
             )}
             

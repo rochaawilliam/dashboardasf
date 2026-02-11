@@ -9,11 +9,16 @@ export interface SubcategoryConfig {
 
 export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
   lucratividade: [
-    { name: "Receitas por Área", keywords: ["Receita Total", "Receita Empresarial", "Receita Tributário", "Receita Trabalhista", "Receita Sucumbência", "Receita Patenteia"], order: 1 },
-    { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 2 },
-    { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 3 },
-    { name: "Indicadores de Rentabilidade", keywords: ["Lucratividade", "Margem"], order: 4 },
-    { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo"], order: 5 },
+    { name: "Receita Total", keywords: ["Receita Total"], order: 1 },
+    { name: "Receita Empresarial", keywords: ["Receita Empresarial"], order: 2 },
+    { name: "Receita Tributário", keywords: ["Receita Tributário"], order: 3 },
+    { name: "Receita Trabalhista", keywords: ["Receita Trabalhista"], order: 4 },
+    { name: "Receita Sucumbência", keywords: ["Receita Sucumbência"], order: 5 },
+    { name: "Receita Patenteia", keywords: ["Receita Patenteia"], order: 6 },
+    { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 7 },
+    { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 8 },
+    { name: "Indicadores de Rentabilidade", keywords: ["Lucratividade", "Margem"], order: 9 },
+    { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo"], order: 10 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   execucao_comercial: [
