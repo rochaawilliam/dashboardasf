@@ -19,27 +19,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create client with user's token to check permissions
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     
-    if (claimsError || !claimsData?.claims) {
+    if (userError || !userData?.user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const requesterId = claimsData.claims.sub;
+    const requesterId = userData.user.id;
 
     // Check if requester is admin using the security definer function
-    const { data: isAdmin, error: roleError } = await supabaseClient.rpc('has_role', {
+    const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: requesterId,
       _role: 'admin'
     });
@@ -68,13 +67,6 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Create admin client with service role key to delete user
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
 
     // Delete the user from auth.users (CASCADE will handle user_roles)
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);

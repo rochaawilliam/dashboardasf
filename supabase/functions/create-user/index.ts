@@ -19,26 +19,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
+    // Verify the requester's token
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     
-    if (claimsError || !claimsData?.claims) {
+    if (userError || !userData?.user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const requesterId = claimsData.claims.sub;
+    const requesterId = userData.user.id;
 
     // Check if requester is admin
-    const { data: isAdmin, error: roleError } = await supabaseClient.rpc('has_role', {
+    const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: requesterId,
       _role: 'admin'
     });
@@ -76,12 +77,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-
     // Create user
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -105,7 +100,6 @@ Deno.serve(async (req) => {
 
       if (roleInsertError) {
         console.error('Error adding admin role:', roleInsertError);
-        // User was created but role assignment failed - not critical
       }
     }
 

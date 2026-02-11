@@ -151,9 +151,9 @@ export function MetricCardMonthly({
   const { trend, percent: trendPercent, monthsCount } = calculateTrend(metric.id, historyData);
   const hasTrend = trend !== "unknown" && monthsCount >= 2;
   
-  // Check if this metric has a specific monthly target
+  // Check if this metric has a specific monthly target for the selected year+month
   const specificMonthlyTarget = selectedMonth 
-    ? monthlyTargets.find(mt => mt.metric_id === metric.id && mt.month === selectedMonth)
+    ? monthlyTargets.find(mt => mt.metric_id === metric.id && mt.month === selectedMonth && mt.year === selectedYear)
     : null;
   
   const monthlyTarget = specificMonthlyTarget 
