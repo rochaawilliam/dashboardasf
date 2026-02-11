@@ -115,7 +115,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
                 Ajuste de Metas Anuais
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
-                {metrics.map((metric) => (
+                {[...metrics].sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((metric) => (
                   <MetricGoalEditor key={metric.id} metric={metric} />
                 ))}
               </div>

@@ -3,7 +3,7 @@ import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUpdateMetric, type Metric } from "@/hooks/useMetrics";
-import { formatNumber } from "@/utils/formatters";
+import { formatMetricValue } from "@/utils/formatters";
 
 interface MetricGoalEditorProps {
   metric: Metric;
@@ -74,9 +74,7 @@ export function MetricGoalEditor({ metric }: MetricGoalEditorProps) {
           onClick={() => setIsEditing(true)}
           className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors min-w-[60px] text-right"
         >
-          {formatNumber(metric.target_value, metric.unit === "%" ? 1 : 0)}
-          {metric.unit === "%" && "%"}
-          {metric.unit === "R$" && " R$"}
+          {formatMetricValue(metric.target_value, metric.unit, metric.name)}
         </button>
       )}
     </div>

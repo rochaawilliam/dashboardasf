@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Pencil, Check, X, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { formatMetricValue } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUpdateMetric, type Metric } from "@/hooks/useMetrics";
@@ -154,13 +155,12 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
       ) : (
         <>
           <div className="flex items-baseline gap-1 mb-1">
-            <span className="metric-value">{metric.current_value}</span>
-            <span className="text-lg font-medium text-muted-foreground">{metric.unit}</span>
+            <span className="metric-value">{formatMetricValue(metric.current_value, metric.unit, metric.name)}</span>
           </div>
           
           <div className="flex items-center gap-2 mb-3">
             <span className={cn("category-badge", getStatusBg(status))}>
-              Meta: {metric.target_value}{metric.unit}
+              Meta: {formatMetricValue(metric.target_value, metric.unit, metric.name)}
             </span>
             {isAboveTarget ? (
               <TrendingUp className="h-4 w-4 text-success" />

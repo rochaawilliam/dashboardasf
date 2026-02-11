@@ -78,6 +78,11 @@ export function formatMetricValue(value: number, unit: string, metricName?: stri
     return `${formatNumber(value, 0)} meses`;
   }
   
+  // "número" or "contratos" - just show the number, no unit label
+  if (unit.toLowerCase() === "número" || unit.toLowerCase() === "contratos") {
+    return formatNumber(value, 0);
+  }
+  
   // Generic number with unit - no decimals
   return `${formatNumber(value, 0)}${unit ? ` ${unit}` : ""}`;
 }
