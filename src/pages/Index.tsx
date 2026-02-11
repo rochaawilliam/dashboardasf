@@ -15,7 +15,6 @@ import { DataEntrySection } from "@/components/dashboard/DataEntrySection";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
-import { MonthsSummary } from "@/components/dashboard/MonthsSummary";
 import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
 import { AutoStartTour } from "@/components/dashboard/GuidedTour";
@@ -388,17 +387,6 @@ const Index = () => {
             historyData={historyData}
           />
         </div>
-        
-        {/* Months Summary - Interactive Panel */}
-        {historyData && metrics && (
-          <MonthsSummary
-            historyData={historyData}
-            selectedYear={selectedYear}
-            metricsCount={metrics.length}
-            selectedMonth={selectedMonth}
-            onMonthChange={setSelectedMonth}
-          />
-        )}
 
         {/* Category Tabs - wrapped with auth overlay for unauthenticated users */}
         {!user ? (
