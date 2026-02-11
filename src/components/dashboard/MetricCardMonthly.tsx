@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Sparkline } from "./Sparkline";
-import type { Metric, MetricHistory } from "@/hooks/useMetrics";
+import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { parseISO } from "date-fns";
 
@@ -33,6 +33,8 @@ interface MetricCardMonthlyProps {
   selectedMonthName?: string;
   historyData?: MetricHistory[];
   selectedYear?: number;
+  selectedMonth?: number | null;
+  monthlyTargets?: MonthlyTarget[];
 }
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
@@ -135,6 +137,8 @@ export function MetricCardMonthly({
   selectedMonthName,
   historyData = [],
   selectedYear = new Date().getFullYear(),
+  selectedMonth,
+  monthlyTargets = [],
 }: MetricCardMonthlyProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -147,7 +151,15 @@ export function MetricCardMonthly({
   const { trend, percent: trendPercent, monthsCount } = calculateTrend(metric.id, historyData);
   const hasTrend = trend !== "unknown" && monthsCount >= 2;
   
-  const monthlyTarget = isNonAccumulative ? metric.target_value : metric.target_value / 12;
+  // Check if this metric has a specific monthly target
+  const specificMonthlyTarget = selectedMonth 
+    ? monthlyTargets.find(mt => mt.metric_id === metric.id && mt.month === selectedMonth)
+    : null;
+  
+  const monthlyTarget = specificMonthlyTarget 
+    ? specificMonthlyTarget.target_value
+    : (isNonAccumulative ? metric.target_value : metric.target_value / 12);
+  
   const displayValue = isMonthSelected ? (monthlyValue ?? 0) : accumulatedValue;
   
   const targetForProgress = isNonAccumulative 

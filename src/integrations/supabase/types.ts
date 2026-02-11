@@ -88,6 +88,44 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_targets: {
+        Row: {
+          created_at: string
+          id: string
+          metric_id: string
+          month: number
+          target_value: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_id: string
+          month: number
+          target_value: number
+          updated_at?: string
+          year?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_id?: string
+          month?: number
+          target_value?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_targets_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "metrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_hours: {
         Row: {
           created_at: string
