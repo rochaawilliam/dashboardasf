@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/error-handler";
 import { ArrowLeft, Trash2, Shield, Loader2, UserPlus, ShieldCheck, ShieldOff, Eye } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -81,7 +82,7 @@ export default function Admin() {
     onError: (error: Error) => {
       toast({
         title: "Erro ao excluir",
-        description: error.message || "Não foi possível excluir o usuário.",
+        description: sanitizeError(error),
         variant: "destructive",
       });
     },
@@ -111,7 +112,7 @@ export default function Admin() {
     onError: (error: Error) => {
       toast({
         title: "Erro ao alterar permissão",
-        description: error.message || "Não foi possível alterar a permissão.",
+        description: sanitizeError(error),
         variant: "destructive",
       });
     },
@@ -154,7 +155,7 @@ export default function Admin() {
     onError: (error: Error) => {
       toast({
         title: "Erro ao criar usuário",
-        description: error.message || "Não foi possível criar o usuário.",
+        description: sanitizeError(error),
         variant: "destructive",
       });
     },

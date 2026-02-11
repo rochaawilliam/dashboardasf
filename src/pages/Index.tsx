@@ -4,6 +4,7 @@ import { parseISO, format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/error-handler";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
@@ -192,7 +193,7 @@ const Index = () => {
     onError: (error: any) => {
       toast({
         title: "Erro ao salvar",
-        description: error.message,
+        description: sanitizeError(error),
         variant: "destructive",
       });
       setSavingMetricId(null);
