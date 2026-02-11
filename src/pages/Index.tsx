@@ -40,6 +40,7 @@ import {
   useMetrics,
   useMetricHistory,
   useTrainingHours,
+  useMonthlyTargets,
   type Filters,
   type MetricCategory,
 } from "@/hooks/useMetrics";
@@ -120,6 +121,7 @@ const Index = () => {
   const { data: metrics, isLoading: metricsLoading } = useMetrics(filters);
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
+  const { data: monthlyTargets } = useMonthlyTargets(selectedYear);
 
   // Offline mode hooks
   const isOnline = useOnlineStatus();
@@ -556,6 +558,8 @@ const Index = () => {
                                         selectedMonthName={selectedMonthName}
                                         historyData={historyData}
                                         selectedYear={selectedYear}
+                                        selectedMonth={selectedMonth}
+                                        monthlyTargets={monthlyTargets}
                                       />
                                     </div>
                                   ))}

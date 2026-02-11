@@ -45,6 +45,16 @@ export interface TrainingHours {
   updated_at: string;
 }
 
+export interface MonthlyTarget {
+  id: string;
+  metric_id: string;
+  year: number;
+  month: number;
+  target_value: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Filters {
   period: "month" | "quarter" | "year";
   division: Division | "all";
@@ -104,6 +114,24 @@ export function useMetricHistory(metricId?: string, filters?: Filters) {
       
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+export function useMonthlyTargets(year?: number) {
+  return useQuery({
+    queryKey: ["monthly_targets", year],
+    queryFn: async () => {
+      let query = supabase.from("monthly_targets").select("*");
+      
+      if (year) {
+        query = query.eq("year", year);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return data as MonthlyTarget[];
     },
   });
 }
