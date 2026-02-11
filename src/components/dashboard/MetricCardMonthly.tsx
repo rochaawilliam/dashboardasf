@@ -275,7 +275,7 @@ export function MetricCardMonthly({
                 className="h-7 text-xs"
                 autoFocus
               />
-              <span className="text-[10px] text-muted-foreground">{metric.unit}</span>
+              {metric.unit !== "número" && <span className="text-[10px] text-muted-foreground">{metric.unit}</span>}
             </div>
             <div className="flex gap-1">
               <Button
