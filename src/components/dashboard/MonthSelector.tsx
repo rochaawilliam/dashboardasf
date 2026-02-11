@@ -36,8 +36,8 @@ export function MonthSelector({
   onYearChange,
   historyData
 }: MonthSelectorProps) {
+  const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
-  const years = [currentYear - 1, currentYear, currentYear + 1];
 
   const monthsWithData = useMemo(() => {
     if (!historyData) return new Set<number>();
@@ -67,7 +67,6 @@ export function MonthSelector({
             size="icon"
             className="h-6 w-6"
             onClick={() => onYearChange(selectedYear - 1)}
-            disabled={selectedYear <= years[0]}
           >
             <ChevronLeft className="h-3 w-3" />
           </Button>
@@ -77,7 +76,6 @@ export function MonthSelector({
             size="icon"
             className="h-6 w-6"
             onClick={() => onYearChange(selectedYear + 1)}
-            disabled={selectedYear >= years[years.length - 1]}
           >
             <ChevronRight className="h-3 w-3" />
           </Button>
@@ -102,6 +100,8 @@ export function MonthSelector({
           {months.map((month) => {
             const hasData = monthsWithData.has(month.value);
             const isSelected = selectedMonth === month.value;
+            const isFuture = selectedYear === currentYear && month.value > currentMonth;
+            const isPast = selectedYear < currentYear || (selectedYear === currentYear && month.value <= currentMonth);
             
             return (
               <Button
@@ -113,7 +113,8 @@ export function MonthSelector({
                   "flex-1 h-7 text-[8px] sm:text-[10px] px-0",
                   isSelected && "bg-primary text-primary-foreground",
                   !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
-                  !isSelected && !hasData && "border-border"
+                  !isSelected && !hasData && isPast && "border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20",
+                  !isSelected && !hasData && isFuture && "border-border text-muted-foreground"
                 )}
               >
                 {month.label}
@@ -127,11 +128,15 @@ export function MonthSelector({
       <div className="flex flex-wrap gap-2 sm:gap-4 text-[9px] sm:text-[11px] text-muted-foreground mt-2">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded border border-success/50 bg-success/10" />
-          <span>Com lançamentos</span>
+          <span>Com lançamento</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded border border-destructive/30 bg-destructive/10" />
+          <span>Pendente</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded border border-border bg-transparent" />
-          <span>Sem lançamentos</span>
+          <span>Futuro</span>
         </div>
       </div>
     </div>
