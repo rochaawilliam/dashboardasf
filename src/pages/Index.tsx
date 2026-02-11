@@ -395,8 +395,8 @@ const Index = () => {
             historyData={historyData}
             selectedYear={selectedYear}
             metricsCount={metrics.length}
-            metrics={metrics}
-            monthlyTargets={monthlyTargets}
+            selectedMonth={selectedMonth}
+            onMonthChange={setSelectedMonth}
           />
         )}
 
