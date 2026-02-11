@@ -408,7 +408,7 @@ const Index = () => {
               <Link to="/login">
                 <Button className="gap-2">
                   <LogIn className="h-4 w-4" />
-                  Fazer Login
+                  Faça seu login
                 </Button>
               </Link>
             </div>
