@@ -338,7 +338,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-14">
       <PrintStyles />
-      <AutoStartTour />
+      {user && <AutoStartTour />}
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div data-tour="header">
@@ -358,8 +358,8 @@ const Index = () => {
           />
         </div>
         
-        {/* Data Entry Section */}
-        {metrics && (
+        {/* Data Entry Section - only for authenticated users */}
+        {user && metrics && (
           <div data-tour="data-entry">
             <DataEntrySection 
               metrics={metrics} 
@@ -395,158 +395,200 @@ const Index = () => {
             metricsCount={metrics.length}
           />
         )}
-        
 
-        {/* Category Tabs with Swipe Support */}
-        <SwipeableTabs<MetricCategory>
-          tabs={categoryOrder}
-          activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab)}
-        >
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
-            {/* Chrome-style tabs - full width */}
-            <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
-              {categoryOrder.map((category) => {
-                const config = categoryConfig[category];
-                const Icon = config.icon;
-                const categoryMetricsCount = groupedMetrics[category]?.length || 0;
-                const isActive = activeTab === category;
-                const canAccess = hasTabAccess(category);
-                
-                return (
-                  <button
-                    key={category}
-                    onClick={() => canAccess && setActiveTab(category)}
-                    disabled={!canAccess}
-                    className={cn(
-                      "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
-                      "text-[9px] sm:text-xs font-medium",
-                      !canAccess && "opacity-50 cursor-not-allowed",
-                      isActive && canAccess
-                        ? "bg-primary text-primary-foreground shadow-sm z-10" 
-                        : canAccess 
-                          ? "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                          : "bg-muted/30 text-muted-foreground"
-                    )}
-                    title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : undefined}
-                  >
-                    {!canAccess ? (
-                      <Lock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                    ) : (
-                      <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                    )}
-                    <span className="hidden md:inline truncate">{config.shortTitle}</span>
-                    <span className={cn(
-                      "text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
-                      isActive && canAccess
-                        ? "bg-primary-foreground/20 text-primary-foreground" 
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      {canAccess ? categoryMetricsCount : "🔒"}
-                    </span>
-                  </button>
-                );
-              })}
+        {/* Category Tabs - wrapped with auth overlay for unauthenticated users */}
+        {!user ? (
+          <div className="relative">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl min-h-[400px]">
+              <Lock className="h-10 w-10 text-primary mb-3" />
+              <h3 className="text-lg font-semibold text-foreground mb-1">Dados Protegidos</h3>
+              <p className="text-sm text-muted-foreground mb-4 text-center max-w-xs">
+                Faça login para visualizar os indicadores do dashboard
+              </p>
+              <Link to="/login">
+                <Button className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Fazer Login
+                </Button>
+              </Link>
             </div>
-
-            {categoryOrder.map((category) => {
-              const config = categoryConfig[category];
-              const categoryMetrics = groupedMetrics[category] || [];
-              const canAccess = hasTabAccess(category);
-              
-              const categoryHistory = historyByCategory?.[category];
-              const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
-              
-              return (
-                <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4 animate-fade-in">
-                  {/* Show locked state if user doesn't have access */}
-                  {!canAccess ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                      <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                        {!isAuthenticated ? "Faça login para acessar" : "Acesso Restrito"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground max-w-md mb-4">
-                        {!isAuthenticated 
-                          ? "Entre com sua conta para visualizar o conteúdo desta aba."
-                          : "Você não tem permissão para visualizar esta aba. Entre em contato com o administrador para solicitar acesso."
-                        }
-                      </p>
-                      {!isAuthenticated && (
-                        <Link to="/login">
-                          <Button className="gap-2">
-                            <LogIn className="h-4 w-4" />
-                            Fazer Login
-                          </Button>
-                        </Link>
-                      )}
+            <div className="pointer-events-none select-none blur-md opacity-50 min-h-[400px]">
+              <SwipeableTabs<MetricCategory>
+                tabs={categoryOrder}
+                activeTab={activeTab}
+                onTabChange={(tab) => setActiveTab(tab)}
+              >
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
+                  <div className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
+                    {categoryOrder.map((category) => {
+                      const config = categoryConfig[category];
+                      const Icon = config.icon;
+                      const isActive = activeTab === category;
+                      return (
+                        <button
+                          key={category}
+                          className={cn(
+                            "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg",
+                            "text-[9px] sm:text-xs font-medium",
+                            isActive ? "bg-primary text-primary-foreground shadow-sm z-10" : "bg-muted/50 text-muted-foreground"
+                          )}
+                        >
+                          <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                          <span className="hidden md:inline truncate">{config.shortTitle}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <TabsContent value={activeTab} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-3 sm:p-4">
+                    <div className="dashboard-grid">
+                      {[...Array(6)].map((_, i) => (
+                        <Skeleton key={i} className="h-32 rounded-xl" />
+                      ))}
                     </div>
-                  ) : (
-                    <>
-                      <SectionHeader
-                        title={config.title}
-                        subtitle={config.subtitle}
-                        icon={config.icon}
-                        variant={config.variant}
-                      />
-                  
-                  {/* Render subcategories */}
-                  {organizedSubcategories.map((subcat) => {
-                    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                    const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                  </TabsContent>
+                </Tabs>
+              </SwipeableTabs>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Category Tabs with Swipe Support */}
+            <SwipeableTabs<MetricCategory>
+              tabs={categoryOrder}
+              activeTab={activeTab}
+              onTabChange={(tab) => setActiveTab(tab)}
+            >
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
+                {/* Chrome-style tabs - full width */}
+                <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
+                  {categoryOrder.map((category) => {
+                    const config = categoryConfig[category];
+                    const Icon = config.icon;
+                    const categoryMetricsCount = groupedMetrics[category]?.length || 0;
+                    const isActive = activeTab === category;
+                    const canAccess = hasTabAccess(category);
                     
                     return (
-                      <div key={subcat.name} className="mb-4 sm:mb-6">
-                        <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
-                        <div className="dashboard-grid">
-                          {subcat.metrics.map((metric, metricIndex) => (
-                            <div 
-                              key={metric.id}
-                              data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
-                            >
-                              <MetricCardMonthly 
-                                metric={metric} 
-                                monthlyValue={monthlyValues[metric.id] ?? null}
-                                isMonthSelected={selectedMonth !== null}
-                                accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                                onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                                isSaving={savingMetricId === metric.id}
-                                selectedMonthName={selectedMonthName}
-                                historyData={historyData}
-                                selectedYear={selectedYear}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <button
+                        key={category}
+                        onClick={() => canAccess && setActiveTab(category)}
+                        disabled={!canAccess}
+                        className={cn(
+                          "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
+                          "text-[9px] sm:text-xs font-medium",
+                          !canAccess && "opacity-50 cursor-not-allowed",
+                          isActive && canAccess
+                            ? "bg-primary text-primary-foreground shadow-sm z-10" 
+                            : canAccess 
+                              ? "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                              : "bg-muted/30 text-muted-foreground"
+                        )}
+                        title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : undefined}
+                      >
+                        {!canAccess ? (
+                          <Lock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                        ) : (
+                          <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                        )}
+                        <span className="hidden md:inline truncate">{config.shortTitle}</span>
+                        <span className={cn(
+                          "text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
+                          isActive && canAccess
+                            ? "bg-primary-foreground/20 text-primary-foreground" 
+                            : "bg-muted text-muted-foreground"
+                        )}>
+                          {canAccess ? categoryMetricsCount : "🔒"}
+                        </span>
+                      </button>
                     );
                   })}
-                  
-                  {/* Chart for this category */}
-                  {categoryHistory && categoryHistory.length > 0 && metrics && (
-                    <MetricChart
-                      data={categoryHistory}
-                      metrics={metrics}
-                      title={`Evolução - ${config.title} (${selectedYear})`}
-                    />
-                  )}
+                </div>
 
-                  {/* Training Hours - only in aprendizado_crescimento tab */}
-                  {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 && (
-                    <div className="mt-4 sm:mt-6">
-                      <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
-                      <div className="dashboard-grid">
-                        <TrainingCardEditable items={trainingHours} />
-                      </div>
-                    </div>
-                  )}
-                    </>
-                  )}
-                </TabsContent>
-              );
-            })}
-          </Tabs>
-        </SwipeableTabs>
+                {categoryOrder.map((category) => {
+                  const config = categoryConfig[category];
+                  const categoryMetrics = groupedMetrics[category] || [];
+                  const canAccess = hasTabAccess(category);
+                  
+                  const categoryHistory = historyByCategory?.[category];
+                  const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
+                  
+                  return (
+                    <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4 animate-fade-in">
+                      {!canAccess ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                            Acesso Restrito
+                          </h3>
+                          <p className="text-sm text-muted-foreground max-w-md mb-4">
+                            Você não tem permissão para visualizar esta aba. Entre em contato com o administrador para solicitar acesso.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <SectionHeader
+                            title={config.title}
+                            subtitle={config.subtitle}
+                            icon={config.icon}
+                            variant={config.variant}
+                          />
+                      
+                          {organizedSubcategories.map((subcat) => {
+                            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                            const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
+                            
+                            return (
+                              <div key={subcat.name} className="mb-4 sm:mb-6">
+                                <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                                <div className="dashboard-grid">
+                                  {subcat.metrics.map((metric, metricIndex) => (
+                                    <div 
+                                      key={metric.id}
+                                      data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
+                                    >
+                                      <MetricCardMonthly 
+                                        metric={metric} 
+                                        monthlyValue={monthlyValues[metric.id] ?? null}
+                                        isMonthSelected={selectedMonth !== null}
+                                        accumulatedValue={accumulatedValues[metric.id] ?? 0}
+                                        onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
+                                        isSaving={savingMetricId === metric.id}
+                                        selectedMonthName={selectedMonthName}
+                                        historyData={historyData}
+                                        selectedYear={selectedYear}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          
+                          {categoryHistory && categoryHistory.length > 0 && metrics && (
+                            <MetricChart
+                              data={categoryHistory}
+                              metrics={metrics}
+                              title={`Evolução - ${config.title} (${selectedYear})`}
+                            />
+                          )}
+
+                          {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 && (
+                            <div className="mt-4 sm:mt-6">
+                              <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
+                              <div className="dashboard-grid">
+                                <TrainingCardEditable items={trainingHours} />
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            </SwipeableTabs>
+          </>
+        )}
       </div>
       
       {/* Sync Status Footer */}
