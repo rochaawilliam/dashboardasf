@@ -675,16 +675,26 @@ const Index = () => {
                                     
                                     // "Mês anterior" cards are read-only computed cards
                                     const isMesAnterior = metric.id === CONTRATOS_EMP_MES_ANT_ID || metric.id === CONTRATOS_TRAB_MES_ANT_ID;
-                                    
+                                     
                                     let dynamicMetric = metric;
-                                    // Dynamic target for Assessoria metrics
                                     const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
+                                    
+                                    // Dynamic target for Assessoria metrics: Jan=0, Feb+=1
                                     if (metric.id === CONTRATOS_EMP_ASSESSORIA_ID) {
                                       dynamicMetric = { ...metric, target_value: currentMonth >= 2 ? 1 : 0 };
                                     } else if (metric.id === CONTRATOS_TRAB_ASSESSORIA_ID) {
                                       dynamicMetric = { ...metric, target_value: currentMonth >= 2 ? 1 : 0 };
                                     }
                                     
+                                    // Dynamic target for "Mês Anterior": Jan=sem meta(0), Feb+=base+increment
+                                    if (metric.id === CONTRATOS_EMP_MES_ANT_ID) {
+                                      const mesAnteriorTarget = currentMonth >= 2 ? 20 + (currentMonth - 1) : 0;
+                                      dynamicMetric = { ...dynamicMetric, target_value: mesAnteriorTarget };
+                                    } else if (metric.id === CONTRATOS_TRAB_MES_ANT_ID) {
+                                      const mesAnteriorTarget = currentMonth >= 2 ? 14 + (currentMonth - 1) : 0;
+                                      dynamicMetric = { ...dynamicMetric, target_value: mesAnteriorTarget };
+                                    }
+                                     
                                     // Compute "Total Contratos Assessoria" = Mês Anterior + Novos Contratos Assessoria
                                     const isTotalAssessoria = metric.id === TOTAL_EMP_ASSESSORIA_ID || metric.id === TOTAL_TRAB_ASSESSORIA_ID;
                                     if (metric.id === TOTAL_EMP_ASSESSORIA_ID) {
@@ -715,7 +725,7 @@ const Index = () => {
                                         data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                       >
                                         <MetricCardMonthly 
-                                          metric={isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : (isMesAnterior ? { ...dynamicMetric, target_value: 0 } : (isTotalAssessoria ? { ...dynamicMetric } : dynamicMetric))}
+                                          metric={isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : (isTotalAssessoria ? { ...dynamicMetric } : dynamicMetric)}
                                           monthlyValue={isAutoSum ? computedMonthly : (isMesAnterior ? mesAnteriorMonthly : (isTotalAssessoria ? totalAssessoriaMonthly : (monthlyValues[metric.id] ?? null)))}
                                           isMonthSelected={selectedMonth !== null}
                                           accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (isMesAnterior ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) : (isTotalAssessoria ? (totalAssessoriaMonthly ?? 0) : (accumulatedValues[metric.id] ?? 0)))}
