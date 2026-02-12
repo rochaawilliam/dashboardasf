@@ -120,9 +120,13 @@ export default function Admin() {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserData) => {
-      const { data: result, error } = await supabase.functions.invoke("create-user", {
+      if (!session?.access_token) {
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+
+      const response = await supabase.functions.invoke("create-user", {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: { 
           email: data.email, 
@@ -131,8 +135,16 @@ export default function Admin() {
         },
       });
 
-      if (error) throw error;
-      if (result.error) throw new Error(result.error);
+      // Handle edge function errors
+      if (response.error) {
+        // Try to extract error message from the response
+        const errorMsg = response.error?.message || "Erro ao criar usuário";
+        console.error("Create user error:", response.error);
+        throw new Error(errorMsg);
+      }
+      
+      const result = response.data;
+      if (result?.error) throw new Error(result.error);
       
       // If not admin, save tab permissions
       if (!data.isAdmin && result.user?.id) {

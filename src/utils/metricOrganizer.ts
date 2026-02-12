@@ -10,15 +10,15 @@ export interface SubcategoryConfig {
 export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
   lucratividade: [
     { name: "Receita Total", keywords: ["Receita Total"], order: 1 },
-    { name: "Receita Empresarial", keywords: ["Receita Empresarial"], order: 2 },
-    { name: "Receita Tributário", keywords: ["Receita Tributário"], order: 3 },
-    { name: "Receita Trabalhista", keywords: ["Receita Trabalhista"], order: 4 },
-    { name: "Receita Sucumbência", keywords: ["Receita Sucumbência"], order: 5 },
-    { name: "Receita Patenteia", keywords: ["Receita Patenteia"], order: 6 },
+    { name: "Assessoria", keywords: ["Assessoria"], order: 2 },
+    { name: "Consultoria", keywords: ["Consultoria"], order: 3 },
+    { name: "Pontual", keywords: ["Pontual"], order: 4 },
+    { name: "Sucumbência", keywords: ["Sucumbência"], order: 5 },
+    { name: "Patenteia", keywords: ["Receita Patenteia"], order: 6 },
     { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 7 },
     { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 8 },
     { name: "Indicadores de Rentabilidade", keywords: ["Lucratividade", "Margem"], order: 9 },
-    { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo"], order: 10 },
+    { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo", "Cumprimento de Orçamento", "SLA Externo"], order: 10 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   execucao_comercial: [
