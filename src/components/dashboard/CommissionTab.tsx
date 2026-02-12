@@ -222,12 +222,17 @@ export function CommissionTab({
       trabBase = 0;
     }
 
+    const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
+    const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
+
     const totalEmpAss = empBase + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
+    const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
     const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
     const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
     const totalTrabAss = trabBase + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
+    const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
     const achieved = selectedMonth !== null
-      ? totalEmpAss + tribAss + tribPont + totalTrabAss
+      ? totalEmpAss + empConsult + tribAss + tribPont + totalTrabAss + trabConsult
       : (accumulatedValues[TOTAL_CONTRATOS_ID] ?? 0);
 
     // Get target from monthly_targets for Total de Contratos
