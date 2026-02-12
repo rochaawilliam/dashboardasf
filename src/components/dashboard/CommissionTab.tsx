@@ -26,8 +26,9 @@ const COMMISSION_TIERS = [
 ];
 
 function getCommission(percentage: number): number {
+  const rounded = Math.round(percentage);
   for (const tier of COMMISSION_TIERS) {
-    if (percentage >= tier.min) return tier.value;
+    if (rounded >= tier.min) return tier.value;
   }
   return 0;
 }
@@ -63,7 +64,8 @@ function CommissionCard({
   unit: string;
   commission: number;
 }) {
-  const percentage = target > 0 ? (achieved / target) * 100 : 0;
+  const rawPercentage = target > 0 ? (achieved / target) * 100 : 0;
+  const percentage = Math.round(rawPercentage);
   
   // Find the highest tier the percentage qualifies for
   const activeTier = COMMISSION_TIERS.find(t => percentage >= t.min);
@@ -93,7 +95,7 @@ function CommissionCard({
             "text-lg font-bold",
             percentage >= 100 ? "text-green-400" : percentage >= 80 ? "text-yellow-400" : "text-red-400"
           )}>
-            {Math.floor(percentage)}%
+            {percentage}%
           </span>
         </div>
 
