@@ -18,7 +18,6 @@ export function MetricGoalEditor({ metric }: MetricGoalEditorProps) {
   const handleSave = () => {
     updateMetric.mutate({
       id: metric.id,
-      current_value: metric.current_value,
       target_value: parseFloat(targetValue),
     });
     setIsEditing(false);
