@@ -13,7 +13,7 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Receita Total", keywords: ["Receita Total"], order: 1 },
     { name: "Assessoria", keywords: ["Assessoria"], excludeKeywords: ["Ticket Médio"], order: 2 },
     { name: "Consultoria", keywords: ["Consultoria"], excludeKeywords: ["Ticket Médio"], order: 3 },
-    { name: "Pontual", keywords: ["Pontual"], excludeKeywords: ["Ticket Médio"], order: 4 },
+    { name: "Pontual", keywords: ["Pontual", "Outras Receitas"], excludeKeywords: ["Ticket Médio"], order: 4 },
     { name: "Sucumbência", keywords: ["Sucumbência"], order: 5 },
     { name: "Patenteia", keywords: ["Receita Patenteia"], order: 6 },
     { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 7 },

@@ -101,6 +101,24 @@ const categoryOrder: MetricCategory[] = [
   "gestao_pessoas",
   "aprendizado_crescimento",
 ];
+// Collapsible subcategory wrapper
+function CollapsibleSubcategory({ name, count, collapsible, defaultCollapsed, children }: { 
+  name: string; count: number; collapsible: boolean; defaultCollapsed: boolean; children: React.ReactNode 
+}) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  return (
+    <div className="mb-3 sm:mb-4">
+      <SubcategoryHeader 
+        name={name} 
+        count={count} 
+        collapsible={collapsible} 
+        defaultCollapsed={defaultCollapsed}
+        onToggle={setCollapsed}
+      />
+      {!collapsed && children}
+    </div>
+  );
+}
 
 const Index = () => {
   const queryClient = useQueryClient();
@@ -531,33 +549,75 @@ const Index = () => {
                             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
                             const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
                             
+                            // Sections that should be collapsible and minimized by default
+                            const collapsibleSections = ["Receita Recorrente", "Tickets Médios", "Indicadores de Rentabilidade", "Saúde Financeira", "Outros Indicadores"];
+                            const isCollapsible = category === "lucratividade" && collapsibleSections.includes(subcat.name);
+                            
+                            // Compute Receita Total as sum of revenue subcategories
+                            const isReceitaTotal = category === "lucratividade" && subcat.name === "Receita Total";
+                            const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                            
+                            const getReceitaTotalMetrics = () => {
+                              if (!isReceitaTotal) return subcat.metrics;
+                              return subcat.metrics.map((metric) => {
+                                if (!metric.name.includes("Receita Total")) return metric;
+                                // Sum all revenue metrics from other subcategories
+                                const revenueMetrics = organizedSubcategories
+                                  .filter((s) => revenueSubcats.includes(s.name))
+                                  .flatMap((s) => s.metrics);
+                                
+                                const computedMonthly = revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
+                                const computedAccumulated = revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                
+                                return {
+                                  ...metric,
+                                  current_value: selectedMonth === null ? computedAccumulated : metric.current_value,
+                                  _computedMonthly: computedMonthly,
+                                  _computedAccumulated: computedAccumulated,
+                                };
+                              });
+                            };
+                            
+                            const displayMetrics = getReceitaTotalMetrics();
+                            
                             return (
-                              <div key={subcat.name} className="mb-3 sm:mb-4">
-                                <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
+                              <CollapsibleSubcategory
+                                key={subcat.name}
+                                name={subcat.name}
+                                count={displayMetrics.length}
+                                collapsible={isCollapsible}
+                                defaultCollapsed={isCollapsible}
+                              >
                                 <div className="dashboard-grid">
-                                  {subcat.metrics.map((metric, metricIndex) => (
-                                    <div 
-                                      key={metric.id}
-                                      data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
-                                    >
-                                      <MetricCardMonthly 
-                                        metric={metric} 
-                                        monthlyValue={monthlyValues[metric.id] ?? null}
-                                        isMonthSelected={selectedMonth !== null}
-                                        accumulatedValue={accumulatedValues[metric.id] ?? 0}
-                                        onSave={selectedMonth !== null ? handleSaveMonthlyValue : undefined}
-                                        isSaving={savingMetricId === metric.id}
-                                        selectedMonthName={selectedMonthName}
-                                        historyData={historyData}
-                                        selectedYear={selectedYear}
-                                        selectedMonth={selectedMonth}
-                                        monthlyTargets={monthlyTargets}
-                                        onCardClick={() => setDrilldownMetric(metric)}
-                                      />
-                                    </div>
-                                  ))}
+                                  {displayMetrics.map((metric, metricIndex) => {
+                                    const isAutoSum = isReceitaTotal && metric.name.includes("Receita Total");
+                                    const computedMonthly = (metric as any)._computedMonthly;
+                                    const computedAccumulated = (metric as any)._computedAccumulated;
+                                    
+                                    return (
+                                      <div 
+                                        key={metric.id}
+                                        data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
+                                      >
+                                        <MetricCardMonthly 
+                                          metric={isAutoSum ? { ...metric, current_value: computedAccumulated ?? 0 } : metric}
+                                          monthlyValue={isAutoSum ? computedMonthly : (monthlyValues[metric.id] ?? null)}
+                                          isMonthSelected={selectedMonth !== null}
+                                          accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (accumulatedValues[metric.id] ?? 0)}
+                                          onSave={isAutoSum ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
+                                          isSaving={savingMetricId === metric.id}
+                                          selectedMonthName={selectedMonthName}
+                                          historyData={historyData}
+                                          selectedYear={selectedYear}
+                                          selectedMonth={selectedMonth}
+                                          monthlyTargets={monthlyTargets}
+                                          onCardClick={isAutoSum ? undefined : () => setDrilldownMetric(metric)}
+                                        />
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              </div>
+                              </CollapsibleSubcategory>
                             );
                           })}
                           
