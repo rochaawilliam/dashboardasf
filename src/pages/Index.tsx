@@ -283,36 +283,13 @@ const Index = () => {
   // Compute previous month's contract values from history
   const prevMonthContractValues = useMemo(() => {
     const refMonth = selectedMonth ?? new Date().getMonth() + 1;
-    const refYear = selectedYear;
     
-    // For January, use fixed values (no previous year data)
-    if (refMonth === 1) {
-      return { empresarial: 20, trabalhista: 14 };
-    }
-    
-    if (!historyData) return { empresarial: 20, trabalhista: 14 };
-    
-    const prevMonth = refMonth - 1;
-    
-    // Start with baseline values
-    let empSum = 20;
-    let trabSum = 14;
-    
-    // Add all new contracts from the previous month's history
-    historyData.forEach((h) => {
-      const date = parseISO(h.recorded_at);
-      if (date.getFullYear() === refYear && date.getMonth() + 1 === prevMonth) {
-        if (h.metric_id === CONTRATOS_EMP_ASSESSORIA_ID || h.metric_id === CONTRATOS_EMP_CONSULTORIA_ID) {
-          empSum += h.value;
-        }
-        if (h.metric_id === CONTRATOS_TRAB_ASSESSORIA_ID || h.metric_id === CONTRATOS_TRAB_CONSULTORIA_ID) {
-          trabSum += h.value;
-        }
-      }
-    });
-    
-    return { empresarial: empSum, trabalhista: trabSum };
-  }, [historyData, selectedMonth, selectedYear]);
+    // Fixed increment: Jan=20/14, Feb=21/15, Mar=22/16, etc.
+    return {
+      empresarial: 20 + (refMonth - 1),
+      trabalhista: 14 + (refMonth - 1),
+    };
+  }, [selectedMonth]);
 
   // Create metrics with adjusted values based on selection
   const adjustedMetrics = useMemo(() => {
