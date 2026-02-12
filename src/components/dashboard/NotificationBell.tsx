@@ -41,7 +41,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { parseISO } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 import { useNotificationState } from "@/hooks/useNotificationState";
 
 interface NotificationBellProps {
@@ -72,7 +72,7 @@ function calculateTrend(
 ): { trend: TrendType; percent: number; current: number; previous: number | null } {
   const metricHistory = historyData
     .filter(h => h.metric_id === metricId)
-    .sort((a, b) => parseISO(b.recorded_at).getTime() - parseISO(a.recorded_at).getTime());
+    .sort((a, b) => parseLocalDate(b.recorded_at).getTime() - parseLocalDate(a.recorded_at).getTime());
   
   if (metricHistory.length < 2) {
     return { trend: "unknown", percent: 0, current: metricHistory[0]?.value ?? 0, previous: null };

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { parseISO } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { MetricHistory } from "@/hooks/useMetrics";
@@ -53,7 +53,7 @@ export function MonthSelector({
     
     const launched = new Set<number>();
     historyData.forEach((h) => {
-      const date = parseISO(h.recorded_at);
+      const date = parseLocalDate(h.recorded_at);
       if (date.getFullYear() === selectedYear) {
         launched.add(date.getMonth() + 1);
       }

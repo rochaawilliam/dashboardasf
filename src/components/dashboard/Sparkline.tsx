@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { MetricHistory } from "@/hooks/useMetrics";
-import { parseISO, format } from "date-fns";
+import { format } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 import { ptBR } from "date-fns/locale";
 import {
   Popover,
@@ -34,13 +35,13 @@ export function Sparkline({
   const monthlyData = useMemo(() => {
     const metricHistory = historyData
       .filter(h => h.metric_id === metricId)
-      .filter(h => parseISO(h.recorded_at).getFullYear() === selectedYear)
-      .sort((a, b) => parseISO(a.recorded_at).getTime() - parseISO(b.recorded_at).getTime());
+      .filter(h => parseLocalDate(h.recorded_at).getFullYear() === selectedYear)
+      .sort((a, b) => parseLocalDate(a.recorded_at).getTime() - parseLocalDate(b.recorded_at).getTime());
 
     // Group by month and take latest value per month
     const byMonth: Record<number, { value: number; date: Date }> = {};
     metricHistory.forEach(h => {
-      const date = parseISO(h.recorded_at);
+      const date = parseLocalDate(h.recorded_at);
       const month = date.getMonth();
       byMonth[month] = { value: h.value, date };
     });

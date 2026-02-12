@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { parseISO, format } from "date-fns";
+import { format } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -174,7 +175,7 @@ const Index = () => {
   const getHistoryId = useCallback((metricId: string) => {
     if (!historyData || selectedMonth === null) return null;
     const record = historyData.find((h) => {
-      const date = parseISO(h.recorded_at);
+      const date = parseLocalDate(h.recorded_at);
       return h.metric_id === metricId && 
              date.getFullYear() === selectedYear && 
              date.getMonth() + 1 === selectedMonth;
@@ -237,7 +238,7 @@ const Index = () => {
     
     const values: Record<string, number> = {};
     historyData.forEach((h) => {
-      const date = parseISO(h.recorded_at);
+      const date = parseLocalDate(h.recorded_at);
       if (date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth) {
         values[h.metric_id] = h.value;
       }
@@ -251,7 +252,7 @@ const Index = () => {
     
     const values: Record<string, number> = {};
     historyData.forEach((h) => {
-      const date = parseISO(h.recorded_at);
+      const date = parseLocalDate(h.recorded_at);
       if (date.getFullYear() === selectedYear) {
         values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
       }
@@ -339,7 +340,7 @@ const Index = () => {
     if (!historyData || !metrics) return {};
     
     const filtered = historyData.filter((h) => {
-      const date = parseISO(h.recorded_at);
+      const date = parseLocalDate(h.recorded_at);
       return date.getFullYear() === selectedYear;
     });
     
