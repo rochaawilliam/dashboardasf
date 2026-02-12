@@ -18,6 +18,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,7 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/error-handler";
-import { Pencil, Trash2, Check, X, Loader2, History } from "lucide-react";
+import { Pencil, Trash2, Check, X, Loader2, History, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Metric } from "@/hooks/useMetrics";
@@ -52,6 +59,11 @@ interface HistoryEntry {
   created_at: string;
 }
 
+const MONTH_NAMES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
 export function MetricDrilldownDialog({
   metric,
   open,
@@ -62,6 +74,10 @@ export function MetricDrilldownDialog({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showNewEntry, setShowNewEntry] = useState(false);
+  const [newValue, setNewValue] = useState("");
+  const [newMonth, setNewMonth] = useState<string>((new Date().getMonth() + 1).toString());
+  const [newYear, setNewYear] = useState<string>(new Date().getFullYear().toString());
   const queryClient = useQueryClient();
 
   const { data: history, isLoading } = useQuery({
@@ -78,6 +94,12 @@ export function MetricDrilldownDialog({
     enabled: open,
   });
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["metric_history"] });
+    queryClient.invalidateQueries({ queryKey: ["metric_drilldown", metric.id] });
+    queryClient.invalidateQueries({ queryKey: ["metrics"] });
+  };
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: number }) => {
       const { error } = await supabase
@@ -87,9 +109,7 @@ export function MetricDrilldownDialog({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["metric_history"] });
-      queryClient.invalidateQueries({ queryKey: ["metric_drilldown", metric.id] });
-      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      invalidateAll();
       setEditingId(null);
       toast({ title: "Valor atualizado", description: "O registro foi atualizado com sucesso." });
     },
@@ -107,14 +127,53 @@ export function MetricDrilldownDialog({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["metric_history"] });
-      queryClient.invalidateQueries({ queryKey: ["metric_drilldown", metric.id] });
-      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      invalidateAll();
       setDeleteId(null);
       toast({ title: "Registro excluído", description: "O lançamento foi removido com sucesso." });
     },
     onError: (error) => {
       toast({ title: "Erro ao excluir", description: sanitizeError(error), variant: "destructive" });
+    },
+  });
+
+  const insertMutation = useMutation({
+    mutationFn: async ({ value, month, year }: { value: number; month: number; year: number }) => {
+      const recordedAt = format(new Date(year, month - 1, 1), "yyyy-MM-dd");
+
+      // Check if entry already exists for this month/year
+      const { data: existing } = await supabase
+        .from("metric_history")
+        .select("id")
+        .eq("metric_id", metric.id)
+        .eq("recorded_at", recordedAt)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("metric_history")
+          .update({ value })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("metric_history")
+          .insert({
+            metric_id: metric.id,
+            value,
+            recorded_at: recordedAt,
+            period_type: "monthly",
+          });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      invalidateAll();
+      setShowNewEntry(false);
+      setNewValue("");
+      toast({ title: "Lançamento criado", description: "O valor foi registrado com sucesso." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao criar lançamento", description: sanitizeError(error), variant: "destructive" });
     },
   });
 
@@ -137,6 +196,15 @@ export function MetricDrilldownDialog({
     setEditValue("");
   };
 
+  const handleInsert = () => {
+    const numValue = parseFloat(newValue);
+    if (isNaN(numValue)) {
+      toast({ title: "Valor inválido", description: "Insira um número válido.", variant: "destructive" });
+      return;
+    }
+    insertMutation.mutate({ value: numValue, month: parseInt(newMonth), year: parseInt(newYear) });
+  };
+
   const formatDate = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "MMMM 'de' yyyy", { locale: ptBR });
@@ -146,6 +214,8 @@ export function MetricDrilldownDialog({
   };
 
   const hasActions = canEdit || canDelete;
+  const currentYear = new Date().getFullYear();
+  const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
 
   return (
     <>
@@ -160,6 +230,86 @@ export function MetricDrilldownDialog({
               Meta anual: {formatMetricValue(metric.target_value, metric.unit, metric.name)}
             </p>
           </DialogHeader>
+
+          {/* New entry form */}
+          {canEdit && (
+            <div className="border border-border rounded-lg p-3 bg-muted/30">
+              {showNewEntry ? (
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-foreground">Novo Lançamento</p>
+                  <div className="flex flex-wrap items-end gap-2">
+                    <div className="flex-1 min-w-[100px]">
+                      <label className="text-[10px] text-muted-foreground">Mês</label>
+                      <Select value={newMonth} onValueChange={setNewMonth}>
+                        <SelectTrigger className="h-8 text-xs mt-0.5">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MONTH_NAMES.map((name, i) => (
+                            <SelectItem key={i} value={(i + 1).toString()}>{name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-20">
+                      <label className="text-[10px] text-muted-foreground">Ano</label>
+                      <Select value={newYear} onValueChange={setNewYear}>
+                        <SelectTrigger className="h-8 text-xs mt-0.5">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {yearOptions.map((y) => (
+                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex-1 min-w-[80px]">
+                      <label className="text-[10px] text-muted-foreground">Valor ({metric.unit})</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={newValue}
+                        onChange={(e) => setNewValue(e.target.value)}
+                        className="h-8 text-xs mt-0.5"
+                        placeholder="0.00"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleInsert}
+                      disabled={insertMutation.isPending || !newValue}
+                      className="h-7 text-xs gap-1"
+                    >
+                      {insertMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                      Salvar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setShowNewEntry(false); setNewValue(""); }}
+                      className="h-7 text-xs"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNewEntry(true)}
+                  className="h-7 text-xs gap-1 w-full text-primary hover:text-primary"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Novo Lançamento
+                </Button>
+              )}
+            </div>
+          )}
 
           <div className="flex-1 overflow-auto">
             {isLoading ? (
