@@ -4,19 +4,20 @@ import type { Metric, MetricCategory } from "@/hooks/useMetrics";
 export interface SubcategoryConfig {
   name: string;
   keywords: string[];
+  excludeKeywords?: string[];
   order: number;
 }
 
 export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
   lucratividade: [
     { name: "Receita Total", keywords: ["Receita Total"], order: 1 },
-    { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 2 },
-    { name: "Assessoria", keywords: ["Assessoria"], order: 3 },
-    { name: "Consultoria", keywords: ["Consultoria"], order: 4 },
-    { name: "Pontual", keywords: ["Pontual"], order: 5 },
-    { name: "Sucumbência", keywords: ["Sucumbência"], order: 6 },
-    { name: "Patenteia", keywords: ["Receita Patenteia"], order: 7 },
-    { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 8 },
+    { name: "Assessoria", keywords: ["Assessoria"], excludeKeywords: ["Ticket Médio"], order: 2 },
+    { name: "Consultoria", keywords: ["Consultoria"], excludeKeywords: ["Ticket Médio"], order: 3 },
+    { name: "Pontual", keywords: ["Pontual"], excludeKeywords: ["Ticket Médio"], order: 4 },
+    { name: "Sucumbência", keywords: ["Sucumbência"], order: 5 },
+    { name: "Patenteia", keywords: ["Receita Patenteia"], order: 6 },
+    { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 7 },
+    { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 8 },
     { name: "Indicadores de Rentabilidade", keywords: ["Lucratividade", "Margem"], order: 9 },
     { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo", "Cumprimento de Orçamento", "SLA Externo"], order: 10 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
@@ -87,8 +88,11 @@ export function organizeMetricsBySubcategory(
       const matchesKeyword = subcat.keywords.some((keyword) =>
         metric.name.toLowerCase().includes(keyword.toLowerCase())
       );
+      const matchesExclude = subcat.excludeKeywords?.some((keyword) =>
+        metric.name.toLowerCase().includes(keyword.toLowerCase())
+      ) || false;
       
-      if (matchesKeyword && !usedMetricIds.has(metric.id)) {
+      if (matchesKeyword && !matchesExclude && !usedMetricIds.has(metric.id)) {
         result.get(subcat.name)?.metrics.push(metric);
         usedMetricIds.add(metric.id);
         assigned = true;
