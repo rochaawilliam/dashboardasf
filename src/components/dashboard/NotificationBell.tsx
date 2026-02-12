@@ -160,7 +160,7 @@ const getSeverityBadge = (severity: AlertSeverity) => {
 
 export function NotificationBell({ metrics, historyData = [], selectedYear }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [filter, setFilter] = useState<"all" | "unread" | "critical">("all");
+  const [filter, setFilter] = useState<"all" | "unread" | "read" | "critical">("all");
   const notifState = useNotificationState();
   
   const allAlerts: MetricAlert[] = metrics.map(metric => {
@@ -192,6 +192,7 @@ export function NotificationBell({ metrics, historyData = [], selectedYear }: No
   // Apply filter
   const filteredAlerts = visibleAlerts.filter(a => {
     if (filter === "unread") return !notifState.isRead(a.metric.id);
+    if (filter === "read") return notifState.isRead(a.metric.id);
     if (filter === "critical") return a.severity === "critical" || a.severity === "warning";
     return true;
   });
@@ -282,7 +283,7 @@ export function NotificationBell({ metrics, historyData = [], selectedYear }: No
         
         {/* Filter tabs */}
         <div className="px-3 py-1.5 bg-muted/30 border-b border-border flex items-center gap-1">
-          {(["all", "unread", "critical"] as const).map(f => (
+          {(["all", "unread", "read", "critical"] as const).map(f => (
             <Button
               key={f}
               variant={filter === f ? "secondary" : "ghost"}
@@ -290,7 +291,7 @@ export function NotificationBell({ metrics, historyData = [], selectedYear }: No
               className="h-6 text-[10px] px-2"
               onClick={() => setFilter(f)}
             >
-              {f === "all" ? "Todas" : f === "unread" ? "Não lidas" : "Críticas"}
+              {f === "all" ? "Todas" : f === "unread" ? "Não lidas" : f === "read" ? "Lidas" : "Críticas"}
             </Button>
           ))}
         </div>
