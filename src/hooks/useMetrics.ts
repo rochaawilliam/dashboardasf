@@ -158,10 +158,14 @@ export function useUpdateMetric() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, current_value, target_value }: { id: string; current_value: number; target_value: number }) => {
+    mutationFn: async ({ id, current_value, target_value }: { id: string; current_value?: number; target_value?: number }) => {
+      const updateData: { current_value?: number; target_value?: number } = {};
+      if (current_value !== undefined) updateData.current_value = current_value;
+      if (target_value !== undefined) updateData.target_value = target_value;
+      
       const { data, error } = await supabase
         .from("metrics")
-        .update({ current_value, target_value })
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
