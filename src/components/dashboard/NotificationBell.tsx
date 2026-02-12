@@ -241,29 +241,39 @@ export function NotificationBell({ metrics, historyData = [], selectedYear }: No
               Central de Alertas
             </SheetTitle>
             
-            {/* Actions dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleMarkAllRead} className="text-xs gap-2">
+            <div className="flex items-center gap-1">
+              {/* Mark all as read button */}
+              {unreadCount > 0 && (
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 px-2" onClick={handleMarkAllRead}>
                   <CheckCheck className="h-3.5 w-3.5" />
-                  Marcar todas como lidas
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDismissAllRead} className="text-xs gap-2">
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Limpar lidas
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={notifState.restoreAll} className="text-xs gap-2">
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Restaurar todas
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  Todas lidas
+                </Button>
+              )}
+              
+              {/* Actions dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={handleMarkAllRead} className="text-xs gap-2">
+                    <CheckCheck className="h-3.5 w-3.5" />
+                    Marcar todas como lidas
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDismissAllRead} className="text-xs gap-2">
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Limpar lidas
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={notifState.restoreAll} className="text-xs gap-2">
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Restaurar todas
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           
           {/* Summary counts */}
