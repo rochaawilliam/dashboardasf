@@ -27,11 +27,13 @@ Deno.serve(async (req) => {
 
     // Verify the requester's token
     const token = authHeader.replace('Bearer ', '');
+    console.log('Verifying token for create-user...');
     const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     
     if (userError || !userData?.user) {
+      console.error('Auth verification failed:', userError?.message);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized: ' + (userError?.message || 'Invalid token') }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
