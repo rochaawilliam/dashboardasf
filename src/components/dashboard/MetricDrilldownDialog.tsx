@@ -250,44 +250,56 @@ export function MetricDrilldownDialog({
               {showNewEntry ? (
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-foreground">Novo Lançamento</p>
-                  <div className="flex flex-wrap items-end gap-2">
-                    <div className="flex-1 min-w-[100px]">
-                      <label className="text-[10px] text-muted-foreground">Mês de Referência</label>
-                      <Select value={newMonth} onValueChange={setNewMonth}>
-                        <SelectTrigger className="h-8 text-xs mt-0.5">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {MONTH_NAMES.map((name, i) => (
-                            <SelectItem key={i} value={(i + 1).toString()}>{name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  <div className="space-y-2">
+                    <div className="flex items-end gap-2">
+                      <div className="w-20">
+                        <label className="text-[10px] text-muted-foreground">Ano</label>
+                        <Select value={newYear} onValueChange={setNewYear}>
+                          <SelectTrigger className="h-8 text-xs mt-0.5">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover border border-border z-50">
+                            {yearOptions.map((y) => (
+                              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex-1 min-w-[80px]">
+                        <label className="text-[10px] text-muted-foreground">Valor ({metric.unit})</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={newValue}
+                          onChange={(e) => setNewValue(e.target.value)}
+                          className="h-8 text-xs mt-0.5"
+                          placeholder="0.00"
+                          autoFocus
+                        />
+                      </div>
                     </div>
-                    <div className="w-20">
-                      <label className="text-[10px] text-muted-foreground">Ano</label>
-                      <Select value={newYear} onValueChange={setNewYear}>
-                        <SelectTrigger className="h-8 text-xs mt-0.5">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {yearOptions.map((y) => (
-                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex-1 min-w-[80px]">
-                      <label className="text-[10px] text-muted-foreground">Valor ({metric.unit})</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={newValue}
-                        onChange={(e) => setNewValue(e.target.value)}
-                        className="h-8 text-xs mt-0.5"
-                        placeholder="0.00"
-                        autoFocus
-                      />
+                    <div>
+                      <label className="text-[10px] text-muted-foreground mb-1 block">Mês de Referência</label>
+                      <div className="grid grid-cols-4 gap-1">
+                        {MONTH_NAMES.map((name, i) => {
+                          const monthValue = (i + 1).toString();
+                          const isSelected = newMonth === monthValue;
+                          return (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => setNewMonth(monthValue)}
+                              className={`rounded-md px-2 py-1.5 text-xs font-medium transition-colors border ${
+                                isSelected
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                              }`}
+                            >
+                              {name.substring(0, 3)}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                   <div>
