@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       metric_history: {
         Row: {
+          comment: string | null
           created_at: string
           id: string
           metric_id: string
@@ -24,6 +25,7 @@ export type Database = {
           value: number
         }
         Insert: {
+          comment?: string | null
           created_at?: string
           id?: string
           metric_id: string
@@ -32,6 +34,7 @@ export type Database = {
           value: number
         }
         Update: {
+          comment?: string | null
           created_at?: string
           id?: string
           metric_id?: string

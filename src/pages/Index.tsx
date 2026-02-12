@@ -240,7 +240,7 @@ const Index = () => {
     historyData.forEach((h) => {
       const date = parseLocalDate(h.recorded_at);
       if (date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth) {
-        values[h.metric_id] = h.value;
+        values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
       }
     });
     return values;

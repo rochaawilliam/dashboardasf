@@ -58,6 +58,7 @@ interface HistoryEntry {
   recorded_at: string;
   period_type: string;
   created_at: string;
+  comment: string | null;
 }
 
 const MONTH_NAMES = [
@@ -78,7 +79,10 @@ export function MetricDrilldownDialog({
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [newValue, setNewValue] = useState("");
   const [newMonth, setNewMonth] = useState<string>((new Date().getMonth() + 1).toString());
+  const [newDay, setNewDay] = useState<string>(new Date().getDate().toString());
   const [newYear, setNewYear] = useState<string>(new Date().getFullYear().toString());
+  const [newComment, setNewComment] = useState("");
+  const [editComment, setEditComment] = useState("");
   const queryClient = useQueryClient();
 
   const { data: history, isLoading } = useQuery({
@@ -102,10 +106,10 @@ export function MetricDrilldownDialog({
   };
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, value }: { id: string; value: number }) => {
+    mutationFn: async ({ id, value, comment }: { id: string; value: number; comment?: string }) => {
       const { error } = await supabase
         .from("metric_history")
-        .update({ value })
+        .update({ value, comment: comment ?? null } as any)
         .eq("id", id);
       if (error) throw error;
     },
@@ -138,39 +142,25 @@ export function MetricDrilldownDialog({
   });
 
   const insertMutation = useMutation({
-    mutationFn: async ({ value, month, year }: { value: number; month: number; year: number }) => {
-      const recordedAt = format(new Date(year, month - 1, 1), "yyyy-MM-dd");
+    mutationFn: async ({ value, month, day, year, comment }: { value: number; month: number; day: number; year: number; comment?: string }) => {
+      const recordedAt = format(new Date(year, month - 1, day), "yyyy-MM-dd");
 
-      // Check if entry already exists for this month/year
-      const { data: existing } = await supabase
+      const { error } = await supabase
         .from("metric_history")
-        .select("id")
-        .eq("metric_id", metric.id)
-        .eq("recorded_at", recordedAt)
-        .maybeSingle();
-
-      if (existing) {
-        const { error } = await supabase
-          .from("metric_history")
-          .update({ value })
-          .eq("id", existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("metric_history")
-          .insert({
-            metric_id: metric.id,
-            value,
-            recorded_at: recordedAt,
-            period_type: "monthly",
-          });
-        if (error) throw error;
-      }
+        .insert({
+          metric_id: metric.id,
+          value,
+          recorded_at: recordedAt,
+          period_type: "monthly",
+          comment: comment || null,
+        } as any);
+      if (error) throw error;
     },
     onSuccess: () => {
       invalidateAll();
       setShowNewEntry(false);
       setNewValue("");
+      setNewComment("");
       toast({ title: "Lançamento criado", description: "O valor foi registrado com sucesso." });
     },
     onError: (error) => {
@@ -178,10 +168,6 @@ export function MetricDrilldownDialog({
     },
   });
 
-  const handleEdit = (entry: HistoryEntry) => {
-    setEditingId(entry.id);
-    setEditValue(entry.value.toString());
-  };
 
   const handleSave = (id: string) => {
     const numValue = parseFloat(editValue);
@@ -189,12 +175,13 @@ export function MetricDrilldownDialog({
       toast({ title: "Valor inválido", description: "Insira um número válido.", variant: "destructive" });
       return;
     }
-    updateMutation.mutate({ id, value: numValue });
+    updateMutation.mutate({ id, value: numValue, comment: editComment.trim() || undefined });
   };
 
   const handleCancel = () => {
     setEditingId(null);
     setEditValue("");
+    setEditComment("");
   };
 
   const handleInsert = () => {
@@ -203,12 +190,24 @@ export function MetricDrilldownDialog({
       toast({ title: "Valor inválido", description: "Insira um número válido.", variant: "destructive" });
       return;
     }
-    insertMutation.mutate({ value: numValue, month: parseInt(newMonth), year: parseInt(newYear) });
+    insertMutation.mutate({ 
+      value: numValue, 
+      month: parseInt(newMonth), 
+      day: parseInt(newDay),
+      year: parseInt(newYear),
+      comment: newComment.trim() || undefined,
+    });
+  };
+
+  const handleEdit = (entry: HistoryEntry) => {
+    setEditingId(entry.id);
+    setEditValue(entry.value.toString());
+    setEditComment(entry.comment || "");
   };
 
   const formatDate = (dateStr: string) => {
     try {
-      return format(parseLocalDate(dateStr), "MMMM 'de' yyyy", { locale: ptBR });
+      return format(parseLocalDate(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
     } catch {
       return dateStr;
     }
@@ -239,6 +238,17 @@ export function MetricDrilldownDialog({
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-foreground">Novo Lançamento</p>
                   <div className="flex flex-wrap items-end gap-2">
+                    <div className="w-16">
+                      <label className="text-[10px] text-muted-foreground">Dia</label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="31"
+                        value={newDay}
+                        onChange={(e) => setNewDay(e.target.value)}
+                        className="h-8 text-xs mt-0.5"
+                      />
+                    </div>
                     <div className="flex-1 min-w-[100px]">
                       <label className="text-[10px] text-muted-foreground">Mês</label>
                       <Select value={newMonth} onValueChange={setNewMonth}>
@@ -278,6 +288,16 @@ export function MetricDrilldownDialog({
                       />
                     </div>
                   </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Comentário (opcional)</label>
+                    <Input
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="h-8 text-xs mt-0.5"
+                      placeholder="Breve descrição do lançamento..."
+                      maxLength={200}
+                    />
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -291,7 +311,7 @@ export function MetricDrilldownDialog({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => { setShowNewEntry(false); setNewValue(""); }}
+                      onClick={() => { setShowNewEntry(false); setNewValue(""); setNewComment(""); }}
                       className="h-7 text-xs"
                     >
                       Cancelar
@@ -321,15 +341,16 @@ export function MetricDrilldownDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Período</TableHead>
+                    <TableHead>Data</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
+                    <TableHead>Comentário</TableHead>
                     {hasActions && <TableHead className="text-right w-[100px]">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {history.map((entry) => (
                     <TableRow key={entry.id}>
-                      <TableCell className="capitalize text-sm">
+                      <TableCell className="capitalize text-sm whitespace-nowrap">
                         {formatDate(entry.recorded_at)}
                       </TableCell>
                       <TableCell className="text-right">
@@ -345,6 +366,21 @@ export function MetricDrilldownDialog({
                         ) : (
                           <span className="text-sm font-medium">
                             {formatMetricValue(entry.value, metric.unit, metric.name)}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-[150px]">
+                        {editingId === entry.id ? (
+                          <Input
+                            value={editComment}
+                            onChange={(e) => setEditComment(e.target.value)}
+                            className="h-8 text-xs"
+                            placeholder="Comentário..."
+                            maxLength={200}
+                          />
+                        ) : (
+                          <span className="text-xs text-muted-foreground truncate block">
+                            {entry.comment || "—"}
                           </span>
                         )}
                       </TableCell>
