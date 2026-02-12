@@ -28,28 +28,28 @@ export function DashboardHeader({
   const { isAdmin } = useUserRole();
 
   return (
-    <header className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-border/30">
-      <div className="flex items-center gap-2 sm:gap-3">
+    <header className="mb-2 sm:mb-4 pb-2 sm:pb-4 border-b border-border/30">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         {/* Mobile drawer trigger */}
         {mobileDrawer}
         
         <img 
           src={asfLogo} 
           alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
-          className="h-8 sm:h-10 md:h-11 w-auto"
+          className="h-7 sm:h-10 md:h-11 w-auto"
         />
         <div className="h-6 sm:h-8 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-base sm:text-lg md:text-xl font-semibold text-foreground tracking-wide truncate">
+          <h1 className="text-sm sm:text-lg md:text-xl font-semibold text-foreground tracking-wide truncate">
             Dashboard de Metas
           </h1>
-          <p className="text-muted-foreground text-[9px] sm:text-[11px] uppercase tracking-wider mt-0.5 truncate">
+          <p className="text-muted-foreground text-[8px] sm:text-[11px] uppercase tracking-wider mt-0.5 truncate hidden sm:block">
             Setor de Crescimento • Comercial & Marketing
           </p>
         </div>
         
         {/* Action buttons - inline with header */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {user && (
             <>
               <div data-tour="notifications">
@@ -61,12 +61,12 @@ export function DashboardHeader({
                   />
                 )}
               </div>
-              <TourButton />
+              <div className="hidden sm:block"><TourButton /></div>
               <UserSettingsPanel />
               {isAdmin && (
                 <Link to="/admin">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 border border-border/50" title="Painel Administrativo">
-                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-9 sm:w-9 border border-border/50" title="Painel Administrativo">
+                    <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </Link>
               )}
@@ -80,11 +80,11 @@ export function DashboardHeader({
             <Link to="/login">
               <Button 
                 variant="default" 
-                className="h-8 sm:h-9 px-3 gap-1.5"
+                className="h-7 sm:h-9 px-2 sm:px-3 gap-1"
                 title="Entrar"
               >
-                <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm font-medium">Entrar</span>
+                <LogIn className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="text-[10px] sm:text-sm font-medium">Entrar</span>
               </Button>
             </Link>
           )}
