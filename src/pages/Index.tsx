@@ -268,23 +268,31 @@ const Index = () => {
   const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
   const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
   const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
+  
+  // IDs for Total Contratos Assessoria
+  const TOTAL_EMP_ASSESSORIA_ID = "b1c2d3e4-f5a6-7890-abcd-ef1234567890";
+  const TOTAL_TRAB_ASSESSORIA_ID = "c2d3e4f5-a6b7-8901-bcde-f12345678901";
 
   // Compute previous month's contract values from history
   const prevMonthContractValues = useMemo(() => {
-    if (!historyData) return { empresarial: 0, trabalhista: 0 };
-    
-    // Determine previous month
     const refMonth = selectedMonth ?? new Date().getMonth() + 1;
     const refYear = selectedYear;
-    const prevMonth = refMonth === 1 ? 12 : refMonth - 1;
-    const prevYear = refMonth === 1 ? refYear - 1 : refYear;
+    
+    // For January, use fixed values (no previous year data)
+    if (refMonth === 1) {
+      return { empresarial: 20, trabalhista: 14 };
+    }
+    
+    if (!historyData) return { empresarial: 0, trabalhista: 0 };
+    
+    const prevMonth = refMonth - 1;
     
     let empSum = 0;
     let trabSum = 0;
     
     historyData.forEach((h) => {
       const date = parseISO(h.recorded_at);
-      if (date.getFullYear() === prevYear && date.getMonth() + 1 === prevMonth) {
+      if (date.getFullYear() === refYear && date.getMonth() + 1 === prevMonth) {
         if (h.metric_id === CONTRATOS_EMP_ASSESSORIA_ID || h.metric_id === CONTRATOS_EMP_CONSULTORIA_ID) {
           empSum += h.value;
         }
@@ -668,20 +676,37 @@ const Index = () => {
                                     // "Mês anterior" cards are read-only computed cards
                                     const isMesAnterior = metric.id === CONTRATOS_EMP_MES_ANT_ID || metric.id === CONTRATOS_TRAB_MES_ANT_ID;
                                     
-                                    // Dynamic target for Assessoria metrics from Feb onwards
                                     let dynamicMetric = metric;
+                                    // Dynamic target for Assessoria metrics
                                     const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
-                                    if (currentMonth >= 2) {
-                                      if (metric.id === CONTRATOS_EMP_ASSESSORIA_ID) {
-                                        dynamicMetric = { ...metric, target_value: prevMonthContractValues.empresarial + 1 };
-                                      } else if (metric.id === CONTRATOS_TRAB_ASSESSORIA_ID) {
-                                        dynamicMetric = { ...metric, target_value: prevMonthContractValues.trabalhista + 1 };
-                                      }
+                                    if (metric.id === CONTRATOS_EMP_ASSESSORIA_ID) {
+                                      dynamicMetric = { ...metric, target_value: currentMonth >= 2 ? 1 : 0 };
+                                    } else if (metric.id === CONTRATOS_TRAB_ASSESSORIA_ID) {
+                                      dynamicMetric = { ...metric, target_value: currentMonth >= 2 ? 1 : 0 };
+                                    }
+                                    
+                                    // Compute "Total Contratos Assessoria" = Mês Anterior + Novos Contratos Assessoria
+                                    const isTotalAssessoria = metric.id === TOTAL_EMP_ASSESSORIA_ID || metric.id === TOTAL_TRAB_ASSESSORIA_ID;
+                                    if (metric.id === TOTAL_EMP_ASSESSORIA_ID) {
+                                      const novosEmp = monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0;
+                                      const totalEmp = prevMonthContractValues.empresarial + novosEmp;
+                                      dynamicMetric = { ...metric, target_value: 0, current_value: totalEmp };
+                                    } else if (metric.id === TOTAL_TRAB_ASSESSORIA_ID) {
+                                      const novosTrab = monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0;
+                                      const totalTrab = prevMonthContractValues.trabalhista + novosTrab;
+                                      dynamicMetric = { ...metric, target_value: 0, current_value: totalTrab };
                                     }
                                     
                                     // For "mês anterior", show value regardless of month selection
                                     const mesAnteriorMonthly = isMesAnterior 
                                       ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) 
+                                      : null;
+                                    
+                                    // For total assessoria, show computed value
+                                    const totalAssessoriaMonthly = isTotalAssessoria
+                                      ? (metric.id === TOTAL_EMP_ASSESSORIA_ID 
+                                        ? prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0)
+                                        : prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0))
                                       : null;
                                     
                                     return (
@@ -690,18 +715,18 @@ const Index = () => {
                                         data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                       >
                                         <MetricCardMonthly 
-                                          metric={isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : (isMesAnterior ? { ...dynamicMetric, target_value: 0 } : dynamicMetric)}
-                                          monthlyValue={isAutoSum ? computedMonthly : (isMesAnterior ? mesAnteriorMonthly : (monthlyValues[metric.id] ?? null))}
+                                          metric={isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : (isMesAnterior ? { ...dynamicMetric, target_value: 0 } : (isTotalAssessoria ? { ...dynamicMetric } : dynamicMetric))}
+                                          monthlyValue={isAutoSum ? computedMonthly : (isMesAnterior ? mesAnteriorMonthly : (isTotalAssessoria ? totalAssessoriaMonthly : (monthlyValues[metric.id] ?? null)))}
                                           isMonthSelected={selectedMonth !== null}
-                                          accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (isMesAnterior ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) : (accumulatedValues[metric.id] ?? 0))}
-                                          onSave={(isAutoSum || isMesAnterior) ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
+                                          accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (isMesAnterior ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) : (isTotalAssessoria ? (totalAssessoriaMonthly ?? 0) : (accumulatedValues[metric.id] ?? 0)))}
+                                          onSave={(isAutoSum || isMesAnterior || isTotalAssessoria) ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
                                           isSaving={savingMetricId === metric.id}
                                           selectedMonthName={selectedMonthName}
                                           historyData={historyData}
                                           selectedYear={selectedYear}
                                           selectedMonth={selectedMonth}
                                           monthlyTargets={monthlyTargets}
-                                          onCardClick={(isAutoSum || isMesAnterior) ? undefined : () => setDrilldownMetric(metric)}
+                                          onCardClick={(isAutoSum || isMesAnterior || isTotalAssessoria) ? undefined : () => setDrilldownMetric(metric)}
                                         />
                                       </div>
                                     );
