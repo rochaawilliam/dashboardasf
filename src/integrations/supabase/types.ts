@@ -273,6 +273,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_can_delete_metric: {
+        Args: { _metric_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_can_edit_metric: {
+        Args: { _metric_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
