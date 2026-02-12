@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 Deno.serve(async (req) => {
@@ -25,20 +25,28 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Verify the requester's token
+    // Verify the requester's token using getClaims
     const token = authHeader.replace('Bearer ', '');
     console.log('Verifying token for create-user...');
-    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     
-    if (userError || !userData?.user) {
-      console.error('Auth verification failed:', userError?.message);
+    // Create a user-scoped client to verify the token
+    const supabaseUser = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    
+    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error('Auth verification failed:', claimsError?.message);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized: ' + (userError?.message || 'Invalid token') }),
+        JSON.stringify({ error: 'Unauthorized: ' + (claimsError?.message || 'Invalid token') }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const requesterId = userData.user.id;
+    const requesterId = claimsData.claims.sub as string;
 
     // Check if requester is admin
     const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
