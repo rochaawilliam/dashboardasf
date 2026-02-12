@@ -53,7 +53,7 @@ export function MonthSelector({
   }, [historyData, selectedYear]);
 
   return (
-    <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-card rounded-xl border border-border print:hidden">
+    <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-card rounded-lg border border-border print:hidden">
       {/* Single row: Year selector + All months */}
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground shrink-0">
@@ -125,7 +125,7 @@ export function MonthSelector({
       </div>
       
       {/* Legend - compact */}
-      <div className="flex flex-wrap gap-2 sm:gap-4 text-[9px] sm:text-[11px] text-muted-foreground mt-2">
+      <div className="flex flex-wrap gap-2 sm:gap-3 text-[8px] sm:text-[10px] text-muted-foreground mt-1.5">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded border border-success/50 bg-success/10" />
           <span>Com lançamento</span>

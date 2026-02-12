@@ -202,7 +202,7 @@
 
 @layer utilities {
   .dashboard-grid {
-    @apply grid gap-3 sm:gap-4 md:gap-5;
+    @apply grid gap-2 sm:gap-3 md:gap-3.5;
     grid-template-columns: 1fr;
   }
   
@@ -225,27 +225,27 @@
   }
 
   .metric-card {
-    @apply bg-card rounded-lg border border-border/50 p-4 sm:p-5 md:p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/30;
+    @apply bg-card rounded-lg border border-border/50 p-2.5 sm:p-3 md:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30;
     background: linear-gradient(135deg, hsl(0 0% 11%) 0%, hsl(0 0% 9%) 100%);
   }
 
   .metric-value {
-    @apply text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-foreground;
+    @apply text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground;
     font-family: 'Roboto', sans-serif;
   }
 
   .metric-label {
-    @apply text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider;
+    @apply text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider;
   }
 
   .section-title {
-    @apply text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4;
+    @apply text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3;
     font-family: 'Cinzel', serif;
     letter-spacing: 0.05em;
   }
 
   .progress-bar {
-    @apply h-1.5 rounded-full bg-muted/50 overflow-hidden;
+    @apply h-1 rounded-full bg-muted/50 overflow-hidden;
   }
 
   .progress-fill {
@@ -265,7 +265,7 @@
   }
 
   .category-badge {
-    @apply inline-flex items-center px-2 sm:px-3 py-1 rounded text-xs font-medium uppercase tracking-wider;
+    @apply inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium uppercase tracking-wider;
   }
 
   .gold-gradient {

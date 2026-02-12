@@ -17,8 +17,8 @@ interface FilterBarProps {
 
 export function FilterBar({ filters, onFiltersChange, onPrint }: FilterBarProps) {
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 p-3 sm:p-4 bg-card rounded-xl border border-border print:hidden">
-      <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
+    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4 p-2 sm:p-3 bg-card rounded-lg border border-border print:hidden">
+      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-medium text-muted-foreground">
         <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         <span>Filtros:</span>
       </div>

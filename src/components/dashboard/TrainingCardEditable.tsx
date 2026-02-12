@@ -35,7 +35,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
   };
 
   return (
-    <div className="bg-muted/50 rounded-lg p-4 group relative">
+    <div className="bg-muted/50 rounded-lg p-3 group relative">
       {!isEditing && (
         <Button
           variant="ghost"
@@ -47,7 +47,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
         </Button>
       )}
       
-      <span className="text-sm font-medium text-muted-foreground block mb-2">
+      <span className="text-xs font-medium text-muted-foreground block mb-1.5">
         {item.role}
       </span>
       
@@ -96,10 +96,10 @@ function TrainingItem({ item }: { item: TrainingHours }) {
       ) : (
         <>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-foreground">
+            <span className="text-xl font-bold text-foreground">
               {formatNumber(item.current_hours, 0)}
             </span>
-            <span className="text-sm text-muted-foreground">hrs</span>
+            <span className="text-xs text-muted-foreground">hrs</span>
           </div>
           <div className="mt-2 progress-bar">
             <div
@@ -125,14 +125,14 @@ function TrainingItem({ item }: { item: TrainingHours }) {
 export function TrainingCardEditable({ items }: TrainingCardEditableProps) {
   return (
     <div className="metric-card col-span-full lg:col-span-2">
-      <div className="flex items-center gap-2 mb-4">
-        <Clock className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold text-foreground">
+      <div className="flex items-center gap-1.5 mb-3">
+        <Clock className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">
           Horas de Treinamento por Colaborador
         </h3>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {items.map((item) => (
           <TrainingItem key={item.id} item={item} />
         ))}

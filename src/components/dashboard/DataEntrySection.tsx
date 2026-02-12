@@ -23,11 +23,11 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
   const [showGoals, setShowGoals] = useState(false);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4 sm:mb-6 print:hidden">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-3 sm:mb-4 print:hidden">
       <CollapsibleTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full justify-between h-auto py-2.5 sm:py-3 px-3 sm:px-4 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
+          className="w-full justify-between h-auto py-2 sm:py-2.5 px-2.5 sm:px-3 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
         >
           <div className="flex items-center gap-2 sm:gap-3">
             <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -42,9 +42,9 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
         </Button>
       </CollapsibleTrigger>
       
-      <CollapsibleContent className="mt-2 sm:mt-3">
-        <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+      <CollapsibleContent className="mt-1.5 sm:mt-2">
+        <div className="bg-card border border-border rounded-lg p-2.5 sm:p-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2">
             {/* Single Entry */}
             <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
               <div className="sm:mb-2">

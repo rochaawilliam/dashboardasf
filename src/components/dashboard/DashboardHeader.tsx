@@ -28,22 +28,22 @@ export function DashboardHeader({
   const { isAdmin } = useUserRole();
 
   return (
-    <header className="mb-4 sm:mb-6 pb-4 sm:pb-5 border-b border-border/30">
-      <div className="flex items-center gap-3 sm:gap-4">
+    <header className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-border/30">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Mobile drawer trigger */}
         {mobileDrawer}
         
         <img 
           src={asfLogo} 
           alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
-          className="h-10 sm:h-12 md:h-14 w-auto"
+          className="h-8 sm:h-10 md:h-11 w-auto"
         />
-        <div className="h-8 sm:h-10 w-px bg-border/50 hidden sm:block" />
+        <div className="h-6 sm:h-8 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground tracking-wide truncate">
+          <h1 className="text-base sm:text-lg md:text-xl font-semibold text-foreground tracking-wide truncate">
             Dashboard de Metas
           </h1>
-          <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider mt-0.5 truncate">
+          <p className="text-muted-foreground text-[9px] sm:text-[11px] uppercase tracking-wider mt-0.5 truncate">
             Setor de Crescimento • Comercial & Marketing
           </p>
         </div>

@@ -227,14 +227,14 @@ export function MetricCardMonthly({
     <>
       <div 
         className={cn(
-          "metric-card group relative p-3 border-l-4",
+          "metric-card group relative p-2 sm:p-2.5 border-l-[3px]",
           status === "danger" && !hasNoData && "ring-1 ring-primary/50"
         )}
         style={{ borderLeftColor: getProgressBorderColor(progress) }}
       >
         {/* Header with name and trend */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <span className="metric-label text-[11px] sm:text-xs font-medium line-clamp-2 flex-1">{metric.name}</span>
+        <div className="flex items-start justify-between gap-1.5 mb-1.5">
+          <span className="metric-label text-[10px] sm:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
@@ -314,17 +314,17 @@ export function MetricCardMonthly({
         ) : (
           <>
             {/* Main value and target - compact row layout */}
-            <div className="flex items-end justify-between gap-2 mb-2">
+            <div className="flex items-end justify-between gap-1.5 mb-1.5">
               {/* Current value - prominent */}
               <div className="flex-1">
                 {hasNoData ? (
-                  <span className="text-muted-foreground text-[10px] italic">Sem dados</span>
+                  <span className="text-muted-foreground text-[9px] italic">Sem dados</span>
                 ) : (
-                  <div className="text-lg sm:text-xl font-bold leading-none text-primary">
+                  <div className="text-base sm:text-lg font-bold leading-none text-primary">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
-                <div className="text-[9px] text-muted-foreground mt-0.5">
+                <div className="text-[8px] text-muted-foreground mt-0.5">
                   {isMonthSelected ? "Lançado" : "Acumulado"}
                 </div>
               </div>
@@ -333,19 +333,19 @@ export function MetricCardMonthly({
               <div className="text-right">
                 {isMonthSelected ? (
                   <>
-                    <div className="text-xs sm:text-sm font-semibold text-primary">
+                    <div className="text-[10px] sm:text-xs font-semibold text-primary">
                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                     </div>
-                    <div className="text-[9px] text-muted-foreground">
+                    <div className="text-[8px] text-muted-foreground">
                       Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="text-xs sm:text-sm font-semibold text-primary">
+                    <div className="text-[10px] sm:text-xs font-semibold text-primary">
                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
                     </div>
-                    <div className="text-[9px] text-muted-foreground">
+                    <div className="text-[8px] text-muted-foreground">
                       Meta {isNonAccumulative ? "" : "Anual"}
                     </div>
                   </>
@@ -355,15 +355,15 @@ export function MetricCardMonthly({
             
             {/* Annual target reference when month is selected */}
             {isMonthSelected && !isNonAccumulative && (
-              <div className="text-[9px] text-muted-foreground mb-2 flex items-center gap-1">
+              <div className="text-[8px] text-muted-foreground mb-1.5 flex items-center gap-1">
                 <span>Meta anual:</span>
                 <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
               </div>
             )}
             
             {/* Compact Progress bar */}
-            <div className="space-y-1">
-              <div className="progress-bar h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="space-y-0.5">
+              <div className="progress-bar h-1 rounded-full bg-muted overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-300",
@@ -379,10 +379,10 @@ export function MetricCardMonthly({
                   unit={metric.unit}
                   historyData={historyData}
                   selectedYear={selectedYear}
-                  height={20}
+                  height={16}
                   className="flex-1 max-w-[60%]"
                 />
-                <span className="text-[10px] font-medium text-primary">
+                <span className="text-[9px] font-medium text-primary">
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
               </div>
