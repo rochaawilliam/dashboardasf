@@ -1,9 +1,17 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { parseISO } from "date-fns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { MetricHistory } from "@/hooks/useMetrics";
 
 interface MonthSelectorProps {
@@ -38,6 +46,7 @@ export function MonthSelector({
 }: MonthSelectorProps) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
+  const isMobile = useIsMobile();
 
   const monthsWithData = useMemo(() => {
     if (!historyData) return new Set<number>();
@@ -52,9 +61,59 @@ export function MonthSelector({
     return launched;
   }, [historyData, selectedYear]);
 
+  // Mobile: year nav + month select dropdown
+  if (isMobile) {
+    return (
+      <div className="mb-2 p-1.5 bg-card rounded-lg border border-border print:hidden">
+        <div className="flex items-center gap-1.5">
+          <CalendarDays className="h-3 w-3 text-primary shrink-0" />
+          
+          {/* Year navigation */}
+          <div className="flex items-center gap-0.5 bg-muted/50 rounded-md p-0.5 shrink-0">
+            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onYearChange(selectedYear - 1)}>
+              <ChevronLeft className="h-3 w-3" />
+            </Button>
+            <span className="text-[10px] font-semibold w-8 text-center">{selectedYear}</span>
+            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onYearChange(selectedYear + 1)}>
+              <ChevronRight className="h-3 w-3" />
+            </Button>
+          </div>
+
+          {/* Month dropdown */}
+          <Select
+            value={selectedMonth === null ? "all" : String(selectedMonth)}
+            onValueChange={(v) => onMonthChange(v === "all" ? null : Number(v))}
+          >
+            <SelectTrigger className="flex-1 h-7 text-[10px] bg-background">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent className="bg-card border border-border z-50">
+              <SelectItem value="all">Todo o Ano</SelectItem>
+              {months.map((month) => {
+                const hasData = monthsWithData.has(month.value);
+                const isFuture = selectedYear === currentYear && month.value > currentMonth;
+                return (
+                  <SelectItem key={month.value} value={String(month.value)}>
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        hasData ? "bg-success" : isFuture ? "bg-muted-foreground/30" : "bg-destructive/60"
+                      )} />
+                      <span>{month.fullLabel}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: horizontal month buttons
   return (
     <div className="mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden">
-      {/* Year + month selector */}
       <div className="flex items-center gap-1.5 sm:gap-2">
         <CalendarDays className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary shrink-0" />
         
@@ -69,7 +128,7 @@ export function MonthSelector({
           </Button>
         </div>
 
-        {/* All Year + Month buttons - scrollable on mobile */}
+        {/* All Year + Month buttons */}
         <ScrollArea className="flex-1">
           <div className="flex gap-0.5 sm:gap-1">
             <Button
@@ -113,7 +172,7 @@ export function MonthSelector({
         </ScrollArea>
       </div>
       
-      {/* Legend - compact */}
+      {/* Legend */}
       <div className="flex flex-wrap gap-2 sm:gap-3 text-[7px] sm:text-[10px] text-muted-foreground mt-1">
         <div className="flex items-center gap-0.5">
           <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded border border-success/50 bg-success/10" />

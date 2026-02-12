@@ -426,7 +426,7 @@ const Index = () => {
                           )}
                         >
                           <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                          <span className="hidden md:inline truncate">{config.shortTitle}</span>
+                          <span className="hidden sm:inline truncate">{config.shortTitle}</span>
                         </button>
                       );
                     })}
@@ -482,9 +482,9 @@ const Index = () => {
                         ) : (
                           <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                         )}
-                        <span className="hidden md:inline truncate">{config.shortTitle}</span>
+                    <span className="hidden sm:inline truncate">{config.shortTitle}</span>
                         <span className={cn(
-                          "text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
+                          "hidden sm:inline text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
                           isActive && canAccess
                             ? "bg-primary-foreground/20 text-primary-foreground" 
                             : "bg-muted text-muted-foreground"
