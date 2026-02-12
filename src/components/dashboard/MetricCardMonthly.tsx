@@ -318,7 +318,7 @@ export function MetricCardMonthly({
               {/* Current value - prominent */}
               <div className="flex-1 min-w-0">
                 {hasNoData ? (
-                  <span className="text-muted-foreground text-[8px] italic">Sem dados</span>
+                  <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
                 ) : (
                   <div className="text-sm sm:text-lg font-bold leading-none text-primary truncate">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}

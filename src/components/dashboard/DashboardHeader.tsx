@@ -7,6 +7,7 @@ import { UserSettingsPanel } from "./UserSettingsPanel";
 import { UserMenu } from "./UserMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useIsMobile } from "@/hooks/use-mobile";
 import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { ReactNode } from "react";
@@ -26,11 +27,12 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
+  const isMobile = useIsMobile();
 
   return (
     <header className="mb-2 sm:mb-4 pb-2 sm:pb-4 border-b border-border/30">
+      {/* Row 1: Logo + Title */}
       <div className="flex items-center gap-1.5 sm:gap-3">
-        {/* Mobile drawer trigger */}
         {mobileDrawer}
         
         <img 
@@ -48,8 +50,48 @@ export function DashboardHeader({
           </p>
         </div>
         
-        {/* Action buttons - inline with header */}
-        <div className="flex items-center gap-1 sm:gap-2">
+        {/* Desktop: actions inline */}
+        {!isMobile && (
+          <div className="flex items-center gap-1 sm:gap-2">
+            {user && (
+              <>
+                <div data-tour="notifications">
+                  {metrics && (
+                    <NotificationBell 
+                      metrics={metrics} 
+                      historyData={historyData}
+                      selectedYear={selectedYear}
+                    />
+                  )}
+                </div>
+                <TourButton />
+                <UserSettingsPanel />
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="icon" className="h-9 w-9 border border-border/50" title="Painel Administrativo">
+                      <Shield className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+              </>
+            )}
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/login">
+                <Button variant="default" className="h-9 px-3 gap-1" title="Entrar">
+                  <LogIn className="h-4 w-4" />
+                  <span className="text-sm font-medium">Entrar</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Row 2 (mobile only): action icons */}
+      {isMobile && (
+        <div className="flex items-center justify-end gap-1 mt-1.5 pt-1.5 border-t border-border/20">
           {user && (
             <>
               <div data-tour="notifications">
@@ -61,35 +103,28 @@ export function DashboardHeader({
                   />
                 )}
               </div>
-              <div className="hidden sm:block"><TourButton /></div>
               <UserSettingsPanel />
               {isAdmin && (
                 <Link to="/admin">
-                  <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-9 sm:w-9 border border-border/50" title="Painel Administrativo">
-                    <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7 border border-border/50" title="Painel Administrativo">
+                    <Shield className="h-3 w-3" />
                   </Button>
                 </Link>
               )}
             </>
           )}
-          
-          {/* Login button or User menu */}
           {user ? (
             <UserMenu />
           ) : (
             <Link to="/login">
-              <Button 
-                variant="default" 
-                className="h-7 sm:h-9 px-2 sm:px-3 gap-1"
-                title="Entrar"
-              >
-                <LogIn className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-[10px] sm:text-sm font-medium">Entrar</span>
+              <Button variant="default" className="h-7 px-2 gap-1" title="Entrar">
+                <LogIn className="h-3 w-3" />
+                <span className="text-[10px] font-medium">Entrar</span>
               </Button>
             </Link>
           )}
         </div>
-      </div>
+      )}
     </header>
   );
 }
