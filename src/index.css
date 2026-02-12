@@ -202,8 +202,8 @@
 
 @layer utilities {
   .dashboard-grid {
-    @apply grid gap-2 sm:gap-3 md:gap-3.5;
-    grid-template-columns: 1fr;
+    @apply grid gap-1.5 sm:gap-2.5 md:gap-3.5;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   @media (min-width: 480px) {
@@ -225,7 +225,7 @@
   }
 
   .metric-card {
-    @apply bg-card rounded-lg border border-border/50 p-2.5 sm:p-3 md:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30;
+    @apply bg-card rounded-lg border border-border/50 p-2 sm:p-2.5 md:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30;
     background: linear-gradient(135deg, hsl(0 0% 11%) 0%, hsl(0 0% 9%) 100%);
   }
 

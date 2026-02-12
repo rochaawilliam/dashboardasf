@@ -23,22 +23,22 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
   const [showGoals, setShowGoals] = useState(false);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-3 sm:mb-4 print:hidden">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-2 sm:mb-4 print:hidden">
       <CollapsibleTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full justify-between h-auto py-2 sm:py-2.5 px-2.5 sm:px-3 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
+          className="w-full justify-between h-auto py-1.5 sm:py-2.5 px-2 sm:px-3 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5" />
+            <FileSpreadsheet className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
             <div className="text-left">
-              <span className="text-sm sm:text-base font-semibold">Central de Lançamentos</span>
-              <p className="text-[10px] sm:text-xs mt-0.5 hidden sm:block opacity-80">
+              <span className="text-xs sm:text-base font-semibold">Central de Lançamentos</span>
+              <p className="text-[9px] sm:text-xs mt-0.5 hidden sm:block opacity-80">
                 Entrada de dados, histórico e ajuste de metas
               </p>
             </div>
           </div>
-          <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+          <ChevronDown className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform", isOpen && "rotate-180")} />
         </Button>
       </CollapsibleTrigger>
       
