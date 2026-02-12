@@ -65,7 +65,8 @@ function CommissionCard({
 }) {
   const percentage = target > 0 ? (achieved / target) * 100 : 0;
   
-  const activeTierIndex = COMMISSION_TIERS.slice().reverse().findIndex(t => percentage >= t.min);
+  // Find the highest tier the percentage qualifies for
+  const activeTier = COMMISSION_TIERS.find(t => percentage >= t.min);
   
   return (
     <Card className="border-l-4 border-l-purple-500 bg-card">
@@ -107,7 +108,7 @@ function CommissionCard({
         {/* Commission tiers */}
         <div className="space-y-1">
           {COMMISSION_TIERS.slice().reverse().map((tier) => {
-            const isActive = percentage >= tier.min && (tier === COMMISSION_TIERS.find(t => percentage >= t.min));
+            const isActive = activeTier?.min === tier.min;
             return (
               <div 
                 key={tier.min}
@@ -230,7 +231,7 @@ export function CommissionTab({
           <TridentIcon className="h-5 w-5 text-purple-400" />
         </div>
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-foreground">Comissão Head de Crescimento</h2>
+          <h2 className="text-base sm:text-lg font-bold text-foreground">Salário Variável - Head de Crescimento</h2>
           <p className="text-xs text-muted-foreground">{periodLabel} • {selectedYear}</p>
         </div>
       </div>
