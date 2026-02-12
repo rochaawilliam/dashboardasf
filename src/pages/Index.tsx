@@ -489,10 +489,10 @@ const Index = () => {
                           ? "bg-purple-600 text-white shadow-sm z-10"
                           : "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
                       )}
-                      title="Comissão"
+                      title="Salário Variável"
                     >
                       <TridentIcon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="hidden sm:inline truncate">Comissão</span>
+                      <span className="hidden sm:inline truncate">Salário Variável</span>
                     </button>
                   )}
                   {categoryOrder.map((category) => {
