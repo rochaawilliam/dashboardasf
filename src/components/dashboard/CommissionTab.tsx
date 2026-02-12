@@ -1,0 +1,279 @@
+import { useMemo } from "react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DollarSign, Target, FileText, Trophy } from "lucide-react";
+import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
+import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
+import { parseISO } from "date-fns";
+import { formatNumber } from "@/utils/formatters";
+
+interface CommissionTabProps {
+  metrics: Metric[];
+  historyData?: MetricHistory[];
+  monthlyTargets?: MonthlyTarget[];
+  selectedMonth: number | null;
+  selectedYear: number;
+  monthlyValues: Record<string, number>;
+  accumulatedValues: Record<string, number>;
+}
+
+const COMMISSION_TIERS = [
+  { min: 120, value: 2500 },
+  { min: 110, value: 2200 },
+  { min: 100, value: 1900 },
+  { min: 90, value: 1600 },
+  { min: 80, value: 1300 },
+];
+
+function getCommission(percentage: number): number {
+  for (const tier of COMMISSION_TIERS) {
+    if (percentage >= tier.min) return tier.value;
+  }
+  return 0;
+}
+
+function TridentIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 2v20" />
+      <path d="M12 2L5 9" />
+      <path d="M12 2l7 7" />
+      <path d="M5 9v3" />
+      <path d="M19 9v3" />
+      <path d="M9 22h6" />
+      <path d="M10 18h4" />
+    </svg>
+  );
+}
+
+export { TridentIcon };
+
+function CommissionCard({ 
+  title, 
+  icon: Icon, 
+  achieved, 
+  target, 
+  unit,
+  commission 
+}: { 
+  title: string;
+  icon: any;
+  achieved: number;
+  target: number;
+  unit: string;
+  commission: number;
+}) {
+  const percentage = target > 0 ? (achieved / target) * 100 : 0;
+  
+  const activeTierIndex = COMMISSION_TIERS.slice().reverse().findIndex(t => percentage >= t.min);
+  
+  return (
+    <Card className="border-l-4 border-l-purple-500 bg-card">
+      <CardHeader className="pb-2 pt-4 px-4">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-purple-500/10">
+            <Icon className="h-4 w-4 text-purple-400" />
+          </div>
+          <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="px-4 pb-4 space-y-3">
+        {/* Progress info */}
+        <div className="flex items-baseline justify-between">
+          <div>
+            <span className="text-xl font-bold text-foreground">
+              {unit === "R$" ? `R$ ${formatNumber(achieved)}` : formatNumber(achieved)}
+            </span>
+            <span className="text-xs text-muted-foreground ml-1">
+              / {unit === "R$" ? `R$ ${formatNumber(target)}` : formatNumber(target)}
+            </span>
+          </div>
+          <span className={cn(
+            "text-lg font-bold",
+            percentage >= 100 ? "text-green-400" : percentage >= 80 ? "text-yellow-400" : "text-red-400"
+          )}>
+            {percentage.toFixed(0)}%
+          </span>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full bg-muted rounded-full h-2">
+          <div 
+            className="h-2 rounded-full bg-purple-500 transition-all"
+            style={{ width: `${Math.min(percentage, 120)}%`, maxWidth: "100%" }}
+          />
+        </div>
+
+        {/* Commission tiers */}
+        <div className="space-y-1">
+          {COMMISSION_TIERS.slice().reverse().map((tier) => {
+            const isActive = percentage >= tier.min && (tier === COMMISSION_TIERS.find(t => percentage >= t.min));
+            return (
+              <div 
+                key={tier.min}
+                className={cn(
+                  "flex items-center justify-between text-xs px-2 py-1 rounded",
+                  isActive ? "bg-purple-500/20 text-purple-300 font-semibold" : "text-muted-foreground"
+                )}
+              >
+                <span>{tier.min}% da meta</span>
+                <span>R$ {formatNumber(tier.value)}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Commission result */}
+        <div className="pt-2 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">Comissão:</span>
+            <span className={cn(
+              "text-lg font-bold",
+              commission > 0 ? "text-purple-400" : "text-muted-foreground"
+            )}>
+              R$ {formatNumber(commission)}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CommissionTab({
+  metrics,
+  historyData,
+  monthlyTargets,
+  selectedMonth,
+  selectedYear,
+  monthlyValues,
+  accumulatedValues,
+}: CommissionTabProps) {
+  // Compute Receita Total (sum of revenue subcategories)
+  const receitaData = useMemo(() => {
+    const lucratividadeMetrics = metrics.filter(m => m.category === "lucratividade");
+    const organized = organizeMetricsBySubcategory(lucratividadeMetrics, "lucratividade");
+    const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+    
+    const revenueMetrics = organized
+      .filter(s => revenueSubcats.includes(s.name))
+      .flatMap(s => s.metrics);
+    
+    const achieved = selectedMonth !== null
+      ? revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0)
+      : revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+    
+    // Get monthly target sum for revenue metrics
+    let target = 0;
+    if (selectedMonth !== null && monthlyTargets) {
+      revenueMetrics.forEach(m => {
+        const mt = monthlyTargets.find(t => t.metric_id === m.id && t.year === selectedYear && t.month === selectedMonth);
+        target += mt ? mt.target_value : 0;
+      });
+    } else {
+      // Annual: sum all monthly targets for the year
+      revenueMetrics.forEach(m => {
+        const mts = (monthlyTargets || []).filter(t => t.metric_id === m.id && t.year === selectedYear);
+        if (mts.length > 0) {
+          target += mts.reduce((s, t) => s + t.target_value, 0);
+        } else {
+          target += m.target_value;
+        }
+      });
+    }
+    
+    return { achieved, target };
+  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
+
+  // Compute Total Contratos (sum of all "Novos Contratos" metrics)
+  const contratosData = useMemo(() => {
+    const contratosMetrics = metrics.filter(m => 
+      m.name.startsWith("Novos Contratos") && m.category === "experiencia_cliente"
+    );
+    
+    const achieved = selectedMonth !== null
+      ? contratosMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0)
+      : contratosMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+    
+    let target = 0;
+    if (selectedMonth !== null && monthlyTargets) {
+      contratosMetrics.forEach(m => {
+        const mt = monthlyTargets.find(t => t.metric_id === m.id && t.year === selectedYear && t.month === selectedMonth);
+        target += mt ? mt.target_value : (m.target_value / 12);
+      });
+    } else {
+      contratosMetrics.forEach(m => {
+        const mts = (monthlyTargets || []).filter(t => t.metric_id === m.id && t.year === selectedYear);
+        if (mts.length > 0) {
+          target += mts.reduce((s, t) => s + t.target_value, 0);
+        } else {
+          target += m.target_value;
+        }
+      });
+    }
+    
+    return { achieved, target };
+  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
+
+  const receitaCommission = getCommission(receitaData.target > 0 ? (receitaData.achieved / receitaData.target) * 100 : 0);
+  const contratosCommission = getCommission(contratosData.target > 0 ? (contratosData.achieved / contratosData.target) * 100 : 0);
+  const totalCommission = receitaCommission + contratosCommission;
+
+  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const periodLabel = selectedMonth !== null ? monthNames[selectedMonth - 1] : `Acumulado ${selectedYear}`;
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 rounded-xl bg-purple-500/10">
+          <TridentIcon className="h-5 w-5 text-purple-400" />
+        </div>
+        <div>
+          <h2 className="text-base sm:text-lg font-bold text-foreground">Comissão Head de Crescimento</h2>
+          <p className="text-xs text-muted-foreground">{periodLabel} • {selectedYear}</p>
+        </div>
+      </div>
+
+      {/* Commission Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <CommissionCard
+          title="Receita Total"
+          icon={DollarSign}
+          achieved={receitaData.achieved}
+          target={receitaData.target}
+          unit="R$"
+          commission={receitaCommission}
+        />
+        <CommissionCard
+          title="Novos Contratos"
+          icon={FileText}
+          achieved={contratosData.achieved}
+          target={contratosData.target}
+          unit="contratos"
+          commission={contratosCommission}
+        />
+      </div>
+
+      {/* Total Commission */}
+      <Card className="border-2 border-purple-500/50 bg-purple-500/5">
+        <CardContent className="py-5 px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-purple-500/20">
+                <Trophy className="h-6 w-6 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Comissão Total</p>
+                <p className="text-xs text-muted-foreground">{periodLabel}</p>
+              </div>
+            </div>
+            <span className="text-2xl sm:text-3xl font-bold text-purple-400">
+              R$ {formatNumber(totalCommission)}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

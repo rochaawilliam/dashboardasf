@@ -19,6 +19,7 @@ import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
 import { AutoStartTour } from "@/components/dashboard/GuidedTour";
+import { CommissionTab, TridentIcon } from "@/components/dashboard/CommissionTab";
 import { useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
 import { SyncStatusFooter } from "@/components/dashboard/SyncStatusFooter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -101,6 +102,9 @@ const categoryOrder: MetricCategory[] = [
   "gestao_pessoas",
   "aprendizado_crescimento",
 ];
+
+const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
+
 // Collapsible subcategory wrapper
 function CollapsibleSubcategory({ name, count, collapsible, defaultCollapsed, children }: { 
   name: string; count: number; collapsible: boolean; defaultCollapsed: boolean; children: React.ReactNode 
@@ -130,7 +134,8 @@ const Index = () => {
     division: "all",
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<MetricCategory>("lucratividade");
+  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao">("lucratividade");
+  const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
   
   // Month/Year selection state
@@ -370,8 +375,8 @@ const Index = () => {
             mobileDrawer={
               <div data-tour="mobile-menu">
                 <MobileDrawer 
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
+                  activeTab={activeTab === "comissao" ? "lucratividade" : activeTab}
+                  onTabChange={(tab) => setActiveTab(tab)}
                   categoryMetricsCounts={categoryMetricsCounts}
                 />
               </div>
@@ -427,7 +432,7 @@ const Index = () => {
             <div className="pointer-events-none select-none blur-md opacity-50 min-h-[400px]">
               <SwipeableTabs<MetricCategory>
                 tabs={categoryOrder}
-                activeTab={activeTab}
+                activeTab={activeTab === "comissao" ? "lucratividade" : activeTab}
                 onTabChange={(tab) => setActiveTab(tab)}
               >
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
@@ -467,12 +472,29 @@ const Index = () => {
             {/* Category Tabs with Swipe Support */}
             <SwipeableTabs<MetricCategory>
               tabs={categoryOrder}
-              activeTab={activeTab}
+              activeTab={activeTab === "comissao" ? "lucratividade" : activeTab}
               onTabChange={(tab) => setActiveTab(tab)}
             >
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-3 sm:mb-4">
+              <Tabs value={activeTab === "comissao" ? "comissao" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
                 <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
+                  {/* Secret Commission Tab */}
+                  {isCommissionUser && (
+                    <button
+                      onClick={() => setActiveTab("comissao")}
+                      className={cn(
+                        "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative",
+                        "text-[9px] sm:text-xs font-medium",
+                        activeTab === "comissao"
+                          ? "bg-purple-600 text-white shadow-sm z-10"
+                          : "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+                      )}
+                      title="Comissão"
+                    >
+                      <TridentIcon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden sm:inline truncate">Comissão</span>
+                    </button>
+                  )}
                   {categoryOrder.map((category) => {
                     const config = categoryConfig[category];
                     const Icon = config.icon;
@@ -642,6 +664,21 @@ const Index = () => {
                     </TabsContent>
                   );
                 })}
+
+                {/* Secret Commission Tab Content */}
+                {isCommissionUser && activeTab === "comissao" && (
+                  <TabsContent value="comissao" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
+                    <CommissionTab
+                      metrics={adjustedMetrics}
+                      historyData={historyData}
+                      monthlyTargets={monthlyTargets}
+                      selectedMonth={selectedMonth}
+                      selectedYear={selectedYear}
+                      monthlyValues={monthlyValues}
+                      accumulatedValues={accumulatedValues}
+                    />
+                  </TabsContent>
+                )}
               </Tabs>
             </SwipeableTabs>
           </>
