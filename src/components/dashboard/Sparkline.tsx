@@ -58,7 +58,7 @@ export function Sparkline({
   if (monthlyData.length < 2) {
     return (
       <div 
-        className={cn("flex items-center justify-center text-xs text-muted-foreground", className)}
+        className={cn("flex items-center justify-center text-[7px] sm:text-[8px] text-muted-foreground", className)}
         style={{ height }}
       >
         <span>Dados insuficientes</span>
