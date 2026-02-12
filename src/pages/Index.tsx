@@ -259,17 +259,66 @@ const Index = () => {
     return values;
   }, [historyData, selectedYear]);
 
+  // IDs for "mês anterior" computed metrics
+  const CONTRATOS_EMP_MES_ANT_ID = "aaa6fbd3-75bc-43ce-9391-fd0f26ace960";
+  const CONTRATOS_TRAB_MES_ANT_ID = "290aec39-539f-4f74-a8bc-33ed2db89de0";
+  
+  // IDs for contract metrics used in the sum
+  const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
+  const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
+  const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
+  const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
+
+  // Compute previous month's contract values from history
+  const prevMonthContractValues = useMemo(() => {
+    if (!historyData) return { empresarial: 0, trabalhista: 0 };
+    
+    // Determine previous month
+    const refMonth = selectedMonth ?? new Date().getMonth() + 1;
+    const refYear = selectedYear;
+    const prevMonth = refMonth === 1 ? 12 : refMonth - 1;
+    const prevYear = refMonth === 1 ? refYear - 1 : refYear;
+    
+    let empSum = 0;
+    let trabSum = 0;
+    
+    historyData.forEach((h) => {
+      const date = parseISO(h.recorded_at);
+      if (date.getFullYear() === prevYear && date.getMonth() + 1 === prevMonth) {
+        if (h.metric_id === CONTRATOS_EMP_ASSESSORIA_ID || h.metric_id === CONTRATOS_EMP_CONSULTORIA_ID) {
+          empSum += h.value;
+        }
+        if (h.metric_id === CONTRATOS_TRAB_ASSESSORIA_ID || h.metric_id === CONTRATOS_TRAB_CONSULTORIA_ID) {
+          trabSum += h.value;
+        }
+      }
+    });
+    
+    return { empresarial: empSum, trabalhista: trabSum };
+  }, [historyData, selectedMonth, selectedYear]);
+
   // Create metrics with adjusted values based on selection
   const adjustedMetrics = useMemo(() => {
     if (!metrics) return [];
     
-    return metrics.map((metric) => ({
-      ...metric,
-      current_value: selectedMonth === null 
+    return metrics.map((metric) => {
+      let currentValue = selectedMonth === null 
         ? (accumulatedValues[metric.id] ?? 0)
-        : metric.current_value,
-    }));
-  }, [metrics, selectedMonth, accumulatedValues]);
+        : metric.current_value;
+      
+      // Compute "mês anterior" card values
+      if (metric.id === CONTRATOS_EMP_MES_ANT_ID) {
+        currentValue = prevMonthContractValues.empresarial;
+      } else if (metric.id === CONTRATOS_TRAB_MES_ANT_ID) {
+        currentValue = prevMonthContractValues.trabalhista;
+      }
+      
+      return {
+        ...metric,
+        current_value: currentValue,
+      };
+    });
+  }, [metrics, selectedMonth, accumulatedValues, prevMonthContractValues]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
@@ -616,24 +665,43 @@ const Index = () => {
                                     const computedMonthly = (metric as any)._computedMonthly;
                                     const computedAccumulated = (metric as any)._computedAccumulated;
                                     
+                                    // "Mês anterior" cards are read-only computed cards
+                                    const isMesAnterior = metric.id === CONTRATOS_EMP_MES_ANT_ID || metric.id === CONTRATOS_TRAB_MES_ANT_ID;
+                                    
+                                    // Dynamic target for Assessoria metrics from Feb onwards
+                                    let dynamicMetric = metric;
+                                    const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
+                                    if (currentMonth >= 2) {
+                                      if (metric.id === CONTRATOS_EMP_ASSESSORIA_ID) {
+                                        dynamicMetric = { ...metric, target_value: prevMonthContractValues.empresarial + 1 };
+                                      } else if (metric.id === CONTRATOS_TRAB_ASSESSORIA_ID) {
+                                        dynamicMetric = { ...metric, target_value: prevMonthContractValues.trabalhista + 1 };
+                                      }
+                                    }
+                                    
+                                    // For "mês anterior", show value regardless of month selection
+                                    const mesAnteriorMonthly = isMesAnterior 
+                                      ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) 
+                                      : null;
+                                    
                                     return (
                                       <div 
                                         key={metric.id}
                                         data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                       >
                                         <MetricCardMonthly 
-                                          metric={isAutoSum ? { ...metric, current_value: computedAccumulated ?? 0 } : metric}
-                                          monthlyValue={isAutoSum ? computedMonthly : (monthlyValues[metric.id] ?? null)}
+                                          metric={isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : (isMesAnterior ? { ...dynamicMetric, target_value: 0 } : dynamicMetric)}
+                                          monthlyValue={isAutoSum ? computedMonthly : (isMesAnterior ? mesAnteriorMonthly : (monthlyValues[metric.id] ?? null))}
                                           isMonthSelected={selectedMonth !== null}
-                                          accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (accumulatedValues[metric.id] ?? 0)}
-                                          onSave={isAutoSum ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
+                                          accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (isMesAnterior ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) : (accumulatedValues[metric.id] ?? 0))}
+                                          onSave={(isAutoSum || isMesAnterior) ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
                                           isSaving={savingMetricId === metric.id}
                                           selectedMonthName={selectedMonthName}
                                           historyData={historyData}
                                           selectedYear={selectedYear}
                                           selectedMonth={selectedMonth}
                                           monthlyTargets={monthlyTargets}
-                                          onCardClick={isAutoSum ? undefined : () => setDrilldownMetric(metric)}
+                                          onCardClick={(isAutoSum || isMesAnterior) ? undefined : () => setDrilldownMetric(metric)}
                                         />
                                       </div>
                                     );
