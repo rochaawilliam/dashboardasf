@@ -1,7 +1,7 @@
 import { useMemo, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { CalendarCheck, CalendarX } from "lucide-react";
-import { parseLocalDate } from "@/utils/dateUtils";
+import { getRefMonthYear } from "@/utils/dateUtils";
 import type { MetricHistory } from "@/hooks/useMetrics";
 
 interface MonthsSummaryProps {
@@ -28,9 +28,9 @@ export const MonthsSummary = forwardRef<HTMLDivElement, MonthsSummaryProps>(
       if (!historyData) return new Set<number>();
       const launched = new Set<number>();
       historyData.forEach((h) => {
-        const date = parseLocalDate(h.recorded_at);
-        if (date.getFullYear() === selectedYear) {
-          launched.add(date.getMonth() + 1);
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear) {
+          launched.add(ref.month);
         }
       });
       return launched;

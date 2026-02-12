@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
-import { parseLocalDate } from "@/utils/dateUtils";
+import { getRefMonthYear } from "@/utils/dateUtils";
 import { formatMetricValue } from "@/utils/formatters";
 import { areNotificationsEnabled } from "@/components/dashboard/NotificationToggle";
 
@@ -70,8 +70,8 @@ export function useMetricNotifications(
   ): Record<string, number> => {
     const values: Record<string, number> = {};
     history.forEach((h) => {
-      const date = parseLocalDate(h.recorded_at);
-      if (date.getFullYear() === selectedYear) {
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      if (ref.year === selectedYear) {
         values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
       }
     });

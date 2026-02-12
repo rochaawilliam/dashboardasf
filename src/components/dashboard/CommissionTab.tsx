@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Target, FileText, Trophy } from "lucide-react";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
-import { parseLocalDate } from "@/utils/dateUtils";
+import { getRefMonthYear } from "@/utils/dateUtils";
 import { formatNumber } from "@/utils/formatters";
 
 interface CommissionTabProps {
@@ -209,8 +209,8 @@ export function CommissionTab({
       const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
       const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
       historyData.forEach(h => {
-        const date = parseLocalDate(h.recorded_at);
-        if (date.getFullYear() === selectedYear && date.getMonth() + 1 === prevMonth) {
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month === prevMonth) {
           if (h.metric_id === CONTRATOS_EMP_ASSESSORIA_ID || h.metric_id === CONTRATOS_EMP_CONSULTORIA_ID) empSum += h.value;
           if (h.metric_id === CONTRATOS_TRAB_ASSESSORIA_ID || h.metric_id === CONTRATOS_TRAB_CONSULTORIA_ID) trabSum += h.value;
         }

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { MetricHistory } from "@/hooks/useMetrics";
 import { format } from "date-fns";
-import { parseLocalDate } from "@/utils/dateUtils";
+import { parseLocalDate, getRefMonthYear } from "@/utils/dateUtils";
 import { ptBR } from "date-fns/locale";
 import {
   Popover,
@@ -35,15 +35,19 @@ export function Sparkline({
   const monthlyData = useMemo(() => {
     const metricHistory = historyData
       .filter(h => h.metric_id === metricId)
-      .filter(h => parseLocalDate(h.recorded_at).getFullYear() === selectedYear)
+      .filter(h => {
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        return ref.year === selectedYear;
+      })
       .sort((a, b) => parseLocalDate(a.recorded_at).getTime() - parseLocalDate(b.recorded_at).getTime());
 
-    // Group by month and take latest value per month
+    // Group by reference month and sum values per month
     const byMonth: Record<number, { value: number; date: Date }> = {};
     metricHistory.forEach(h => {
-      const date = parseLocalDate(h.recorded_at);
-      const month = date.getMonth();
-      byMonth[month] = { value: h.value, date };
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      const month = ref.month - 1;
+      const existing = byMonth[month];
+      byMonth[month] = { value: (existing?.value || 0) + h.value, date: parseLocalDate(h.recorded_at) };
     });
 
     // Convert to array with month indices
