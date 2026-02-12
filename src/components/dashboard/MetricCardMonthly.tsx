@@ -35,6 +35,7 @@ interface MetricCardMonthlyProps {
   selectedYear?: number;
   selectedMonth?: number | null;
   monthlyTargets?: MonthlyTarget[];
+  onCardClick?: () => void;
 }
 
 const inverseMetrics = ["Churn de Clientes", "Turnover"];
@@ -139,6 +140,7 @@ export function MetricCardMonthly({
   selectedYear = new Date().getFullYear(),
   selectedMonth,
   monthlyTargets = [],
+  onCardClick,
 }: MetricCardMonthlyProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -228,9 +230,13 @@ export function MetricCardMonthly({
       <div 
         className={cn(
           "metric-card group relative p-1.5 sm:p-2.5 border-l-[3px]",
-          status === "danger" && !hasNoData && "ring-1 ring-primary/50"
+          status === "danger" && !hasNoData && "ring-1 ring-primary/50",
+          onCardClick && !isEditing && "cursor-pointer hover:shadow-md transition-shadow"
         )}
         style={{ borderLeftColor: getProgressBorderColor(progress) }}
+        onClick={() => {
+          if (onCardClick && !isEditing) onCardClick();
+        }}
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
@@ -267,7 +273,7 @@ export function MetricCardMonthly({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleStartEdit}
+                onClick={(e) => { e.stopPropagation(); handleStartEdit(); }}
                 className="h-5 w-5 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 <Edit2 className="h-3 w-3" />
@@ -278,7 +284,7 @@ export function MetricCardMonthly({
         
         {/* Editing mode */}
         {isEditing ? (
-          <div className="space-y-2">
+          <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2">
               <Input
                 type="number"

@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/error-handler";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
+import { MetricDrilldownDialog } from "@/components/dashboard/MetricDrilldownDialog";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
@@ -112,6 +113,7 @@ const Index = () => {
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<MetricCategory>("lucratividade");
+  const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
   
   // Month/Year selection state
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -550,6 +552,7 @@ const Index = () => {
                                         selectedYear={selectedYear}
                                         selectedMonth={selectedMonth}
                                         monthlyTargets={monthlyTargets}
+                                        onCardClick={() => setDrilldownMetric(metric)}
                                       />
                                     </div>
                                   ))}
@@ -585,6 +588,17 @@ const Index = () => {
         )}
       </div>
       
+      {/* Metric Drilldown Dialog */}
+      {drilldownMetric && (
+        <MetricDrilldownDialog
+          metric={drilldownMetric}
+          open={!!drilldownMetric}
+          onOpenChange={(open) => { if (!open) setDrilldownMetric(null); }}
+          canEdit={hasTabAccess(drilldownMetric.category, "edit")}
+          canDelete={hasTabAccess(drilldownMetric.category, "delete")}
+        />
+      )}
+
       {/* Sync Status Footer */}
       <SyncStatusFooter
         isOnline={isOnline}
