@@ -79,7 +79,6 @@ export function MetricDrilldownDialog({
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [newValue, setNewValue] = useState("");
   const [newMonth, setNewMonth] = useState<string>((new Date().getMonth() + 1).toString());
-  const [newDay, setNewDay] = useState<string>(new Date().getDate().toString());
   const [newYear, setNewYear] = useState<string>(new Date().getFullYear().toString());
   const [newComment, setNewComment] = useState("");
   const [editComment, setEditComment] = useState("");
@@ -142,8 +141,12 @@ export function MetricDrilldownDialog({
   });
 
   const insertMutation = useMutation({
-    mutationFn: async ({ value, month, day, year, comment }: { value: number; month: number; day: number; year: number; comment?: string }) => {
-      const recordedAt = format(new Date(year, month - 1, day), "yyyy-MM-dd");
+    mutationFn: async ({ value, month, year, comment }: { value: number; month: number; year: number; comment?: string }) => {
+      // recorded_at = today's date (actual date of the entry)
+      const today = new Date();
+      const recordedAt = format(today, "yyyy-MM-dd");
+      // period_type stores the reference month as "YYYY-MM"
+      const refPeriod = `${year}-${String(month).padStart(2, "0")}`;
 
       const { error } = await supabase
         .from("metric_history")
@@ -151,7 +154,7 @@ export function MetricDrilldownDialog({
           metric_id: metric.id,
           value,
           recorded_at: recordedAt,
-          period_type: "monthly",
+          period_type: refPeriod,
           comment: comment || null,
         } as any);
       if (error) throw error;
@@ -193,7 +196,6 @@ export function MetricDrilldownDialog({
     insertMutation.mutate({ 
       value: numValue, 
       month: parseInt(newMonth), 
-      day: parseInt(newDay),
       year: parseInt(newYear),
       comment: newComment.trim() || undefined,
     });
@@ -207,9 +209,20 @@ export function MetricDrilldownDialog({
 
   const formatDate = (dateStr: string) => {
     try {
-      return format(parseLocalDate(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+      return format(parseLocalDate(dateStr), "dd/MM/yyyy", { locale: ptBR });
     } catch {
       return dateStr;
+    }
+  };
+
+  const formatRefPeriod = (periodType: string) => {
+    // period_type is "YYYY-MM" for new entries, "monthly" for legacy
+    if (periodType === "monthly" || !periodType.includes("-")) return "—";
+    try {
+      const [year, month] = periodType.split("-").map(Number);
+      return MONTH_NAMES[month - 1] + "/" + year;
+    } catch {
+      return periodType;
     }
   };
 
@@ -238,19 +251,8 @@ export function MetricDrilldownDialog({
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-foreground">Novo Lançamento</p>
                   <div className="flex flex-wrap items-end gap-2">
-                    <div className="w-16">
-                      <label className="text-[10px] text-muted-foreground">Dia</label>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="31"
-                        value={newDay}
-                        onChange={(e) => setNewDay(e.target.value)}
-                        className="h-8 text-xs mt-0.5"
-                      />
-                    </div>
                     <div className="flex-1 min-w-[100px]">
-                      <label className="text-[10px] text-muted-foreground">Mês</label>
+                      <label className="text-[10px] text-muted-foreground">Mês de Referência</label>
                       <Select value={newMonth} onValueChange={setNewMonth}>
                         <SelectTrigger className="h-8 text-xs mt-0.5">
                           <SelectValue />
@@ -341,7 +343,8 @@ export function MetricDrilldownDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Data</TableHead>
+                    <TableHead>Referência</TableHead>
+                    <TableHead>Lançado em</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
                     <TableHead>Comentário</TableHead>
                     {hasActions && <TableHead className="text-right w-[100px]">Ações</TableHead>}
@@ -350,7 +353,10 @@ export function MetricDrilldownDialog({
                 <TableBody>
                   {history.map((entry) => (
                     <TableRow key={entry.id}>
-                      <TableCell className="capitalize text-sm whitespace-nowrap">
+                      <TableCell className="capitalize text-xs whitespace-nowrap">
+                        {formatRefPeriod(entry.period_type)}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                         {formatDate(entry.recorded_at)}
                       </TableCell>
                       <TableCell className="text-right">

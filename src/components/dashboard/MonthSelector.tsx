@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { parseLocalDate } from "@/utils/dateUtils";
+import { getRefMonthYear } from "@/utils/dateUtils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { MetricHistory } from "@/hooks/useMetrics";
@@ -53,9 +53,9 @@ export function MonthSelector({
     
     const launched = new Set<number>();
     historyData.forEach((h) => {
-      const date = parseLocalDate(h.recorded_at);
-      if (date.getFullYear() === selectedYear) {
-        launched.add(date.getMonth() + 1);
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      if (ref.year === selectedYear) {
+        launched.add(ref.month);
       }
     });
     return launched;
