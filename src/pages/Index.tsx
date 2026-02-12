@@ -290,13 +290,15 @@ const Index = () => {
       return { empresarial: 20, trabalhista: 14 };
     }
     
-    if (!historyData) return { empresarial: 0, trabalhista: 0 };
+    if (!historyData) return { empresarial: 20, trabalhista: 14 };
     
     const prevMonth = refMonth - 1;
     
-    let empSum = 0;
-    let trabSum = 0;
+    // Start with baseline values
+    let empSum = 20;
+    let trabSum = 14;
     
+    // Add all new contracts from the previous month's history
     historyData.forEach((h) => {
       const date = parseISO(h.recorded_at);
       if (date.getFullYear() === refYear && date.getMonth() + 1 === prevMonth) {
