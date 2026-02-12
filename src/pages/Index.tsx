@@ -718,10 +718,12 @@ const Index = () => {
                                     const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
                                     if (isTotalContratos) {
                                       const totalEmpAss = prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
+                                      const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
                                       const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
                                       const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
                                       const totalTrabAss = prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
-                                      const totalContratos = totalEmpAss + tribAss + tribPont + totalTrabAss;
+                                      const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
+                                      const totalContratos = totalEmpAss + empConsult + tribAss + tribPont + totalTrabAss + trabConsult;
                                       dynamicMetric = { ...dynamicMetric, current_value: totalContratos };
                                     }
                                     
@@ -740,9 +742,11 @@ const Index = () => {
                                     // For "Total de Contratos", compute monthly value
                                     const totalContratosMonthly = isTotalContratos
                                       ? (prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0))
+                                        + (monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0)
                                         + (monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0)
                                         + (monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0)
                                         + (prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0))
+                                        + (monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0)
                                       : null;
                                     
                                     const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos;
