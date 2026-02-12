@@ -20,7 +20,6 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 8 },
     { name: "Indicadores de Rentabilidade", keywords: ["Lucratividade", "Margem"], order: 9 },
     { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo", "Cumprimento de Orçamento", "SLA Externo"], order: 10 },
-    { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   execucao_comercial: [
     { name: "Alcance e Impressões", keywords: ["impressões", "alcance", "conversas iniciadas"], order: 1 },
