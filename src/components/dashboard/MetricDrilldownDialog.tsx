@@ -39,6 +39,7 @@ import { sanitizeError } from "@/lib/error-handler";
 import { Pencil, Trash2, Check, X, Loader2, History, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { parseLocalDate } from "@/utils/dateUtils";
 import type { Metric } from "@/hooks/useMetrics";
 import { formatMetricValue } from "@/utils/formatters";
 
@@ -207,7 +208,7 @@ export function MetricDrilldownDialog({
 
   const formatDate = (dateStr: string) => {
     try {
-      return format(new Date(dateStr), "MMMM 'de' yyyy", { locale: ptBR });
+      return format(parseLocalDate(dateStr), "MMMM 'de' yyyy", { locale: ptBR });
     } catch {
       return dateStr;
     }

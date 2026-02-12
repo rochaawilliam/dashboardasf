@@ -21,7 +21,7 @@ import {
 import { Sparkline } from "./Sparkline";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { parseISO } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 
 interface MetricCardMonthlyProps {
   metric: Metric;
@@ -102,7 +102,7 @@ function calculateTrend(
 ): { trend: "up" | "down" | "stable" | "unknown"; percent: number; monthsCount: number } {
   const metricHistory = historyData
     .filter(h => h.metric_id === metricId)
-    .sort((a, b) => parseISO(b.recorded_at).getTime() - parseISO(a.recorded_at).getTime());
+    .sort((a, b) => parseLocalDate(b.recorded_at).getTime() - parseLocalDate(a.recorded_at).getTime());
   
   if (metricHistory.length < 2) {
     return { trend: "unknown", percent: 0, monthsCount: metricHistory.length };

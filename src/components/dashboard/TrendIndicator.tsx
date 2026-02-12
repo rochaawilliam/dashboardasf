@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { MetricHistory } from "@/hooks/useMetrics";
-import { parseISO } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 
 interface TrendIndicatorProps {
   metricId: string;
@@ -25,7 +25,7 @@ function calculateTrend(
 ): { trend: TrendType; percent: number; current: number; previous: number | null; monthsCount: number } {
   const metricHistory = historyData
     .filter(h => h.metric_id === metricId)
-    .sort((a, b) => parseISO(b.recorded_at).getTime() - parseISO(a.recorded_at).getTime());
+    .sort((a, b) => parseLocalDate(b.recorded_at).getTime() - parseLocalDate(a.recorded_at).getTime());
   
   if (metricHistory.length < 2) {
     return { 

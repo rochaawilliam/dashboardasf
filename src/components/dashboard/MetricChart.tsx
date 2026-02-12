@@ -10,7 +10,8 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
+import { parseLocalDate } from "@/utils/dateUtils";
 import { ptBR } from "date-fns/locale";
 import type { Metric } from "@/hooks/useMetrics";
 import { formatNumber } from "@/utils/formatters";
@@ -44,7 +45,7 @@ export function MetricChart({ data, metrics, title }: MetricChartProps) {
     const grouped: Record<string, Record<string, number | string>> = {};
     
     data.forEach((item) => {
-      const dateKey = format(parseISO(item.recorded_at), "MMM/yy", { locale: ptBR });
+      const dateKey = format(parseLocalDate(item.recorded_at), "MMM/yy", { locale: ptBR });
       if (!grouped[dateKey]) {
         grouped[dateKey] = { date: dateKey };
       }
