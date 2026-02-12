@@ -47,14 +47,14 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
   }).filter(Boolean);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
       {summaryData.map((item) => {
         if (!item) return null;
         
         return (
           <div
             key={item.name}
-            className="bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-card rounded-lg border border-border p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between">
               <div className={cn("p-2 rounded-lg", item.colorClass)}>
@@ -71,9 +71,9 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
                 {item.change}
               </span>
             </div>
-            <div className="mt-4">
-              <p className="text-2xl font-bold text-foreground">{item.value}</p>
-              <p className="text-sm text-muted-foreground mt-1">{item.name}</p>
+            <div className="mt-2.5">
+              <p className="text-xl font-bold text-foreground">{item.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.name}</p>
             </div>
           </div>
         );

@@ -341,7 +341,7 @@ const Index = () => {
       <PrintStyles />
       {user && <AutoStartTour />}
       
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-5 lg:px-6 py-3 sm:py-4 md:py-6">
         <div data-tour="header">
           <DashboardHeader 
             metrics={adjustedMetrics}
@@ -450,7 +450,7 @@ const Index = () => {
               activeTab={activeTab}
               onTabChange={(tab) => setActiveTab(tab)}
             >
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
                 <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
                   {categoryOrder.map((category) => {
@@ -505,7 +505,7 @@ const Index = () => {
                   const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
                   
                   return (
-                    <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-3 sm:p-4 animate-fade-in">
+                    <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
                       {!canAccess ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                           <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
@@ -530,7 +530,7 @@ const Index = () => {
                             const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
                             
                             return (
-                              <div key={subcat.name} className="mb-4 sm:mb-6">
+                              <div key={subcat.name} className="mb-3 sm:mb-4">
                                 <SubcategoryHeader name={subcat.name} count={subcat.metrics.length} />
                                 <div className="dashboard-grid">
                                   {subcat.metrics.map((metric, metricIndex) => (

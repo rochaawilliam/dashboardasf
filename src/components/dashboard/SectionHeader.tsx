@@ -17,21 +17,21 @@ const variantStyles = {
 
 export function SectionHeader({ title, subtitle, icon: Icon, variant = "primary" }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-3 sm:mb-4">
       <div className={cn(
-        "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex-shrink-0",
+        "flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex-shrink-0",
         variantStyles[variant]
       )}>
-        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
       <div className="min-w-0">
         <h3 
-          className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground leading-tight"
+          className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground leading-tight"
           style={{ fontFamily: "'Cinzel', serif" }}
         >
           {title}
         </h3>
-        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
