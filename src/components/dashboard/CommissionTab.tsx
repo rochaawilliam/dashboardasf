@@ -188,35 +188,60 @@ export function CommissionTab({
     return { achieved, target };
   }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
 
-  // Compute Total Contratos (sum of all "Novos Contratos" metrics)
+  // Compute Total Contratos using the "Total de Contratos" card value and monthly targets
+  const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
+  const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
+  const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
+  const CONTRATOS_TRIB_PONTUAL_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
+  const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
+
   const contratosData = useMemo(() => {
-    const contratosMetrics = metrics.filter(m => 
-      m.name.startsWith("Novos Contratos") && m.category === "experiencia_cliente"
-    );
+    // Compute achieved value same way as Index.tsx: Total Emp Assessoria + Trib Assessoria + Trib Pontual + Total Trab Assessoria
+    // We need prev month contract base values
+    const refMonth = selectedMonth ?? new Date().getMonth() + 1;
+    let empBase = 20;
+    let trabBase = 14;
     
-    const achieved = selectedMonth !== null
-      ? contratosMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0)
-      : contratosMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-    
-    let target = 0;
-    if (selectedMonth !== null && monthlyTargets) {
-      contratosMetrics.forEach(m => {
-        const mt = monthlyTargets.find(t => t.metric_id === m.id && t.year === selectedYear && t.month === selectedMonth);
-        target += mt ? mt.target_value : (m.target_value / 12);
-      });
-    } else {
-      contratosMetrics.forEach(m => {
-        const mts = (monthlyTargets || []).filter(t => t.metric_id === m.id && t.year === selectedYear);
-        if (mts.length > 0) {
-          target += mts.reduce((s, t) => s + t.target_value, 0);
-        } else {
-          target += m.target_value;
+    if (refMonth > 1 && historyData) {
+      const prevMonth = refMonth - 1;
+      let empSum = 0;
+      let trabSum = 0;
+      const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
+      const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
+      historyData.forEach(h => {
+        const date = parseISO(h.recorded_at);
+        if (date.getFullYear() === selectedYear && date.getMonth() + 1 === prevMonth) {
+          if (h.metric_id === CONTRATOS_EMP_ASSESSORIA_ID || h.metric_id === CONTRATOS_EMP_CONSULTORIA_ID) empSum += h.value;
+          if (h.metric_id === CONTRATOS_TRAB_ASSESSORIA_ID || h.metric_id === CONTRATOS_TRAB_CONSULTORIA_ID) trabSum += h.value;
         }
       });
+      empBase = empSum;
+      trabBase = trabSum;
+    } else if (refMonth > 1) {
+      empBase = 0;
+      trabBase = 0;
+    }
+
+    const totalEmpAss = empBase + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
+    const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
+    const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
+    const totalTrabAss = trabBase + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
+    const achieved = selectedMonth !== null
+      ? totalEmpAss + tribAss + tribPont + totalTrabAss
+      : (accumulatedValues[TOTAL_CONTRATOS_ID] ?? 0);
+
+    // Get target from monthly_targets for Total de Contratos
+    let target = 0;
+    if (selectedMonth !== null && monthlyTargets) {
+      const mt = monthlyTargets.find(t => t.metric_id === TOTAL_CONTRATOS_ID && t.year === selectedYear && t.month === selectedMonth);
+      target = mt ? mt.target_value : 0;
+    } else {
+      const mts = (monthlyTargets || []).filter(t => t.metric_id === TOTAL_CONTRATOS_ID && t.year === selectedYear);
+      target = mts.length > 0 ? mts.reduce((s, t) => s + t.target_value, 0) : 0;
     }
     
     return { achieved, target };
-  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
+  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear, historyData]);
 
   const receitaCommission = getCommission(receitaData.target > 0 ? (receitaData.achieved / receitaData.target) * 100 : 0);
   const contratosCommission = getCommission(contratosData.target > 0 ? (contratosData.achieved / contratosData.target) * 100 : 0);
