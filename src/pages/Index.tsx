@@ -475,7 +475,7 @@ const Index = () => {
                               ? "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                               : "bg-muted/30 text-muted-foreground"
                         )}
-                        title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : undefined}
+                        title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : config.title}
                       >
                         {!canAccess ? (
                           <Lock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
