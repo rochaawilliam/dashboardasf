@@ -93,7 +93,7 @@ function CommissionCard({
             "text-lg font-bold",
             percentage >= 100 ? "text-green-400" : percentage >= 80 ? "text-yellow-400" : "text-red-400"
           )}>
-            {percentage.toFixed(0)}%
+            {Math.floor(percentage)}%
           </span>
         </div>
 
