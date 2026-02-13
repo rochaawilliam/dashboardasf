@@ -294,7 +294,7 @@ export function MetricDrilldownDialog({
                     </div>
                     <div>
                       <label className="text-[10px] text-muted-foreground mb-1 block">Mês de Referência</label>
-                      <div className="grid grid-cols-4 gap-1">
+                      <div className="grid grid-cols-4 gap-1" translate="no">
                         {MONTH_NAMES.map((name, i) => {
                           const monthValue = (i + 1).toString();
                           const isSelected = newMonth === monthValue;
@@ -376,7 +376,7 @@ export function MetricDrilldownDialog({
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex gap-1 flex-wrap" translate="no">
               <button
                 type="button"
                 onClick={() => setFilterMonth("all")}
