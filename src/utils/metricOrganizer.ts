@@ -6,6 +6,7 @@ export interface SubcategoryConfig {
   keywords: string[];
   excludeKeywords?: string[];
   order: number;
+  sortOrder?: string[]; // Custom sort order by keyword match
 }
 
 export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
@@ -22,10 +23,12 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo", "Cumprimento de Orçamento", "SLA Externo"], order: 10 },
   ],
   execucao_comercial: [
-    { name: "Alcance e Impressões", keywords: ["impressões", "alcance", "conversas iniciadas"], order: 1 },
-    { name: "Geração de Leads", keywords: ["Leads"], order: 2 },
-    { name: "Reuniões Agendadas", keywords: ["Reuniões agendadas"], order: 3 },
-    { name: "Propostas Elaboradas", keywords: ["Propostas elaboradas"], order: 4 },
+    { name: "Alcance e Impressões ASF", keywords: ["impressões ASF", "alcance ASF", "conversas iniciadas ASF"], order: 1, sortOrder: ["impressões", "alcance", "conversas"] },
+    { name: "Alcance e Impressões Patenteia", keywords: ["impressões Patenteia", "alcance Patenteia", "conversas iniciadas Patenteia"], order: 2, sortOrder: ["impressões", "alcance", "conversas"] },
+    { name: "Leads Online", keywords: ["Leads ASF Online", "Leads Patenteia Online"], order: 3, sortOrder: ["ASF", "Patenteia"] },
+    { name: "Leads Offline", keywords: ["Off"], order: 4 },
+    { name: "Reuniões Agendadas", keywords: ["Reuniões agendadas"], order: 5 },
+    { name: "Propostas Elaboradas", keywords: ["Propostas elaboradas"], order: 6 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   experiencia_cliente: [
@@ -109,9 +112,18 @@ export function organizeMetricsBySubcategory(
     }
   });
 
-  // Sort metrics within each subcategory by name
+  // Sort metrics within each subcategory
   result.forEach((subcat) => {
-    subcat.metrics.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    const config = categorySubcats.find((c) => c.name === subcat.name);
+    if (config?.sortOrder) {
+      subcat.metrics.sort((a, b) => {
+        const aIdx = config.sortOrder!.findIndex((k) => a.name.toLowerCase().includes(k.toLowerCase()));
+        const bIdx = config.sortOrder!.findIndex((k) => b.name.toLowerCase().includes(k.toLowerCase()));
+        return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+      });
+    } else {
+      subcat.metrics.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    }
   });
 
   // Convert to array and sort by order, filter empty subcategories
