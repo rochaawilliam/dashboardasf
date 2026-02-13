@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/error-handler";
-import { Pencil, Trash2, Check, X, Loader2, History, Plus } from "lucide-react";
+import { Pencil, Trash2, Check, X, Loader2, History, Plus, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { parseLocalDate } from "@/utils/dateUtils";
@@ -82,6 +82,8 @@ export function MetricDrilldownDialog({
   const [newYear, setNewYear] = useState<string>(new Date().getFullYear().toString());
   const [newComment, setNewComment] = useState("");
   const [editComment, setEditComment] = useState("");
+  const [filterMonth, setFilterMonth] = useState<string>("all");
+  const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
   const queryClient = useQueryClient();
 
   const { data: history, isLoading } = useQuery({
@@ -230,6 +232,18 @@ export function MetricDrilldownDialog({
   const currentYear = new Date().getFullYear();
   const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
 
+  // Filter history by selected month/year
+  const filteredHistory = history?.filter((entry) => {
+    if (filterMonth === "all") return true;
+    if (entry.period_type && entry.period_type.includes("-")) {
+      const [entryYear, entryMonth] = entry.period_type.split("-");
+      return entryYear === filterYear && entryMonth === filterMonth.padStart(2, "0");
+    }
+    return true;
+  });
+
+  const filteredTotal = filteredHistory?.reduce((sum, e) => sum + Number(e.value), 0) ?? 0;
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -346,12 +360,66 @@ export function MetricDrilldownDialog({
             </div>
           )}
 
+          {/* Month filter */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Filter className="h-3.5 w-3.5" />
+              <span>Filtrar:</span>
+            </div>
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger className="h-7 w-20 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border border-border z-50">
+                {yearOptions.map((y) => (
+                  <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-1 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setFilterMonth("all")}
+                className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors border ${
+                  filterMonth === "all"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                Todos
+              </button>
+              {MONTH_NAMES.map((name, i) => {
+                const monthValue = (i + 1).toString();
+                const isSelected = filterMonth === monthValue;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setFilterMonth(monthValue)}
+                    className={`rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors border ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    {name.substring(0, 3)}
+                  </button>
+                );
+              })}
+            </div>
+            {filterMonth !== "all" && filteredHistory && filteredHistory.length > 0 && (
+              <span className="text-xs font-medium text-primary ml-auto">
+                Total: {formatMetricValue(filteredTotal, metric.unit, metric.name)}
+              </span>
+            )}
+          </div>
+
           <div className="flex-1 overflow-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : history && history.length > 0 ? (
+            ) : filteredHistory && filteredHistory.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -363,7 +431,7 @@ export function MetricDrilldownDialog({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {history.map((entry) => (
+                  {filteredHistory.map((entry) => (
                     <TableRow key={entry.id}>
                       <TableCell className="capitalize text-xs whitespace-nowrap">
                         {formatRefPeriod(entry.period_type)}
