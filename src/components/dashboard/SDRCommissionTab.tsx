@@ -145,17 +145,36 @@ export function SDRCommissionTab({
             />
           </div>
 
-          {/* Breakdown */}
-          <div className="space-y-1 pt-1">
-            {data.breakdown.map(item => {
-              const pct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
-              return (
-                <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
-                  <span className="truncate mr-2">{item.name}</span>
-                  <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({pct}%)</span>
-                </div>
-              );
-            })}
+          {/* Breakdown - two columns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Reuniões Agendadas */}
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-green-400 px-2">Reuniões Agendadas</p>
+              {data.breakdown.filter(item => item.name.startsWith("Reuniões")).map(item => {
+                const pct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
+                const label = item.name.replace("Reuniões agendadas ", "");
+                return (
+                  <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
+                    <span className="truncate mr-2">{label}</span>
+                    <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({pct}%)</span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Propostas Elaboradas */}
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-green-400 px-2">Propostas Elaboradas</p>
+              {data.breakdown.filter(item => item.name.startsWith("Propostas")).map(item => {
+                const pct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
+                const label = item.name.replace("Propostas elaboradas ", "");
+                return (
+                  <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
+                    <span className="truncate mr-2">{label}</span>
+                    <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({pct}%)</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Commission tiers */}
