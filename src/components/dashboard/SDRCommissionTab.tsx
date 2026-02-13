@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Target } from "lucide-react";
+import { Trophy, Target, CalendarCheck, FileText } from "lucide-react";
 import type { Metric, MonthlyTarget } from "@/hooks/useMetrics";
 import { formatNumber } from "@/utils/formatters";
 
@@ -112,124 +112,148 @@ export function SDRCommissionTab({
         </div>
       </div>
 
-      {/* Progress Card */}
-      <Card className="border-l-4 border-l-green-500 bg-card">
-        <CardHeader className="pb-2 pt-4 px-4">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-green-500/10">
-              <Target className="h-4 w-4 text-green-400" />
-            </div>
-            <CardTitle className="text-sm font-semibold">Reuniões + Propostas</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="px-4 pb-4 space-y-3">
-          {/* Progress info */}
-          <div className="flex items-baseline justify-between">
-            <div>
-              <span className="text-xl font-bold text-foreground">{formatNumber(data.achieved)}</span>
-              <span className="text-xs text-muted-foreground ml-1">/ {formatNumber(data.target)}</span>
-            </div>
-            <span className={cn(
-              "text-lg font-bold",
-              percentage >= 100 ? "text-green-400" : percentage >= 80 ? "text-yellow-400" : "text-red-400"
-            )}>
-              {percentage}%
-            </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="h-2 rounded-full bg-green-500 transition-all"
-              style={{ width: `${Math.min(percentage, 100)}%` }}
-            />
-          </div>
-
-          {/* Breakdown - two columns */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            {/* Reuniões Agendadas */}
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-green-400 px-2">Reuniões Agendadas</p>
-              {data.breakdown.filter(item => item.name.startsWith("Reuniões")).map(item => {
-                const pct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
-                const label = item.name.replace("Reuniões agendadas ", "");
-                return (
-                  <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
-                    <span className="truncate mr-2">{label}</span>
-                    <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({pct}%)</span>
+      {/* Three-column layout: Reuniões | Propostas | Comissão */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Reuniões Agendadas Card */}
+        {(() => {
+          const items = data.breakdown.filter(i => i.name.startsWith("Reuniões"));
+          const ach = items.reduce((s, i) => s + i.achieved, 0);
+          const tgt = items.reduce((s, i) => s + i.target, 0);
+          const pct = tgt > 0 ? Math.round((ach / tgt) * 100) : 0;
+          return (
+            <Card className="border-l-4 border-l-green-500 bg-card">
+              <CardHeader className="pb-2 pt-4 px-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-green-500/10">
+                    <CalendarCheck className="h-4 w-4 text-green-400" />
                   </div>
-                );
-              })}
-            </div>
-            {/* Propostas Elaboradas */}
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-green-400 px-2">Propostas Elaboradas</p>
-              {data.breakdown.filter(item => item.name.startsWith("Propostas")).map(item => {
-                const pct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
-                const label = item.name.replace("Propostas elaboradas ", "");
-                return (
-                  <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
-                    <span className="truncate mr-2">{label}</span>
-                    <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({pct}%)</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Commission tiers */}
-          <div className="space-y-1 pt-2 border-t border-border/50">
-            {SDR_TIERS.slice().reverse().map(tier => {
-              const isActive = activeTier?.min === tier.min;
-              return (
-                <div
-                  key={tier.min}
-                  className={cn(
-                    "flex items-center justify-between text-xs px-2 py-1 rounded",
-                    isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
-                  )}
-                >
-                  <span>≥ {tier.min}% da meta</span>
-                  <span>R$ {formatNumber(Math.round(TOTAL_COMMISSION * tier.pct))}</span>
+                  <CardTitle className="text-sm font-semibold">Reuniões Agendadas</CardTitle>
                 </div>
-              );
-            })}
-          </div>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <span className="text-xl font-bold text-foreground">{formatNumber(ach)}</span>
+                    <span className="text-xs text-muted-foreground ml-1">/ {formatNumber(tgt)}</span>
+                  </div>
+                  <span className={cn("text-lg font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
+                    {pct}%
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="h-2 rounded-full bg-green-500 transition-all" style={{ width: `${Math.min(pct, 100)}%` }} />
+                </div>
+                <div className="space-y-1">
+                  {items.map(item => {
+                    const iPct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
+                    return (
+                      <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
+                        <span className="truncate mr-2">{item.name.replace("Reuniões agendadas ", "")}</span>
+                        <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({iPct}%)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
-          {/* Commission result */}
-          <div className="pt-2 border-t border-border/50">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Comissão:</span>
-              <span className={cn(
-                "text-lg font-bold",
-                commission > 0 ? "text-green-400" : "text-muted-foreground"
-              )}>
-                R$ {formatNumber(commission)}
+        {/* Propostas Elaboradas Card */}
+        {(() => {
+          const items = data.breakdown.filter(i => i.name.startsWith("Propostas"));
+          const ach = items.reduce((s, i) => s + i.achieved, 0);
+          const tgt = items.reduce((s, i) => s + i.target, 0);
+          const pct = tgt > 0 ? Math.round((ach / tgt) * 100) : 0;
+          return (
+            <Card className="border-l-4 border-l-green-500 bg-card">
+              <CardHeader className="pb-2 pt-4 px-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-green-500/10">
+                    <FileText className="h-4 w-4 text-green-400" />
+                  </div>
+                  <CardTitle className="text-sm font-semibold">Propostas Elaboradas</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <span className="text-xl font-bold text-foreground">{formatNumber(ach)}</span>
+                    <span className="text-xs text-muted-foreground ml-1">/ {formatNumber(tgt)}</span>
+                  </div>
+                  <span className={cn("text-lg font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
+                    {pct}%
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="h-2 rounded-full bg-green-500 transition-all" style={{ width: `${Math.min(pct, 100)}%` }} />
+                </div>
+                <div className="space-y-1">
+                  {items.map(item => {
+                    const iPct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
+                    return (
+                      <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
+                        <span className="truncate mr-2">{item.name.replace("Propostas elaboradas ", "")}</span>
+                        <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({iPct}%)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
+
+        {/* Comissão Card */}
+        <Card className="border-l-4 border-l-green-500 bg-card">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-green-500/10">
+                <Trophy className="h-4 w-4 text-green-400" />
+              </div>
+              <CardTitle className="text-sm font-semibold">Comissão</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 space-y-3">
+            {/* Overall progress */}
+            <div className="flex items-baseline justify-between">
+              <span className="text-xs text-muted-foreground">Atingimento geral</span>
+              <span className={cn("text-lg font-bold", percentage >= 100 ? "text-green-400" : percentage >= 80 ? "text-yellow-400" : "text-red-400")}>
+                {percentage}%
               </span>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div className="h-2 rounded-full bg-green-500 transition-all" style={{ width: `${Math.min(percentage, 100)}%` }} />
+            </div>
 
-      {/* Total Commission */}
-      <Card className="border-2 border-green-500/50 bg-green-500/5">
-        <CardContent className="py-5 px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-green-500/20">
-                <Trophy className="h-6 w-6 text-green-400" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Comissão Total SDR</p>
-                <p className="text-xs text-muted-foreground">{periodLabel}</p>
+            {/* Commission tiers */}
+            <div className="space-y-1">
+              {SDR_TIERS.slice().reverse().map(tier => {
+                const isActive = activeTier?.min === tier.min;
+                return (
+                  <div key={tier.min} className={cn(
+                    "flex items-center justify-between text-xs px-2 py-1 rounded",
+                    isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
+                  )}>
+                    <span>≥ {tier.min}%</span>
+                    <span>R$ {formatNumber(Math.round(TOTAL_COMMISSION * tier.pct))}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Commission result */}
+            <div className="pt-2 border-t border-border/50">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Total:</span>
+                <span className={cn("text-2xl font-bold", commission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                  R$ {formatNumber(commission)}
+                </span>
               </div>
             </div>
-            <span className="text-2xl sm:text-3xl font-bold text-green-400">
-              R$ {formatNumber(commission)}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
