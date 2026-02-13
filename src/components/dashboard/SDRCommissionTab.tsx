@@ -112,8 +112,8 @@ export function SDRCommissionTab({
         </div>
       </div>
 
-      {/* Three-column layout: Reuniões | Propostas | Comissão */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Two-column layout: Reuniões | Propostas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Reuniões Agendadas Card */}
         {(() => {
           const items = data.breakdown.filter(i => i.name.startsWith("Reuniões"));
@@ -203,8 +203,9 @@ export function SDRCommissionTab({
             </Card>
           );
         })()}
+      </div>
 
-        {/* Comissão Card */}
+      {/* Comissão Card - full width below */}
         <Card className="border-l-4 border-l-green-500 bg-card">
           <CardHeader className="pb-2 pt-4 px-4">
             <div className="flex items-center gap-2">
@@ -253,7 +254,6 @@ export function SDRCommissionTab({
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }
