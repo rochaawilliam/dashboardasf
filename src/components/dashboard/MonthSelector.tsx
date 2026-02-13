@@ -64,7 +64,7 @@ export function MonthSelector({
   // Mobile: year nav + month select dropdown
   if (isMobile) {
     return (
-      <div className="mb-2 p-1.5 bg-card rounded-lg border border-border print:hidden">
+      <div className="mb-2 p-1.5 bg-card rounded-lg border border-border print:hidden" lang="pt-BR" translate="no">
         <div className="flex items-center gap-1.5">
           <CalendarDays className="h-3 w-3 text-primary shrink-0" />
           
@@ -113,7 +113,7 @@ export function MonthSelector({
 
   // Desktop: horizontal month buttons
   return (
-    <div className="mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden">
+    <div className="mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden" lang="pt-BR">
       <div className="flex items-center gap-1.5 sm:gap-2">
         <CalendarDays className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary shrink-0" />
         
@@ -130,7 +130,7 @@ export function MonthSelector({
 
         {/* All Year + Month buttons */}
         <ScrollArea className="flex-1">
-          <div className="flex gap-0.5 sm:gap-1">
+          <div className="flex gap-0.5 sm:gap-1" translate="no">
             <Button
               variant={selectedMonth === null ? "default" : "outline"}
               size="sm"
