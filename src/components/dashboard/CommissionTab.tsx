@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Target, FileText, Trophy } from "lucide-react";
+import { DollarSign, Target, FileText, Trophy, TrendingUp } from "lucide-react";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { getRefMonthYear } from "@/utils/dateUtils";
@@ -239,7 +239,7 @@ export function CommissionTab({
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 rounded-xl bg-purple-500/10">
-          <TridentIcon className="h-5 w-5 text-purple-400" />
+          <TrendingUp className="h-5 w-5 text-purple-400" />
         </div>
         <div>
           <h2 className="text-base sm:text-lg font-bold text-foreground">Salário Variável - Head de Crescimento</h2>
