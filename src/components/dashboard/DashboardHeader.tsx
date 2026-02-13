@@ -1,13 +1,11 @@
-import { Shield, LogIn, Menu } from "lucide-react";
+import { LogIn, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
-import { TourButton } from "./GuidedTour";
-import { UserSettingsPanel } from "./UserSettingsPanel";
-import { UserMenu } from "./UserMenu";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,46 +31,17 @@ export function DashboardHeader({
   mobileDrawer 
 }: DashboardHeaderProps) {
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { profile } = useProfile();
   const isMobile = useIsMobile();
-  const [actionsOpen, setActionsOpen] = useState(false);
 
-  const actionButtons = (
-    <>
-      {user && (
-        <>
-          <div data-tour="notifications">
-            {metrics && (
-              <NotificationBell 
-                metrics={metrics} 
-                historyData={historyData}
-                selectedYear={selectedYear}
-              />
-            )}
-          </div>
-          {!isMobile && <TourButton />}
-          <UserSettingsPanel />
-          {isAdmin && (
-            <Link to="/admin">
-              <Button variant="ghost" size="icon" className={cn(isMobile ? "h-7 w-7" : "h-9 w-9", "border border-border/50")} title="Painel Administrativo">
-                <Shield className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
-              </Button>
-            </Link>
-          )}
-        </>
-      )}
-      {user ? (
-        <UserMenu />
-      ) : (
-        <Link to="/login">
-          <Button variant="default" className={cn(isMobile ? "h-7 px-2 gap-1" : "h-9 px-3 gap-1")} title="Entrar">
-            <LogIn className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
-            <span className={cn(isMobile ? "text-[10px]" : "text-sm", "font-medium")}>Entrar</span>
-          </Button>
-        </Link>
-      )}
-    </>
-  );
+  const initials = (profile?.display_name || user?.email || "U")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .substring(0, 2);
+
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "";
 
   return (
     <header className="mb-2 sm:mb-4 pb-2 sm:pb-4 border-b border-border/30">
@@ -94,35 +63,42 @@ export function DashboardHeader({
           </p>
         </div>
         
-        {/* Desktop: inline actions */}
-        {!isMobile && (
-          <div className="flex items-center gap-1 sm:gap-2">
-            {actionButtons}
-          </div>
-        )}
-
-        {/* Mobile: collapsible menu trigger */}
-        {isMobile && (
-          <Collapsible open={actionsOpen} onOpenChange={setActionsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="icon" className="h-7 w-7 shrink-0">
-                <Menu className="h-3.5 w-3.5" />
-              </Button>
-            </CollapsibleTrigger>
-          </Collapsible>
-        )}
-      </div>
-      
-      {/* Mobile: expandable actions row */}
-      {isMobile && (
-        <Collapsible open={actionsOpen} onOpenChange={setActionsOpen}>
-          <CollapsibleContent>
-            <div className="flex items-center justify-end gap-1.5 mt-1.5 pt-1.5 border-t border-border/20">
-              {actionButtons}
+        {/* Right side: notifications + user avatar */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {user && metrics && (
+            <div data-tour="notifications">
+              <NotificationBell 
+                metrics={metrics} 
+                historyData={historyData}
+                selectedYear={selectedYear}
+              />
             </div>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
+          )}
+
+          {user ? (
+            <Link to="/profile" className="flex items-center gap-2">
+              <Avatar className={cn("border border-border/50", isMobile ? "h-7 w-7" : "h-9 w-9")}>
+                <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
+                <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              {!isMobile && (
+                <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
+                  {displayName}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <Link to="/login">
+              <Button variant="default" className={cn(isMobile ? "h-7 px-2 gap-1" : "h-9 px-3 gap-1")} title="Entrar">
+                <LogIn className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
+                <span className={cn(isMobile ? "text-[10px]" : "text-sm", "font-medium")}>Entrar</span>
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
     </header>
   );
 }
