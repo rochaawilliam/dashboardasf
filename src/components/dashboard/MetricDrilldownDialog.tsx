@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -244,6 +244,19 @@ export function MetricDrilldownDialog({
 
   const filteredTotal = filteredHistory?.reduce((sum, e) => sum + Number(e.value), 0) ?? 0;
 
+  // Monthly totals for the selected year
+  const monthlyTotals = useMemo(() => {
+    if (!history) return [];
+    return MONTH_NAMES.map((name, i) => {
+      const month = i + 1;
+      const monthStr = String(month).padStart(2, "0");
+      const total = history
+        .filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`))
+        .reduce((sum, e) => sum + Number(e.value), 0);
+      return { month, name: name.substring(0, 3), total };
+    });
+  }, [history, filterYear]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -413,6 +426,40 @@ export function MetricDrilldownDialog({
               </span>
             )}
           </div>
+
+          {/* Monthly totals grid */}
+          {!isLoading && history && history.length > 0 && (
+            <div className="border border-border rounded-lg p-2 bg-muted/20">
+              <p className="text-[10px] font-medium text-muted-foreground mb-1.5">Totais por mês — {filterYear}</p>
+              <div className="grid grid-cols-6 sm:grid-cols-12 gap-1" translate="no">
+                {monthlyTotals.map((m) => {
+                  const hasValue = m.total > 0;
+                  const isActive = filterMonth === String(m.month);
+                  return (
+                    <button
+                      key={m.month}
+                      type="button"
+                      onClick={() => setFilterMonth(isActive ? "all" : String(m.month))}
+                      className={`rounded-md p-1 text-center transition-colors border ${
+                        isActive
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : hasValue
+                          ? "bg-success/10 border-success/30 hover:bg-success/20"
+                          : "bg-background border-border hover:bg-accent"
+                      }`}
+                    >
+                      <span className="text-[9px] font-medium block">{m.name}</span>
+                      <span className={`text-[10px] font-semibold block ${
+                        isActive ? "text-primary-foreground" : hasValue ? "text-success" : "text-muted-foreground"
+                      }`}>
+                        {hasValue ? formatMetricValue(m.total, metric.unit, metric.name) : "—"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex-1 overflow-auto">
             {isLoading ? (
