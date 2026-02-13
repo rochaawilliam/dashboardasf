@@ -72,7 +72,7 @@ export const SyncStatusFooter = forwardRef<HTMLElement, SyncStatusFooterProps>(
             )}
           </div>
           
-          {/* Center - Last sync time */}
+          {/* Center - Last sync time + ASF link */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {displaySyncTime ? (
               <>
@@ -85,10 +85,22 @@ export const SyncStatusFooter = forwardRef<HTMLElement, SyncStatusFooterProps>(
                 {isLoggedIn ? "Sincronizando..." : "Modo local"}
               </span>
             )}
+            <span className="hidden sm:inline text-border">|</span>
+            <a 
+              href="https://www.asfnegocios.com.br" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hidden sm:inline text-primary hover:underline"
+            >
+              www.asfnegocios.com.br
+            </a>
           </div>
           
-          {/* Right side - Sync button */}
+          {/* Right side - Version info + Sync button */}
           <div className="flex items-center gap-2">
+            <span className="hidden md:inline text-[10px] text-muted-foreground/60">
+              Versão 1.0 | Desenvolvido por William Rocha
+            </span>
             {(pendingCount > 0 || !isOnline) && (
               <Button
                 variant="outline"

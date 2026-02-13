@@ -1,17 +1,12 @@
-import { LogIn, Menu } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { useState } from "react";
 import asfLogo from "@/assets/asf-logo.png";
 import type { Metric, MetricHistory } from "@/hooks/useMetrics";
 import { ReactNode } from "react";
@@ -63,8 +58,10 @@ export function DashboardHeader({
           </p>
         </div>
         
-        {/* Right side: notifications + user avatar */}
+        {/* Right side: theme toggle + notifications + user avatar */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          <ThemeToggle />
+          
           {user && metrics && (
             <div data-tour="notifications">
               <NotificationBell 
@@ -77,16 +74,23 @@ export function DashboardHeader({
 
           {user ? (
             <Link to="/profile" className="flex items-center gap-2">
-              <Avatar className={cn("border border-border/50", isMobile ? "h-7 w-7" : "h-9 w-9")}>
+              <Avatar className={cn("border border-border/50", isMobile ? "h-9 w-9" : "h-12 w-12")}>
                 <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+                <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-xs" : "text-sm")}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
               {!isMobile && (
-                <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
-                  {displayName}
-                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
+                    {displayName}
+                  </span>
+                  {profile?.job_title && (
+                    <span className="text-[10px] text-muted-foreground max-w-[120px] truncate leading-tight">
+                      {profile.job_title}
+                    </span>
+                  )}
+                </div>
               )}
             </Link>
           ) : (

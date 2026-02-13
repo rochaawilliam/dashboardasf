@@ -7,6 +7,7 @@ export interface Profile {
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
+  job_title: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -47,7 +48,7 @@ export function useProfile() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: async (updates: Partial<Pick<Profile, "display_name" | "avatar_url">>) => {
+    mutationFn: async (updates: Partial<Pick<Profile, "display_name" | "avatar_url" | "job_title">>) => {
       if (!user?.id) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("profiles")

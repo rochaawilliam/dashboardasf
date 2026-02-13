@@ -92,7 +92,7 @@ export function AdminUsersPanel() {
       if (!session?.access_token) throw new Error("Sessão expirada. Faça login novamente.");
       const response = await supabase.functions.invoke("create-user", {
         headers: { Authorization: `Bearer ${session.access_token}` },
-        body: { email: data.email, password: data.password, makeAdmin: data.isAdmin },
+        body: { email: data.email, password: data.password, makeAdmin: data.isAdmin, jobTitle: data.jobTitle },
       });
       if (response.error) throw new Error(response.error?.message || "Erro ao criar usuário");
       const result = response.data;

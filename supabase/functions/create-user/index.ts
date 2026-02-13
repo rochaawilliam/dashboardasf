@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { email, password, makeAdmin } = await req.json();
+    const { email, password, makeAdmin, jobTitle } = await req.json();
 
     if (!email || !password) {
       return new Response(
@@ -106,6 +106,18 @@ Deno.serve(async (req) => {
 
       if (roleInsertError) {
         console.error('Error adding admin role:', roleInsertError);
+      }
+    }
+
+    // Update profile with job_title if provided
+    if (jobTitle && newUser.user) {
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .update({ job_title: jobTitle })
+        .eq('user_id', newUser.user.id);
+
+      if (profileError) {
+        console.error('Error updating profile job_title:', profileError);
       }
     }
 

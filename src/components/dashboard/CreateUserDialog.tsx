@@ -30,6 +30,7 @@ interface CreateUserDialogProps {
 export interface CreateUserData {
   email: string;
   password: string;
+  jobTitle: string;
   isAdmin: boolean;
   permissions: Record<TabKey, TabPermissionSet>;
 }
@@ -51,6 +52,7 @@ export function CreateUserDialog({
 }: CreateUserDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [permissions, setPermissions] = useState<Record<TabKey, TabPermissionSet>>({ ...defaultPermissions });
 
@@ -106,6 +108,7 @@ export function CreateUserDialog({
     onCreateUser({
       email,
       password,
+      jobTitle,
       isAdmin,
       permissions,
     });
@@ -114,6 +117,7 @@ export function CreateUserDialog({
   const resetForm = () => {
     setEmail("");
     setPassword("");
+    setJobTitle("");
     setIsAdmin(false);
     setPermissions({ ...defaultPermissions });
   };
@@ -160,6 +164,16 @@ export function CreateUserDialog({
                 placeholder="Mínimo 6 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="jobTitle">Cargo</Label>
+              <Input
+                id="jobTitle"
+                type="text"
+                placeholder="Ex: Advogado, Analista, Gerente"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
               />
             </div>
             <div className="flex items-center space-x-2">
