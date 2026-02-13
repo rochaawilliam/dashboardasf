@@ -21,6 +21,7 @@ import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
 import { AutoStartTour } from "@/components/dashboard/GuidedTour";
 import { CommissionTab, TridentIcon } from "@/components/dashboard/CommissionTab";
+import { SDRCommissionTab } from "@/components/dashboard/SDRCommissionTab";
 import { useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
 import { SyncStatusFooter } from "@/components/dashboard/SyncStatusFooter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,7 @@ import {
   Briefcase,
   Lock,
   LogIn,
+  Target,
 } from "lucide-react";
 import {
   useMetrics,
@@ -105,6 +107,7 @@ const categoryOrder: MetricCategory[] = [
 ];
 
 const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
+const SDR_ALLOWED_EMAILS = ["william.rocha@asfnegocios.com.br", "jaderjunior@asfnegocios.com.br"];
 
 // Collapsible subcategory wrapper
 function CollapsibleSubcategory({ name, count, collapsible, defaultCollapsed, children }: { 
@@ -135,8 +138,9 @@ const Index = () => {
     division: "all",
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao">("lucratividade");
+  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("lucratividade");
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
+  const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
   
   // Month/Year selection state
@@ -419,8 +423,8 @@ const Index = () => {
             mobileDrawer={
               <div data-tour="mobile-menu">
                 <MobileDrawer 
-                  activeTab={activeTab === "comissao" ? "lucratividade" : activeTab}
-                  onTabChange={(tab) => setActiveTab(tab)}
+                  activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+                  onTabChange={(tab) => setActiveTab(tab as MetricCategory)}
                   categoryMetricsCounts={categoryMetricsCounts}
                 />
               </div>
@@ -476,8 +480,8 @@ const Index = () => {
             <div className="pointer-events-none select-none blur-md opacity-50 min-h-[400px]">
               <SwipeableTabs<MetricCategory>
                 tabs={categoryOrder}
-                activeTab={activeTab === "comissao" ? "lucratividade" : activeTab}
-                onTabChange={(tab) => setActiveTab(tab)}
+                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+                onTabChange={(tab) => setActiveTab(tab as MetricCategory)}
               >
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
                   <div className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
@@ -516,10 +520,10 @@ const Index = () => {
             {/* Category Tabs with Swipe Support */}
             <SwipeableTabs<MetricCategory>
               tabs={categoryOrder}
-              activeTab={activeTab === "comissao" ? "lucratividade" : activeTab}
-              onTabChange={(tab) => setActiveTab(tab)}
+              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+              onTabChange={(tab) => setActiveTab(tab as MetricCategory)}
             >
-              <Tabs value={activeTab === "comissao" ? "comissao" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao")} className="mb-3 sm:mb-4">
+              <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
                 <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5">
                   {/* Secret Commission Tab */}
@@ -537,6 +541,23 @@ const Index = () => {
                     >
                       <TridentIcon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                       <span className="hidden sm:inline truncate">Salário Variável</span>
+                    </button>
+                  )}
+                  {/* SDR Commission Tab */}
+                  {isSDRUser && (
+                    <button
+                      onClick={() => setActiveTab("comissao_sdr")}
+                      className={cn(
+                        "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative",
+                        "text-[9px] sm:text-xs font-medium",
+                        activeTab === "comissao_sdr"
+                          ? "bg-green-600 text-white shadow-sm z-10"
+                          : "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                      )}
+                      title="Salário Variável SDR"
+                    >
+                      <Target className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden sm:inline truncate">SDR</span>
                     </button>
                   )}
                   {categoryOrder.map((category) => {
@@ -786,6 +807,20 @@ const Index = () => {
                     <CommissionTab
                       metrics={adjustedMetrics}
                       historyData={historyData}
+                      monthlyTargets={monthlyTargets}
+                      selectedMonth={selectedMonth}
+                      selectedYear={selectedYear}
+                      monthlyValues={monthlyValues}
+                      accumulatedValues={accumulatedValues}
+                    />
+                  </TabsContent>
+                )}
+
+                {/* SDR Commission Tab Content */}
+                {isSDRUser && activeTab === "comissao_sdr" && (
+                  <TabsContent value="comissao_sdr" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
+                    <SDRCommissionTab
+                      metrics={adjustedMetrics}
                       monthlyTargets={monthlyTargets}
                       selectedMonth={selectedMonth}
                       selectedYear={selectedYear}
