@@ -61,7 +61,7 @@ export function SDRCommissionTab({
     if (selectedMonth !== null && monthlyTargets) {
       sdrMetrics.forEach(m => {
         const mt = monthlyTargets.find(t => t.metric_id === m.id && t.year === selectedYear && t.month === selectedMonth);
-        target += mt ? mt.target_value : 0;
+        target += mt ? mt.target_value : Math.round((m.target_value / 12) * 100) / 100;
       });
     } else {
       sdrMetrics.forEach(m => {
@@ -81,7 +81,7 @@ export function SDRCommissionTab({
       target: (() => {
         if (selectedMonth !== null && monthlyTargets) {
           const mt = monthlyTargets.find(t => t.metric_id === m.id && t.year === selectedYear && t.month === selectedMonth);
-          return mt ? mt.target_value : 0;
+          return mt ? mt.target_value : Math.round((m.target_value / 12) * 100) / 100;
         }
         const mts = (monthlyTargets || []).filter(t => t.metric_id === m.id && t.year === selectedYear);
         return mts.length > 0 ? mts.reduce((s, t) => s + t.target_value, 0) : m.target_value;
