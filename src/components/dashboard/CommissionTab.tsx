@@ -196,31 +196,10 @@ export function CommissionTab({
   const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
 
   const contratosData = useMemo(() => {
-    // Compute achieved value same way as Index.tsx: Total Emp Assessoria + Trib Assessoria + Trib Pontual + Total Trab Assessoria
-    // We need prev month contract base values
+    // Use the same fixed formula as Index.tsx for prev month base
     const refMonth = selectedMonth ?? new Date().getMonth() + 1;
-    let empBase = 20;
-    let trabBase = 14;
-    
-    if (refMonth > 1 && historyData) {
-      const prevMonth = refMonth - 1;
-      let empSum = 0;
-      let trabSum = 0;
-      const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
-      const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
-      historyData.forEach(h => {
-        const ref = getRefMonthYear(h.period_type, h.recorded_at);
-        if (ref.year === selectedYear && ref.month === prevMonth) {
-          if (h.metric_id === CONTRATOS_EMP_ASSESSORIA_ID || h.metric_id === CONTRATOS_EMP_CONSULTORIA_ID) empSum += h.value;
-          if (h.metric_id === CONTRATOS_TRAB_ASSESSORIA_ID || h.metric_id === CONTRATOS_TRAB_CONSULTORIA_ID) trabSum += h.value;
-        }
-      });
-      empBase = empSum;
-      trabBase = trabSum;
-    } else if (refMonth > 1) {
-      empBase = 0;
-      trabBase = 0;
-    }
+    const empBase = 20 + (refMonth - 1);
+    const trabBase = 14 + (refMonth - 1);
 
     const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
     const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
@@ -246,7 +225,7 @@ export function CommissionTab({
     }
     
     return { achieved, target };
-  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear, historyData]);
+  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
 
   const receitaCommission = getCommission(receitaData.target > 0 ? (receitaData.achieved / receitaData.target) * 100 : 0);
   const contratosCommission = getCommission(contratosData.target > 0 ? (contratosData.achieved / contratosData.target) * 100 : 0);
