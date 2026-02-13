@@ -35,6 +35,7 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const [displayName, setDisplayName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [nameInitialized, setNameInitialized] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -46,6 +47,7 @@ export default function Profile() {
   // Initialize display name from profile
   if (profile && !nameInitialized) {
     setDisplayName(profile.display_name || "");
+    setJobTitle(profile.job_title || "");
     setNameInitialized(true);
   }
 
@@ -80,8 +82,8 @@ export default function Profile() {
 
   const handleSaveName = async () => {
     try {
-      await updateProfile.mutateAsync({ display_name: displayName });
-      toast({ title: "Nome atualizado!", description: "Seu nome de exibição foi alterado." });
+      await updateProfile.mutateAsync({ display_name: displayName, job_title: jobTitle });
+      toast({ title: "Perfil atualizado!", description: "Seus dados foram alterados." });
     } catch (err: any) {
       toast({ title: "Erro", description: sanitizeError(err), variant: "destructive" });
     }
@@ -201,21 +203,33 @@ export default function Profile() {
                 {/* Display Name */}
                 <div className="space-y-2">
                   <Label htmlFor="displayName">Nome de exibição</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="displayName"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Seu nome"
-                    />
-                    <Button
-                      onClick={handleSaveName}
-                      disabled={updateProfile.isPending || displayName === profile?.display_name}
-                    >
-                      {updateProfile.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    </Button>
-                  </div>
+                  <Input
+                    id="displayName"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Seu nome"
+                  />
                 </div>
+
+                {/* Job Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="jobTitle">Cargo</Label>
+                  <Input
+                    id="jobTitle"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    placeholder="Ex: Advogado, Analista, Gerente"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSaveName}
+                  disabled={updateProfile.isPending || (displayName === profile?.display_name && jobTitle === (profile?.job_title || ""))}
+                  className="w-full sm:w-auto"
+                >
+                  {updateProfile.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                  Salvar
+                </Button>
 
                 {/* Email (read-only) */}
                 <div className="space-y-2">

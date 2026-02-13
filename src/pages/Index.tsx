@@ -19,7 +19,7 @@ import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
-import { AutoStartTour } from "@/components/dashboard/GuidedTour";
+
 import { CommissionTab, TridentIcon } from "@/components/dashboard/CommissionTab";
 import { SDRCommissionTab } from "@/components/dashboard/SDRCommissionTab";
 import { useOfflineCache, usePendingMutations, useOnlineStatus } from "@/hooks/useOfflineMode";
@@ -413,7 +413,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-14">
       <PrintStyles />
-      {user && <AutoStartTour />}
+      
       
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-5 lg:px-6 py-3 sm:py-4 md:py-6">
         <div data-tour="header">
