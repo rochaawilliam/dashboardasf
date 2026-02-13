@@ -145,7 +145,7 @@ const Index = () => {
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
   
   // Month/Year selection state
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const { data: metrics, isLoading: metricsLoading } = useMetrics(filters);
