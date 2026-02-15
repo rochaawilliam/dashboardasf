@@ -22,6 +22,18 @@ interface SparklineProps {
   showLabels?: boolean;
 }
 
+function smoothPath(points: { x: number; y: number }[]): string {
+  if (points.length < 2) return "";
+  let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+    const cpx = (prev.x + curr.x) / 2;
+    d += ` C ${cpx.toFixed(1)} ${prev.y.toFixed(1)}, ${cpx.toFixed(1)} ${curr.y.toFixed(1)}, ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+  }
+  return d;
+}
+
 export function Sparkline({
   metricId,
   metricName,
@@ -41,7 +53,6 @@ export function Sparkline({
       })
       .sort((a, b) => parseLocalDate(a.recorded_at).getTime() - parseLocalDate(b.recorded_at).getTime());
 
-    // Group by reference month and sum values per month
     const byMonth: Record<number, { value: number; date: Date }> = {};
     metricHistory.forEach(h => {
       const ref = getRefMonthYear(h.period_type, h.recorded_at);
@@ -50,7 +61,6 @@ export function Sparkline({
       byMonth[month] = { value: (existing?.value || 0) + h.value, date: parseLocalDate(h.recorded_at) };
     });
 
-    // Convert to array with month indices
     return Object.entries(byMonth)
       .map(([month, data]) => ({
         month: parseInt(month),
@@ -76,36 +86,34 @@ export function Sparkline({
   const maxValue = Math.max(...values);
   const range = maxValue - minValue || 1;
 
-  // Calculate SVG path
-  const width = 100;
-  const padding = 2;
-  const chartWidth = width - padding * 2;
-  const chartHeight = height - padding * 2;
+  const width = 120;
+  const paddingX = 4;
+  const paddingY = 6;
+  const chartWidth = width - paddingX * 2;
+  const chartHeight = height - paddingY * 2;
 
   const points = monthlyData.map((d, i) => {
-    const x = padding + (i / (monthlyData.length - 1)) * chartWidth;
-    const y = padding + chartHeight - ((d.value - minValue) / range) * chartHeight;
+    const x = paddingX + (i / (monthlyData.length - 1)) * chartWidth;
+    const y = paddingY + chartHeight - ((d.value - minValue) / range) * chartHeight;
     return { x, y, ...d };
   });
 
-  const pathD = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
-    .join(' ');
+  const linePath = smoothPath(points);
+  const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${paddingX} ${height} Z`;
 
-  // Create area path
-  const areaD = `${pathD} L ${points[points.length - 1].x.toFixed(1)} ${height - padding} L ${padding} ${height - padding} Z`;
-
-  // Determine trend color
   const firstValue = values[0];
   const lastValue = values[values.length - 1];
   const isPositive = lastValue >= firstValue;
+
+  const gradientId = `spark-grad-${metricId.slice(0, 8)}`;
+  const strokeColor = isPositive ? "hsl(var(--success))" : "hsl(var(--destructive))";
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <div 
           className={cn(
-            "relative cursor-pointer transition-opacity hover:opacity-80",
+            "relative cursor-pointer transition-opacity hover:opacity-80 rounded-md overflow-hidden",
             className
           )}
           style={{ height }}
@@ -115,32 +123,38 @@ export function Sparkline({
             className="w-full h-full"
             preserveAspectRatio="none"
           >
-            {/* Area fill */}
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={strokeColor} stopOpacity="0.3" />
+                <stop offset="100%" stopColor={strokeColor} stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+            {/* Area fill with gradient */}
+            <path d={areaPath} fill={`url(#${gradientId})`} />
+            {/* Smooth line */}
             <path
-              d={areaD}
-              fill={isPositive ? "hsl(var(--success) / 0.15)" : "hsl(var(--destructive) / 0.15)"}
-            />
-            {/* Line */}
-            <path
-              d={pathD}
+              d={linePath}
               fill="none"
-              stroke={isPositive ? "hsl(var(--success))" : "hsl(var(--destructive))"}
-              strokeWidth="2"
+              stroke={strokeColor}
+              strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* Data points */}
-            {points.map((p, i) => (
-              <circle
-                key={i}
-                cx={p.x}
-                cy={p.y}
-                r="2.5"
-                fill="hsl(var(--background))"
-                stroke={isPositive ? "hsl(var(--success))" : "hsl(var(--destructive))"}
-                strokeWidth="1.5"
-              />
-            ))}
+            {/* Last point highlight */}
+            <circle
+              cx={points[points.length - 1].x}
+              cy={points[points.length - 1].y}
+              r="3"
+              fill={strokeColor}
+              opacity="0.9"
+            />
+            <circle
+              cx={points[points.length - 1].x}
+              cy={points[points.length - 1].y}
+              r="5"
+              fill={strokeColor}
+              opacity="0.2"
+            />
           </svg>
           {showLabels && (
             <div className="absolute inset-x-0 bottom-0 flex justify-between text-[9px] text-muted-foreground px-0.5">
