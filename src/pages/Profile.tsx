@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Activity,
   ArrowLeft,
   Camera,
   Loader2,
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 import { UserSettingsContent } from "@/components/dashboard/UserSettingsContent";
 import { AdminUsersPanel } from "@/components/dashboard/AdminUsersPanel";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -137,6 +139,10 @@ export default function Profile() {
               <User className="h-4 w-4" />
               Perfil
             </TabsTrigger>
+            <TabsTrigger value="activity" className="gap-1.5">
+              <Activity className="h-4 w-4" />
+              Atividade
+            </TabsTrigger>
             <TabsTrigger value="security" className="gap-1.5">
               <Lock className="h-4 w-4" />
               Segurança
@@ -238,6 +244,11 @@ export default function Profile() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Activity Tab */}
+          <TabsContent value="activity">
+            <RecentActivity />
           </TabsContent>
 
           {/* Security Tab */}
