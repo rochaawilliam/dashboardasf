@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Sparkline } from "./Sparkline";
+import { PaceIndicator } from "./PaceIndicator";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { parseLocalDate } from "@/utils/dateUtils";
@@ -385,16 +386,29 @@ export function MetricCardMonthly({
               </div>
             </div>
             
-            {/* Sparkline - larger and more visible */}
-            <Sparkline
-              metricId={metric.id}
-              metricName={metric.name}
-              unit={metric.unit}
-              historyData={historyData}
-              selectedYear={selectedYear}
-              height={36}
-              className="w-full mt-1"
-            />
+            {/* Sparkline + Pace Indicator - two columns */}
+            <div className="flex items-stretch gap-1.5 mt-1">
+              <Sparkline
+                metricId={metric.id}
+                metricName={metric.name}
+                unit={metric.unit}
+                historyData={historyData}
+                selectedYear={selectedYear}
+                height={40}
+                className="flex-1 min-w-0"
+              />
+              <PaceIndicator
+                metricId={metric.id}
+                metricName={metric.name}
+                unit={metric.unit}
+                annualTarget={metric.target_value}
+                historyData={historyData}
+                selectedYear={selectedYear}
+                isInverse={isInverse}
+                isNonAccumulative={isNonAccumulative}
+                className="w-12 shrink-0"
+              />
+            </div>
           </>
         )}
       </div>
