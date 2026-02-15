@@ -379,20 +379,22 @@ export function MetricCardMonthly({
                 />
               </div>
               <div className="flex justify-between items-center">
-                <Sparkline
-                  metricId={metric.id}
-                  metricName={metric.name}
-                  unit={metric.unit}
-                  historyData={historyData}
-                  selectedYear={selectedYear}
-                  height={16}
-                  className="flex-1 max-w-[60%]"
-                />
                 <span className="text-[9px] font-medium text-primary">
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
               </div>
             </div>
+            
+            {/* Sparkline - larger and more visible */}
+            <Sparkline
+              metricId={metric.id}
+              metricName={metric.name}
+              unit={metric.unit}
+              historyData={historyData}
+              selectedYear={selectedYear}
+              height={36}
+              className="w-full mt-1"
+            />
           </>
         )}
       </div>
