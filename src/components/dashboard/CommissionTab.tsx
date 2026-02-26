@@ -152,11 +152,17 @@ export function CommissionTab({
   monthlyValues,
   accumulatedValues,
 }: CommissionTabProps) {
-  // Compute Receita Total (sum of revenue subcategories)
+  // Fixed monthly revenue targets (without Patenteia)
+  const RECEITA_MONTHLY_TARGETS: Record<number, number> = {
+    1: 78000, 2: 81000, 3: 91600, 4: 124000, 5: 136200, 6: 194000,
+    7: 168000, 8: 184700, 9: 202800, 10: 234700, 11: 234700, 12: 301800,
+  };
+
+  // Compute Receita Total (sum of revenue subcategories, excluding Patenteia)
   const receitaData = useMemo(() => {
     const lucratividadeMetrics = metrics.filter(m => m.category === "lucratividade");
     const organized = organizeMetricsBySubcategory(lucratividadeMetrics, "lucratividade");
-    const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+    const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
     
     const revenueMetrics = organized
       .filter(s => revenueSubcats.includes(s.name))
@@ -166,27 +172,17 @@ export function CommissionTab({
       ? revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0)
       : revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
     
-    // Get monthly target sum for revenue metrics
+    // Use fixed monthly targets
     let target = 0;
-    if (selectedMonth !== null && monthlyTargets) {
-      revenueMetrics.forEach(m => {
-        const mt = monthlyTargets.find(t => t.metric_id === m.id && t.year === selectedYear && t.month === selectedMonth);
-        target += mt ? mt.target_value : 0;
-      });
+    if (selectedMonth !== null) {
+      target = RECEITA_MONTHLY_TARGETS[selectedMonth] ?? 0;
     } else {
-      // Annual: sum all monthly targets for the year
-      revenueMetrics.forEach(m => {
-        const mts = (monthlyTargets || []).filter(t => t.metric_id === m.id && t.year === selectedYear);
-        if (mts.length > 0) {
-          target += mts.reduce((s, t) => s + t.target_value, 0);
-        } else {
-          target += m.target_value;
-        }
-      });
+      // Annual: sum all monthly targets
+      target = Object.values(RECEITA_MONTHLY_TARGETS).reduce((s, v) => s + v, 0);
     }
     
     return { achieved, target };
-  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
+  }, [metrics, monthlyValues, accumulatedValues, selectedMonth, selectedYear]);
 
   // Compute Total Contratos using the "Total de Contratos" card value and monthly targets
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
@@ -266,6 +262,11 @@ export function CommissionTab({
           commission={contratosCommission}
         />
       </div>
+
+      {/* Legend */}
+      <p className="text-xs text-muted-foreground italic px-1">
+        * Base de cálculo da Receita: meta mensal ajustada, sem considerar o valor do Patenteia.
+      </p>
 
       {/* Total Commission */}
       <Card className="border-2 border-purple-500/50 bg-purple-500/5">
