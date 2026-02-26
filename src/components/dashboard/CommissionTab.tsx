@@ -119,7 +119,12 @@ function CommissionCard({
                   isActive ? "bg-purple-500/20 text-purple-300 font-semibold" : "text-muted-foreground"
                 )}
               >
-                <span>{tier.min}% da meta</span>
+                <span>
+                  {tier.min}% da meta
+                  <span className="ml-1 opacity-70">
+                    ({unit === "R$" ? `R$ ${formatNumber(target * tier.min / 100)}` : formatNumber(target * tier.min / 100)})
+                  </span>
+                </span>
                 <span>R$ {formatNumber(tier.value)}</span>
               </div>
             );
