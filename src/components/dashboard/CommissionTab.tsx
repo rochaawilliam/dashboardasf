@@ -122,7 +122,9 @@ function CommissionCard({
                 <span>
                   {tier.min}% da meta
                   <span className="ml-1 opacity-70">
-                    ({unit === "R$" ? `R$ ${formatNumber(target * tier.min / 100)}` : formatNumber(target * tier.min / 100)})
+                    ({unit === "R$" 
+                      ? `R$ ${formatNumber(target * tier.min / 100)}` 
+                      : Math.floor(target * tier.min / 100)})
                   </span>
                 </span>
                 <span>R$ {formatNumber(tier.value)}</span>
@@ -259,7 +261,7 @@ export function CommissionTab({
           commission={receitaCommission}
         />
         <CommissionCard
-          title="Novos Contratos"
+          title="Total de Contratos"
           icon={FileText}
           achieved={contratosData.achieved}
           target={contratosData.target}
