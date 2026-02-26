@@ -639,7 +639,7 @@ const Index = () => {
                             
                             // Sections that should be collapsible and minimized by default
                             const collapsibleSections = ["Receita Recorrente", "Tickets Médios", "Indicadores de Rentabilidade", "Saúde Financeira", "Outros Indicadores"];
-                            const isCollapsible = category === "lucratividade" && collapsibleSections.includes(subcat.name);
+                            const isCollapsible = false;
                             
                             // Compute Receita Total as sum of revenue subcategories
                             const isReceitaTotal = category === "lucratividade" && subcat.name === "Receita Total";
