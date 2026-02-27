@@ -765,35 +765,18 @@ const Index = () => {
                                         data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                         className={undefined}
                                       >
-                                        {isReceitaTotalCard ? (
-                                          <CircularProgressCard
-                                            metric={cardMetric}
-                                            monthlyValue={cardMonthlyValue}
-                                            isMonthSelected={selectedMonth !== null}
-                                            accumulatedValue={cardAccumulatedValue}
-                                            selectedMonthName={selectedMonthName}
-                                            historyData={historyData}
-                                            selectedYear={selectedYear}
-                                            selectedMonth={selectedMonth}
-                                            monthlyTargets={monthlyTargets}
-                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                          />
-                                        ) : (
-                                          <MetricCardMonthly 
-                                            metric={cardMetric}
-                                            monthlyValue={cardMonthlyValue}
-                                            isMonthSelected={selectedMonth !== null}
-                                            accumulatedValue={cardAccumulatedValue}
-                                            onSave={isComputedCard ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
-                                            isSaving={savingMetricId === metric.id}
-                                            selectedMonthName={selectedMonthName}
-                                            historyData={historyData}
-                                            selectedYear={selectedYear}
-                                            selectedMonth={selectedMonth}
-                                            monthlyTargets={monthlyTargets}
-                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                          />
-                                        )}
+                                        <CircularProgressCard
+                                          metric={cardMetric}
+                                          monthlyValue={cardMonthlyValue}
+                                          isMonthSelected={selectedMonth !== null}
+                                          accumulatedValue={cardAccumulatedValue}
+                                          selectedMonthName={selectedMonthName}
+                                          historyData={historyData}
+                                          selectedYear={selectedYear}
+                                          selectedMonth={selectedMonth}
+                                          monthlyTargets={monthlyTargets}
+                                          onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
+                                        />
                                       </div>
                                     );
                                   })}
