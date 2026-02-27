@@ -124,7 +124,8 @@ function CircularProgress({
           strokeWidth={strokeWidth} />
 
         {gradientSegments.map((seg, i) => {
-          const segLength = (seg.end - seg.start) / 100 * circumference;
+          const rawSegLength = (seg.end - seg.start) / 100 * circumference;
+          const segLength = rawSegLength + 1.5; // overlap to eliminate gaps
           const segOffset = circumference - seg.start / 100 * circumference;
           return (
             <circle
