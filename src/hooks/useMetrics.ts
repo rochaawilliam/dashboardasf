@@ -22,6 +22,7 @@ export interface Metric {
   current_value: number;
   unit: string;
   description: string | null;
+  polarity: "higher_is_better" | "lower_is_better";
   created_at: string;
   updated_at: string;
 }
@@ -158,10 +159,11 @@ export function useUpdateMetric() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, current_value, target_value }: { id: string; current_value?: number; target_value?: number }) => {
-      const updateData: { current_value?: number; target_value?: number } = {};
+    mutationFn: async ({ id, current_value, target_value, polarity }: { id: string; current_value?: number; target_value?: number; polarity?: "higher_is_better" | "lower_is_better" }) => {
+      const updateData: { current_value?: number; target_value?: number; polarity?: string } = {};
       if (current_value !== undefined) updateData.current_value = current_value;
       if (target_value !== undefined) updateData.target_value = target_value;
+      if (polarity !== undefined) updateData.polarity = polarity;
       
       const { data, error } = await supabase
         .from("metrics")
