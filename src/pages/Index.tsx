@@ -295,15 +295,44 @@ const Index = () => {
   const ARR_METRIC_ID = "c80c98f8-964c-4146-9012-eb0d0c5a30ee";
 
   // Compute previous month's contract values from history
+  // "Mês Anterior" for month M = Total Contratos Assessoria of month M-1
+  // Total Contratos Assessoria(M) = MêsAnterior(M) + NovosAssessoria(M)
+  // So we build month-by-month from Jan (base: 20 emp, 14 trab)
   const prevMonthContractValues = useMemo(() => {
     const refMonth = selectedMonth ?? new Date().getMonth() + 1;
+    const BASE_EMP = 20;
+    const BASE_TRAB = 14;
 
-    // Fixed increment: Jan=20/14, Feb=21/15, Mar=22/16, etc.
-    return {
-      empresarial: 20 + (refMonth - 1),
-      trabalhista: 14 + (refMonth - 1)
+    if (!historyData || refMonth <= 1) {
+      // January: use base values
+      return { empresarial: BASE_EMP, trabalhista: BASE_TRAB };
+    }
+
+    // Get monthly novos assessoria values from history for each month
+    const getMonthValue = (metricId: string, month: number) => {
+      let total = 0;
+      historyData.forEach((h) => {
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month === month && h.metric_id === metricId) {
+          total += h.value;
+        }
+      });
+      return total;
     };
-  }, [selectedMonth]);
+
+    // Build chain: Total Assessoria(1) = base + novos(1), MêsAnterior(2) = Total(1), etc.
+    let totalEmp = BASE_EMP + getMonthValue(CONTRATOS_EMP_ASSESSORIA_ID, 1);
+    let totalTrab = BASE_TRAB + getMonthValue(CONTRATOS_TRAB_ASSESSORIA_ID, 1);
+
+    for (let m = 2; m < refMonth; m++) {
+      // For month m, mêsAnterior = previous total, then total = mêsAnterior + novos(m)
+      totalEmp = totalEmp + getMonthValue(CONTRATOS_EMP_ASSESSORIA_ID, m);
+      totalTrab = totalTrab + getMonthValue(CONTRATOS_TRAB_ASSESSORIA_ID, m);
+    }
+
+    // totalEmp/totalTrab now = Total Assessoria of (refMonth - 1) = Mês Anterior for refMonth
+    return { empresarial: totalEmp, trabalhista: totalTrab };
+  }, [selectedMonth, selectedYear, historyData]);
 
   // Create metrics with adjusted values based on selection
   const adjustedMetrics = useMemo(() => {
