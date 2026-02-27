@@ -788,17 +788,13 @@ const Index = () => {
                                 let arrMonthlyValue: number | null = null;
                                 let arrAccumulatedValue = 0;
                                 if (isARR) {
-                                  const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
-                                  const allRevenueMetrics = organizedSubcategories
-                                    .filter((s) => revenueSubcatNames.includes(s.name))
-                                    .flatMap((s) => s.metrics);
+                                  const RECEITA_ANUAL_TOTAL = 2218000;
 
-                                  // ARR always uses accumulated (annual) values, even when a month is selected
+                                  // ARR % = soma acumulada das assessorias / receita anual total * 100
                                   const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                  const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                  arrAccumulatedValue = receitaTotalAccum > 0 ? (assessoriaAccum / receitaTotalAccum) * 100 : 0;
+                                  arrAccumulatedValue = (assessoriaAccum / RECEITA_ANUAL_TOTAL) * 100;
 
-                                  // When a month is selected, still show the annual accumulated value
+                                  // When a month is selected, show accumulated up to that month
                                   arrMonthlyValue = arrAccumulatedValue;
                                   dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
                                 }
