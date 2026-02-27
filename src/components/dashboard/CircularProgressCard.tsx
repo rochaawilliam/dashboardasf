@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { Sparkline } from "./Sparkline";
 import { PaceIndicator } from "./PaceIndicator";
-import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -196,7 +196,7 @@ export function CircularProgressCard({
   0;
   const progress = Math.min(rawProgress, 100);
 
-  const hasNoData = isMonthSelected && monthlyValue === null;
+  const hasNoData = false; // Always show 0% when no data
 
   return (
     <div
@@ -232,8 +232,8 @@ export function CircularProgressCard({
         </Tooltip>
       </div>
 
-      {/* Achievement Badge */}
-      {!hasNoData && (() => {
+      {/* Achievement Badge + Guerrilla Icon */}
+      {(() => {
         const p = rawProgress;
         let badge: { label: string; icon: React.ReactNode; className: string } | null = null;
 
@@ -249,30 +249,50 @@ export function CircularProgressCard({
           badge = { label: "Mantenha o ritmo!", icon: <TrendingUp className="w-3 h-3" />, className: "bg-warning/15 text-warning" };
         } else if (p >= 20) {
           badge = { label: "Vamos nessa!", icon: <Flame className="w-3 h-3" />, className: "bg-warning/25 text-warning" };
-        } else if (p >= 0) {
+        } else {
           badge = { label: "Começamos!", icon: <PlayCircle className="w-3 h-3" />, className: "bg-muted text-muted-foreground" };
         }
 
-        return badge ? (
-          <div className="mb-2 flex justify-center">
+        // Guerrilla day-of-month icon
+        const day = new Date().getDate();
+        let guerrillaIcon: React.ReactNode = null;
+        let guerrillaTooltip = "";
+        if (day <= 10) {
+          guerrillaIcon = <Timer className="w-3.5 h-3.5 text-primary" />;
+          guerrillaTooltip = "Largada do mês";
+        } else if (day <= 20) {
+          guerrillaIcon = <PersonStanding className="w-3.5 h-3.5 text-accent-foreground" />;
+          guerrillaTooltip = "Corrida em andamento";
+        } else if (day <= 25) {
+          guerrillaIcon = <Rocket className="w-3.5 h-3.5 text-warning" />;
+          guerrillaTooltip = "Aceleração final";
+        } else {
+          guerrillaIcon = <Crosshair className="w-3.5 h-3.5 text-destructive" />;
+          guerrillaTooltip = "Foco no alvo";
+        }
+
+        return (
+          <div className="mb-2 flex items-center justify-center gap-1.5">
             <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex items-center justify-center p-0.5 rounded-full bg-muted/50">
+                  {guerrillaIcon}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">{guerrillaTooltip}</TooltipContent>
+            </Tooltip>
           </div>
-        ) : null;
+        );
       })()}
 
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Circular Progress - 1/3 */}
         <div className="shrink-0 w-1/3 flex items-center justify-center">
-          {hasNoData ?
-          <div className="flex items-center justify-center" style={{ width: 110, height: 110 }}>
-              <span className="text-muted-foreground text-xs italic">Sem dados</span>
-            </div> :
-
           <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={8} />
-          }
         </div>
 
         {/* Target and Realized values - 2/3 */}
@@ -295,7 +315,7 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <p className="text-base font-bold text-foreground leading-tight sm:text-3xl">
-              {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
+              {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
         </div>
