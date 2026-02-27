@@ -27,7 +27,7 @@ export function SectionHeader({ title, subtitle, icon: Icon, variant = "primary"
       <div className="min-w-0">
         <h3 
           className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground leading-tight"
-          style={{ fontFamily: "'Cinzel', serif" }}
+          style={{ fontFamily: "'Roboto', sans-serif" }}
         >
           {title}
         </h3>
