@@ -287,6 +287,12 @@ const Index = () => {
   const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
   const CONTRATOS_TRIB_PONTUAL_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
 
+  // MRR % Mensal - auto-calculated metric
+  const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
+  const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
+  const RECEITA_TRAB_ASSESSORIA_ID = "be1fcc4f-c1b8-476a-b330-e2b8675ae458";
+  const RECEITA_TRIB_ASSESSORIA_ID = "b829cf12-3f66-4a0c-8753-70260a9645d8";
+
   // Compute previous month's contract values from history
   const prevMonthContractValues = useMemo(() => {
     const refMonth = selectedMonth ?? new Date().getMonth() + 1;
@@ -752,11 +758,35 @@ const Index = () => {
                                 monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0) :
                                 null;
 
-                                const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos;
+                                // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
+                                const isMRR = metric.id === MRR_METRIC_ID;
+                                let mrrMonthlyValue: number | null = null;
+                                let mrrAccumulatedValue = 0;
+                                if (isMRR) {
+                                  // Get all revenue metrics from subcategories for Receita Total denominator
+                                  const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                  const allRevenueMetrics = organizedSubcategories
+                                    .filter((s) => revenueSubcatNames.includes(s.name))
+                                    .flatMap((s) => s.metrics);
+
+                                  if (selectedMonth !== null) {
+                                    const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                    const receitaTotal = allRevenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
+                                    mrrMonthlyValue = receitaTotal > 0 ? (assessoriaSum / receitaTotal) * 100 : 0;
+                                  }
+                                  // Accumulated: weighted average across months with data
+                                  const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                  const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                  mrrAccumulatedValue = receitaTotalAccum > 0 ? (assessoriaAccum / receitaTotalAccum) * 100 : 0;
+
+                                  dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
+                                }
+
+                                const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos || isMRR;
 
                                 const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                const cardMonthlyValue = isAutoSum ? computedMonthly : isMesAnterior ? mesAnteriorMonthly : isTotalAssessoria ? totalAssessoriaMonthly : isTotalContratos ? totalContratosMonthly : monthlyValues[metric.id] ?? null;
-                                const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : accumulatedValues[metric.id] ?? 0;
+                                const cardMonthlyValue = isAutoSum ? computedMonthly : isMesAnterior ? mesAnteriorMonthly : isTotalAssessoria ? totalAssessoriaMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : monthlyValues[metric.id] ?? null;
+                                const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : accumulatedValues[metric.id] ?? 0;
                                 const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                 return (
