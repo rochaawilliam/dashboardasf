@@ -598,7 +598,7 @@ const Index = () => {
 
                       <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                       }
-                    <span className="hidden sm:inline truncate">{config.shortTitle}</span>
+                    <span className="hidden sm:inline truncate text-base">{config.shortTitle}</span>
                         <span className={cn(
                         "hidden sm:inline text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
                         isActive && canAccess ?
@@ -766,19 +766,19 @@ const Index = () => {
                                 if (isMRR) {
                                   // Get all revenue metrics from subcategories for Receita Total denominator
                                   const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
-                                  const allRevenueMetrics = organizedSubcategories
-                                    .filter((s) => revenueSubcatNames.includes(s.name))
-                                    .flatMap((s) => s.metrics);
+                                  const allRevenueMetrics = organizedSubcategories.
+                                  filter((s) => revenueSubcatNames.includes(s.name)).
+                                  flatMap((s) => s.metrics);
 
                                   if (selectedMonth !== null) {
                                     const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
                                     const receitaTotal = allRevenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                                    mrrMonthlyValue = receitaTotal > 0 ? (assessoriaSum / receitaTotal) * 100 : 0;
+                                    mrrMonthlyValue = receitaTotal > 0 ? assessoriaSum / receitaTotal * 100 : 0;
                                   }
                                   // Accumulated: weighted average across months with data
                                   const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
                                   const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                  mrrAccumulatedValue = receitaTotalAccum > 0 ? (assessoriaAccum / receitaTotalAccum) * 100 : 0;
+                                  mrrAccumulatedValue = receitaTotalAccum > 0 ? assessoriaAccum / receitaTotalAccum * 100 : 0;
 
                                   dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
                                 }
@@ -789,12 +789,12 @@ const Index = () => {
                                 let arrAccumulatedValue = 0;
                                 if (isARR) {
                                   // Busca dinâmica da meta anual de Receita Total do banco
-                                  const receitaTotalMetric = metrics?.find(m => m.id === "b94952b3-b811-4200-872e-810b215240f6");
+                                  const receitaTotalMetric = metrics?.find((m) => m.id === "b94952b3-b811-4200-872e-810b215240f6");
                                   const receitaAnualTotal = receitaTotalMetric?.target_value || 2218000;
 
                                   // ARR % = soma acumulada das assessorias / receita anual total * 100
                                   const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                  arrAccumulatedValue = receitaAnualTotal > 0 ? (assessoriaAccum / receitaAnualTotal) * 100 : 0;
+                                  arrAccumulatedValue = receitaAnualTotal > 0 ? assessoriaAccum / receitaAnualTotal * 100 : 0;
 
                                   // When a month is selected, show accumulated up to that month
                                   arrMonthlyValue = arrAccumulatedValue;
