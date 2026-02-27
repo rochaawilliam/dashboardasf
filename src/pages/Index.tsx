@@ -763,7 +763,7 @@ const Index = () => {
                                       <div 
                                         key={metric.id}
                                         data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
-                                        className={isReceitaTotalCard ? "col-span-full sm:col-span-2" : undefined}
+                                        className={undefined}
                                       >
                                         {isReceitaTotalCard ? (
                                           <CircularProgressCard

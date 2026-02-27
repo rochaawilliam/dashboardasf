@@ -43,32 +43,52 @@ const getStatus = (current: number, target: number, isInverse: boolean = false) 
   return "danger";
 };
 
-const getStatusStrokeColor = (status: "success" | "warning" | "danger") => {
-  switch (status) {
-    case "success": return "hsl(var(--success))";
-    case "warning": return "hsl(var(--warning))";
-    case "danger": return "hsl(var(--destructive))";
+// Gradient: red (0%) → orange (35%) → amber (50%) → yellow-green (70%) → green (85%+) → bright green (100%+)
+const getGradientColor = (percentage: number): string => {
+  const p = Math.min(Math.max(percentage, 0), 120);
+  if (p <= 35) {
+    // Red to orange
+    const t = p / 35;
+    const h = 0 + t * 25;
+    return `hsl(${h}, 75%, 48%)`;
+  } else if (p <= 50) {
+    // Orange to amber
+    const t = (p - 35) / 15;
+    const h = 25 + t * 15;
+    return `hsl(${h}, 85%, 50%)`;
+  } else if (p <= 70) {
+    // Amber to yellow-green
+    const t = (p - 50) / 20;
+    const h = 40 + t * 40;
+    return `hsl(${h}, 70%, 45%)`;
+  } else if (p <= 85) {
+    // Yellow-green to green
+    const t = (p - 70) / 15;
+    const h = 80 + t * 40;
+    return `hsl(${h}, 65%, 42%)`;
+  } else {
+    // Green to bright green
+    const t = Math.min((p - 85) / 15, 1);
+    const h = 120 + t * 22;
+    const s = 65 + t * 6;
+    return `hsl(${h}, ${s}%, 40%)`;
   }
 };
 
-const getStatusTrackColor = (status: "success" | "warning" | "danger") => {
-  switch (status) {
-    case "success": return "hsl(var(--success) / 0.15)";
-    case "warning": return "hsl(var(--warning) / 0.15)";
-    case "danger": return "hsl(var(--destructive) / 0.15)";
-  }
+const getTrackColor = (percentage: number): string => {
+  const color = getGradientColor(percentage);
+  // Extract and apply opacity
+  return color.replace(')', ' / 0.18)').replace('hsl(', 'hsl(');
 };
 
 function CircularProgress({ 
   percentage, 
-  size = 100, 
-  strokeWidth = 8, 
-  status 
+  size = 90, 
+  strokeWidth = 7, 
 }: { 
   percentage: number; 
   size?: number; 
   strokeWidth?: number; 
-  status: "success" | "warning" | "danger";
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -83,7 +103,7 @@ function CircularProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={getStatusTrackColor(status)}
+          stroke={getTrackColor(percentage)}
           strokeWidth={strokeWidth}
         />
         {/* Progress */}
@@ -92,7 +112,7 @@ function CircularProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={getStatusStrokeColor(status)}
+          stroke={getGradientColor(percentage)}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -169,11 +189,11 @@ export function CircularProgressCard({
         {/* Circular Progress */}
         <div className="shrink-0">
           {hasNoData ? (
-            <div className="flex items-center justify-center" style={{ width: 100, height: 100 }}>
+            <div className="flex items-center justify-center" style={{ width: 90, height: 90 }}>
               <span className="text-muted-foreground text-xs italic">Sem dados</span>
             </div>
           ) : (
-            <CircularProgress percentage={progress} size={100} strokeWidth={8} status={status} />
+            <CircularProgress percentage={progress} size={90} strokeWidth={7} />
           )}
         </div>
 
@@ -196,10 +216,7 @@ export function CircularProgressCard({
             <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className={cn(
-              "text-sm sm:text-base font-bold leading-tight",
-              status === "success" ? "text-success" : status === "warning" ? "text-warning" : "text-destructive"
-            )}>
+            <p className="text-sm sm:text-base font-bold leading-tight" style={{ color: getGradientColor(progress) }}>
               {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
