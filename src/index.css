@@ -64,6 +64,10 @@
 }
 
 @layer base {
+  html {
+    font-size: 12px; /* Global 25% reduction (16px → 12px) */
+  }
+
   :root,
   .light {
     /* Cream/Beige theme with golden accents */
