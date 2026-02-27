@@ -43,10 +43,8 @@ export function formatMetricValue(value: number, unit: string, metricName?: stri
   // Default: no decimals unless financial
   let decimals = isFinancial ? 2 : 0;
   
-  // For large financial values, remove decimals
-  if (isFinancial && Math.abs(value) >= 1000) {
-    decimals = 0;
-  }
+  // Always show 2 decimals for financial values
+
   
   // Currency units
   if (isFinancial) {
