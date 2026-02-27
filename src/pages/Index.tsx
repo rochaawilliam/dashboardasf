@@ -824,7 +824,8 @@ const Index = () => {
                                       selectedYear={selectedYear}
                                       selectedMonth={selectedMonth}
                                       monthlyTargets={monthlyTargets}
-                                      onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)} />
+                                      onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
+                                      hideTarget={isMesAnterior} />
 
                                       </div>);
 

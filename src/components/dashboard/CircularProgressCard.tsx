@@ -23,6 +23,7 @@ interface CircularProgressCardProps {
   selectedMonth?: number | null;
   monthlyTargets?: MonthlyTarget[];
   onCardClick?: () => void;
+  hideTarget?: boolean;
 }
 
 const nonAccumulativeKeywords = [
@@ -164,7 +165,8 @@ export function CircularProgressCard({
   selectedYear = new Date().getFullYear(),
   selectedMonth,
   monthlyTargets = [],
-  onCardClick
+  onCardClick,
+  hideTarget = false
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -311,6 +313,7 @@ export function CircularProgressCard({
         {/* Target and Realized values - 2/3 */}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px] mx-[6px]">
           {/* Target - top */}
+          {!hideTarget && (
           <div>
             <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
@@ -321,6 +324,7 @@ export function CircularProgressCard({
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
             </p>
           </div>
+          )}
 
           {/* Realized - bottom */}
           <div>
@@ -359,7 +363,7 @@ export function CircularProgressCard({
       </div>
 
       {/* Annual target reference when month is selected */}
-      {isMonthSelected && !isNonAccumulative &&
+      {!hideTarget && isMonthSelected && !isNonAccumulative &&
       <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1.5 flex items-center gap-1">
           <span className="text-xs">Meta anual:</span>
           <span className="font-medium text-xs">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
