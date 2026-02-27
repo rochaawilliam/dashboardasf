@@ -143,10 +143,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl text-foreground leading-none font-sans text-center sm:text-3xl font-bold">
+        <span className="text-foreground leading-none font-sans text-center sm:text-3xl font-bold text-3xl">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
-        <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
+        <span className="sm:text-[8px] text-muted-foreground mt-0.5 text-sm">
           {displayPct >= 100 ? "Atingido" : "Meta Pontual"}
         </span>
       </div>
@@ -209,7 +209,7 @@ export function CircularProgressCard({
 
       {/* Header with polarity toggle */}
       <div className="mb-2 sm:mb-3 flex items-center gap-1.5">
-        <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
+        <span className="metric-label sm:text-xs font-semibold flex-1 text-base">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -312,10 +312,10 @@ export function CircularProgressCard({
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px]">
           {/* Target - top */}
           <div>
-            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
+            <p className="sm:text-[9px] text-muted-foreground uppercase tracking-wide text-sm">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="text-base font-semibold text-foreground leading-tight sm:text-3xl">
+            <p className="font-semibold text-foreground leading-tight sm:text-3xl text-2xl">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -324,10 +324,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
+            <p className="sm:text-[9px] text-muted-foreground uppercase tracking-wide text-sm">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-base font-bold text-foreground leading-tight sm:text-4xl">
+            <p className="text-foreground leading-tight sm:text-4xl font-extrabold text-3xl">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
