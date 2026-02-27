@@ -788,11 +788,13 @@ const Index = () => {
                                 let arrMonthlyValue: number | null = null;
                                 let arrAccumulatedValue = 0;
                                 if (isARR) {
-                                  const RECEITA_ANUAL_TOTAL = 2218000;
+                                  // Busca dinâmica da meta anual de Receita Total do banco
+                                  const receitaTotalMetric = metrics?.find(m => m.id === "b94952b3-b811-4200-872e-810b215240f6");
+                                  const receitaAnualTotal = receitaTotalMetric?.target_value || 2218000;
 
                                   // ARR % = soma acumulada das assessorias / receita anual total * 100
                                   const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                  arrAccumulatedValue = (assessoriaAccum / RECEITA_ANUAL_TOTAL) * 100;
+                                  arrAccumulatedValue = receitaAnualTotal > 0 ? (assessoriaAccum / receitaAnualTotal) * 100 : 0;
 
                                   // When a month is selected, show accumulated up to that month
                                   arrMonthlyValue = arrAccumulatedValue;
