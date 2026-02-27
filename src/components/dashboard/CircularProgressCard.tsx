@@ -234,7 +234,15 @@ export function CircularProgressCard({
 
       {/* Achievement Badge + Guerrilla Icon */}
       {(() => {
+        const now = new Date();
+        const isCurrentMonth = !isMonthSelected || (selectedMonth === now.getMonth() + 1 && selectedYear === now.getFullYear());
+        const isPastMonth = isMonthSelected && !isCurrentMonth;
+
         const p = rawProgress;
+
+        // For past months, only show badge if >= 100%
+        if (isPastMonth && p < 100) return null;
+
         let badge: { label: string; icon: React.ReactNode; className: string } | null = null;
 
         if (p >= 120) {
@@ -253,22 +261,25 @@ export function CircularProgressCard({
           badge = { label: "Começamos!", icon: <PlayCircle className="w-3 h-3" />, className: "bg-muted text-muted-foreground" };
         }
 
-        // Guerrilla day-of-month icon
-        const day = new Date().getDate();
+        // Guerrilla icon only for current month
+        const showGuerrilla = isCurrentMonth;
         let guerrillaIcon: React.ReactNode = null;
         let guerrillaTooltip = "";
-        if (day <= 10) {
-          guerrillaIcon = <Timer className="w-3.5 h-3.5 text-primary" />;
-          guerrillaTooltip = "Largada do mês";
-        } else if (day <= 20) {
-          guerrillaIcon = <PersonStanding className="w-3.5 h-3.5 text-accent-foreground" />;
-          guerrillaTooltip = "Corrida em andamento";
-        } else if (day <= 25) {
-          guerrillaIcon = <Rocket className="w-3.5 h-3.5 text-warning" />;
-          guerrillaTooltip = "Aceleração final";
-        } else {
-          guerrillaIcon = <Crosshair className="w-3.5 h-3.5 text-destructive" />;
-          guerrillaTooltip = "Foco no alvo";
+        if (showGuerrilla) {
+          const day = now.getDate();
+          if (day <= 10) {
+            guerrillaIcon = <Timer className="w-3.5 h-3.5 text-primary" />;
+            guerrillaTooltip = "Largada do mês";
+          } else if (day <= 20) {
+            guerrillaIcon = <PersonStanding className="w-3.5 h-3.5 text-accent-foreground" />;
+            guerrillaTooltip = "Corrida em andamento";
+          } else if (day <= 25) {
+            guerrillaIcon = <Rocket className="w-3.5 h-3.5 text-warning" />;
+            guerrillaTooltip = "Aceleração final";
+          } else {
+            guerrillaIcon = <Crosshair className="w-3.5 h-3.5 text-destructive" />;
+            guerrillaTooltip = "Foco no alvo";
+          }
         }
 
         return (
@@ -277,14 +288,16 @@ export function CircularProgressCard({
               {badge.icon}
               {badge.label}
             </span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center justify-center p-0.5 rounded-full bg-muted/50">
-                  {guerrillaIcon}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">{guerrillaTooltip}</TooltipContent>
-            </Tooltip>
+            {showGuerrilla && guerrillaIcon && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center justify-center p-0.5 rounded-full bg-muted/50">
+                    {guerrillaIcon}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">{guerrillaTooltip}</TooltipContent>
+              </Tooltip>
+            )}
           </div>
         );
       })()}
