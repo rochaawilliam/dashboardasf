@@ -147,7 +147,7 @@ function CircularProgress({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-xl sm:text-2xl text-foreground leading-none font-extrabold font-serif">
-          {formatNumber(animated ? clampedPct : 0, 1)}%
+          {formatNumber(animated ? clampedPct : 0, 0)}%
         </span>
         <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
           {clampedPct >= 100 ? "Atingido" : "Meta Pontual"}
