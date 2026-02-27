@@ -61,6 +61,7 @@ export type Database = {
           division: Database["public"]["Enums"]["division"] | null
           id: string
           name: string
+          polarity: string
           target_value: number
           unit: string
           updated_at: string
@@ -73,6 +74,7 @@ export type Database = {
           division?: Database["public"]["Enums"]["division"] | null
           id?: string
           name: string
+          polarity?: string
           target_value: number
           unit?: string
           updated_at?: string
@@ -85,6 +87,7 @@ export type Database = {
           division?: Database["public"]["Enums"]["division"] | null
           id?: string
           name?: string
+          polarity?: string
           target_value?: number
           unit?: string
           updated_at?: string

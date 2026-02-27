@@ -3,6 +3,12 @@ import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { Sparkline } from "./Sparkline";
 import { PaceIndicator } from "./PaceIndicator";
+import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 
 interface CircularProgressCardProps {
@@ -17,8 +23,6 @@ interface CircularProgressCardProps {
   monthlyTargets?: MonthlyTarget[];
   onCardClick?: () => void;
 }
-
-const inverseMetrics = ["Churn de Clientes", "Turnover"];
 
 const nonAccumulativeKeywords = [
   "Ticket Médio", "Margem", "Churn", "Custo Fixo", "Folha sobre Receita",
@@ -44,24 +48,17 @@ const getStatus = (current: number, target: number, isInverse: boolean = false) 
   return "danger";
 };
 
-// 5 segment colors for each 20% band
-const SEGMENT_COLORS = [
-  "hsl(0, 75%, 48%)",      // 0-20%: Red
-  "hsl(25, 85%, 50%)",     // 20-40%: Orange
-  "hsl(40, 80%, 48%)",     // 40-60%: Amber
-  "hsl(80, 65%, 42%)",     // 60-80%: Yellow-green
-  "hsl(142, 65%, 38%)",    // 80-100%: Green
+// HSL values for each band boundary
+const BAND_HSL = [
+  [0, 75, 48],    // Red
+  [25, 85, 50],   // Orange
+  [40, 80, 48],   // Amber
+  [80, 65, 42],   // Yellow-green
+  [142, 65, 38],  // Green
 ];
 
-const getColorForPercentage = (percentage: number): string => {
-  if (percentage <= 20) return SEGMENT_COLORS[0];
-  if (percentage <= 40) return SEGMENT_COLORS[1];
-  if (percentage <= 60) return SEGMENT_COLORS[2];
-  if (percentage <= 80) return SEGMENT_COLORS[3];
-  return SEGMENT_COLORS[4];
-};
+const SEGMENT_COLORS = BAND_HSL.map(([h, s, l]) => `hsl(${h}, ${s}%, ${l}%)`);
 
-// Interpolate between two HSL colors
 function interpolateHSL(
   h1: number, s1: number, l1: number,
   h2: number, s2: number, l2: number,
@@ -72,15 +69,6 @@ function interpolateHSL(
   const l = l1 + (l2 - l1) * t;
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
-
-// HSL values for each band boundary
-const BAND_HSL = [
-  [0, 75, 48],    // Red
-  [25, 85, 50],   // Orange
-  [40, 80, 48],   // Amber
-  [80, 65, 42],   // Yellow-green
-  [142, 65, 38],  // Green
-];
 
 function getInterpolatedColor(pct: number): string {
   if (pct <= 0) return SEGMENT_COLORS[0];
@@ -95,8 +83,8 @@ function getInterpolatedColor(pct: number): string {
 
 function CircularProgress({ 
   percentage, 
-  size = 90, 
-  strokeWidth = 7, 
+  size = 110, 
+  strokeWidth = 8, 
 }: { 
   percentage: number; 
   size?: number; 
@@ -114,7 +102,6 @@ function CircularProgress({
 
   const currentPct = animated ? clampedPct : 0;
 
-  // Build many small segments for smooth gradient
   const GRADIENT_STEPS = 60;
   const stepSize = currentPct / GRADIENT_STEPS;
   const gradientSegments: { start: number; end: number; color: string }[] = [];
@@ -129,7 +116,6 @@ function CircularProgress({
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        {/* Track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -138,7 +124,6 @@ function CircularProgress({
           stroke="hsl(var(--muted) / 0.5)"
           strokeWidth={strokeWidth}
         />
-        {/* Gradient progress segments */}
         {gradientSegments.map((seg, i) => {
           const segLength = ((seg.end - seg.start) / 100) * circumference;
           const segOffset = circumference - (seg.start / 100) * circumference;
@@ -159,9 +144,8 @@ function CircularProgress({
           );
         })}
       </svg>
-      {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg sm:text-xl font-bold text-foreground leading-none">
+        <span className="text-xl sm:text-2xl font-bold text-foreground leading-none">
           {formatNumber(animated ? clampedPct : 0, 1)}%
         </span>
         <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
@@ -184,7 +168,7 @@ export function CircularProgressCard({
   monthlyTargets = [],
   onCardClick,
 }: CircularProgressCardProps) {
-  const isInverse = inverseMetrics.includes(metric.name);
+  const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
 
   const specificMonthlyTarget = selectedMonth
@@ -196,7 +180,6 @@ export function CircularProgressCard({
     : (isNonAccumulative ? metric.target_value : metric.target_value / 12);
 
   const displayValue = isMonthSelected ? (monthlyValue ?? 0) : accumulatedValue;
-
   const targetForProgress = isMonthSelected ? monthlyTarget : metric.target_value;
 
   const status = getStatus(displayValue, targetForProgress, isInverse);
@@ -218,25 +201,39 @@ export function CircularProgressCard({
       )}
       onClick={() => onCardClick?.()}
     >
-      {/* Header */}
-      <div className="mb-2 sm:mb-3">
-        <span className="metric-label text-[10px] sm:text-xs font-semibold">{metric.name}</span>
+      {/* Header with polarity indicator */}
+      <div className="mb-2 sm:mb-3 flex items-center gap-1.5">
+        <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="shrink-0">
+              {isInverse ? (
+                <ArrowDownCircle className="w-3.5 h-3.5 text-success" />
+              ) : (
+                <ArrowUpCircle className="w-3.5 h-3.5 text-primary" />
+              )}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            {isInverse ? "Quanto menor, melhor" : "Quanto maior, melhor"}
+          </TooltipContent>
+        </Tooltip>
       </div>
 
-      {/* Main content: circular progress + values */}
+      {/* Main content: 1/3 chart + 2/3 info */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Circular Progress */}
-        <div className="shrink-0">
+        {/* Circular Progress - 1/3 */}
+        <div className="shrink-0 w-1/3 flex items-center justify-center">
           {hasNoData ? (
-            <div className="flex items-center justify-center" style={{ width: 90, height: 90 }}>
+            <div className="flex items-center justify-center" style={{ width: 110, height: 110 }}>
               <span className="text-muted-foreground text-xs italic">Sem dados</span>
             </div>
           ) : (
-            <CircularProgress percentage={progress} size={90} strokeWidth={7} />
+            <CircularProgress percentage={progress} size={110} strokeWidth={8} />
           )}
         </div>
 
-        {/* Target and Realized values */}
+        {/* Target and Realized values - 2/3 */}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
           {/* Target - top, secondary */}
           <div>
@@ -255,7 +252,7 @@ export function CircularProgressCard({
             <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-2xl sm:text-3xl font-black leading-tight" style={{ color: getInterpolatedColor(progress) }}>
+            <p className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: getInterpolatedColor(progress) }}>
               {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
