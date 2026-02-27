@@ -674,7 +674,7 @@ const Index = () => {
                                 name={subcat.name}
                                 count={displayMetrics.length}
                                 collapsible={isCollapsible}
-                                defaultCollapsed={isCollapsible}
+                                defaultCollapsed={false}
                               >
                                 <div className="dashboard-grid">
                                   {displayMetrics.map((metric, metricIndex) => {
