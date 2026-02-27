@@ -142,7 +142,7 @@ function CircularProgress({
               style={{ transition: `stroke-dasharray 1s ease-out ${i * 8}ms, stroke-dashoffset 1s ease-out ${i * 8}ms` }} />);
         })}
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
         <span className="text-foreground leading-none font-sans text-center sm:text-3xl font-bold text-3xl">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
@@ -309,13 +309,13 @@ export function CircularProgressCard({
         </div>
 
         {/* Target and Realized values - 2/3 */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px]">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px] mx-[6px]">
           {/* Target - top */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-sm">
+            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-2xl sm:text-4xl">
+            <p className="font-semibold text-foreground leading-tight text-2xl sm:text-3xl">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -324,10 +324,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-sm">
+            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight font-extrabold text-3xl font-sans sm:text-4xl">
+            <p className="text-foreground leading-tight text-3xl font-sans sm:text-4xl font-extrabold">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
