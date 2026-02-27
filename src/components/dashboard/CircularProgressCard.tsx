@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { Sparkline } from "./Sparkline";
 import { PaceIndicator } from "./PaceIndicator";
-import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -84,16 +84,14 @@ function getInterpolatedColor(pct: number): string {
 
 function CircularProgress({
   percentage,
+  rawPercentage,
   size = 110,
   strokeWidth = 8
-
-
-
-
-}: {percentage: number;size?: number;strokeWidth?: number;}) {
+}: {percentage: number; rawPercentage?: number; size?: number; strokeWidth?: number;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(percentage, 0), 100);
+  const displayPct = rawPercentage ?? percentage;
   const [animated, setAnimated] = React.useState(false);
 
   React.useEffect(() => {
@@ -141,16 +139,14 @@ function CircularProgress({
               strokeDashoffset={segOffset}
               strokeLinecap={i === gradientSegments.length - 1 ? "round" : "butt"}
               style={{ transition: `stroke-dasharray 1s ease-out ${i * 8}ms, stroke-dashoffset 1s ease-out ${i * 8}ms` }} />);
-
-
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-xl sm:text-2xl text-foreground leading-none font-extrabold font-serif">
-          {formatNumber(animated ? clampedPct : 0, 0)}%
+          {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
         <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
-          {clampedPct >= 100 ? "Atingido" : "Meta Pontual"}
+          {displayPct >= 100 ? "Atingido" : "Meta Pontual"}
         </span>
       </div>
     </div>);
@@ -191,13 +187,14 @@ export function CircularProgressCard({
   const targetForProgress = isMonthSelected ? monthlyTarget : metric.target_value;
 
   const status = getStatus(displayValue, targetForProgress, isInverse);
-  const progress = isInverse ?
+  const rawProgress = isInverse ?
   targetForProgress > 0 && displayValue > 0 ?
-  Math.min(targetForProgress / displayValue * 100, 100) :
+  targetForProgress / displayValue * 100 :
   displayValue === 0 ? 100 : 0 :
   targetForProgress > 0 ?
-  Math.min(displayValue / targetForProgress * 100, 100) :
+  displayValue / targetForProgress * 100 :
   0;
+  const progress = Math.min(rawProgress, 100);
 
   const hasNoData = isMonthSelected && monthlyValue === null;
 
@@ -235,7 +232,23 @@ export function CircularProgressCard({
         </Tooltip>
       </div>
 
-      {/* Main content: 1/3 chart + 2/3 info */}
+      {/* Achievement Badge */}
+      {!hasNoData && rawProgress >= 120 ? (
+        <div className="mb-2 flex justify-center">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-destructive/15 text-destructive">
+            <Rocket className="w-3 h-3" />
+            Aceleramos!
+          </span>
+        </div>
+      ) : !hasNoData && rawProgress >= 100 ? (
+        <div className="mb-2 flex justify-center">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-success/15 text-success">
+            <Trophy className="w-3 h-3" />
+            Meta Batida
+          </span>
+        </div>
+      ) : null}
+
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Circular Progress - 1/3 */}
         <div className="shrink-0 w-1/3 flex items-center justify-center">
@@ -244,7 +257,7 @@ export function CircularProgressCard({
               <span className="text-muted-foreground text-xs italic">Sem dados</span>
             </div> :
 
-          <CircularProgress percentage={progress} size={110} strokeWidth={8} />
+          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={8} />
           }
         </div>
 
