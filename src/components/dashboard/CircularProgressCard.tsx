@@ -143,10 +143,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm sm:text-xl text-foreground leading-none font-sans text-center font-bold">
+        <span className="text-xl text-foreground leading-none font-sans text-center sm:text-3xl font-bold">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
-        <span className="text-[6px] sm:text-[7px] text-muted-foreground mt-0.5">
+        <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
           {displayPct >= 100 ? "Atingido" : "Meta Pontual"}
         </span>
       </div>
@@ -202,14 +202,14 @@ export function CircularProgressCard({
   return (
     <div
       className={cn(
-        "metric-card group relative p-2 sm:p-3",
+        "metric-card group relative p-3 sm:p-4",
         onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
       onClick={() => onCardClick?.()}>
 
       {/* Header with polarity toggle */}
-      <div className="mb-1.5 sm:mb-2 flex items-center gap-1">
-        <span className="metric-label text-[9px] sm:text-[11px] font-semibold flex-1 leading-tight">{metric.name}</span>
+      <div className="mb-2 sm:mb-3 flex items-center gap-1.5">
+        <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -221,8 +221,8 @@ export function CircularProgressCard({
               aria-label="Alternar polaridade da meta">
 
               {isInverse ?
-              <ArrowDownCircle className="w-3.5 h-3.5 text-success" /> :
-              <ArrowUpCircle className="w-3.5 h-3.5 text-primary" />
+              <ArrowDownCircle className="w-4 h-4 text-success" /> :
+              <ArrowUpCircle className="w-4 h-4 text-primary" />
               }
             </button>
           </TooltipTrigger>
@@ -283,8 +283,8 @@ export function CircularProgressCard({
         }
 
         return (
-          <div className="mb-1.5 flex items-center justify-end gap-[3px]">
-            <span className={cn("inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[10px] font-bold", badge.className)}>
+          <div className="mb-2 flex items-center justify-end gap-[4px]">
+            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
@@ -302,20 +302,20 @@ export function CircularProgressCard({
 
       })()}
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-3 sm:gap-4">
         {/* Circular Progress - 1/3 */}
         <div className="shrink-0 w-1/3 flex items-center justify-center">
-          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={9} />
+          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={12} />
         </div>
 
         {/* Target and Realized values - 2/3 */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[2px]">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px]">
           {/* Target - top */}
           <div>
-            <p className="text-[7px] sm:text-[8px] text-muted-foreground uppercase tracking-wide">
+            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="text-xs sm:text-xl font-semibold text-foreground leading-tight">
+            <p className="text-base font-semibold text-foreground leading-tight sm:text-3xl">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -324,10 +324,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-[7px] sm:text-[8px] text-muted-foreground uppercase tracking-wide">
+            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-xs sm:text-2xl font-bold text-foreground leading-tight">
+            <p className="text-base font-bold text-foreground leading-tight sm:text-4xl">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
@@ -335,14 +335,14 @@ export function CircularProgressCard({
       </div>
 
       {/* Bottom section: Sparkline + Pace */}
-      <div className="flex items-stretch gap-1 mt-2">
+      <div className="flex items-stretch gap-1.5 mt-3">
         <Sparkline
           metricId={metric.id}
           metricName={metric.name}
           unit={metric.unit}
           historyData={historyData}
           selectedYear={selectedYear}
-          height={32}
+          height={40}
           className="flex-1 min-w-0" />
 
         <PaceIndicator
@@ -354,13 +354,13 @@ export function CircularProgressCard({
           selectedYear={selectedYear}
           isInverse={isInverse}
           isNonAccumulative={isNonAccumulative}
-          className="w-10 shrink-0" />
+          className="w-12 shrink-0" />
 
       </div>
 
       {/* Annual target reference when month is selected */}
       {isMonthSelected && !isNonAccumulative &&
-      <div className="text-[6px] sm:text-[7px] text-muted-foreground mt-1 flex items-center gap-1">
+      <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1.5 flex items-center gap-1">
           <span>Meta anual:</span>
           <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
         </div>
