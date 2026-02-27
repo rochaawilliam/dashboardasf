@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { Sparkline } from "./Sparkline";
@@ -60,6 +61,38 @@ const getColorForPercentage = (percentage: number): string => {
   return SEGMENT_COLORS[4];
 };
 
+// Interpolate between two HSL colors
+function interpolateHSL(
+  h1: number, s1: number, l1: number,
+  h2: number, s2: number, l2: number,
+  t: number
+): string {
+  const h = h1 + (h2 - h1) * t;
+  const s = s1 + (s2 - s1) * t;
+  const l = l1 + (l2 - l1) * t;
+  return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+// HSL values for each band boundary
+const BAND_HSL = [
+  [0, 75, 48],    // Red
+  [25, 85, 50],   // Orange
+  [40, 80, 48],   // Amber
+  [80, 65, 42],   // Yellow-green
+  [142, 65, 38],  // Green
+];
+
+function getInterpolatedColor(pct: number): string {
+  if (pct <= 0) return SEGMENT_COLORS[0];
+  if (pct >= 100) return SEGMENT_COLORS[4];
+  const bandIndex = Math.min(Math.floor(pct / 20), 4);
+  const nextIndex = Math.min(bandIndex + 1, 4);
+  const t = (pct - bandIndex * 20) / 20;
+  const [h1, s1, l1] = BAND_HSL[bandIndex];
+  const [h2, s2, l2] = BAND_HSL[nextIndex];
+  return interpolateHSL(h1, s1, l1, h2, s2, l2, t);
+}
+
 function CircularProgress({ 
   percentage, 
   size = 90, 
@@ -72,19 +105,25 @@ function CircularProgress({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(percentage, 0), 100);
+  const [animated, setAnimated] = React.useState(false);
 
-  // Build segments: each 20% band gets its own color
-  const segments: { start: number; end: number; color: string }[] = [];
-  const bands = [0, 20, 40, 60, 80, 100];
-  for (let i = 0; i < 5; i++) {
-    const bandStart = bands[i];
-    const bandEnd = bands[i + 1];
-    if (clampedPct <= bandStart) break;
-    segments.push({
-      start: bandStart,
-      end: Math.min(clampedPct, bandEnd),
-      color: SEGMENT_COLORS[i],
-    });
+  React.useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const currentPct = animated ? clampedPct : 0;
+
+  // Build many small segments for smooth gradient
+  const GRADIENT_STEPS = 60;
+  const stepSize = currentPct / GRADIENT_STEPS;
+  const gradientSegments: { start: number; end: number; color: string }[] = [];
+  for (let i = 0; i < GRADIENT_STEPS; i++) {
+    const start = i * stepSize;
+    const end = (i + 1) * stepSize;
+    if (end <= 0) continue;
+    const midPct = (start + end) / 2;
+    gradientSegments.push({ start, end, color: getInterpolatedColor(midPct) });
   }
 
   return (
@@ -99,8 +138,8 @@ function CircularProgress({
           stroke="hsl(var(--muted) / 0.5)"
           strokeWidth={strokeWidth}
         />
-        {/* Multi-color progress segments */}
-        {segments.map((seg, i) => {
+        {/* Gradient progress segments */}
+        {gradientSegments.map((seg, i) => {
           const segLength = ((seg.end - seg.start) / 100) * circumference;
           const segOffset = circumference - (seg.start / 100) * circumference;
           return (
@@ -114,8 +153,8 @@ function CircularProgress({
               strokeWidth={strokeWidth}
               strokeDasharray={`${segLength} ${circumference - segLength}`}
               strokeDashoffset={segOffset}
-              strokeLinecap={i === segments.length - 1 ? "round" : "butt"}
-              className="transition-all duration-700 ease-out"
+              strokeLinecap={i === gradientSegments.length - 1 ? "round" : "butt"}
+              style={{ transition: `stroke-dasharray 1s ease-out ${i * 8}ms, stroke-dashoffset 1s ease-out ${i * 8}ms` }}
             />
           );
         })}
@@ -123,7 +162,7 @@ function CircularProgress({
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-lg sm:text-xl font-bold text-foreground leading-none">
-          {formatNumber(clampedPct, 1)}%
+          {formatNumber(animated ? clampedPct : 0, 1)}%
         </span>
         <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
           {clampedPct >= 100 ? "Atingido" : "Meta Pontual"}
@@ -198,26 +237,26 @@ export function CircularProgressCard({
         </div>
 
         {/* Target and Realized values */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-          {/* Realized - prominent */}
-          <div>
-            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
-              {isMonthSelected ? "Realizado" : "Acumulado"}
-            </p>
-            <p className="text-xl sm:text-2xl font-extrabold leading-tight" style={{ color: getColorForPercentage(progress) }}>
-              {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
-            </p>
-          </div>
-
-          {/* Target - secondary */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+          {/* Target - top, secondary */}
           <div>
             <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : (isNonAccumulative ? "Meta" : "Meta Anual")}
             </p>
-            <p className="text-xs sm:text-sm font-semibold text-muted-foreground leading-tight">
+            <p className="text-sm sm:text-base font-semibold text-muted-foreground leading-tight">
               {isMonthSelected
                 ? formatMetricValue(monthlyTarget, metric.unit, metric.name)
                 : formatMetricValue(metric.target_value, metric.unit, metric.name)}
+            </p>
+          </div>
+
+          {/* Realized - bottom, very prominent */}
+          <div>
+            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
+              {isMonthSelected ? "Realizado" : "Acumulado"}
+            </p>
+            <p className="text-2xl sm:text-3xl font-black leading-tight" style={{ color: getInterpolatedColor(progress) }}>
+              {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
         </div>
