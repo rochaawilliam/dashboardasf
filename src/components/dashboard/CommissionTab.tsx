@@ -199,19 +199,44 @@ export function CommissionTab({
   const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
 
   const contratosData = useMemo(() => {
-    // Use the same fixed formula as Index.tsx for prev month base
     const refMonth = selectedMonth ?? new Date().getMonth() + 1;
-    const empBase = 20 + (refMonth - 1);
-    const trabBase = 14 + (refMonth - 1);
+    const BASE_EMP = 20;
+    const BASE_TRAB = 14;
 
     const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
     const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
 
-    const totalEmpAss = empBase + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
+    // Build chain from history: Total Assessoria(M) = prev(M) + novos(M)
+    const getMonthValue = (metricId: string, month: number) => {
+      let total = 0;
+      (historyData || []).forEach((h) => {
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month === month && h.metric_id === metricId) {
+          total += h.value;
+        }
+      });
+      return total;
+    };
+
+    // Compute prevMonth values (mês anterior) using chain logic
+    let empPrev = BASE_EMP;
+    let trabPrev = BASE_TRAB;
+    if (refMonth > 1) {
+      let totalEmp = BASE_EMP + getMonthValue(CONTRATOS_EMP_ASSESSORIA_ID, 1);
+      let totalTrab = BASE_TRAB + getMonthValue(CONTRATOS_TRAB_ASSESSORIA_ID, 1);
+      for (let m = 2; m < refMonth; m++) {
+        totalEmp = totalEmp + getMonthValue(CONTRATOS_EMP_ASSESSORIA_ID, m);
+        totalTrab = totalTrab + getMonthValue(CONTRATOS_TRAB_ASSESSORIA_ID, m);
+      }
+      empPrev = totalEmp;
+      trabPrev = totalTrab;
+    }
+
+    const totalEmpAss = empPrev + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
     const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
     const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
     const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
-    const totalTrabAss = trabBase + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
+    const totalTrabAss = trabPrev + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
     const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
     const achieved = selectedMonth !== null
       ? totalEmpAss + empConsult + tribAss + tribPont + totalTrabAss + trabConsult
@@ -228,7 +253,7 @@ export function CommissionTab({
     }
     
     return { achieved, target };
-  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
+  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear, historyData]);
 
   const receitaCommission = getCommission(receitaData.target > 0 ? (receitaData.achieved / receitaData.target) * 100 : 0);
   const contratosCommission = getCommission(contratosData.target > 0 ? (contratosData.achieved / contratosData.target) * 100 : 0);
