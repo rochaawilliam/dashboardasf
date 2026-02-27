@@ -9,6 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useUpdateMetric } from "@/hooks/useMetrics";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 
 interface CircularProgressCardProps {
@@ -170,6 +171,13 @@ export function CircularProgressCard({
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
+  const updateMetric = useUpdateMetric();
+
+  const handleTogglePolarity = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newPolarity = isInverse ? "higher_is_better" : "lower_is_better";
+    updateMetric.mutate({ id: metric.id, polarity: newPolarity });
+  };
 
   const specificMonthlyTarget = selectedMonth
     ? monthlyTargets.find(mt => mt.metric_id === metric.id && mt.month === selectedMonth && mt.year === selectedYear)
@@ -201,21 +209,28 @@ export function CircularProgressCard({
       )}
       onClick={() => onCardClick?.()}
     >
-      {/* Header with polarity indicator */}
+      {/* Header with polarity toggle */}
       <div className="mb-2 sm:mb-3 flex items-center gap-1.5">
         <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="shrink-0">
-              {isInverse ? (
-                <ArrowDownCircle className="w-3.5 h-3.5 text-success" />
-              ) : (
-                <ArrowUpCircle className="w-3.5 h-3.5 text-primary" />
+            <button
+              onClick={handleTogglePolarity}
+              className={cn(
+                "shrink-0 p-0.5 rounded-full transition-colors hover:bg-muted/80",
+                updateMetric.isPending && "opacity-50 pointer-events-none"
               )}
-            </span>
+              aria-label="Alternar polaridade da meta"
+            >
+              {isInverse ? (
+                <ArrowDownCircle className="w-4 h-4 text-success" />
+              ) : (
+                <ArrowUpCircle className="w-4 h-4 text-primary" />
+              )}
+            </button>
           </TooltipTrigger>
           <TooltipContent side="top" className="text-xs">
-            {isInverse ? "Quanto menor, melhor" : "Quanto maior, melhor"}
+            {isInverse ? "Quanto menor, melhor — clique para alternar" : "Quanto maior, melhor — clique para alternar"}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -235,24 +250,24 @@ export function CircularProgressCard({
 
         {/* Target and Realized values - 2/3 */}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
-          {/* Target - top, secondary */}
+          {/* Target - top */}
           <div>
             <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : (isNonAccumulative ? "Meta" : "Meta Anual")}
             </p>
-            <p className="text-sm sm:text-base font-semibold text-muted-foreground leading-tight">
+            <p className="text-base sm:text-lg font-semibold text-foreground leading-tight">
               {isMonthSelected
                 ? formatMetricValue(monthlyTarget, metric.unit, metric.name)
                 : formatMetricValue(metric.target_value, metric.unit, metric.name)}
             </p>
           </div>
 
-          {/* Realized - bottom, very prominent */}
+          {/* Realized - bottom */}
           <div>
             <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: getInterpolatedColor(progress) }}>
+            <p className="text-base sm:text-lg font-bold text-foreground leading-tight">
               {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
