@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { Sparkline } from "./Sparkline";
 import { PaceIndicator } from "./PaceIndicator";
-import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -233,21 +233,35 @@ export function CircularProgressCard({
       </div>
 
       {/* Achievement Badge */}
-      {!hasNoData && rawProgress >= 120 ? (
-        <div className="mb-2 flex justify-center">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-destructive/15 text-destructive">
-            <Rocket className="w-3 h-3" />
-            Aceleramos!
-          </span>
-        </div>
-      ) : !hasNoData && rawProgress >= 100 ? (
-        <div className="mb-2 flex justify-center">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-success/15 text-success">
-            <Trophy className="w-3 h-3" />
-            Meta Batida
-          </span>
-        </div>
-      ) : null}
+      {!hasNoData && (() => {
+        const p = rawProgress;
+        let badge: { label: string; icon: React.ReactNode; className: string } | null = null;
+
+        if (p >= 120) {
+          badge = { label: "Aceleramos!", icon: <Rocket className="w-3 h-3" />, className: "bg-destructive/15 text-destructive" };
+        } else if (p >= 100) {
+          badge = { label: "Meta Batida!", icon: <Trophy className="w-3 h-3" />, className: "bg-success/15 text-success" };
+        } else if (p >= 80) {
+          badge = { label: "Reta Final!", icon: <Flag className="w-3 h-3" />, className: "bg-primary/15 text-primary" };
+        } else if (p >= 60) {
+          badge = { label: "Go! Go!", icon: <Zap className="w-3 h-3" />, className: "bg-accent/30 text-accent-foreground" };
+        } else if (p >= 40) {
+          badge = { label: "Mantenha o ritmo!", icon: <TrendingUp className="w-3 h-3" />, className: "bg-warning/15 text-warning" };
+        } else if (p >= 20) {
+          badge = { label: "Vamos nessa!", icon: <Flame className="w-3 h-3" />, className: "bg-warning/25 text-warning" };
+        } else if (p >= 0) {
+          badge = { label: "Começamos!", icon: <PlayCircle className="w-3 h-3" />, className: "bg-muted text-muted-foreground" };
+        }
+
+        return badge ? (
+          <div className="mb-2 flex justify-center">
+            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold", badge.className)}>
+              {badge.icon}
+              {badge.label}
+            </span>
+          </div>
+        ) : null;
+      })()}
 
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Circular Progress - 1/3 */}
