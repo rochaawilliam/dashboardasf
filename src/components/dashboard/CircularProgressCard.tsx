@@ -87,7 +87,7 @@ function CircularProgress({
   rawPercentage,
   size = 110,
   strokeWidth = 8
-}: {percentage: number; rawPercentage?: number; size?: number; strokeWidth?: number;}) {
+}: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(percentage, 0), 100);
@@ -142,7 +142,7 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl sm:text-2xl text-foreground leading-none font-extrabold font-serif">
+        <span className="text-xl text-foreground leading-none font-sans text-center sm:text-3xl font-bold">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
         <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
@@ -235,7 +235,7 @@ export function CircularProgressCard({
       {/* Achievement Badge + Guerrilla Icon */}
       {(() => {
         const now = new Date();
-        const isCurrentMonth = !isMonthSelected || (selectedMonth === now.getMonth() + 1 && selectedYear === now.getFullYear());
+        const isCurrentMonth = !isMonthSelected || selectedMonth === now.getMonth() + 1 && selectedYear === now.getFullYear();
         const isPastMonth = isMonthSelected && !isCurrentMonth;
 
         const p = rawProgress;
@@ -243,7 +243,7 @@ export function CircularProgressCard({
         // For past months, only show badge if >= 100%
         if (isPastMonth && p < 100) return null;
 
-        let badge: { label: string; icon: React.ReactNode; className: string } | null = null;
+        let badge: {label: string;icon: React.ReactNode;className: string;} | null = null;
 
         if (p >= 120) {
           badge = { label: "Aceleramos!", icon: <Rocket className="w-3 h-3" />, className: "bg-destructive/15 text-destructive" };
@@ -283,13 +283,13 @@ export function CircularProgressCard({
         }
 
         return (
-          <div className="mb-2 flex items-center justify-center gap-1.5">
+          <div className="mb-2 flex items-center justify-end gap-[4px]">
             <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
-            {showGuerrilla && guerrillaIcon && (
-              <Tooltip>
+            {showGuerrilla && guerrillaIcon &&
+            <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex items-center justify-center p-0.5 rounded-full bg-muted/50">
                     {guerrillaIcon}
@@ -297,9 +297,9 @@ export function CircularProgressCard({
                 </TooltipTrigger>
                 <TooltipContent side="top" className="text-xs">{guerrillaTooltip}</TooltipContent>
               </Tooltip>
-            )}
-          </div>
-        );
+            }
+          </div>);
+
       })()}
 
       <div className="flex items-center gap-3 sm:gap-4">
@@ -309,13 +309,13 @@ export function CircularProgressCard({
         </div>
 
         {/* Target and Realized values - 2/3 */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px]">
           {/* Target - top */}
           <div>
             <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="text-base font-semibold text-foreground leading-tight sm:text-2xl">
+            <p className="text-base font-semibold text-foreground leading-tight sm:text-3xl">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -327,7 +327,7 @@ export function CircularProgressCard({
             <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-base font-bold text-foreground leading-tight sm:text-3xl">
+            <p className="text-base font-bold text-foreground leading-tight sm:text-4xl">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
