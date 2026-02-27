@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/error-handler";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
+import { CircularProgressCard } from "@/components/dashboard/CircularProgressCard";
 import { MetricDrilldownDialog } from "@/components/dashboard/MetricDrilldownDialog";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
@@ -753,25 +754,46 @@ const Index = () => {
                                     
                                     const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos;
                                     
+                                    const isReceitaTotalCard = metric.name.includes("Receita Total");
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : (isMesAnterior ? mesAnteriorMonthly : (isTotalAssessoria ? totalAssessoriaMonthly : (isTotalContratos ? totalContratosMonthly : (monthlyValues[metric.id] ?? null))));
+                                    const cardAccumulatedValue = isAutoSum ? (computedAccumulated ?? 0) : (isMesAnterior ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) : (isTotalAssessoria ? (totalAssessoriaMonthly ?? 0) : (isTotalContratos ? (totalContratosMonthly ?? 0) : (accumulatedValues[metric.id] ?? 0))));
+                                    const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
+
                                     return (
                                       <div 
                                         key={metric.id}
                                         data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
+                                        className={isReceitaTotalCard ? "col-span-full sm:col-span-2" : undefined}
                                       >
-                                        <MetricCardMonthly 
-                                          metric={isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric}
-                                          monthlyValue={isAutoSum ? computedMonthly : (isMesAnterior ? mesAnteriorMonthly : (isTotalAssessoria ? totalAssessoriaMonthly : (isTotalContratos ? totalContratosMonthly : (monthlyValues[metric.id] ?? null))))}
-                                          isMonthSelected={selectedMonth !== null}
-                                          accumulatedValue={isAutoSum ? (computedAccumulated ?? 0) : (isMesAnterior ? (metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista) : (isTotalAssessoria ? (totalAssessoriaMonthly ?? 0) : (isTotalContratos ? (totalContratosMonthly ?? 0) : (accumulatedValues[metric.id] ?? 0))))}
-                                          onSave={isComputedCard ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
-                                          isSaving={savingMetricId === metric.id}
-                                          selectedMonthName={selectedMonthName}
-                                          historyData={historyData}
-                                          selectedYear={selectedYear}
-                                          selectedMonth={selectedMonth}
-                                          monthlyTargets={monthlyTargets}
-                                          onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                        />
+                                        {isReceitaTotalCard ? (
+                                          <CircularProgressCard
+                                            metric={cardMetric}
+                                            monthlyValue={cardMonthlyValue}
+                                            isMonthSelected={selectedMonth !== null}
+                                            accumulatedValue={cardAccumulatedValue}
+                                            selectedMonthName={selectedMonthName}
+                                            historyData={historyData}
+                                            selectedYear={selectedYear}
+                                            selectedMonth={selectedMonth}
+                                            monthlyTargets={monthlyTargets}
+                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
+                                          />
+                                        ) : (
+                                          <MetricCardMonthly 
+                                            metric={cardMetric}
+                                            monthlyValue={cardMonthlyValue}
+                                            isMonthSelected={selectedMonth !== null}
+                                            accumulatedValue={cardAccumulatedValue}
+                                            onSave={isComputedCard ? undefined : (selectedMonth !== null ? handleSaveMonthlyValue : undefined)}
+                                            isSaving={savingMetricId === metric.id}
+                                            selectedMonthName={selectedMonthName}
+                                            historyData={historyData}
+                                            selectedYear={selectedYear}
+                                            selectedMonth={selectedMonth}
+                                            monthlyTargets={monthlyTargets}
+                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
+                                          />
+                                        )}
                                       </div>
                                     );
                                   })}
