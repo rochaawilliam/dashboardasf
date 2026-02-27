@@ -43,42 +43,21 @@ const getStatus = (current: number, target: number, isInverse: boolean = false) 
   return "danger";
 };
 
-// Gradient: red (0%) → orange (35%) → amber (50%) → yellow-green (70%) → green (85%+) → bright green (100%+)
-const getGradientColor = (percentage: number): string => {
-  const p = Math.min(Math.max(percentage, 0), 120);
-  if (p <= 35) {
-    // Red to orange
-    const t = p / 35;
-    const h = 0 + t * 25;
-    return `hsl(${h}, 75%, 48%)`;
-  } else if (p <= 50) {
-    // Orange to amber
-    const t = (p - 35) / 15;
-    const h = 25 + t * 15;
-    return `hsl(${h}, 85%, 50%)`;
-  } else if (p <= 70) {
-    // Amber to yellow-green
-    const t = (p - 50) / 20;
-    const h = 40 + t * 40;
-    return `hsl(${h}, 70%, 45%)`;
-  } else if (p <= 85) {
-    // Yellow-green to green
-    const t = (p - 70) / 15;
-    const h = 80 + t * 40;
-    return `hsl(${h}, 65%, 42%)`;
-  } else {
-    // Green to bright green
-    const t = Math.min((p - 85) / 15, 1);
-    const h = 120 + t * 22;
-    const s = 65 + t * 6;
-    return `hsl(${h}, ${s}%, 40%)`;
-  }
-};
+// 5 segment colors for each 20% band
+const SEGMENT_COLORS = [
+  "hsl(0, 75%, 48%)",      // 0-20%: Red
+  "hsl(25, 85%, 50%)",     // 20-40%: Orange
+  "hsl(40, 80%, 48%)",     // 40-60%: Amber
+  "hsl(80, 65%, 42%)",     // 60-80%: Yellow-green
+  "hsl(142, 65%, 38%)",    // 80-100%: Green
+];
 
-const getTrackColor = (percentage: number): string => {
-  const color = getGradientColor(percentage);
-  // Extract and apply opacity
-  return color.replace(')', ' / 0.18)').replace('hsl(', 'hsl(');
+const getColorForPercentage = (percentage: number): string => {
+  if (percentage <= 20) return SEGMENT_COLORS[0];
+  if (percentage <= 40) return SEGMENT_COLORS[1];
+  if (percentage <= 60) return SEGMENT_COLORS[2];
+  if (percentage <= 80) return SEGMENT_COLORS[3];
+  return SEGMENT_COLORS[4];
 };
 
 function CircularProgress({ 
@@ -92,7 +71,21 @@ function CircularProgress({
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
+  const clampedPct = Math.min(Math.max(percentage, 0), 100);
+
+  // Build segments: each 20% band gets its own color
+  const segments: { start: number; end: number; color: string }[] = [];
+  const bands = [0, 20, 40, 60, 80, 100];
+  for (let i = 0; i < 5; i++) {
+    const bandStart = bands[i];
+    const bandEnd = bands[i + 1];
+    if (clampedPct <= bandStart) break;
+    segments.push({
+      start: bandStart,
+      end: Math.min(clampedPct, bandEnd),
+      color: SEGMENT_COLORS[i],
+    });
+  }
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -103,30 +96,37 @@ function CircularProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={getTrackColor(percentage)}
+          stroke="hsl(var(--muted) / 0.5)"
           strokeWidth={strokeWidth}
         />
-        {/* Progress */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={getGradientColor(percentage)}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="transition-all duration-700 ease-out"
-        />
+        {/* Multi-color progress segments */}
+        {segments.map((seg, i) => {
+          const segLength = ((seg.end - seg.start) / 100) * circumference;
+          const segOffset = circumference - (seg.start / 100) * circumference;
+          return (
+            <circle
+              key={i}
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${segLength} ${circumference - segLength}`}
+              strokeDashoffset={segOffset}
+              strokeLinecap={i === segments.length - 1 ? "round" : "butt"}
+              className="transition-all duration-700 ease-out"
+            />
+          );
+        })}
       </svg>
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-lg sm:text-xl font-bold text-foreground leading-none">
-          {formatNumber(percentage, 1)}%
+          {formatNumber(clampedPct, 1)}%
         </span>
         <span className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
-          {percentage >= 100 ? "Atingido" : "Meta Pontual"}
+          {clampedPct >= 100 ? "Atingido" : "Meta Pontual"}
         </span>
       </div>
     </div>
@@ -198,26 +198,26 @@ export function CircularProgressCard({
         </div>
 
         {/* Target and Realized values */}
-        <div className="flex-1 min-w-0 space-y-2">
-          {/* Target */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+          {/* Realized - prominent */}
           <div>
-            <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">
-              {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : (isNonAccumulative ? "Meta" : "Meta Anual")}
+            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
+              {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-sm sm:text-base font-bold text-foreground leading-tight">
-              {isMonthSelected
-                ? formatMetricValue(monthlyTarget, metric.unit, metric.name)
-                : formatMetricValue(metric.target_value, metric.unit, metric.name)}
+            <p className="text-xl sm:text-2xl font-extrabold leading-tight" style={{ color: getColorForPercentage(progress) }}>
+              {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
 
-          {/* Realized */}
+          {/* Target - secondary */}
           <div>
-            <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">
-              {isMonthSelected ? "Realizado" : "Acumulado"}
+            <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-wide">
+              {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : (isNonAccumulative ? "Meta" : "Meta Anual")}
             </p>
-            <p className="text-sm sm:text-base font-bold leading-tight" style={{ color: getGradientColor(progress) }}>
-              {hasNoData ? "—" : formatMetricValue(displayValue, metric.unit, metric.name)}
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground leading-tight">
+              {isMonthSelected
+                ? formatMetricValue(monthlyTarget, metric.unit, metric.name)
+                : formatMetricValue(metric.target_value, metric.unit, metric.name)}
             </p>
           </div>
         </div>
