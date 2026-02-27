@@ -327,7 +327,7 @@ export function CircularProgressCard({
             <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-sm">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight font-extrabold text-3xl font-sans sm:text-4xl">
+            <p className="text-foreground leading-tight font-extrabold text-3xl font-sans sm:text-5xl">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
