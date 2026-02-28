@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUpdateMetric, type Metric } from "@/hooks/useMetrics";
@@ -35,6 +35,11 @@ export function MetricGoalEditor({ metric }: MetricGoalEditorProps) {
 
   return (
     <div className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group">
+      {metric.polarity === "lower_is_better" ? (
+        <TrendingDown className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+      ) : (
+        <TrendingUp className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+      )}
       <span className="flex-1 text-xs font-medium text-foreground truncate" title={metric.name}>
         {metric.name}
       </span>
