@@ -177,6 +177,7 @@ export function useUpdateMetric() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["monthly_targets"] });
       toast({
         title: "Meta atualizada",
         description: "Os valores foram salvos com sucesso.",
