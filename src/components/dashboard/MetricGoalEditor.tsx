@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUpdateMetric, type Metric } from "@/hooks/useMetrics";
 import { formatMetricValue } from "@/utils/formatters";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface MetricGoalEditorProps {
   metric: Metric;
@@ -20,36 +18,14 @@ export function MetricGoalEditor({ metric }: MetricGoalEditorProps) {
       setTargetValue(metric.target_value.toString());
     }
   }, [metric.target_value, isEditing]);
-  
-  const updateMetric = useUpdateMetric();
-  const queryClient = useQueryClient();
 
-  const handleSave = async () => {
-    const newTarget = parseFloat(targetValue);
-    
-    // Update the annual target
+  const updateMetric = useUpdateMetric();
+
+  const handleSave = () => {
     updateMetric.mutate({
       id: metric.id,
-      target_value: newTarget,
+      target_value: parseFloat(targetValue),
     });
-
-    // Also update all monthly targets for current and next year
-    // For percentage metrics, monthly = annual; for cumulative, monthly = annual/12
-    const isPercentageOrRate = metric.unit === "%" || metric.unit === "x" || metric.name.toLowerCase().includes("taxa") || metric.name.toLowerCase().includes("nps") || metric.name.toLowerCase().includes("enps");
-    const monthlyValue = isPercentageOrRate ? newTarget : newTarget / 12;
-
-    const currentYear = new Date().getFullYear();
-    for (const year of [currentYear, currentYear + 1]) {
-      for (let month = 1; month <= 12; month++) {
-        await supabase
-          .from("monthly_targets")
-          .upsert(
-            { metric_id: metric.id, year, month, target_value: monthlyValue },
-            { onConflict: "metric_id,year,month" }
-          );
-      }
-    }
-    queryClient.invalidateQueries({ queryKey: ["monthly_targets"] });
     setIsEditing(false);
   };
 
