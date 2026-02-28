@@ -37,7 +37,7 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Contratos - Trabalhista", keywords: ["Contratos Trabalhista", "Total Contratos Assessoria Trabalhista"], excludeKeywords: ["Mês Anterior"], order: 4 },
     { name: "Contratos Totais", keywords: ["Mês Anterior", "Total de Contratos", "Total Contratos Ativos"], order: 5 },
     { name: "Contratos - Patenteia", keywords: ["Contratos Patenteia"], excludeKeywords: ["Total Contratos Assessoria"], order: 6 },
-    { name: "Crescimento Comercial", keywords: ["Taxa de Cumprimento de Metas", "Taxa de Conversão", "Tempo Médio de Fechamento", "Upsell", "SLA Consultivo"], order: 7 },
+    { name: "Crescimento Comercial", keywords: ["Taxa de Cumprimento de Metas", "Taxa de Conversão", "Tempo Médio de Fechamento", "Upsell", "SLA Consultivo", "Taxa de Agendamento", "Taxa de Comparecimento"], order: 7 },
     { name: "Satisfação do Cliente", keywords: ["NPS", "Churn de Clientes"], order: 8 },
     { name: "Retenção e Lifetime", keywords: ["Lifetime", "Lead Time de Onboarding", "Taxa de Onboarding"], order: 9 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
