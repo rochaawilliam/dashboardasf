@@ -11,7 +11,7 @@ export interface SubcategoryConfig {
 
 export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
   lucratividade: [
-    { name: "Receita Total", keywords: ["Receita Total", "Resultado Acumulado ASF", "Eficiência de Receita ASF"], order: 1 },
+    { name: "Receita Total", keywords: ["Receita Total", "Resultado Acumulado ASF", "Eficiência de Receita ASF"], order: 1, sortOrder: ["Receita Total Anual", "Resultado Acumulado", "Eficiência de Receita"] },
     { name: "Assessoria", keywords: ["Assessoria"], excludeKeywords: ["Ticket Médio"], order: 2 },
     { name: "Consultoria", keywords: ["Consultoria"], excludeKeywords: ["Ticket Médio"], order: 3 },
     { name: "Pontual", keywords: ["Pontual", "Outras Receitas"], excludeKeywords: ["Ticket Médio"], order: 4 },

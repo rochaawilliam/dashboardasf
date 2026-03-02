@@ -942,7 +942,9 @@ const Index = () => {
                                   eficienciaProjecao = monthsElapsed > 0 ? (receitaAcumulada / monthsElapsed) * 12 : 0;
 
                                   if (isResultadoAcumulado) {
-                                    dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0 };
+                                    const pctAcumulado = metaAnual > 0 ? (resultadoAcumuladoValue / metaAnual) * 100 : 0;
+                                    const sign = pctAcumulado >= 0 ? "+" : "";
+                                    dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0, description: `Meta anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(metaAnual)} | ${sign}${pctAcumulado.toFixed(1)}% da meta` };
                                   }
                                   if (isEficienciaReceita) {
                                     dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
