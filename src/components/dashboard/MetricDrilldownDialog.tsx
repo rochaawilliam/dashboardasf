@@ -87,6 +87,7 @@ export function MetricDrilldownDialog({
   const [newComment, setNewComment] = useState("");
   const [newSource, setNewSource] = useState<string | null>(null);
   const [editComment, setEditComment] = useState("");
+  const [editSource, setEditSource] = useState<string | null>(null);
   const [filterMonth, setFilterMonth] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
   const queryClient = useQueryClient();
@@ -112,10 +113,10 @@ export function MetricDrilldownDialog({
   };
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, value, comment }: { id: string; value: number; comment?: string }) => {
+    mutationFn: async ({ id, value, comment, source }: { id: string; value: number; comment?: string; source?: string | null }) => {
       const { error } = await supabase
         .from("metric_history")
-        .update({ value, comment: comment ?? null } as any)
+        .update({ value, comment: comment ?? null, source: source ?? null } as any)
         .eq("id", id);
       if (error) throw error;
     },
@@ -187,7 +188,7 @@ export function MetricDrilldownDialog({
       toast({ title: "Valor inválido", description: "Insira um número válido.", variant: "destructive" });
       return;
     }
-    updateMutation.mutate({ id, value: numValue, comment: editComment.trim() || undefined });
+    updateMutation.mutate({ id, value: numValue, comment: editComment.trim() || undefined, source: editSource });
   };
 
   const handleCancel = () => {
@@ -215,6 +216,7 @@ export function MetricDrilldownDialog({
     setEditingId(entry.id);
     setEditValue(entry.value.toString());
     setEditComment(entry.comment || "");
+    setEditSource(entry.source || null);
   };
 
   const formatDate = (dateStr: string) => {
@@ -534,13 +536,32 @@ export function MetricDrilldownDialog({
                       </TableCell>
                       {isContractMetric(metric.name) && (
                         <TableCell>
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                            entry.source === "online" ? "bg-primary/10 text-primary" :
-                            entry.source === "offline" ? "bg-warning/10 text-warning" :
-                            "text-muted-foreground"
-                          }`}>
-                            {entry.source === "online" ? "On-line" : entry.source === "offline" ? "Off-line" : "—"}
-                          </span>
+                          {editingId === entry.id ? (
+                            <div className="flex gap-1">
+                              {[{ value: "online", label: "On" }, { value: "offline", label: "Off" }].map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => setEditSource(editSource === opt.value ? null : opt.value)}
+                                  className={`rounded px-1.5 py-0.5 text-[10px] font-medium border transition-colors ${
+                                    editSource === opt.value
+                                      ? "bg-primary text-primary-foreground border-primary"
+                                      : "bg-background text-muted-foreground border-border hover:bg-accent"
+                                  }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                              entry.source === "online" ? "bg-primary/10 text-primary" :
+                              entry.source === "offline" ? "bg-warning/10 text-warning" :
+                              "text-muted-foreground"
+                            }`}>
+                              {entry.source === "online" ? "On-line" : entry.source === "offline" ? "Off-line" : "—"}
+                            </span>
+                          )}
                         </TableCell>
                       )}
                       <TableCell className="max-w-[150px]">
