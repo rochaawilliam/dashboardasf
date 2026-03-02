@@ -59,7 +59,11 @@ interface HistoryEntry {
   period_type: string;
   created_at: string;
   comment: string | null;
+  source: string | null;
 }
+
+const isContractMetric = (name: string) =>
+  name.toLowerCase().includes("novos contratos") && !name.toLowerCase().includes("off-line") && !name.toLowerCase().includes("on-line");
 
 const MONTH_NAMES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -81,6 +85,7 @@ export function MetricDrilldownDialog({
   const [newMonth, setNewMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [newYear, setNewYear] = useState<string>(new Date().getFullYear().toString());
   const [newComment, setNewComment] = useState("");
+  const [newSource, setNewSource] = useState<string | null>(null);
   const [editComment, setEditComment] = useState("");
   const [filterMonth, setFilterMonth] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
@@ -143,7 +148,7 @@ export function MetricDrilldownDialog({
   });
 
   const insertMutation = useMutation({
-    mutationFn: async ({ value, month, year, comment }: { value: number; month: number; year: number; comment?: string }) => {
+    mutationFn: async ({ value, month, year, comment, source }: { value: number; month: number; year: number; comment?: string; source?: string | null }) => {
       // recorded_at = today's date (actual date of the entry)
       const today = new Date();
       const recordedAt = format(today, "yyyy-MM-dd");
@@ -158,6 +163,7 @@ export function MetricDrilldownDialog({
           recorded_at: recordedAt,
           period_type: refPeriod,
           comment: comment || null,
+          source: source || null,
         } as any);
       if (error) throw error;
     },
@@ -166,6 +172,7 @@ export function MetricDrilldownDialog({
       setShowNewEntry(false);
       setNewValue("");
       setNewComment("");
+      setNewSource(null);
       toast({ title: "Lançamento criado", description: "O valor foi registrado com sucesso." });
     },
     onError: (error) => {
@@ -200,6 +207,7 @@ export function MetricDrilldownDialog({
       month: parseInt(newMonth), 
       year: parseInt(newYear),
       comment: newComment.trim() || undefined,
+      source: newSource,
     });
   };
 
@@ -339,6 +347,27 @@ export function MetricDrilldownDialog({
                       maxLength={200}
                     />
                   </div>
+                  {isContractMetric(metric.name) && (
+                    <div>
+                      <label className="text-[10px] text-muted-foreground mb-1 block">Origem do Contrato</label>
+                      <div className="flex gap-2">
+                        {[{ value: "online", label: "On-line" }, { value: "offline", label: "Off-line" }].map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setNewSource(newSource === opt.value ? null : opt.value)}
+                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors border ${
+                              newSource === opt.value
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -352,7 +381,7 @@ export function MetricDrilldownDialog({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => { setShowNewEntry(false); setNewValue(""); setNewComment(""); }}
+                      onClick={() => { setShowNewEntry(false); setNewValue(""); setNewComment(""); setNewSource(null); }}
                       className="h-7 text-xs"
                     >
                       Cancelar
@@ -473,6 +502,7 @@ export function MetricDrilldownDialog({
                     <TableHead>Referência</TableHead>
                     <TableHead>Lançado em</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
+                    {isContractMetric(metric.name) && <TableHead>Origem</TableHead>}
                     <TableHead>Comentário</TableHead>
                     {hasActions && <TableHead className="text-right w-[100px]">Ações</TableHead>}
                   </TableRow>
@@ -502,6 +532,17 @@ export function MetricDrilldownDialog({
                           </span>
                         )}
                       </TableCell>
+                      {isContractMetric(metric.name) && (
+                        <TableCell>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            entry.source === "online" ? "bg-primary/10 text-primary" :
+                            entry.source === "offline" ? "bg-warning/10 text-warning" :
+                            "text-muted-foreground"
+                          }`}>
+                            {entry.source === "online" ? "On-line" : entry.source === "offline" ? "Off-line" : "—"}
+                          </span>
+                        </TableCell>
+                      )}
                       <TableCell className="max-w-[150px]">
                         {editingId === entry.id ? (
                           <Input
