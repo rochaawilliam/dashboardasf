@@ -725,12 +725,7 @@ const Index = () => {
                                 let dynamicMetric = metric;
                                 const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
 
-                                // Dynamic target for Assessoria metrics: Jan=0, Feb+=1
-                                if (metric.id === CONTRATOS_EMP_ASSESSORIA_ID) {
-                                  dynamicMetric = { ...metric, target_value: currentMonth >= 2 ? 1 : 0 };
-                                } else if (metric.id === CONTRATOS_TRAB_ASSESSORIA_ID) {
-                                  dynamicMetric = { ...metric, target_value: currentMonth >= 2 ? 1 : 0 };
-                                }
+                                // Novos Contratos Assessoria: use DB monthly_targets (no override needed)
 
                                 // Dynamic target for "Mês Anterior": Jan=sem meta(0), Feb+=base+increment
                                 if (metric.id === CONTRATOS_EMP_MES_ANT_ID) {
@@ -746,11 +741,11 @@ const Index = () => {
                                 if (metric.id === TOTAL_EMP_ASSESSORIA_ID) {
                                   const novosEmp = monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0;
                                   const totalEmp = prevMonthContractValues.empresarial + novosEmp;
-                                  dynamicMetric = { ...metric, target_value: 0, current_value: totalEmp };
+                                  dynamicMetric = { ...metric, current_value: totalEmp };
                                 } else if (metric.id === TOTAL_TRAB_ASSESSORIA_ID) {
                                   const novosTrab = monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0;
                                   const totalTrab = prevMonthContractValues.trabalhista + novosTrab;
-                                  dynamicMetric = { ...metric, target_value: 0, current_value: totalTrab };
+                                  dynamicMetric = { ...metric, current_value: totalTrab };
                                 }
 
                                 // Compute "Total de Contratos" = Total Emp Assessoria + Trib Assessoria + Trib Pontual + Total Trab Assessoria
