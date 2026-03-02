@@ -229,7 +229,7 @@
   }
 
   .metric-card {
-    @apply bg-card rounded-lg border border-border/50 p-2 sm:p-2.5 md:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30;
+    @apply bg-card rounded-lg border border-border/50 p-2 sm:p-2.5 md:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30 h-full flex flex-col;
   }
 
   .dark .metric-card {

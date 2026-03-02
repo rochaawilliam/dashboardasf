@@ -841,7 +841,7 @@ const Index = () => {
                                   <div
                                     key={metric.id}
                                     data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
-                                    className={undefined}>
+                                    className="h-full">
 
                                         <CircularProgressCard
                                       metric={cardMetric}
