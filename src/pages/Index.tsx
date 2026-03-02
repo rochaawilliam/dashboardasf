@@ -366,6 +366,27 @@ const Index = () => {
     return { online: { monthly: onlineMonthly, accumulated: onlineAcc }, offline: { monthly: offlineMonthly, accumulated: offlineAcc } };
   }, [historyData, selectedMonth, selectedYear]);
 
+  // Compute dynamic targets for origin cards (30% online, 70% offline of total new contracts)
+  const originTargets = useMemo(() => {
+    if (!monthlyTargets) return { online: 0, offline: 0 };
+    const novosContratosIds = [
+      CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
+      CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
+      CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
+      "4c298090-3652-442c-a69d-970ff23781eb", // Patenteia
+    ];
+    const month = selectedMonth ?? new Date().getMonth() + 1;
+    const year = selectedYear;
+    const totalMonthlyTarget = novosContratosIds.reduce((sum, id) => {
+      const mt = monthlyTargets.find((t) => t.metric_id === id && t.month === month && t.year === year);
+      return sum + (mt?.target_value ?? 0);
+    }, 0);
+    return {
+      online: Math.round(totalMonthlyTarget * 0.3 * 100) / 100,
+      offline: Math.round(totalMonthlyTarget * 0.7 * 100) / 100,
+    };
+  }, [monthlyTargets, selectedMonth, selectedYear]);
+
   // Create metrics with adjusted values based on selection
   const adjustedMetrics = useMemo(() => {
     if (!metrics) return [];
@@ -382,11 +403,13 @@ const Index = () => {
         currentValue = prevMonthContractValues.trabalhista;
       }
 
-      // Compute origin card values
+      // Compute origin card values and dynamic targets
       if (metric.id === CONTRATOS_ONLINE_ID) {
         currentValue = selectedMonth !== null ? originValues.online.monthly : originValues.online.accumulated;
+        return { ...metric, current_value: currentValue, target_value: originTargets.online * 12 };
       } else if (metric.id === CONTRATOS_OFFLINE_ID) {
         currentValue = selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated;
+        return { ...metric, current_value: currentValue, target_value: originTargets.offline * 12 };
       }
 
       return {
@@ -394,7 +417,7 @@ const Index = () => {
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, prevMonthContractValues, originValues]);
+  }, [metrics, selectedMonth, accumulatedValues, prevMonthContractValues, originValues, originTargets]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
