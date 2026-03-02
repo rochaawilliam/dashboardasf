@@ -40,6 +40,7 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Crescimento Comercial", keywords: ["Taxa de Cumprimento de Metas", "Taxa de Conversão", "Tempo Médio de Fechamento", "Upsell", "SLA Consultivo", "Taxa de Agendamento", "Taxa de Comparecimento"], order: 7 },
     { name: "Satisfação do Cliente", keywords: ["NPS", "Churn de Clientes"], order: 8 },
     { name: "Retenção e Lifetime", keywords: ["Lifetime", "Lead Time de Onboarding", "Taxa de Onboarding"], order: 9 },
+    { name: "Origem dos Contratos", keywords: ["Off-line ASF", "On-line ASF"], order: 10 },
     { name: "Outros Indicadores", keywords: [], order: 99 },
   ],
   produtividade: [

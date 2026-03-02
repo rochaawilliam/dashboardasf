@@ -287,6 +287,10 @@ const Index = () => {
   const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
   const CONTRATOS_TRIB_PONTUAL_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
 
+  // IDs for origin tracking cards
+  const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
+  const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
+
   // MRR % Mensal - auto-calculated metric
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
   const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
@@ -334,6 +338,34 @@ const Index = () => {
     return { empresarial: totalEmp, trabalhista: totalTrab };
   }, [selectedMonth, selectedYear, historyData]);
 
+  // Compute origin card values from history source field
+  const originValues = useMemo(() => {
+    if (!historyData) return { online: { monthly: 0, accumulated: 0 }, offline: { monthly: 0, accumulated: 0 } };
+
+    // All "Novos Contratos" metric IDs (excluding the origin cards themselves)
+    const novosContratosIds = new Set([
+      CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
+      CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
+      CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
+      "4c298090-3652-442c-a69d-970ff23781eb", // Novos Contratos Patenteia
+    ]);
+
+    let onlineMonthly = 0, offlineMonthly = 0, onlineAcc = 0, offlineAcc = 0;
+    historyData.forEach((h: any) => {
+      if (!novosContratosIds.has(h.metric_id)) return;
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      if (ref.year !== selectedYear) return;
+      if (h.source === "online") {
+        onlineAcc += h.value;
+        if (selectedMonth !== null && ref.month === selectedMonth) onlineMonthly += h.value;
+      } else if (h.source === "offline") {
+        offlineAcc += h.value;
+        if (selectedMonth !== null && ref.month === selectedMonth) offlineMonthly += h.value;
+      }
+    });
+    return { online: { monthly: onlineMonthly, accumulated: onlineAcc }, offline: { monthly: offlineMonthly, accumulated: offlineAcc } };
+  }, [historyData, selectedMonth, selectedYear]);
+
   // Create metrics with adjusted values based on selection
   const adjustedMetrics = useMemo(() => {
     if (!metrics) return [];
@@ -350,12 +382,19 @@ const Index = () => {
         currentValue = prevMonthContractValues.trabalhista;
       }
 
+      // Compute origin card values
+      if (metric.id === CONTRATOS_ONLINE_ID) {
+        currentValue = selectedMonth !== null ? originValues.online.monthly : originValues.online.accumulated;
+      } else if (metric.id === CONTRATOS_OFFLINE_ID) {
+        currentValue = selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated;
+      }
+
       return {
         ...metric,
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, prevMonthContractValues]);
+  }, [metrics, selectedMonth, accumulatedValues, prevMonthContractValues, originValues]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
@@ -825,11 +864,15 @@ const Index = () => {
                                   dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
                                 }
 
-                                const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos || isMRR || isARR;
+                                const isOriginCard = metric.id === CONTRATOS_ONLINE_ID || metric.id === CONTRATOS_OFFLINE_ID;
+                                const originMonthly = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.monthly : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.monthly : null;
+                                const originAccumulated = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.accumulated : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.accumulated : 0;
+
+                                const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos || isMRR || isARR || isOriginCard;
 
                                 const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                const cardMonthlyValue = isAutoSum ? computedMonthly : isMesAnterior ? mesAnteriorMonthly : isTotalAssessoria ? totalAssessoriaMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : monthlyValues[metric.id] ?? null;
-                                const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : accumulatedValues[metric.id] ?? 0;
+                                const cardMonthlyValue = isAutoSum ? computedMonthly : isMesAnterior ? mesAnteriorMonthly : isTotalAssessoria ? totalAssessoriaMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : monthlyValues[metric.id] ?? null;
+                                const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : accumulatedValues[metric.id] ?? 0;
                                 const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                 return (

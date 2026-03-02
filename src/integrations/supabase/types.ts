@@ -22,6 +22,7 @@ export type Database = {
           metric_id: string
           period_type: string
           recorded_at: string
+          source: string | null
           value: number
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           metric_id: string
           period_type?: string
           recorded_at?: string
+          source?: string | null
           value: number
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           metric_id?: string
           period_type?: string
           recorded_at?: string
+          source?: string | null
           value?: number
         }
         Relationships: [
