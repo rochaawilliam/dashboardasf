@@ -341,7 +341,7 @@ export function CircularProgressCard({
       </div>
 
       {/* Bottom section: Sparkline + Pace */}
-      <div className="flex items-stretch gap-1.5 mt-3">
+      <div className="flex items-stretch gap-1.5 mt-auto pt-3">
         <Sparkline
           metricId={metric.id}
           metricName={metric.name}
