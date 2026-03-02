@@ -337,6 +337,12 @@ export function CircularProgressCard({
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
+          {/* Description / projection info */}
+          {metric.description && metric.description.startsWith("Projeção") && (
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 font-medium">
+              📈 {metric.description}
+            </p>
+          )}
         </div>
       </div>
 
