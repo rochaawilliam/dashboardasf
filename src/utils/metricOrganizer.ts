@@ -23,8 +23,8 @@ export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
     { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo", "Cumprimento de Orçamento", "SLA Externo"], order: 10 },
   ],
   execucao_comercial: [
-    { name: "Alcance e Impressões ASF", keywords: ["impressões ASF", "alcance ASF", "conversas iniciadas ASF"], order: 1, sortOrder: ["impressões", "alcance", "conversas"] },
-    { name: "Alcance e Impressões Patenteia", keywords: ["impressões Patenteia", "alcance Patenteia", "conversas iniciadas Patenteia"], order: 2, sortOrder: ["impressões", "alcance", "conversas"] },
+    { name: "Alcance e Impressões ASF", keywords: ["impressões ASF", "alcance ASF", "conversas iniciadas ASF", "Valor Investido ASF"], order: 1, sortOrder: ["impressões", "alcance", "conversas", "Valor Investido"] },
+    { name: "Alcance e Impressões Patenteia", keywords: ["impressões Patenteia", "alcance Patenteia", "conversas iniciadas Patenteia", "Valor Investido Patenteia"], order: 2, sortOrder: ["impressões", "alcance", "conversas", "Valor Investido"] },
     { name: "Leads Online", keywords: ["Leads ASF Online", "Leads Patenteia Online"], order: 3, sortOrder: ["ASF", "Patenteia"] },
     { name: "Leads Offline", keywords: ["Off"], order: 4 },
     { name: "Reuniões Agendadas", keywords: ["Reuniões agendadas"], order: 5 },
