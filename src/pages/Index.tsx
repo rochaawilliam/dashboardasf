@@ -958,6 +958,11 @@ const Index = () => {
                                 const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : accumulatedValues[metric.id] ?? 0;
                                 const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
+                                // Pre-compute monthly target for this metric
+                                const cardMonthlyTarget = selectedMonth && monthlyTargets
+                                  ? monthlyTargets.find((t) => t.metric_id === metric.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? null
+                                  : null;
+
                                 return (
                                   <div
                                     key={metric.id}
@@ -974,6 +979,7 @@ const Index = () => {
                                       selectedYear={selectedYear}
                                       selectedMonth={selectedMonth}
                                       monthlyTargets={monthlyTargets}
+                                      monthlyTargetOverride={cardMonthlyTarget}
                                       onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
                                       hideTarget={isMesAnterior || isResultadoAcumulado} />
 

@@ -22,6 +22,7 @@ interface CircularProgressCardProps {
   selectedYear?: number;
   selectedMonth?: number | null;
   monthlyTargets?: MonthlyTarget[];
+  monthlyTargetOverride?: number | null;
   onCardClick?: () => void;
   hideTarget?: boolean;
 }
@@ -165,6 +166,7 @@ export function CircularProgressCard({
   selectedYear = new Date().getFullYear(),
   selectedMonth,
   monthlyTargets = [],
+  monthlyTargetOverride,
   onCardClick,
   hideTarget = false
 }: CircularProgressCardProps) {
@@ -178,7 +180,8 @@ export function CircularProgressCard({
     updateMetric.mutate({ id: metric.id, polarity: newPolarity });
   };
 
-  const specificMonthlyTarget = selectedMonth ?
+  const specificMonthlyTarget = monthlyTargetOverride != null ? { target_value: monthlyTargetOverride } :
+  selectedMonth ?
   monthlyTargets.find((mt) => mt.metric_id === metric.id && mt.month === selectedMonth && mt.year === selectedYear) :
   null;
 
