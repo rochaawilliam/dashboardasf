@@ -55,6 +55,75 @@ export type Database = {
           },
         ]
       }
+      metric_subcategories: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      metric_subcategory_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          metric_id: string
+          sort_order: number
+          subcategory_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_id: string
+          sort_order?: number
+          subcategory_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_id?: string
+          sort_order?: number
+          subcategory_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metric_subcategory_assignments_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: true
+            referencedRelation: "metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_subcategory_assignments_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "metric_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metrics: {
         Row: {
           category: Database["public"]["Enums"]["metric_category"]
