@@ -338,9 +338,9 @@ export function CircularProgressCard({
             </p>
           </div>
           {/* Description / projection info */}
-          {metric.description && metric.description.startsWith("Projeção") && (
+          {metric.description && (metric.description.startsWith("Projeção") || metric.description.startsWith("Meta anual")) && (
             <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 font-medium">
-              📈 {metric.description}
+              📊 {metric.description}
             </p>
           )}
         </div>
