@@ -152,7 +152,7 @@ const Index = () => {
   const { data: metrics, isLoading: metricsLoading } = useMetrics(filters);
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
-  const { data: monthlyTargets } = useMonthlyTargets();
+  const { data: monthlyTargets } = useMonthlyTargets(selectedYear);
 
   // Offline mode hooks
   const isOnline = useOnlineStatus();
