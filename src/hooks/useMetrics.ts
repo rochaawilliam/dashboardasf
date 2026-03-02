@@ -129,10 +129,25 @@ export function useMonthlyTargets(year?: number) {
         query = query.eq("year", year);
       }
       
-      const { data, error } = await query.limit(2000);
+      // Supabase max-rows is 1000, so we paginate to get all records
+      const allData: MonthlyTarget[] = [];
+      let from = 0;
+      const pageSize = 1000;
       
-      if (error) throw error;
-      return data as MonthlyTarget[];
+      while (true) {
+        let pageQuery = supabase.from("monthly_targets").select("*").range(from, from + pageSize - 1);
+        if (year) {
+          pageQuery = pageQuery.eq("year", year);
+        }
+        const { data, error } = await pageQuery;
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        allData.push(...(data as MonthlyTarget[]));
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      
+      return allData;
     },
   });
 }
