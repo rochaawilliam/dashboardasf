@@ -756,23 +756,25 @@ const Index = () => {
                               icon={config.icon}
                               variant={config.variant} />
                             {isAdmin && (
-                              <div className="flex items-center gap-1 mb-2">
+                              <div className="flex items-center gap-1.5 mb-2">
                                 <Button
                                   variant={isDragMode ? "default" : "outline"}
                                   size="sm"
-                                  className="h-7 text-xs gap-1"
+                                  className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
                                   onClick={() => setIsDragMode(!isDragMode)}
+                                  title={isDragMode ? "Concluir organização" : "Organizar cards"}
                                 >
-                                  <Move className="h-3 w-3" />
+                                  <Move className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                   <span className="hidden sm:inline">{isDragMode ? "Concluir" : "Organizar"}</span>
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-7 text-xs gap-1"
+                                  className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
                                   onClick={() => setShowSubcatManager(true)}
+                                  title="Gerenciar subcategorias"
                                 >
-                                  <Settings2 className="h-3 w-3" />
+                                  <Settings2 className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                   <span className="hidden sm:inline">Subcategorias</span>
                                 </Button>
                               </div>
