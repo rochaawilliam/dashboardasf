@@ -129,7 +129,7 @@ export function useMonthlyTargets(year?: number) {
         query = query.eq("year", year);
       }
       
-      const { data, error } = await query;
+      const { data, error } = await query.limit(2000);
       
       if (error) throw error;
       return data as MonthlyTarget[];
