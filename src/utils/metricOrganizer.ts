@@ -1,134 +1,86 @@
 import type { Metric, MetricCategory } from "@/hooks/useMetrics";
-
-// Define subcategories for better organization
-export interface SubcategoryConfig {
-  name: string;
-  keywords: string[];
-  excludeKeywords?: string[];
-  order: number;
-  sortOrder?: string[]; // Custom sort order by keyword match
-}
-
-export const subcategories: Record<MetricCategory, SubcategoryConfig[]> = {
-  lucratividade: [
-    { name: "Receita Total", keywords: ["Receita Total", "Resultado Acumulado ASF", "Eficiência de Receita ASF"], order: 1, sortOrder: ["Receita Total Anual", "Resultado Acumulado", "Eficiência de Receita"] },
-    { name: "Assessoria", keywords: ["Assessoria"], excludeKeywords: ["Ticket Médio"], order: 2 },
-    { name: "Consultoria", keywords: ["Consultoria"], excludeKeywords: ["Ticket Médio"], order: 3 },
-    { name: "Pontual", keywords: ["Pontual", "Outras Receitas"], excludeKeywords: ["Ticket Médio"], order: 4 },
-    { name: "Sucumbência", keywords: ["Sucumbência"], order: 5 },
-    { name: "Patenteia", keywords: ["Receita Patenteia"], order: 6 },
-    { name: "Receita Recorrente", keywords: ["MRR", "ARR"], order: 7 },
-    { name: "Tickets Médios", keywords: ["Ticket Médio"], order: 8 },
-    { name: "Indicadores de Rentabilidade", keywords: ["Lucratividade", "Margem"], order: 9 },
-    { name: "Saúde Financeira", keywords: ["Inadimplência", "LTV", "Churn de Receitas", "Folha sobre", "Custo Fixo", "Cumprimento de Orçamento", "SLA Externo"], order: 10 },
-  ],
-  execucao_comercial: [
-    { name: "Alcance e Impressões ASF", keywords: ["impressões ASF", "alcance ASF", "conversas iniciadas ASF", "Valor Investido ASF"], order: 1, sortOrder: ["impressões", "alcance", "conversas", "Valor Investido"] },
-    { name: "Alcance e Impressões Patenteia", keywords: ["impressões Patenteia", "alcance Patenteia", "conversas iniciadas Patenteia", "Valor Investido Patenteia"], order: 2, sortOrder: ["impressões", "alcance", "conversas", "Valor Investido"] },
-    { name: "Leads Online", keywords: ["Leads ASF Online", "Leads Patenteia Online"], order: 3, sortOrder: ["ASF", "Patenteia"] },
-    { name: "Leads Offline", keywords: ["Off"], order: 4 },
-    { name: "Reuniões Agendadas", keywords: ["Reuniões agendadas"], order: 5 },
-    { name: "Propostas Elaboradas", keywords: ["Propostas elaboradas"], order: 6 },
-    { name: "Outros Indicadores", keywords: [], order: 99 },
-  ],
-  experiencia_cliente: [
-    { name: "Contratos - Empresarial", keywords: ["Contratos Empresarial", "Total Contratos Assessoria Empresarial"], excludeKeywords: ["Mês Anterior"], order: 1 },
-    { name: "Contratos - Tributário", keywords: ["Contratos Tributário"], order: 3 },
-    { name: "Contratos - Trabalhista", keywords: ["Contratos Trabalhista", "Total Contratos Assessoria Trabalhista"], excludeKeywords: ["Mês Anterior"], order: 4 },
-    { name: "Contratos Totais", keywords: ["Mês Anterior", "Total de Contratos", "Total Contratos Ativos"], order: 5 },
-    { name: "Origem dos Contratos", keywords: ["Off-line ASF", "On-line ASF"], order: 6 },
-    { name: "Contratos - Patenteia", keywords: ["Contratos Patenteia"], excludeKeywords: ["Total Contratos Assessoria"], order: 7 },
-    { name: "Crescimento Comercial", keywords: ["Taxa de Cumprimento de Metas", "Taxa de Conversão", "Tempo Médio de Fechamento", "Upsell", "SLA Consultivo", "Taxa de Agendamento", "Taxa de Comparecimento"], order: 8 },
-    { name: "Satisfação do Cliente", keywords: ["NPS", "Churn de Clientes"], order: 9 },
-    { name: "Retenção e Lifetime", keywords: ["Lifetime", "Lead Time de Onboarding", "Taxa de Onboarding"], order: 10 },
-    { name: "Outros Indicadores", keywords: [], order: 99 },
-  ],
-  produtividade: [
-    { name: "Performance Jurídica", keywords: ["Lead Time Judicial", "Taxa de Sucesso", "Taxa de Cumprimento de Prazo"], order: 1 },
-    { name: "Capacidade e Eficiência", keywords: ["Capacidade", "SLA Interno", "Receita por Colaborador"], order: 2 },
-    { name: "Outros Indicadores", keywords: [], order: 99 },
-  ],
-  gestao_pessoas: [
-    { name: "Engajamento", keywords: ["ENPS"], order: 1 },
-    { name: "Retenção de Talentos", keywords: ["Turnover"], order: 2 },
-    { name: "Outros Indicadores", keywords: [], order: 99 },
-  ],
-  aprendizado_crescimento: [
-    { name: "Desenvolvimento", keywords: ["Treinamento", "Capacitação"], order: 1 },
-    { name: "Outros Indicadores", keywords: [], order: 99 },
-  ],
-};
+import type { Subcategory, SubcategoryAssignment } from "@/hooks/useSubcategories";
 
 export interface GroupedSubcategory {
+  id: string;
   name: string;
   metrics: Metric[];
   order: number;
 }
 
+/**
+ * Organize metrics by DB-stored subcategories and assignments.
+ * Metrics without assignment go to "Outros Indicadores" if it exists, 
+ * otherwise they are grouped at the end.
+ */
 export function organizeMetricsBySubcategory(
   metrics: Metric[],
-  category: MetricCategory
+  category: MetricCategory,
+  subcategories?: Subcategory[],
+  assignments?: SubcategoryAssignment[]
 ): GroupedSubcategory[] {
-  const categorySubcats = subcategories[category] || [];
+  // If no DB data, return single group with all metrics
+  if (!subcategories || !assignments || subcategories.length === 0) {
+    return metrics.length > 0
+      ? [{ id: "all", name: "Todos", metrics: [...metrics], order: 0 }]
+      : [];
+  }
+
+  const categorySubcats = subcategories
+    .filter((s) => s.category === category)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   const result: Map<string, GroupedSubcategory> = new Map();
-  const usedMetricIds = new Set<string>();
+  const assignedMetricIds = new Set<string>();
 
   // Initialize subcategories
   categorySubcats.forEach((subcat) => {
-    result.set(subcat.name, {
+    result.set(subcat.id, {
+      id: subcat.id,
       name: subcat.name,
       metrics: [],
-      order: subcat.order,
+      order: subcat.sort_order,
     });
   });
 
-  // Assign metrics to subcategories based on keywords
-  metrics.forEach((metric) => {
-    let assigned = false;
-    
-    for (const subcat of categorySubcats) {
-      if (subcat.keywords.length === 0) continue; // Skip "Outros" for now
-      
-      const matchesKeyword = subcat.keywords.some((keyword) =>
-        metric.name.toLowerCase().includes(keyword.toLowerCase())
-      );
-      const matchesExclude = subcat.excludeKeywords?.some((keyword) =>
-        metric.name.toLowerCase().includes(keyword.toLowerCase())
-      ) || false;
-      
-      if (matchesKeyword && !matchesExclude && !usedMetricIds.has(metric.id)) {
-        result.get(subcat.name)?.metrics.push(metric);
-        usedMetricIds.add(metric.id);
-        assigned = true;
-        break;
-      }
-    }
-    
-    // If not assigned, put in "Outros Indicadores"
-    if (!assigned && !usedMetricIds.has(metric.id)) {
-      const outros = result.get("Outros Indicadores");
-      if (outros) {
-        outros.metrics.push(metric);
-        usedMetricIds.add(metric.id);
+  // Get assignments for metrics in this category
+  const metricIds = new Set(metrics.map((m) => m.id));
+  const relevantAssignments = assignments
+    .filter((a) => metricIds.has(a.metric_id))
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  // Assign metrics based on DB assignments
+  relevantAssignments.forEach((assignment) => {
+    const subcatGroup = result.get(assignment.subcategory_id);
+    if (subcatGroup) {
+      const metric = metrics.find((m) => m.id === assignment.metric_id);
+      if (metric) {
+        subcatGroup.metrics.push(metric);
+        assignedMetricIds.add(metric.id);
       }
     }
   });
 
-  // Sort metrics within each subcategory
-  result.forEach((subcat) => {
-    const config = categorySubcats.find((c) => c.name === subcat.name);
-    if (config?.sortOrder) {
-      subcat.metrics.sort((a, b) => {
-        const aIdx = config.sortOrder!.findIndex((k) => a.name.toLowerCase().includes(k.toLowerCase()));
-        const bIdx = config.sortOrder!.findIndex((k) => b.name.toLowerCase().includes(k.toLowerCase()));
-        return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
-      });
+  // Put unassigned metrics in "Outros Indicadores" or create catch-all
+  const unassigned = metrics.filter((m) => !assignedMetricIds.has(m.id));
+  if (unassigned.length > 0) {
+    const outrosSubcat = categorySubcats.find((s) => s.name === "Outros Indicadores");
+    if (outrosSubcat) {
+      const outrosGroup = result.get(outrosSubcat.id);
+      if (outrosGroup) {
+        outrosGroup.metrics.push(...unassigned);
+      }
     } else {
-      subcat.metrics.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+      result.set("unassigned", {
+        id: "unassigned",
+        name: "Outros Indicadores",
+        metrics: unassigned,
+        order: 999,
+      });
     }
-  });
+  }
 
-  // Convert to array and sort by order, filter empty subcategories
+  // Convert to array, filter empty, sort by order
   return Array.from(result.values())
     .filter((subcat) => subcat.metrics.length > 0)
     .sort((a, b) => a.order - b.order);

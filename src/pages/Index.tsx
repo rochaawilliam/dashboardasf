@@ -29,6 +29,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
+import { useSubcategories, useSubcategoryAssignments, useUpdateAssignment } from "@/hooks/useSubcategories";
+import { SubcategoryManagerDialog } from "@/components/dashboard/SubcategoryManagerDialog";
+import { DraggableCardWrapper } from "@/components/dashboard/DraggableCardWrapper";
+import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import {
   DollarSign,
@@ -40,7 +45,9 @@ import {
   Lock,
   LogIn,
   Target,
-  TrendingUp } from
+  TrendingUp,
+  Settings2,
+  Move } from
 "lucide-react";
 import {
   useMetrics,
@@ -153,6 +160,18 @@ const Index = () => {
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
   const { data: monthlyTargets } = useMonthlyTargets(selectedYear);
+
+  // DB-based subcategories
+  const { data: dbSubcategories } = useSubcategories();
+  const { data: dbAssignments } = useSubcategoryAssignments();
+  const updateAssignment = useUpdateAssignment();
+
+  // Admin UI state
+  const [showSubcatManager, setShowSubcatManager] = useState(false);
+  const [isDragMode, setIsDragMode] = useState(false);
+
+  // DnD sensors
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   // Offline mode hooks
   const isOnline = useOnlineStatus();
@@ -714,7 +733,7 @@ const Index = () => {
                 const canAccess = hasTabAccess(category);
 
                 const categoryHistory = historyByCategory?.[category];
-                const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category);
+                const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category, dbSubcategories, dbAssignments);
 
                 return (
                   <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
@@ -730,11 +749,35 @@ const Index = () => {
                         </div> :
 
                     <>
-                          <SectionHeader
-                        title={config.title}
-                        subtitle={config.subtitle}
-                        icon={config.icon}
-                        variant={config.variant} />
+                          <div className="flex items-center justify-between">
+                            <SectionHeader
+                              title={config.title}
+                              subtitle={config.subtitle}
+                              icon={config.icon}
+                              variant={config.variant} />
+                            {isAdmin && (
+                              <div className="flex items-center gap-1 mb-2">
+                                <Button
+                                  variant={isDragMode ? "default" : "outline"}
+                                  size="sm"
+                                  className="h-7 text-xs gap-1"
+                                  onClick={() => setIsDragMode(!isDragMode)}
+                                >
+                                  <Move className="h-3 w-3" />
+                                  <span className="hidden sm:inline">{isDragMode ? "Concluir" : "Organizar"}</span>
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs gap-1"
+                                  onClick={() => setShowSubcatManager(true)}
+                                >
+                                  <Settings2 className="h-3 w-3" />
+                                  <span className="hidden sm:inline">Subcategorias</span>
+                                </Button>
+                              </div>
+                            )}
+                          </div>
 
                       
                           {organizedSubcategories.map((subcat) => {
@@ -780,6 +823,20 @@ const Index = () => {
                             collapsible={isCollapsible}
                             defaultCollapsed={false}>
 
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event: DragEndEvent) => {
+                                  if (!event.over || event.active.id === event.over.id) return;
+                                  // Find the target subcategory for the dropped card
+                                  const metricId = event.active.id as string;
+                                  // Determine new sort order based on position
+                                  const overMetricId = event.over.id as string;
+                                  const overIndex = displayMetrics.findIndex((m) => m.id === overMetricId);
+                                  updateAssignment.mutate({
+                                    metric_id: metricId,
+                                    subcategory_id: subcat.id,
+                                    sort_order: overIndex >= 0 ? overIndex : 0,
+                                  });
+                                }}>
+                                <SortableContext items={displayMetrics.map((m) => m.id)} strategy={rectSortingStrategy}>
                                 <div className="dashboard-grid px-0">
                                   {displayMetrics.map((metric, metricIndex) => {
                                 const isAutoSum = isReceitaTotal && metric.name.includes("Receita Total");
@@ -964,29 +1021,30 @@ const Index = () => {
                                   : null;
 
                                 return (
-                                  <div
-                                    key={metric.id}
-                                    data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
-                                    className="h-full">
-
+                                  <DraggableCardWrapper key={metric.id} id={metric.id} isDragMode={isDragMode}>
+                                    <div
+                                      data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
+                                      className="h-full">
                                         <CircularProgressCard
-                                      metric={cardMetric}
-                                      monthlyValue={cardMonthlyValue}
-                                      isMonthSelected={selectedMonth !== null}
-                                      accumulatedValue={cardAccumulatedValue}
-                                      selectedMonthName={selectedMonthName}
-                                      historyData={historyData}
-                                      selectedYear={selectedYear}
-                                      selectedMonth={selectedMonth}
-                                      monthlyTargets={monthlyTargets}
-                                      monthlyTargetOverride={cardMonthlyTarget}
-                                      onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                      hideTarget={isMesAnterior || isResultadoAcumulado} />
-
-                                      </div>);
+                                          metric={cardMetric}
+                                          monthlyValue={cardMonthlyValue}
+                                          isMonthSelected={selectedMonth !== null}
+                                          accumulatedValue={cardAccumulatedValue}
+                                          selectedMonthName={selectedMonthName}
+                                          historyData={historyData}
+                                          selectedYear={selectedYear}
+                                          selectedMonth={selectedMonth}
+                                          monthlyTargets={monthlyTargets}
+                                          monthlyTargetOverride={cardMonthlyTarget}
+                                          onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
+                                          hideTarget={isMesAnterior || isResultadoAcumulado} />
+                                    </div>
+                                  </DraggableCardWrapper>);
 
                               })}
                                 </div>
+                                </SortableContext>
+                                </DndContext>
                               </CollapsibleSubcategory>);
 
                       })}
@@ -1065,6 +1123,9 @@ const Index = () => {
         isSyncing={isSyncing}
         onSync={handleSync}
         lastSyncedAt={lastSyncedAt} />
+
+      {/* Subcategory Manager Dialog */}
+      <SubcategoryManagerDialog open={showSubcatManager} onOpenChange={setShowSubcatManager} />
 
     </div>);
 

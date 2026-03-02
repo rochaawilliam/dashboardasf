@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Target, FileText, Trophy, TrendingUp } from "lucide-react";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
+import { useSubcategories, useSubcategoryAssignments } from "@/hooks/useSubcategories";
 import { getRefMonthYear } from "@/utils/dateUtils";
 import { formatNumber } from "@/utils/formatters";
 
@@ -159,6 +160,9 @@ export function CommissionTab({
   monthlyValues,
   accumulatedValues,
 }: CommissionTabProps) {
+  const { data: dbSubcategories } = useSubcategories();
+  const { data: dbAssignments } = useSubcategoryAssignments();
+
   // Fixed monthly revenue targets (without Patenteia)
   const RECEITA_MONTHLY_TARGETS: Record<number, number> = {
     1: 78000, 2: 81000, 3: 91600, 4: 124000, 5: 136200, 6: 194000,
@@ -168,7 +172,7 @@ export function CommissionTab({
   // Compute Receita Total (sum of revenue subcategories, excluding Patenteia)
   const receitaData = useMemo(() => {
     const lucratividadeMetrics = metrics.filter(m => m.category === "lucratividade");
-    const organized = organizeMetricsBySubcategory(lucratividadeMetrics, "lucratividade");
+    const organized = organizeMetricsBySubcategory(lucratividadeMetrics, "lucratividade", dbSubcategories, dbAssignments);
     const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
     
     const revenueMetrics = organized
