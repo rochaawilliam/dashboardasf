@@ -227,88 +227,88 @@ export function SDRCommissionTab({
             </div>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-4">
-            {/* Reuniões commission */}
-            {(() => {
-              const pct = Math.round(reunioesPct);
-              const activeTier = SDR_TIERS.find(t => pct >= t.min);
-              return (
-                <div className="space-y-2">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">Reuniões Agendadas</span>
-                    <span className={cn("text-sm font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
-                      {pct}%
-                    </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Reuniões commission */}
+              {(() => {
+                const pct = Math.round(reunioesPct);
+                const activeTier = SDR_TIERS.find(t => pct >= t.min);
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">Reuniões Agendadas</span>
+                      <span className={cn("text-sm font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {SDR_TIERS.slice().reverse().map(tier => {
+                        const isActive = activeTier?.min === tier.min;
+                        return (
+                          <div key={tier.min} className={cn(
+                            "flex items-center justify-between text-xs px-2 py-0.5 rounded",
+                            isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
+                          )}>
+                            <span>≥ {tier.min}%</span>
+                            <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                      <span className="text-xs text-muted-foreground">Subtotal:</span>
+                      <span className={cn("text-base font-bold", reunioesCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                        R$ {formatNumber(reunioesCommission)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {SDR_TIERS.slice().reverse().map(tier => {
-                      const isActive = activeTier?.min === tier.min;
-                      return (
-                        <div key={tier.min} className={cn(
-                          "flex items-center justify-between text-xs px-2 py-0.5 rounded",
-                          isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
-                        )}>
-                          <span>≥ {tier.min}%</span>
-                          <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-xs text-muted-foreground">Subtotal:</span>
-                    <span className={cn("text-base font-bold", reunioesCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
-                      R$ {formatNumber(reunioesCommission)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
 
-            <div className="border-t border-border/50" />
-
-            {/* Propostas commission */}
-            {(() => {
-              const pct = Math.round(propostasPct);
-              const activeTier = SDR_TIERS.find(t => pct >= t.min);
-              return (
-                <div className="space-y-2">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">Propostas Elaboradas</span>
-                    <span className={cn("text-sm font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
-                      {pct}%
-                    </span>
+              {/* Propostas commission */}
+              {(() => {
+                const pct = Math.round(propostasPct);
+                const activeTier = SDR_TIERS.find(t => pct >= t.min);
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">Propostas Elaboradas</span>
+                      <span className={cn("text-sm font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {SDR_TIERS.slice().reverse().map(tier => {
+                        const isActive = activeTier?.min === tier.min;
+                        return (
+                          <div key={tier.min} className={cn(
+                            "flex items-center justify-between text-xs px-2 py-0.5 rounded",
+                            isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
+                          )}>
+                            <span>≥ {tier.min}%</span>
+                            <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                      <span className="text-xs text-muted-foreground">Subtotal:</span>
+                      <span className={cn("text-base font-bold", propostasCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                        R$ {formatNumber(propostasCommission)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {SDR_TIERS.slice().reverse().map(tier => {
-                      const isActive = activeTier?.min === tier.min;
-                      return (
-                        <div key={tier.min} className={cn(
-                          "flex items-center justify-between text-xs px-2 py-0.5 rounded",
-                          isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
-                        )}>
-                          <span>≥ {tier.min}%</span>
-                          <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-xs text-muted-foreground">Subtotal:</span>
-                    <span className={cn("text-base font-bold", propostasCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
-                      R$ {formatNumber(propostasCommission)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
-
-            <div className="border-t border-border/50" />
+                );
+              })()}
+            </div>
 
             {/* Total */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Total:</span>
-              <span className={cn("text-2xl font-bold", totalCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
-                R$ {formatNumber(totalCommission)}
-              </span>
+            <div className="border-t border-border/50 pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Total:</span>
+                <span className={cn("text-2xl font-bold", totalCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                  R$ {formatNumber(totalCommission)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
