@@ -1072,7 +1072,7 @@ const Index = () => {
                                   : null;
 
                                 return (
-                                  <DraggableCardWrapper key={metric.id} id={metric.id} isDragMode={isDragMode}>
+                                  <DraggableCardWrapper key={metric.id} id={metric.id} isDragMode={isDragMode} currentSubcategoryId={subcat.id} availableSubcategories={organizedSubcategories.map(s => ({ id: s.id, name: s.name }))} onMoveToSubcategory={(metricId, subcategoryId) => { updateAssignment.mutate({ metric_id: metricId, subcategory_id: subcategoryId, sort_order: 0 }); }}>
                                     <div
                                       data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                       className="h-full">
