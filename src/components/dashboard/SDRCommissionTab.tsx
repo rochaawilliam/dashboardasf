@@ -42,19 +42,20 @@ function getHalfCommission(percentage: number): number {
   return 0;
 }
 
-function getStatusClasses(pct: number) {
-  if (pct >= 100) return "text-success";
-  if (pct >= 80) return "text-warning";
-  return "text-destructive";
+/** Green-based status: emerald for good, amber for mid, red for low */
+function pctColor(pct: number) {
+  if (pct >= 100) return "text-emerald-400";
+  if (pct >= 80) return "text-amber-400";
+  return "text-red-400";
 }
 
 function ProgressBar({ pct }: { pct: number }) {
   return (
-    <div className="w-full bg-muted rounded-full h-2">
+    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
       <div
         className={cn(
-          "h-2 rounded-full transition-all",
-          pct >= 100 ? "bg-success" : pct >= 80 ? "bg-warning" : "bg-destructive"
+          "h-2 rounded-full transition-all duration-500",
+          pct >= 100 ? "bg-emerald-500" : pct >= 80 ? "bg-amber-500" : "bg-red-500"
         )}
         style={{ width: `${Math.min(pct, 100)}%` }}
       />
@@ -75,10 +76,10 @@ function MetricGroupCard({ title, icon, items, stripLabel }: MetricGroupCardProp
   const pct = tgt > 0 ? Math.round((ach / tgt) * 100) : 0;
 
   return (
-    <Card className="border-l-4 border-l-primary bg-card">
+    <Card className="border-l-4 border-l-emerald-500 bg-card">
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-primary/10">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10">
             {icon}
           </div>
           <CardTitle className="text-sm font-semibold">{title}</CardTitle>
@@ -90,18 +91,21 @@ function MetricGroupCard({ title, icon, items, stripLabel }: MetricGroupCardProp
             <span className="text-xl font-bold text-foreground">{formatNumber(ach)}</span>
             <span className="text-xs text-muted-foreground ml-1">/ {formatNumber(tgt)}</span>
           </div>
-          <span className={cn("text-lg font-bold", getStatusClasses(pct))}>
+          <span className={cn("text-lg font-bold", pctColor(pct))}>
             {pct}%
           </span>
         </div>
         <ProgressBar pct={pct} />
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {items.map(item => {
             const iPct = item.target > 0 ? Math.round((item.achieved / item.target) * 100) : 0;
             return (
-              <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1 rounded text-muted-foreground">
-                <span className="truncate mr-2">{item.name.replace(stripLabel, "")}</span>
-                <span className="shrink-0">{formatNumber(item.achieved)} / {formatNumber(item.target)} ({iPct}%)</span>
+              <div key={item.name} className="flex items-center justify-between text-xs px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors">
+                <span className="truncate mr-2 text-foreground/70">{item.name.replace(stripLabel, "")}</span>
+                <div className="shrink-0 flex items-center gap-1.5">
+                  <span className="text-muted-foreground">{formatNumber(item.achieved)}/{formatNumber(item.target)}</span>
+                  <span className={cn("font-medium min-w-[32px] text-right", pctColor(iPct))}>{iPct}%</span>
+                </div>
               </div>
             );
           })}
@@ -125,19 +129,19 @@ function CommissionColumn({ title, pct, commission }: CommissionColumnProps) {
     <div className="space-y-2">
       <div className="flex items-baseline justify-between">
         <span className="text-xs font-semibold text-foreground">{title}</span>
-        <span className={cn("text-sm font-bold", getStatusClasses(rounded))}>
+        <span className={cn("text-sm font-bold", pctColor(rounded))}>
           {rounded}%
         </span>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {SDR_TIERS.slice().reverse().map(tier => {
           const isActive = activeTier?.min === tier.min;
           return (
             <div key={tier.min} className={cn(
-              "flex items-center justify-between text-xs px-2 py-0.5 rounded transition-colors",
+              "flex items-center justify-between text-xs px-2.5 py-1 rounded-md transition-colors",
               isActive
-                ? "bg-primary/15 text-primary font-semibold"
-                : "text-muted-foreground"
+                ? "bg-emerald-500/15 text-emerald-300 font-semibold ring-1 ring-emerald-500/30"
+                : "text-muted-foreground hover:bg-muted/30"
             )}>
               <span>≥ {tier.min}%</span>
               <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
@@ -145,9 +149,9 @@ function CommissionColumn({ title, pct, commission }: CommissionColumnProps) {
           );
         })}
       </div>
-      <div className="flex items-center justify-between pt-1 border-t border-border">
+      <div className="flex items-center justify-between pt-2 border-t border-border">
         <span className="text-xs text-muted-foreground">Subtotal:</span>
-        <span className={cn("text-base font-bold", commission > 0 ? "text-primary" : "text-muted-foreground")}>
+        <span className={cn("text-base font-bold", commission > 0 ? "text-emerald-400" : "text-muted-foreground")}>
           R$ {formatNumber(commission)}
         </span>
       </div>
@@ -221,8 +225,8 @@ export function SDRCommissionTab({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-xl bg-primary/10">
-          <Target className="h-5 w-5 text-primary" />
+        <div className="p-2 rounded-xl bg-emerald-500/10">
+          <Target className="h-5 w-5 text-emerald-400" />
         </div>
         <div>
           <h2 className="text-base sm:text-lg font-bold text-foreground">Salário Variável - SDR</h2>
@@ -234,47 +238,49 @@ export function SDRCommissionTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <MetricGroupCard
           title="Reuniões Agendadas"
-          icon={<CalendarCheck className="h-4 w-4 text-primary" />}
+          icon={<CalendarCheck className="h-4 w-4 text-emerald-400" />}
           items={reunioesItems}
           stripLabel="Reuniões agendadas "
         />
         <MetricGroupCard
           title="Propostas Elaboradas"
-          icon={<FileText className="h-4 w-4 text-primary" />}
+          icon={<FileText className="h-4 w-4 text-emerald-400" />}
           items={propostasItems}
           stripLabel="Propostas elaboradas "
         />
       </div>
 
       {/* Comissão Card */}
-      <Card className="border-l-4 border-l-primary bg-card">
+      <Card className="border-l-4 border-l-emerald-500 bg-card">
         <CardHeader className="pb-2 pt-4 px-4">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <Trophy className="h-4 w-4 text-primary" />
+            <div className="p-1.5 rounded-lg bg-emerald-500/10">
+              <Trophy className="h-4 w-4 text-emerald-400" />
             </div>
             <CardTitle className="text-sm font-semibold">Comissão</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="px-4 pb-4 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:divide-x sm:divide-border">
             <CommissionColumn
               title="Reuniões Agendadas"
               pct={reunioesPct}
               commission={reunioesCommission}
             />
-            <CommissionColumn
-              title="Propostas Elaboradas"
-              pct={propostasPct}
-              commission={propostasCommission}
-            />
+            <div className="sm:pl-4">
+              <CommissionColumn
+                title="Propostas Elaboradas"
+                pct={propostasPct}
+                commission={propostasCommission}
+              />
+            </div>
           </div>
 
           {/* Total */}
           <div className="border-t border-border pt-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-foreground">Total:</span>
-              <span className={cn("text-2xl font-bold", totalCommission > 0 ? "text-primary" : "text-muted-foreground")}>
+              <span className={cn("text-2xl font-bold", totalCommission > 0 ? "text-emerald-400" : "text-muted-foreground")}>
                 R$ {formatNumber(totalCommission)}
               </span>
             </div>
