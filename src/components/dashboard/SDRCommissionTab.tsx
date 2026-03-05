@@ -14,7 +14,7 @@ interface SDRCommissionTabProps {
   accumulatedValues: Record<string, number>;
 }
 
-const TOTAL_COMMISSION = 650;
+const HALF_COMMISSION = 325;
 
 const SDR_TIERS = [
   { min: 100, label: "100%", pct: 1.0 },
@@ -34,10 +34,10 @@ const PROPOSTAS_TRIB = "7f937d5a-6502-4fdd-810d-11fc4413d864";
 
 const SDR_METRIC_IDS = [REUNIOES_EMP, REUNIOES_TRAB, REUNIOES_TRIB, PROPOSTAS_EMP, PROPOSTAS_TRAB, PROPOSTAS_TRIB];
 
-function getSDRCommission(percentage: number): number {
+function getHalfCommission(percentage: number): number {
   const rounded = Math.round(percentage);
   for (const tier of SDR_TIERS) {
-    if (rounded >= tier.min) return Math.round(TOTAL_COMMISSION * tier.pct);
+    if (rounded >= tier.min) return Math.round(HALF_COMMISSION * tier.pct);
   }
   return 0;
 }
@@ -91,10 +91,21 @@ export function SDRCommissionTab({
     return { achieved, target, breakdown };
   }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
 
-  const rawPercentage = data.target > 0 ? (data.achieved / data.target) * 100 : 0;
-  const percentage = Math.round(rawPercentage);
-  const commission = getSDRCommission(rawPercentage);
-  const activeTier = SDR_TIERS.find(t => percentage >= t.min);
+  // Compute per-group percentages and commissions
+  const reunioesItems = data.breakdown.filter(i => i.name.startsWith("Reuniões"));
+  const propostasItems = data.breakdown.filter(i => i.name.startsWith("Propostas"));
+
+  const reunioesAch = reunioesItems.reduce((s, i) => s + i.achieved, 0);
+  const reunioesTgt = reunioesItems.reduce((s, i) => s + i.target, 0);
+  const reunioesPct = reunioesTgt > 0 ? (reunioesAch / reunioesTgt) * 100 : 0;
+  const reunioesCommission = getHalfCommission(reunioesPct);
+
+  const propostasAch = propostasItems.reduce((s, i) => s + i.achieved, 0);
+  const propostasTgt = propostasItems.reduce((s, i) => s + i.target, 0);
+  const propostasPct = propostasTgt > 0 ? (propostasAch / propostasTgt) * 100 : 0;
+  const propostasCommission = getHalfCommission(propostasPct);
+
+  const totalCommission = reunioesCommission + propostasCommission;
 
   const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
   const periodLabel = selectedMonth !== null ? monthNames[selectedMonth - 1] : `Acumulado ${selectedYear}`;
@@ -215,42 +226,89 @@ export function SDRCommissionTab({
               <CardTitle className="text-sm font-semibold">Comissão</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-4 pb-4 space-y-3">
-            {/* Overall progress */}
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs text-muted-foreground">Atingimento geral</span>
-              <span className={cn("text-lg font-bold", percentage >= 100 ? "text-green-400" : percentage >= 80 ? "text-yellow-400" : "text-red-400")}>
-                {percentage}%
-              </span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div className="h-2 rounded-full bg-green-500 transition-all" style={{ width: `${Math.min(percentage, 100)}%` }} />
-            </div>
-
-            {/* Commission tiers */}
-            <div className="space-y-1">
-              {SDR_TIERS.slice().reverse().map(tier => {
-                const isActive = activeTier?.min === tier.min;
-                return (
-                  <div key={tier.min} className={cn(
-                    "flex items-center justify-between text-xs px-2 py-1 rounded",
-                    isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
-                  )}>
-                    <span>≥ {tier.min}%</span>
-                    <span>R$ {formatNumber(Math.round(TOTAL_COMMISSION * tier.pct))}</span>
+          <CardContent className="px-4 pb-4 space-y-4">
+            {/* Reuniões commission */}
+            {(() => {
+              const pct = Math.round(reunioesPct);
+              const activeTier = SDR_TIERS.find(t => pct >= t.min);
+              return (
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">Reuniões Agendadas</span>
+                    <span className={cn("text-sm font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
+                      {pct}%
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="space-y-1">
+                    {SDR_TIERS.slice().reverse().map(tier => {
+                      const isActive = activeTier?.min === tier.min;
+                      return (
+                        <div key={tier.min} className={cn(
+                          "flex items-center justify-between text-xs px-2 py-0.5 rounded",
+                          isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
+                        )}>
+                          <span>≥ {tier.min}%</span>
+                          <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-muted-foreground">Subtotal:</span>
+                    <span className={cn("text-base font-bold", reunioesCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                      R$ {formatNumber(reunioesCommission)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
-            {/* Commission result */}
-            <div className="pt-2 border-t border-border/50">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">Total:</span>
-                <span className={cn("text-2xl font-bold", commission > 0 ? "text-green-400" : "text-muted-foreground")}>
-                  R$ {formatNumber(commission)}
-                </span>
-              </div>
+            <div className="border-t border-border/50" />
+
+            {/* Propostas commission */}
+            {(() => {
+              const pct = Math.round(propostasPct);
+              const activeTier = SDR_TIERS.find(t => pct >= t.min);
+              return (
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">Propostas Elaboradas</span>
+                    <span className={cn("text-sm font-bold", pct >= 100 ? "text-green-400" : pct >= 80 ? "text-yellow-400" : "text-red-400")}>
+                      {pct}%
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {SDR_TIERS.slice().reverse().map(tier => {
+                      const isActive = activeTier?.min === tier.min;
+                      return (
+                        <div key={tier.min} className={cn(
+                          "flex items-center justify-between text-xs px-2 py-0.5 rounded",
+                          isActive ? "bg-green-500/20 text-green-300 font-semibold" : "text-muted-foreground"
+                        )}>
+                          <span>≥ {tier.min}%</span>
+                          <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-muted-foreground">Subtotal:</span>
+                    <span className={cn("text-base font-bold", propostasCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                      R$ {formatNumber(propostasCommission)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="border-t border-border/50" />
+
+            {/* Total */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">Total:</span>
+              <span className={cn("text-2xl font-bold", totalCommission > 0 ? "text-green-400" : "text-muted-foreground")}>
+                R$ {formatNumber(totalCommission)}
+              </span>
             </div>
           </CardContent>
         </Card>
