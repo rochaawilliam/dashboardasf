@@ -46,11 +46,11 @@ export function DashboardHeader({
         <img 
           src={asfLogo} 
           alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
-          className="h-9 sm:h-[52px] md:h-14 w-auto"
+          className="h-11 sm:h-[60px] md:h-[60px] w-auto"
         />
-        <div className="h-8 sm:h-10 w-px bg-border/50 hidden sm:block" />
+        <div className="h-10 sm:h-12 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-base sm:text-xl md:text-2xl font-semibold text-foreground tracking-wide sm:truncate leading-tight">
+          <h1 className="text-lg sm:text-2xl md:text-[28px] font-semibold text-foreground tracking-wide sm:truncate leading-tight">
             Dashboard Executivo Geral
           </h1>
           <p className="text-muted-foreground text-[9px] sm:text-xs uppercase tracking-wider mt-0.5 leading-tight">
