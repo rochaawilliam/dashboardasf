@@ -16,8 +16,8 @@ const tourSteps: DriveStep[] = [
   {
     element: "[data-tour='header']",
     popover: {
-      title: "🎯 Dashboard de Metas",
-      description: "Bem-vindo ao Dashboard de Metas da ASF! Aqui você acompanha todos os indicadores de desempenho do setor de Crescimento.",
+      title: "🎯 Dashboard Executivo Geral",
+      description: "Bem-vindo ao Dashboard Executivo Geral da ASF! Aqui você acompanha todos os indicadores de desempenho do setor de Crescimento.",
       side: "bottom",
       align: "center",
     },
