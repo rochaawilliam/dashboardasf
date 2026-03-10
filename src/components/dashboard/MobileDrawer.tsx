@@ -66,7 +66,7 @@ export function MobileDrawer({ activeTab, onTabChange, categoryMetricsCounts }: 
               className="h-8 w-auto"
             />
             <div>
-              <SheetTitle className="text-base text-left">Dashboard de Metas</SheetTitle>
+              <SheetTitle className="text-base text-left">Dashboard Executivo Geral</SheetTitle>
               <p className="text-xs text-muted-foreground">Navegação</p>
             </div>
           </div>

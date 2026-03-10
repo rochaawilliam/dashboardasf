@@ -51,7 +51,7 @@ export function DashboardHeader({
         <div className="h-6 sm:h-8 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
           <h1 className="text-sm sm:text-lg md:text-xl font-semibold text-foreground tracking-wide sm:truncate leading-tight">
-            Dashboard de Metas
+            Dashboard Executivo Geral
           </h1>
           <p className="text-muted-foreground text-[8px] sm:text-[11px] uppercase tracking-wider mt-0.5 leading-tight">
             Setor de Crescimento • Comercial & Marketing
