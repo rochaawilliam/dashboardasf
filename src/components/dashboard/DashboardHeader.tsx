@@ -39,7 +39,7 @@ export function DashboardHeader({
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "";
 
   return (
-    <header className="mb-3 sm:mb-5 pb-3 sm:pb-5 border-b border-border/30">
+    <header className="mt-2 sm:mt-3 mb-3 sm:mb-5 pb-3 sm:pb-5 border-b border-border/30">
       <div className="flex items-center gap-2 sm:gap-4">
         {mobileDrawer}
         
