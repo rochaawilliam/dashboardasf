@@ -50,7 +50,7 @@ export function DashboardHeader({
         />
         <div className="h-10 sm:h-12 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg sm:text-2xl md:text-[28px] font-semibold text-foreground tracking-wide sm:truncate leading-tight">
+          <h1 className="text-lg sm:text-2xl md:text-[28px] font-semibold text-foreground tracking-tight sm:truncate leading-tight">
             Dashboard Executivo Geral
           </h1>
           <p className="text-muted-foreground text-[9px] sm:text-xs uppercase tracking-wider mt-0.5 leading-tight">
