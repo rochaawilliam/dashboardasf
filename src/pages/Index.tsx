@@ -385,13 +385,13 @@ const Index = () => {
 
     // All "Novos Contratos" metric IDs (excluding the origin cards themselves)
     const novosContratosIds = new Set([
-      CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
-      CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-      CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
-      "4c298090-3652-442c-a69d-970ff23781eb", // Novos Contratos Patenteia
+    CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
+    CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
+    "4c298090-3652-442c-a69d-970ff23781eb" // Novos Contratos Patenteia
     ]);
 
-    let onlineMonthly = 0, offlineMonthly = 0, onlineAcc = 0, offlineAcc = 0;
+    let onlineMonthly = 0,offlineMonthly = 0,onlineAcc = 0,offlineAcc = 0;
     historyData.forEach((h: any) => {
       if (!novosContratosIds.has(h.metric_id)) return;
       const ref = getRefMonthYear(h.period_type, h.recorded_at);
@@ -411,10 +411,10 @@ const Index = () => {
   const originTargets = useMemo(() => {
     if (!monthlyTargets) return { online: 0, offline: 0 };
     const novosContratosIds = [
-      CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
-      CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-      CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
-      "4c298090-3652-442c-a69d-970ff23781eb", // Patenteia
+    CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
+    CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
+    "4c298090-3652-442c-a69d-970ff23781eb" // Patenteia
     ];
     const month = selectedMonth ?? new Date().getMonth() + 1;
     const year = selectedYear;
@@ -424,7 +424,7 @@ const Index = () => {
     }, 0);
     return {
       online: Math.round(totalMonthlyTarget * 0.3 * 100) / 100,
-      offline: Math.round(totalMonthlyTarget * 0.7 * 100) / 100,
+      offline: Math.round(totalMonthlyTarget * 0.7 * 100) / 100
     };
   }, [monthlyTargets, selectedMonth, selectedYear]);
 
@@ -666,7 +666,7 @@ const Index = () => {
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
-                <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 px-1 gap-0.5 -mx-px">
+                <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0">
                   {/* Secret Commission Tab */}
                   {isCommissionUser &&
                 <button
@@ -753,7 +753,7 @@ const Index = () => {
                 const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category, dbSubcategories, dbAssignments);
 
                 return (
-                  <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2.5 sm:p-3 animate-fade-in">
+                  <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
                       {!canAccess ?
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                           <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
@@ -768,34 +768,34 @@ const Index = () => {
                     <>
                           <div className="flex items-center justify-between">
                             <SectionHeader
-                              title={config.title}
-                              subtitle={config.subtitle}
-                              icon={config.icon}
-                              variant={config.variant} />
-                            {isAdmin && (
-                              <div className="flex items-center gap-1.5 mb-2">
+                          title={config.title}
+                          subtitle={config.subtitle}
+                          icon={config.icon}
+                          variant={config.variant} />
+                            {isAdmin &&
+                        <div className="flex items-center gap-1.5 mb-2">
                                 <Button
-                                  variant={isDragMode ? "default" : "outline"}
-                                  size="sm"
-                                  className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
-                                  onClick={() => setIsDragMode(!isDragMode)}
-                                  title={isDragMode ? "Concluir organização" : "Organizar cards"}
-                                >
+                            variant={isDragMode ? "default" : "outline"}
+                            size="sm"
+                            className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
+                            onClick={() => setIsDragMode(!isDragMode)}
+                            title={isDragMode ? "Concluir organização" : "Organizar cards"}>
+                            
                                   <Move className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                   <span className="hidden sm:inline">{isDragMode ? "Concluir" : "Organizar"}</span>
                                 </Button>
                                 <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
-                                  onClick={() => setShowSubcatManager(true)}
-                                  title="Gerenciar subcategorias"
-                                >
+                            variant="outline"
+                            size="sm"
+                            className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
+                            onClick={() => setShowSubcatManager(true)}
+                            title="Gerenciar subcategorias">
+                            
                                   <Settings2 className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                   <span className="hidden sm:inline">Subcategorias</span>
                                 </Button>
                               </div>
-                            )}
+                        }
                           </div>
 
                       
@@ -843,256 +843,256 @@ const Index = () => {
                             defaultCollapsed={false}>
 
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event: DragEndEvent) => {
-                                  if (!event.over || event.active.id === event.over.id) return;
-                                  // Find the target subcategory for the dropped card
-                                  const metricId = event.active.id as string;
-                                  // Determine new sort order based on position
-                                  const overMetricId = event.over.id as string;
-                                  const overIndex = displayMetrics.findIndex((m) => m.id === overMetricId);
-                                  updateAssignment.mutate({
-                                    metric_id: metricId,
-                                    subcategory_id: subcat.id,
-                                    sort_order: overIndex >= 0 ? overIndex : 0,
-                                  });
-                                }}>
+                              if (!event.over || event.active.id === event.over.id) return;
+                              // Find the target subcategory for the dropped card
+                              const metricId = event.active.id as string;
+                              // Determine new sort order based on position
+                              const overMetricId = event.over.id as string;
+                              const overIndex = displayMetrics.findIndex((m) => m.id === overMetricId);
+                              updateAssignment.mutate({
+                                metric_id: metricId,
+                                subcategory_id: subcat.id,
+                                sort_order: overIndex >= 0 ? overIndex : 0
+                              });
+                            }}>
                                 <SortableContext items={displayMetrics.map((m) => m.id)} strategy={rectSortingStrategy}>
                                 <div className="dashboard-grid px-0">
                                   {displayMetrics.map((metric, metricIndex) => {
-                                const isAutoSum = isReceitaTotal && metric.name.includes("Receita Total");
-                                const computedMonthly = (metric as any)._computedMonthly;
-                                const computedAccumulated = (metric as any)._computedAccumulated;
+                                    const isAutoSum = isReceitaTotal && metric.name.includes("Receita Total");
+                                    const computedMonthly = (metric as any)._computedMonthly;
+                                    const computedAccumulated = (metric as any)._computedAccumulated;
 
-                                // "Mês anterior" cards are read-only computed cards
-                                const isMesAnterior = metric.id === CONTRATOS_EMP_MES_ANT_ID || metric.id === CONTRATOS_TRAB_MES_ANT_ID;
+                                    // "Mês anterior" cards are read-only computed cards
+                                    const isMesAnterior = metric.id === CONTRATOS_EMP_MES_ANT_ID || metric.id === CONTRATOS_TRAB_MES_ANT_ID;
 
-                                let dynamicMetric = metric;
-                                const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
+                                    let dynamicMetric = metric;
+                                    const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
 
-                                // Novos Contratos Assessoria: use DB monthly_targets (no override needed)
+                                    // Novos Contratos Assessoria: use DB monthly_targets (no override needed)
 
-                                // Dynamic target for "Mês Anterior": Jan=sem meta(0), Feb+=base+increment
-                                if (metric.id === CONTRATOS_EMP_MES_ANT_ID) {
-                                  const mesAnteriorTarget = currentMonth >= 2 ? 20 + (currentMonth - 1) : 0;
-                                  dynamicMetric = { ...dynamicMetric, target_value: mesAnteriorTarget };
-                                } else if (metric.id === CONTRATOS_TRAB_MES_ANT_ID) {
-                                  const mesAnteriorTarget = currentMonth >= 2 ? 14 + (currentMonth - 1) : 0;
-                                  dynamicMetric = { ...dynamicMetric, target_value: mesAnteriorTarget };
-                                }
+                                    // Dynamic target for "Mês Anterior": Jan=sem meta(0), Feb+=base+increment
+                                    if (metric.id === CONTRATOS_EMP_MES_ANT_ID) {
+                                      const mesAnteriorTarget = currentMonth >= 2 ? 20 + (currentMonth - 1) : 0;
+                                      dynamicMetric = { ...dynamicMetric, target_value: mesAnteriorTarget };
+                                    } else if (metric.id === CONTRATOS_TRAB_MES_ANT_ID) {
+                                      const mesAnteriorTarget = currentMonth >= 2 ? 14 + (currentMonth - 1) : 0;
+                                      dynamicMetric = { ...dynamicMetric, target_value: mesAnteriorTarget };
+                                    }
 
-                                // Compute "Total Contratos Assessoria" = Mês Anterior + Novos Contratos Assessoria
-                                const isTotalAssessoria = metric.id === TOTAL_EMP_ASSESSORIA_ID || metric.id === TOTAL_TRAB_ASSESSORIA_ID;
-                                if (metric.id === TOTAL_EMP_ASSESSORIA_ID) {
-                                  const novosEmp = monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0;
-                                  const totalEmp = prevMonthContractValues.empresarial + novosEmp;
-                                  dynamicMetric = { ...metric, current_value: totalEmp };
-                                } else if (metric.id === TOTAL_TRAB_ASSESSORIA_ID) {
-                                  const novosTrab = monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0;
-                                  const totalTrab = prevMonthContractValues.trabalhista + novosTrab;
-                                  dynamicMetric = { ...metric, current_value: totalTrab };
-                                }
+                                    // Compute "Total Contratos Assessoria" = Mês Anterior + Novos Contratos Assessoria
+                                    const isTotalAssessoria = metric.id === TOTAL_EMP_ASSESSORIA_ID || metric.id === TOTAL_TRAB_ASSESSORIA_ID;
+                                    if (metric.id === TOTAL_EMP_ASSESSORIA_ID) {
+                                      const novosEmp = monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0;
+                                      const totalEmp = prevMonthContractValues.empresarial + novosEmp;
+                                      dynamicMetric = { ...metric, current_value: totalEmp };
+                                    } else if (metric.id === TOTAL_TRAB_ASSESSORIA_ID) {
+                                      const novosTrab = monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0;
+                                      const totalTrab = prevMonthContractValues.trabalhista + novosTrab;
+                                      dynamicMetric = { ...metric, current_value: totalTrab };
+                                    }
 
-                                // Compute "Total de Contratos" = Total Emp Assessoria + Trib Assessoria + Trib Pontual + Total Trab Assessoria
-                                const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
-                                if (isTotalContratos) {
-                                  const totalEmpAss = prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
-                                  const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
-                                  const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
-                                  const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
-                                  const totalTrabAss = prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
-                                  const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
-                                  const totalContratos = totalEmpAss + empConsult + tribAss + tribPont + totalTrabAss + trabConsult;
-                                  dynamicMetric = { ...dynamicMetric, current_value: totalContratos };
-                                }
+                                    // Compute "Total de Contratos" = Total Emp Assessoria + Trib Assessoria + Trib Pontual + Total Trab Assessoria
+                                    const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
+                                    if (isTotalContratos) {
+                                      const totalEmpAss = prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0);
+                                      const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
+                                      const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
+                                      const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
+                                      const totalTrabAss = prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0);
+                                      const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
+                                      const totalContratos = totalEmpAss + empConsult + tribAss + tribPont + totalTrabAss + trabConsult;
+                                      dynamicMetric = { ...dynamicMetric, current_value: totalContratos };
+                                    }
 
-                                // For "mês anterior", show value regardless of month selection
-                                const mesAnteriorMonthly = isMesAnterior ?
-                                metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista :
-                                null;
+                                    // For "mês anterior", show value regardless of month selection
+                                    const mesAnteriorMonthly = isMesAnterior ?
+                                    metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista :
+                                    null;
 
-                                // For total assessoria, show computed value
-                                const totalAssessoriaMonthly = isTotalAssessoria ?
-                                metric.id === TOTAL_EMP_ASSESSORIA_ID ?
-                                prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0) :
-                                prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0) :
-                                null;
+                                    // For total assessoria, show computed value
+                                    const totalAssessoriaMonthly = isTotalAssessoria ?
+                                    metric.id === TOTAL_EMP_ASSESSORIA_ID ?
+                                    prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0) :
+                                    prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0) :
+                                    null;
 
-                                // For "Total de Contratos", compute monthly value
-                                const totalContratosMonthly = isTotalContratos ?
-                                prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0) + (
-                                monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0) + (
-                                monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0) + (
-                                monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0) + (
-                                prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0)) + (
-                                monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0) :
-                                null;
+                                    // For "Total de Contratos", compute monthly value
+                                    const totalContratosMonthly = isTotalContratos ?
+                                    prevMonthContractValues.empresarial + (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0) + (
+                                    monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0) + (
+                                    monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0) + (
+                                    monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0) + (
+                                    prevMonthContractValues.trabalhista + (monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0)) + (
+                                    monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0) :
+                                    null;
 
-                                // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
-                                const isMRR = metric.id === MRR_METRIC_ID;
-                                let mrrMonthlyValue: number | null = null;
-                                let mrrAccumulatedValue = 0;
-                                if (isMRR) {
-                                  // Get all revenue metrics from subcategories for Receita Total denominator
-                                  const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
-                                  const allRevenueMetrics = organizedSubcategories.
-                                  filter((s) => revenueSubcatNames.includes(s.name)).
-                                  flatMap((s) => s.metrics);
+                                    // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
+                                    const isMRR = metric.id === MRR_METRIC_ID;
+                                    let mrrMonthlyValue: number | null = null;
+                                    let mrrAccumulatedValue = 0;
+                                    if (isMRR) {
+                                      // Get all revenue metrics from subcategories for Receita Total denominator
+                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                      const allRevenueMetrics = organizedSubcategories.
+                                      filter((s) => revenueSubcatNames.includes(s.name)).
+                                      flatMap((s) => s.metrics);
 
-                                  if (selectedMonth !== null) {
-                                    const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                    const receitaTotal = allRevenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                                    mrrMonthlyValue = receitaTotal > 0 ? assessoriaSum / receitaTotal * 100 : 0;
-                                  }
-                                  // Accumulated: weighted average across months with data
-                                  const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                  const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                  mrrAccumulatedValue = receitaTotalAccum > 0 ? assessoriaAccum / receitaTotalAccum * 100 : 0;
+                                      if (selectedMonth !== null) {
+                                        const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                        const receitaTotal = allRevenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
+                                        mrrMonthlyValue = receitaTotal > 0 ? assessoriaSum / receitaTotal * 100 : 0;
+                                      }
+                                      // Accumulated: weighted average across months with data
+                                      const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                      const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                      mrrAccumulatedValue = receitaTotalAccum > 0 ? assessoriaAccum / receitaTotalAccum * 100 : 0;
 
-                                  dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
-                                }
+                                      dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
+                                    }
 
-                                // Compute ARR % Anual = same as accumulated MRR % (weighted avg across year)
-                                const isARR = metric.id === ARR_METRIC_ID;
-                                let arrMonthlyValue: number | null = null;
-                                let arrAccumulatedValue = 0;
-                                if (isARR) {
-                                  // Busca dinâmica da meta anual de Receita Total do banco
-                                  const receitaTotalMetric = metrics?.find((m) => m.id === "b94952b3-b811-4200-872e-810b215240f6");
-                                  const receitaAnualTotal = receitaTotalMetric?.target_value || 2218000;
+                                    // Compute ARR % Anual = same as accumulated MRR % (weighted avg across year)
+                                    const isARR = metric.id === ARR_METRIC_ID;
+                                    let arrMonthlyValue: number | null = null;
+                                    let arrAccumulatedValue = 0;
+                                    if (isARR) {
+                                      // Busca dinâmica da meta anual de Receita Total do banco
+                                      const receitaTotalMetric = metrics?.find((m) => m.id === "b94952b3-b811-4200-872e-810b215240f6");
+                                      const receitaAnualTotal = receitaTotalMetric?.target_value || 2218000;
 
-                                  // ARR % = soma acumulada das assessorias / receita anual total * 100
-                                  const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                  arrAccumulatedValue = receitaAnualTotal > 0 ? assessoriaAccum / receitaAnualTotal * 100 : 0;
+                                      // ARR % = soma acumulada das assessorias / receita anual total * 100
+                                      const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                      arrAccumulatedValue = receitaAnualTotal > 0 ? assessoriaAccum / receitaAnualTotal * 100 : 0;
 
-                                  // When a month is selected, show accumulated up to that month
-                                  arrMonthlyValue = arrAccumulatedValue;
-                                  dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
-                                }
+                                      // When a month is selected, show accumulated up to that month
+                                      arrMonthlyValue = arrAccumulatedValue;
+                                      dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
+                                    }
 
-                                const isOriginCard = metric.id === CONTRATOS_ONLINE_ID || metric.id === CONTRATOS_OFFLINE_ID;
-                                const originMonthly = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.monthly : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.monthly : null;
-                                const originAccumulated = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.accumulated : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.accumulated : 0;
+                                    const isOriginCard = metric.id === CONTRATOS_ONLINE_ID || metric.id === CONTRATOS_OFFLINE_ID;
+                                    const originMonthly = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.monthly : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.monthly : null;
+                                    const originAccumulated = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.accumulated : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.accumulated : 0;
 
-                                // Compute Resultado Acumulado ASF and Eficiência de Receita ASF
-                                const isResultadoAcumulado = metric.id === RESULTADO_ACUMULADO_ID;
-                                const isEficienciaReceita = metric.id === EFICIENCIA_RECEITA_ID;
-                                let resultadoAcumuladoValue = 0;
-                                let eficienciaReceitaValue = 0;
-                                let eficienciaProjecao = 0;
+                                    // Compute Resultado Acumulado ASF and Eficiência de Receita ASF
+                                    const isResultadoAcumulado = metric.id === RESULTADO_ACUMULADO_ID;
+                                    const isEficienciaReceita = metric.id === EFICIENCIA_RECEITA_ID;
+                                    let resultadoAcumuladoValue = 0;
+                                    let eficienciaReceitaValue = 0;
+                                    let eficienciaProjecao = 0;
 
-                                if (isResultadoAcumulado || isEficienciaReceita) {
-                                  // Get all revenue metrics for computing totals
-                                  const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
-                                  const allRevenueMetrics = organizedSubcategories
-                                    .filter((s) => revenueSubcatNames.includes(s.name))
-                                    .flatMap((s) => s.metrics);
+                                    if (isResultadoAcumulado || isEficienciaReceita) {
+                                      // Get all revenue metrics for computing totals
+                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                      const allRevenueMetrics = organizedSubcategories.
+                                      filter((s) => revenueSubcatNames.includes(s.name)).
+                                      flatMap((s) => s.metrics);
 
-                                  const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
+                                      const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
 
-                                  // For each completed month, compute (realizado - meta)
-                                  for (let mo = 1; mo < currentMonthRef; mo++) {
-                                    let monthRealizado = 0;
-                                    let monthMeta = 0;
-                                    allRevenueMetrics.forEach((rm) => {
-                                      // Get realized for this month
-                                      historyData?.forEach((h: any) => {
-                                        const ref = getRefMonthYear(h.period_type, h.recorded_at);
-                                        if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
-                                          monthRealizado += h.value;
-                                        }
-                                      });
-                                      // Get target for this month
-                                      const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
-                                      monthMeta += mt?.target_value ?? 0;
-                                    });
-                                    resultadoAcumuladoValue += (monthRealizado - monthMeta);
-                                  }
+                                      // For each completed month, compute (realizado - meta)
+                                      for (let mo = 1; mo < currentMonthRef; mo++) {
+                                        let monthRealizado = 0;
+                                        let monthMeta = 0;
+                                        allRevenueMetrics.forEach((rm) => {
+                                          // Get realized for this month
+                                          historyData?.forEach((h: any) => {
+                                            const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                            if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
+                                              monthRealizado += h.value;
+                                            }
+                                          });
+                                          // Get target for this month
+                                          const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
+                                          monthMeta += mt?.target_value ?? 0;
+                                        });
+                                        resultadoAcumuladoValue += monthRealizado - monthMeta;
+                                      }
 
-                                  // Eficiência de Receita = receita acumulada / meta anual * 100
-                                  const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_ANUAL_ID);
-                                  const metaAnual = receitaTotalMetric?.target_value || 2218000;
-                                  const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                  eficienciaReceitaValue = metaAnual > 0 ? (receitaAcumulada / metaAnual) * 100 : 0;
+                                      // Eficiência de Receita = receita acumulada / meta anual * 100
+                                      const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_ANUAL_ID);
+                                      const metaAnual = receitaTotalMetric?.target_value || 2218000;
+                                      const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                      eficienciaReceitaValue = metaAnual > 0 ? receitaAcumulada / metaAnual * 100 : 0;
 
-                                  // Projeção: se em X meses geramos Y, em 12 meses geramos Y * 12/X
-                                  const monthsElapsed = currentMonthRef - 1 + (selectedMonth !== null ? 1 : 0);
-                                  eficienciaProjecao = monthsElapsed > 0 ? (receitaAcumulada / monthsElapsed) * 12 : 0;
+                                      // Projeção: se em X meses geramos Y, em 12 meses geramos Y * 12/X
+                                      const monthsElapsed = currentMonthRef - 1 + (selectedMonth !== null ? 1 : 0);
+                                      eficienciaProjecao = monthsElapsed > 0 ? receitaAcumulada / monthsElapsed * 12 : 0;
 
-                                  if (isResultadoAcumulado) {
-                                    const pctAcumulado = metaAnual > 0 ? (resultadoAcumuladoValue / metaAnual) * 100 : 0;
-                                    const sign = pctAcumulado >= 0 ? "+" : "";
-                                    dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0, description: `Meta anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(metaAnual)} | ${sign}${pctAcumulado.toFixed(1)}% da meta` };
-                                  }
-                                  if (isEficienciaReceita) {
-                                    dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
-                                  }
-                                }
+                                      if (isResultadoAcumulado) {
+                                        const pctAcumulado = metaAnual > 0 ? resultadoAcumuladoValue / metaAnual * 100 : 0;
+                                        const sign = pctAcumulado >= 0 ? "+" : "";
+                                        dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0, description: `Meta anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(metaAnual)} | ${sign}${pctAcumulado.toFixed(1)}% da meta` };
+                                      }
+                                      if (isEficienciaReceita) {
+                                        dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
+                                      }
+                                    }
 
-                                // Compute Receita Empresarial/Trabalhista/Tributário as sum of sub-metrics
-                                const isReceitaEmp = metric.id === RECEITA_EMP_ID;
-                                const isReceitaTrab = metric.id === RECEITA_TRAB_ID;
-                                const isReceitaTrib = metric.id === RECEITA_TRIB_ID;
-                                const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_ANUAL_ID;
-                                let revSumMonthly: number | null = null;
-                                let revSumAccumulated = 0;
+                                    // Compute Receita Empresarial/Trabalhista/Tributário as sum of sub-metrics
+                                    const isReceitaEmp = metric.id === RECEITA_EMP_ID;
+                                    const isReceitaTrab = metric.id === RECEITA_TRAB_ID;
+                                    const isReceitaTrib = metric.id === RECEITA_TRIB_ID;
+                                    const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_ANUAL_ID;
+                                    let revSumMonthly: number | null = null;
+                                    let revSumAccumulated = 0;
 
-                                const sumComponents = (ids: string[], source: Record<string, number>) =>
-                                  ids.reduce((sum, id) => sum + (source[id] ?? 0), 0);
+                                    const sumComponents = (ids: string[], source: Record<string, number>) =>
+                                    ids.reduce((sum, id) => sum + (source[id] ?? 0), 0);
 
-                                if (isReceitaEmp) {
-                                  revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_EMP_COMPONENTS, monthlyValues) : null;
-                                  revSumAccumulated = sumComponents(RECEITA_EMP_COMPONENTS, accumulatedValues);
-                                  dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
-                                } else if (isReceitaTrab) {
-                                  revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_TRAB_COMPONENTS, monthlyValues) : null;
-                                  revSumAccumulated = sumComponents(RECEITA_TRAB_COMPONENTS, accumulatedValues);
-                                  dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
-                                } else if (isReceitaTrib) {
-                                  revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_TRIB_COMPONENTS, monthlyValues) : null;
-                                  revSumAccumulated = sumComponents(RECEITA_TRIB_COMPONENTS, accumulatedValues);
-                                  dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
-                                } else if (isReceitaTotalAnual) {
-                                  // Receita Total = Receita Emp + Trab + Trib + Outras Receitas
-                                  const allRevIds = [...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID];
-                                  revSumMonthly = selectedMonth !== null ? sumComponents(allRevIds, monthlyValues) : null;
-                                  revSumAccumulated = sumComponents(allRevIds, accumulatedValues);
-                                  dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
-                                }
+                                    if (isReceitaEmp) {
+                                      revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_EMP_COMPONENTS, monthlyValues) : null;
+                                      revSumAccumulated = sumComponents(RECEITA_EMP_COMPONENTS, accumulatedValues);
+                                      dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
+                                    } else if (isReceitaTrab) {
+                                      revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_TRAB_COMPONENTS, monthlyValues) : null;
+                                      revSumAccumulated = sumComponents(RECEITA_TRAB_COMPONENTS, accumulatedValues);
+                                      dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
+                                    } else if (isReceitaTrib) {
+                                      revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_TRIB_COMPONENTS, monthlyValues) : null;
+                                      revSumAccumulated = sumComponents(RECEITA_TRIB_COMPONENTS, accumulatedValues);
+                                      dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
+                                    } else if (isReceitaTotalAnual) {
+                                      // Receita Total = Receita Emp + Trab + Trib + Outras Receitas
+                                      const allRevIds = [...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID];
+                                      revSumMonthly = selectedMonth !== null ? sumComponents(allRevIds, monthlyValues) : null;
+                                      revSumAccumulated = sumComponents(allRevIds, accumulatedValues);
+                                      dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
+                                    }
 
-                                const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
-                                const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard;
+                                    const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
+                                    const isComputedCard = isAutoSum || isMesAnterior || isTotalAssessoria || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard;
 
-                                const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                const cardMonthlyValue = isAutoSum ? computedMonthly : isMesAnterior ? mesAnteriorMonthly : isTotalAssessoria ? totalAssessoriaMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : monthlyValues[metric.id] ?? null;
-                                const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : accumulatedValues[metric.id] ?? 0;
-                                const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
+                                    const isReceitaTotalCard = metric.name.includes("Receita Total");
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isMesAnterior ? mesAnteriorMonthly : isTotalAssessoria ? totalAssessoriaMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : monthlyValues[metric.id] ?? null;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isMesAnterior ? metric.id === CONTRATOS_EMP_MES_ANT_ID ? prevMonthContractValues.empresarial : prevMonthContractValues.trabalhista : isTotalAssessoria ? totalAssessoriaMonthly ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : accumulatedValues[metric.id] ?? 0;
+                                    const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
-                                // Pre-compute monthly target for this metric
-                                const cardMonthlyTarget = selectedMonth && monthlyTargets
-                                  ? monthlyTargets.find((t) => t.metric_id === metric.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? null
-                                  : null;
+                                    // Pre-compute monthly target for this metric
+                                    const cardMonthlyTarget = selectedMonth && monthlyTargets ?
+                                    monthlyTargets.find((t) => t.metric_id === metric.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? null :
+                                    null;
 
-                                return (
-                                  <DraggableCardWrapper key={metric.id} id={metric.id} isDragMode={isDragMode} currentSubcategoryId={subcat.id} availableSubcategories={organizedSubcategories.map(s => ({ id: s.id, name: s.name }))} onMoveToSubcategory={(metricId, subcategoryId) => { updateAssignment.mutate({ metric_id: metricId, subcategory_id: subcategoryId, sort_order: 0 }); }}>
+                                    return (
+                                      <DraggableCardWrapper key={metric.id} id={metric.id} isDragMode={isDragMode} currentSubcategoryId={subcat.id} availableSubcategories={organizedSubcategories.map((s) => ({ id: s.id, name: s.name }))} onMoveToSubcategory={(metricId, subcategoryId) => {updateAssignment.mutate({ metric_id: metricId, subcategory_id: subcategoryId, sort_order: 0 });}}>
                                     <div
-                                      data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
-                                      className="h-full">
+                                          data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
+                                          className="h-full">
                                         <CircularProgressCard
-                                          metric={cardMetric}
-                                          monthlyValue={cardMonthlyValue}
-                                          isMonthSelected={selectedMonth !== null}
-                                          accumulatedValue={cardAccumulatedValue}
-                                          selectedMonthName={selectedMonthName}
-                                          historyData={historyData}
-                                          selectedYear={selectedYear}
-                                          selectedMonth={selectedMonth}
-                                          monthlyTargets={monthlyTargets}
-                                          monthlyTargetOverride={cardMonthlyTarget}
-                                          onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                          hideTarget={isMesAnterior || isResultadoAcumulado} />
+                                            metric={cardMetric}
+                                            monthlyValue={cardMonthlyValue}
+                                            isMonthSelected={selectedMonth !== null}
+                                            accumulatedValue={cardAccumulatedValue}
+                                            selectedMonthName={selectedMonthName}
+                                            historyData={historyData}
+                                            selectedYear={selectedYear}
+                                            selectedMonth={selectedMonth}
+                                            monthlyTargets={monthlyTargets}
+                                            monthlyTargetOverride={cardMonthlyTarget}
+                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
+                                            hideTarget={isMesAnterior || isResultadoAcumulado} />
                                     </div>
                                   </DraggableCardWrapper>);
 
-                              })}
+                                  })}
                                 </div>
                                 </SortableContext>
                                 </DndContext>
@@ -1124,7 +1124,7 @@ const Index = () => {
 
                 {/* Secret Commission Tab Content */}
                 {isCommissionUser && activeTab === "comissao" &&
-              <TabsContent value="comissao" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2.5 sm:p-3 animate-fade-in">
+              <TabsContent value="comissao" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
                     <CommissionTab
                   metrics={adjustedMetrics}
                   historyData={historyData}
@@ -1139,7 +1139,7 @@ const Index = () => {
 
                 {/* SDR Commission Tab Content */}
                 {isSDRUser && activeTab === "comissao_sdr" &&
-              <TabsContent value="comissao_sdr" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2.5 sm:p-3 animate-fade-in">
+              <TabsContent value="comissao_sdr" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
                     <SDRCommissionTab
                   metrics={adjustedMetrics}
                   monthlyTargets={monthlyTargets}
