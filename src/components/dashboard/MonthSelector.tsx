@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getRefMonthYear } from "@/utils/dateUtils";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // kept for potential future use
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { MetricHistory } from "@/hooks/useMetrics";
 
