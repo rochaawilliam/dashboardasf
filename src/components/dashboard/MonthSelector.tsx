@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getRefMonthYear } from "@/utils/dateUtils";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // kept for potential future use
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { MetricHistory } from "@/hooks/useMetrics";
 
@@ -129,14 +129,13 @@ export function MonthSelector({
         </div>
 
         {/* All Year + Month buttons */}
-        <ScrollArea className="flex-1">
-          <div className="flex gap-0.5 sm:gap-1" translate="no">
+        <div className="flex flex-1 gap-0.5 sm:gap-1" translate="no">
             <Button
               variant={selectedMonth === null ? "default" : "outline"}
               size="sm"
               onClick={() => onMonthChange(null)}
               className={cn(
-                "h-6 sm:h-7 text-[7px] sm:text-[10px] px-1.5 sm:px-2 shrink-0",
+                "h-6 sm:h-7 text-[7px] sm:text-[10px] px-0 flex-1 min-w-0",
                 selectedMonth === null && "bg-primary text-primary-foreground"
               )}
             >
@@ -156,7 +155,7 @@ export function MonthSelector({
                   size="sm"
                   onClick={() => onMonthChange(month.value)}
                   className={cn(
-                    "h-6 sm:h-7 text-[7px] sm:text-[10px] px-1 sm:px-1.5 shrink-0",
+                    "h-6 sm:h-7 text-[7px] sm:text-[10px] px-0 flex-1 min-w-0",
                     isSelected && "bg-primary text-primary-foreground",
                     !isSelected && hasData && "border-success/50 bg-success/10 text-success hover:bg-success/20 hover:text-success",
                     !isSelected && !hasData && isPast && "border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20",
@@ -168,8 +167,6 @@ export function MonthSelector({
               );
             })}
           </div>
-          <ScrollBar orientation="horizontal" className="h-1" />
-        </ScrollArea>
       </div>
       
       {/* Legend */}
