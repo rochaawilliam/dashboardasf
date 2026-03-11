@@ -1139,7 +1139,7 @@ const Index = () => {
 
                 {/* SDR Commission Tab Content */}
                 {isSDRUser && activeTab === "comissao_sdr" &&
-              <TabsContent value="comissao_sdr" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl rounded-tr-xl p-2.5 sm:p-3 animate-fade-in">
+              <TabsContent value="comissao_sdr" className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2.5 sm:p-3 animate-fade-in">
                     <SDRCommissionTab
                   metrics={adjustedMetrics}
                   monthlyTargets={monthlyTargets}
