@@ -231,7 +231,7 @@
   }
 
   .metric-value {
-    @apply text-base sm:text-lg lg:text-2xl font-semibold tracking-tight text-foreground;
+    @apply text-base sm:text-lg lg:text-2xl font-semibold tracking-tighter text-foreground;
     font-family: 'Roboto', sans-serif;
   }
 
