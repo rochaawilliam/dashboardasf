@@ -327,7 +327,7 @@ export function MetricCardMonthly({
                 {hasNoData ? (
                   <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
                 ) : (
-                  <div className="text-xs sm:text-base font-bold leading-none text-primary truncate">
+                  <div className="text-[10px] sm:text-sm font-bold leading-none text-primary truncate">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
@@ -340,7 +340,7 @@ export function MetricCardMonthly({
               <div className="text-right shrink-0">
                 {isMonthSelected ? (
                   <>
-                    <div className="text-[9px] sm:text-xs font-semibold text-primary">
+                     <div className="text-[8px] sm:text-[11px] font-semibold text-primary truncate">
                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
@@ -349,7 +349,7 @@ export function MetricCardMonthly({
                   </>
                 ) : (
                   <>
-                    <div className="text-[9px] sm:text-xs font-semibold text-primary">
+                    <div className="text-[8px] sm:text-[11px] font-semibold text-primary truncate">
                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
@@ -387,14 +387,14 @@ export function MetricCardMonthly({
             </div>
             
             {/* Sparkline + Pace Indicator - two columns */}
-            <div className="flex items-stretch gap-1.5 mt-1">
+            <div className="flex items-stretch gap-1 mt-1">
               <Sparkline
                 metricId={metric.id}
                 metricName={metric.name}
                 unit={metric.unit}
                 historyData={historyData}
                 selectedYear={selectedYear}
-                height={40}
+                height={32}
                 className="flex-1 min-w-0"
               />
               <PaceIndicator
@@ -406,7 +406,7 @@ export function MetricCardMonthly({
                 selectedYear={selectedYear}
                 isInverse={isInverse}
                 isNonAccumulative={isNonAccumulative}
-                className="w-12 shrink-0"
+                className="w-10 shrink-0"
               />
             </div>
           </>
