@@ -149,7 +149,7 @@ function CircularProgress({
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
         <span className="text-muted-foreground mt-0.5 text-[8px] sm:text-[10px] lg:text-sm">
-          {displayPct >= 100 ? "Atingido" : "Meta Pontual"}
+          Meta
         </span>
       </div>
     </div>);
