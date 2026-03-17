@@ -74,9 +74,9 @@ export function DashboardHeader({
 
           {user ? (
             <Link to="/profile" className="flex items-center gap-2.5">
-              <Avatar className={cn("border border-border/50", isMobile ? "h-11 w-11" : "h-[60px] w-[60px]")}>
+              <Avatar className={cn("border border-border/50", isMobile ? "h-9 w-9" : "h-11 w-11")}>
                 <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-sm" : "text-base")}>
+                <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-xs" : "text-sm")}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
