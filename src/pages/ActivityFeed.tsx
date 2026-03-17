@@ -58,6 +58,8 @@ const tableLabels: Record<string, string> = {
   metrics: "Métrica",
   profiles: "Perfil",
   user_roles: "Permissão",
+  user_tab_permissions: "Permissão de Aba",
+  users: "Usuário",
   training_hours: "Treinamento",
 };
 

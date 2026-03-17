@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
+import { insertAuditLog } from "../_shared/audit.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -40,7 +41,6 @@ Deno.serve(async (req) => {
 
     const requesterId = claimsData.claims.sub as string;
 
-    // Check if requester is admin
     const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: requesterId,
       _role: 'admin'
@@ -62,7 +62,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Prevent admin from demoting themselves
     if (userId === requesterId && !makeAdmin) {
       return new Response(
         JSON.stringify({ error: 'Cannot remove your own admin role' }),
@@ -70,8 +69,11 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Get user email for audit
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const userEmail = userData?.user?.email || 'unknown';
+
     if (makeAdmin) {
-      // Add admin role
       const { error: insertError } = await supabaseAdmin
         .from('user_roles')
         .upsert({ user_id: userId, role: 'admin' }, { onConflict: 'user_id,role' });
@@ -84,7 +86,6 @@ Deno.serve(async (req) => {
         );
       }
     } else {
-      // Remove admin role
       const { error: deleteError } = await supabaseAdmin
         .from('user_roles')
         .delete()
@@ -99,6 +100,19 @@ Deno.serve(async (req) => {
         );
       }
     }
+
+    // Audit log
+    await insertAuditLog(supabaseAdmin, {
+      table_name: 'user_roles',
+      record_id: userId,
+      action: 'update',
+      old_value: { role: makeAdmin ? 'user' : 'admin' },
+      new_value: { role: makeAdmin ? 'admin' : 'user', email: userEmail },
+      user_id: requesterId,
+      description: makeAdmin
+        ? `Usuário promovido a admin: ${userEmail}`
+        : `Admin removido: ${userEmail}`,
+    });
 
     return new Response(
       JSON.stringify({ success: true, message: makeAdmin ? 'User promoted to admin' : 'Admin role removed' }),
