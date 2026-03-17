@@ -289,7 +289,7 @@ export function CircularProgressCard({
 
         return (
           <div className="mb-2 flex items-center justify-end gap-[4px]">
-            <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold", badge.className)}>
+            <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] lg:text-xs font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
