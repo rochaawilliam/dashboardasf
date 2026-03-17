@@ -340,7 +340,7 @@ export function MetricCardMonthly({
               <div className="text-right shrink-0">
                 {isMonthSelected ? (
                   <>
-                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate">
+                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
