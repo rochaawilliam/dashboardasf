@@ -57,8 +57,8 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
             className="bg-card rounded-lg border border-border p-2 sm:p-3 lg:p-4 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between">
-              <div className={cn("p-1.5 rounded-lg", item.colorClass)}>
-                <item.icon className="h-4 w-4" />
+              <div className={cn("p-1.5 lg:p-2 rounded-lg", item.colorClass)}>
+                <item.icon className="h-4 w-4 lg:h-5 lg:w-5" />
               </div>
               <span
                 className={cn(
