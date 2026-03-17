@@ -47,18 +47,18 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
   }).filter(Boolean);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
       {summaryData.map((item) => {
         if (!item) return null;
         
         return (
           <div
             key={item.name}
-            className="bg-card rounded-lg border border-border p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-card rounded-lg border border-border p-2 sm:p-3 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between">
-              <div className={cn("p-2 rounded-lg", item.colorClass)}>
-                <item.icon className="h-5 w-5" />
+              <div className={cn("p-1.5 rounded-lg", item.colorClass)}>
+                <item.icon className="h-4 w-4" />
               </div>
               <span
                 className={cn(
@@ -71,9 +71,9 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
                 {item.change}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold text-foreground">{item.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{item.name}</p>
+            <div className="mt-1.5">
+              <p className="text-sm sm:text-lg font-bold text-foreground">{item.value}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{item.name}</p>
             </div>
           </div>
         );

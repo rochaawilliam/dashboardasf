@@ -230,7 +230,7 @@ export function MetricCardMonthly({
     <>
       <div 
         className={cn(
-          "metric-card group relative p-1.5 sm:p-2.5 border-l-[3px]",
+          "metric-card group relative p-1.5 sm:p-2 border-l-[3px]",
           status === "danger" && !hasNoData && "ring-1 ring-primary/50",
           onCardClick && !isEditing && "cursor-pointer hover:shadow-md transition-shadow"
         )}
@@ -241,7 +241,7 @@ export function MetricCardMonthly({
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
-          <span className="metric-label text-[9px] sm:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <span className="metric-label text-[9px] sm:text-[10px] font-medium line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
@@ -327,7 +327,7 @@ export function MetricCardMonthly({
                 {hasNoData ? (
                   <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
                 ) : (
-                  <div className="text-sm sm:text-lg font-bold leading-none text-primary truncate">
+                  <div className="text-xs sm:text-base font-bold leading-none text-primary truncate">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}

@@ -27,39 +27,39 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
   return (
     <div className="mb-2 sm:mb-4 print:hidden">
       {/* Two-column trigger buttons */}
-      <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-2 gap-1.5">
         <Button
           variant="outline"
           onClick={() => togglePanel("lancamentos")}
-          className="w-full justify-between h-auto py-1.5 sm:py-2.5 px-2 sm:px-3 border-2 bg-warning/90 text-warning-foreground border-warning/50 hover:bg-warning hover:border-warning shadow-md hover:shadow-lg transition-all"
+          className="w-full justify-between h-auto py-1.5 sm:py-2 px-2 sm:px-3 border-2 bg-warning/90 text-warning-foreground border-warning/50 hover:bg-warning hover:border-warning shadow-md hover:shadow-lg transition-all"
         >
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <FileSpreadsheet className="h-3.5 w-3.5 sm:h-5 sm:w-5 shrink-0" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <FileSpreadsheet className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <div className="text-left min-w-0">
-              <span className="text-[10px] sm:text-base font-semibold block truncate">Central de Lançamentos</span>
-              <p className="text-[8px] sm:text-xs mt-0.5 hidden sm:block opacity-80">
+              <span className="text-[10px] sm:text-sm font-semibold block truncate">Central de Lançamentos</span>
+              <p className="text-[8px] sm:text-[10px] mt-0.5 hidden sm:block opacity-80">
                 Entrada de dados, histórico e metas
               </p>
             </div>
           </div>
-          <ChevronDown className={cn("h-3 w-3 sm:h-4 sm:w-4 shrink-0 transition-transform", openPanel === "lancamentos" && "rotate-180")} />
+          <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform", openPanel === "lancamentos" && "rotate-180")} />
         </Button>
 
         <Button
           variant="outline"
           onClick={() => togglePanel("feed")}
-          className="w-full justify-between h-auto py-1.5 sm:py-2.5 px-2 sm:px-3 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
+          className="w-full justify-between h-auto py-1.5 sm:py-2 px-2 sm:px-3 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
         >
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <Activity className="h-3.5 w-3.5 sm:h-5 sm:w-5 shrink-0" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <div className="text-left min-w-0">
-              <span className="text-[10px] sm:text-base font-semibold block truncate">Feed de Atividades</span>
-              <p className="text-[8px] sm:text-xs mt-0.5 hidden sm:block opacity-80">
+              <span className="text-[10px] sm:text-sm font-semibold block truncate">Feed de Atividades</span>
+              <p className="text-[8px] sm:text-[10px] mt-0.5 hidden sm:block opacity-80">
                 Registro de movimentações do sistema
               </p>
             </div>
           </div>
-          <ChevronDown className={cn("h-3 w-3 sm:h-4 sm:w-4 shrink-0 transition-transform", openPanel === "feed" && "rotate-180")} />
+          <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform", openPanel === "feed" && "rotate-180")} />
         </Button>
       </div>
 

@@ -17,21 +17,21 @@ const variantStyles = {
 
 export function SectionHeader({ title, subtitle, icon: Icon, variant = "primary" }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
       <div className={cn(
-        "flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex-shrink-0",
+        "flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex-shrink-0",
         variantStyles[variant]
       )}>
-        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </div>
       <div className="min-w-0">
         <h3 
-          className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground leading-tight"
+          className="text-sm sm:text-base md:text-lg font-semibold text-foreground leading-tight"
           style={{ fontFamily: "'Roboto', sans-serif" }}
         >
           {title}
         </h3>
-        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+        <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
     </div>
   );

@@ -730,7 +730,7 @@ const Index = () => {
 
                       <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                       }
-                    <span className="hidden sm:inline truncate text-base">{config.shortTitle}</span>
+                    <span className="hidden sm:inline truncate text-xs">{config.shortTitle}</span>
                         <span className={cn(
                         "hidden sm:inline text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
                         isActive && canAccess ?
@@ -753,7 +753,7 @@ const Index = () => {
                 const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category, dbSubcategories, dbAssignments);
 
                 return (
-                  <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2.5 sm:p-3 animate-fade-in">
+                  <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2 sm:p-3 animate-fade-in">
                       {!canAccess ?
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                           <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
