@@ -241,7 +241,7 @@ export function MetricCardMonthly({
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
-          <span className="metric-label text-[9px] sm:text-[10px] font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <span className="metric-label text-[9px] sm:text-[10px] lg:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
