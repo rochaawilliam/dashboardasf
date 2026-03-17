@@ -26,7 +26,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
 
   return (
     <div className="mb-2 sm:mb-4 print:hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
         {/* Column 1: Central de Lançamentos */}
         <Collapsible open={isLancamentosOpen} onOpenChange={setIsLancamentosOpen}>
           <CollapsibleTrigger asChild>
