@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
+import { insertAuditLog } from "../_shared/audit.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -40,7 +41,6 @@ Deno.serve(async (req) => {
 
     const requesterId = claimsData.claims.sub as string;
 
-    // Check if requester is admin using the security definer function
     const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: requesterId,
       _role: 'admin'
@@ -53,7 +53,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get user ID to delete from request body
     const { userId } = await req.json();
 
     if (!userId) {
@@ -63,7 +62,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Prevent admin from deleting themselves
     if (userId === requesterId) {
       return new Response(
         JSON.stringify({ error: 'Cannot delete your own account' }),
@@ -71,7 +69,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Delete the user from auth.users (CASCADE will handle user_roles)
+    // Get user info before deletion for audit
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const userEmail = userData?.user?.email || 'unknown';
+
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (deleteError) {
@@ -81,6 +82,16 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Audit log
+    await insertAuditLog(supabaseAdmin, {
+      table_name: 'users',
+      record_id: userId,
+      action: 'delete',
+      old_value: { email: userEmail },
+      user_id: requesterId,
+      description: `Usuário excluído: ${userEmail}`,
+    });
 
     return new Response(
       JSON.stringify({ success: true, message: 'User deleted successfully' }),

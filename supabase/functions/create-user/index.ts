@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
+import { insertAuditLog } from "../_shared/audit.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -21,11 +22,8 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Verify the requester's token using getClaims
     const token = authHeader.replace('Bearer ', '');
-    console.log('Verifying token for create-user...');
     
-    // Create a user-scoped client to verify the token
     const supabaseUser = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -44,7 +42,6 @@ Deno.serve(async (req) => {
 
     const requesterId = claimsData.claims.sub as string;
 
-    // Check if requester is admin
     const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: requesterId,
       _role: 'admin'
@@ -66,7 +63,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return new Response(
@@ -75,7 +71,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate password length
     if (password.length < 6) {
       return new Response(
         JSON.stringify({ error: 'Password must be at least 6 characters' }),
@@ -83,7 +78,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create user
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -98,7 +92,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // If makeAdmin is true, add admin role
     if (makeAdmin && newUser.user) {
       const { error: roleInsertError } = await supabaseAdmin
         .from('user_roles')
@@ -109,7 +102,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update profile with job_title if provided
     if (jobTitle && newUser.user) {
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
@@ -119,6 +111,18 @@ Deno.serve(async (req) => {
       if (profileError) {
         console.error('Error updating profile job_title:', profileError);
       }
+    }
+
+    // Audit log
+    if (newUser.user) {
+      await insertAuditLog(supabaseAdmin, {
+        table_name: 'users',
+        record_id: newUser.user.id,
+        action: 'create',
+        new_value: { email, role: makeAdmin ? 'admin' : 'user', job_title: jobTitle || null },
+        user_id: requesterId,
+        description: `Usuário criado: ${email}${makeAdmin ? ' (admin)' : ''}`,
+      });
     }
 
     return new Response(
