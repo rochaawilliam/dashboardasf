@@ -666,7 +666,7 @@ const Index = () => {
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
-                <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0">
+                <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
                   {/* Secret Commission Tab */}
                   {isCommissionUser &&
                 <button
@@ -714,8 +714,8 @@ const Index = () => {
                       onClick={() => canAccess && setActiveTab(category)}
                       disabled={!canAccess}
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
-                        "text-[9px] sm:text-xs font-medium",
+                        "flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 py-1.5 sm:py-2 px-0.5 sm:px-1.5 rounded-t-lg transition-all relative",
+                        "text-[8px] sm:text-[10px] font-medium",
                         !canAccess && "opacity-50 cursor-not-allowed",
                         isActive && canAccess ?
                         "bg-primary text-primary-foreground shadow-sm z-10" :
@@ -726,13 +726,12 @@ const Index = () => {
                       title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : config.title}>
 
                         {!canAccess ?
-                      <Lock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" /> :
-
-                      <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <Lock className="h-3 w-3 shrink-0" /> :
+                      <Icon className="h-3 w-3 shrink-0" />
                       }
-                    <span className="hidden sm:inline truncate text-xs">{config.shortTitle}</span>
+                    <span className="hidden md:inline truncate text-[10px]">{config.shortTitle}</span>
                         <span className={cn(
-                        "hidden sm:inline text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
+                        "hidden md:inline text-[7px] px-1 py-0.5 rounded-full font-semibold",
                         isActive && canAccess ?
                         "bg-primary-foreground/20 text-primary-foreground" :
                         "bg-muted text-muted-foreground"
