@@ -311,7 +311,12 @@ export function CircularProgressCard({
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
-          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
+          <div className="hidden sm:block">
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
+          </div>
+          <div className="block sm:hidden">
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={64} strokeWidth={6} />
+          </div>
         </div>
         )}
 
@@ -336,7 +341,7 @@ export function CircularProgressCard({
             <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-sm sm:text-xl lg:text-3xl font-sans font-extrabold tracking-tighter break-all">
+            <p className="text-foreground leading-tight text-sm sm:text-xl lg:text-3xl font-sans font-extrabold tracking-tighter">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
