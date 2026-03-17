@@ -87,8 +87,8 @@ function getInterpolatedColor(pct: number): string {
 function CircularProgress({
   percentage,
   rawPercentage,
-  size = 110,
-  strokeWidth = 8
+  size = 80,
+  strokeWidth = 7
 }: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -145,10 +145,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
-        <span className="text-foreground leading-none font-sans text-center sm:text-3xl font-bold text-3xl">
+        <span className="text-foreground leading-none font-sans text-center text-lg sm:text-xl font-bold">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
-        <span className="text-muted-foreground mt-0.5 text-sm sm:text-sm">
+        <span className="text-muted-foreground mt-0.5 text-[8px] sm:text-[10px]">
           {displayPct >= 100 ? "Atingido" : "Meta Pontual"}
         </span>
       </div>
@@ -206,15 +206,15 @@ export function CircularProgressCard({
 
   return (
     <div
-      className={cn("metric-card group relative p-3 sm:p-4 px-[12px]",
+      className={cn("metric-card group relative p-2 sm:p-3",
 
       onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
       onClick={() => onCardClick?.()}>
 
       {/* Header with polarity toggle */}
-      <div className="mb-2 sm:mb-3 flex items-center gap-1.5">
-        <span className="metric-label sm:text-xs font-semibold flex-1 text-base">{metric.name}</span>
+      <div className="mb-1.5 sm:mb-2 flex items-center gap-1.5">
+        <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -289,7 +289,7 @@ export function CircularProgressCard({
 
         return (
           <div className="mb-2 flex items-center justify-end gap-[4px]">
-            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full sm:text-xs font-bold text-base", badge.className)}>
+            <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
@@ -307,23 +307,23 @@ export function CircularProgressCard({
 
       })()}
 
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
-        <div className="shrink-0 w-1/3 flex items-center justify-center">
-          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={12} />
+        <div className="shrink-0 flex items-center justify-center">
+          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
         </div>
         )}
 
         {/* Target and Realized values - 2/3 */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px] mx-[6px]">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-2xl sm:text-3xl">
+            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -333,10 +333,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-3xl font-sans sm:text-4xl font-extrabold">
+            <p className="text-foreground leading-tight text-base sm:text-xl font-sans font-extrabold">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
@@ -350,14 +350,14 @@ export function CircularProgressCard({
       </div>
 
       {/* Bottom section: Sparkline + Pace */}
-      <div className="flex items-stretch gap-1.5 mt-auto pt-3">
+      <div className="flex items-stretch gap-1 mt-auto pt-2">
         <Sparkline
           metricId={metric.id}
           metricName={metric.name}
           unit={metric.unit}
           historyData={historyData}
           selectedYear={selectedYear}
-          height={40}
+          height={32}
           className="flex-1 min-w-0" />
 
         <PaceIndicator
@@ -369,15 +369,15 @@ export function CircularProgressCard({
           selectedYear={selectedYear}
           isInverse={isInverse}
           isNonAccumulative={isNonAccumulative}
-          className="w-12 shrink-0" />
+          className="w-10 shrink-0" />
 
       </div>
 
       {/* Annual target reference when month is selected */}
       {!hideTarget && isMonthSelected && !isNonAccumulative &&
-      <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1.5 flex items-center gap-1">
-          <span className="text-xs">Meta anual:</span>
-          <span className="font-medium text-xs">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+      <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
+          <span>Meta anual:</span>
+          <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
         </div>
       }
     </div>);
