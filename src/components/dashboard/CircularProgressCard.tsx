@@ -288,10 +288,10 @@ export function CircularProgressCard({
         }
 
         return (
-          <div className="mb-1 sm:mb-1.5 lg:mb-2 flex items-center justify-end gap-[3px]">
-            <span className={cn("inline-flex items-center gap-0.5 px-1 sm:px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] lg:text-xs font-bold", badge.className)}>
+          <div className="mb-1.5 sm:mb-2 lg:mb-2 flex items-center justify-end gap-1">
+            <span className={cn("inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] lg:text-xs font-bold", badge.className)}>
               {badge.icon}
-              <span className="hidden sm:inline">{badge.label}</span>
+              {badge.label}
             </span>
             {showGuerrilla && guerrillaIcon &&
             <Tooltip>
