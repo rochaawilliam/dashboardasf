@@ -323,7 +323,7 @@ export function CircularProgressCard({
             <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg">
+            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg lg:text-2xl">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
