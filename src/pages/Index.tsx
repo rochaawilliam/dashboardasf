@@ -731,7 +731,7 @@ const Index = () => {
                       }
                     <span className="hidden md:inline truncate text-[10px]">{config.shortTitle}</span>
                         <span className={cn(
-                        "hidden sm:inline text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
+                        "hidden md:inline text-[7px] px-1 py-0.5 rounded-full font-semibold",
                         isActive && canAccess ?
                         "bg-primary-foreground/20 text-primary-foreground" :
                         "bg-muted text-muted-foreground"
