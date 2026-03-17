@@ -110,7 +110,8 @@ export function MetricChart({ data, metrics, title }: MetricChartProps) {
               formatter={(value: number) => formatNumber(value, 2)}
             />
             <Legend 
-              wrapperStyle={{ fontSize: "12px" }}
+              wrapperStyle={{ fontSize: "10px", maxHeight: "80px", overflowY: "auto" }}
+              iconSize={8}
             />
             {metricNames.map((name, index) => {
               const metric = metrics.find((m) => m.name === name);
