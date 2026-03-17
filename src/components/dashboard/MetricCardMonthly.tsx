@@ -387,14 +387,14 @@ export function MetricCardMonthly({
             </div>
             
             {/* Sparkline + Pace Indicator - two columns */}
-            <div className="flex items-stretch gap-1.5 mt-1">
+            <div className="flex items-stretch gap-1 mt-1">
               <Sparkline
                 metricId={metric.id}
                 metricName={metric.name}
                 unit={metric.unit}
                 historyData={historyData}
                 selectedYear={selectedYear}
-                height={40}
+                height={32}
                 className="flex-1 min-w-0"
               />
               <PaceIndicator
@@ -406,7 +406,7 @@ export function MetricCardMonthly({
                 selectedYear={selectedYear}
                 isInverse={isInverse}
                 isNonAccumulative={isNonAccumulative}
-                className="w-12 shrink-0"
+                className="w-10 shrink-0"
               />
             </div>
           </>
