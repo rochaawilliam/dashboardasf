@@ -59,7 +59,7 @@ export function DashboardHeader({
         </div>
         
         {/* Right side: theme toggle + notifications + user avatar */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
           <ThemeToggle />
           
           {user && metrics && (
