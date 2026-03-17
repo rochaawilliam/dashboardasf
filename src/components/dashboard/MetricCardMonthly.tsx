@@ -230,7 +230,7 @@ export function MetricCardMonthly({
     <>
       <div 
         className={cn(
-          "metric-card group relative p-1.5 sm:p-2.5 border-l-[3px]",
+          "metric-card group relative p-1.5 sm:p-2 border-l-[3px]",
           status === "danger" && !hasNoData && "ring-1 ring-primary/50",
           onCardClick && !isEditing && "cursor-pointer hover:shadow-md transition-shadow"
         )}
