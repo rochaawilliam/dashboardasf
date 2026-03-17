@@ -1,14 +1,10 @@
-import { FileSpreadsheet, Upload, History, ChevronDown, Target } from "lucide-react";
+import { FileSpreadsheet, Upload, History, Target, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { DataEntryModal } from "./DataEntryModal";
 import { MetricHistoryModal } from "./MetricHistoryModal";
 import { MetricGoalEditor } from "./MetricGoalEditor";
+import { ActivityFeedWidget } from "./ActivityFeedWidget";
 import type { Metric, TrainingHours } from "@/hooks/useMetrics";
 import { cn } from "@/lib/utils";
 
@@ -19,32 +15,18 @@ interface DataEntrySectionProps {
 }
 
 export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true }: DataEntrySectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-2 sm:mb-4 print:hidden">
-      <CollapsibleTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="w-full justify-between h-auto py-1.5 sm:py-2.5 px-2 sm:px-3 border-2 bg-primary text-primary-foreground border-primary/50 hover:bg-primary/90 hover:border-primary shadow-md hover:shadow-lg transition-all"
-        >
-          <div className="flex items-center gap-2 sm:gap-3">
-            <FileSpreadsheet className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-            <div className="text-left">
-              <span className="text-xs sm:text-base font-semibold">Central de Lançamentos</span>
-              <p className="text-[9px] sm:text-xs mt-0.5 hidden sm:block opacity-80">
-                Entrada de dados, histórico e ajuste de metas
-              </p>
-            </div>
-          </div>
-          <ChevronDown className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform", isOpen && "rotate-180")} />
-        </Button>
-      </CollapsibleTrigger>
-      
-      <CollapsibleContent className="mt-1.5 sm:mt-2">
-        <div className="bg-card border border-border rounded-lg p-2.5 sm:p-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2">
+    <div className="mb-2 sm:mb-4 print:hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Column 1: Central de Lançamentos */}
+        <div className="bg-card border border-border rounded-lg p-3">
+          <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
+            <FileSpreadsheet className="h-4 w-4 text-primary" />
+            Central de Lançamentos
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
             {/* Single Entry */}
             <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
               <div className="sm:mb-2">
@@ -60,8 +42,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
               </div>
               <DataEntryModal metrics={metrics} />
             </div>
-            
-            
+
             {/* History */}
             <div className="flex flex-row sm:flex-col items-center sm:text-center p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-0">
               <div className="sm:mb-2">
@@ -92,8 +73,8 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
                     Edite as metas anuais
                   </p>
                 </div>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant={showGoals ? "default" : "outline"}
                   className="h-7 text-xs"
                   onClick={(e) => {
@@ -114,7 +95,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
                 <Target className="h-4 w-4 text-primary" />
                 Ajuste de Metas Anuais
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-1.5">
                 {[...metrics].sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((metric) => (
                   <MetricGoalEditor key={metric.id} metric={metric} />
                 ))}
@@ -122,7 +103,12 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
             </div>
           )}
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+
+        {/* Column 2: Activity Feed */}
+        <div className="bg-card border border-border rounded-lg p-3">
+          <ActivityFeedWidget />
+        </div>
+      </div>
+    </div>
   );
 }
