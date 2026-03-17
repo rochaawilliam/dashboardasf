@@ -327,7 +327,7 @@ export function MetricCardMonthly({
                 {hasNoData ? (
                   <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
                 ) : (
-                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate">
+                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate tracking-tighter">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
@@ -340,7 +340,7 @@ export function MetricCardMonthly({
               <div className="text-right shrink-0">
                 {isMonthSelected ? (
                   <>
-                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate">
+                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
@@ -349,7 +349,7 @@ export function MetricCardMonthly({
                   </>
                 ) : (
                   <>
-                    <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate">
+                    <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
