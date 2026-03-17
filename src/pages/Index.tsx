@@ -578,18 +578,23 @@ const Index = () => {
         <div data-tour="data-entry">
             <DataEntrySection
             metrics={metrics}
-            trainingHours={trainingHours} />
+            trainingHours={trainingHours}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onPrint={handlePrint} />
 
           </div>
         }
         
+        {/* Filters for unauthenticated users */}
+        {!user &&
         <div data-tour="filters">
           <FilterBar
             filters={filters}
             onFiltersChange={setFilters}
             onPrint={handlePrint} />
-
         </div>
+        }
         
         {/* Month Selector */}
         <div data-tour="month-selector">
