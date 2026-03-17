@@ -206,7 +206,7 @@ export function CircularProgressCard({
 
   return (
     <div
-      className={cn("metric-card group relative p-2.5 sm:p-3 lg:p-4",
+      className={cn("metric-card group relative p-3 sm:p-4 lg:p-4",
 
       onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
@@ -214,7 +214,7 @@ export function CircularProgressCard({
 
       {/* Header with polarity toggle */}
       <div className="mb-1.5 sm:mb-2 lg:mb-3 flex items-center gap-1">
-        <span className="metric-label text-sm sm:text-base lg:text-base font-semibold flex-1 leading-tight">{metric.name}</span>
+        <span className="metric-label text-base sm:text-lg lg:text-base font-semibold flex-1 leading-tight">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -289,7 +289,7 @@ export function CircularProgressCard({
 
         return (
           <div className="mb-1.5 sm:mb-2 lg:mb-2 flex items-center justify-end gap-1">
-            <span className={cn("inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs lg:text-xs font-bold", badge.className)}>
+            <span className={cn("inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm lg:text-xs font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
@@ -315,10 +315,10 @@ export function CircularProgressCard({
             <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
           </div>
           <div className="hidden sm:block lg:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={10} />
           </div>
           <div className="block sm:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={100} strokeWidth={10} />
           </div>
         </div>
         )}
@@ -328,10 +328,10 @@ export function CircularProgressCard({
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[10px] sm:text-xs lg:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-xs sm:text-sm lg:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-base sm:text-xl lg:text-2xl tracking-tighter">
+            <p className="font-semibold text-foreground leading-tight text-xl sm:text-2xl lg:text-2xl tracking-tighter">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -341,16 +341,16 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[10px] sm:text-xs lg:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-xs sm:text-sm lg:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-lg sm:text-2xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+            <p className="text-foreground leading-tight text-2xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
           {/* Description / projection info */}
           {metric.description && (metric.description.startsWith("Projeção") || metric.description.startsWith("Meta anual")) && (
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 font-medium">
+            <p className="text-xs sm:text-sm lg:text-xs text-muted-foreground mt-0.5 font-medium">
               📊 {metric.description}
             </p>
           )}
