@@ -350,7 +350,7 @@ export function CircularProgressCard({
       </div>
 
       {/* Bottom section: Sparkline + Pace */}
-      <div className="flex items-stretch gap-1 mt-auto pt-2">
+      <div className="flex items-stretch gap-1 lg:gap-1.5 mt-auto pt-2 lg:pt-3">
         <Sparkline
           metricId={metric.id}
           metricName={metric.name}
@@ -369,7 +369,7 @@ export function CircularProgressCard({
           selectedYear={selectedYear}
           isInverse={isInverse}
           isNonAccumulative={isNonAccumulative}
-          className="w-10 shrink-0" />
+          className="w-10 lg:w-12 shrink-0" />
 
       </div>
 
