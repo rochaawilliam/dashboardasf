@@ -37,7 +37,7 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
   return (
     <div className="mb-2 sm:mb-4 print:hidden">
       {/* Three-column trigger buttons */}
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-1 sm:gap-1.5">
         <Button
           variant="outline"
           onClick={() => togglePanel("lancamentos")}
