@@ -206,15 +206,15 @@ export function CircularProgressCard({
 
   return (
     <div
-      className={cn("metric-card group relative p-2 sm:p-2.5 lg:p-4",
+      className={cn("metric-card group relative p-2.5 sm:p-3 lg:p-4",
 
       onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
       onClick={() => onCardClick?.()}>
 
       {/* Header with polarity toggle */}
-      <div className="mb-1 sm:mb-1.5 lg:mb-3 flex items-center gap-1">
-        <span className="metric-label text-[10px] sm:text-[11px] lg:text-base font-semibold flex-1 leading-tight">{metric.name}</span>
+      <div className="mb-1.5 sm:mb-2 lg:mb-3 flex items-center gap-1">
+        <span className="metric-label text-xs sm:text-sm lg:text-base font-semibold flex-1 leading-tight">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -288,10 +288,10 @@ export function CircularProgressCard({
         }
 
         return (
-          <div className="mb-1 sm:mb-1.5 lg:mb-2 flex items-center justify-end gap-[3px]">
-            <span className={cn("inline-flex items-center gap-0.5 px-1 sm:px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] lg:text-xs font-bold", badge.className)}>
+          <div className="mb-1.5 sm:mb-2 lg:mb-2 flex items-center justify-end gap-1">
+            <span className={cn("inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] lg:text-xs font-bold", badge.className)}>
               {badge.icon}
-              <span className="hidden sm:inline">{badge.label}</span>
+              {badge.label}
             </span>
             {showGuerrilla && guerrillaIcon &&
             <Tooltip>
@@ -307,7 +307,7 @@ export function CircularProgressCard({
 
       })()}
 
-      <div className="flex items-center gap-2 lg:gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 lg:gap-4">
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
@@ -315,10 +315,10 @@ export function CircularProgressCard({
             <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
           </div>
           <div className="hidden sm:block lg:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={72} strokeWidth={7} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} />
           </div>
           <div className="block sm:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={60} strokeWidth={6} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
           </div>
         </div>
         )}
@@ -328,10 +328,10 @@ export function CircularProgressCard({
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[7px] sm:text-[9px] lg:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-[9px] sm:text-[11px] lg:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-[11px] sm:text-sm lg:text-2xl tracking-tighter">
+            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg lg:text-2xl tracking-tighter">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -341,10 +341,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[7px] sm:text-[9px] lg:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-[9px] sm:text-[11px] lg:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-xs sm:text-base lg:text-3xl font-sans font-extrabold tracking-tighter">
+            <p className="text-foreground leading-tight text-base sm:text-xl lg:text-3xl font-sans font-extrabold tracking-tighter">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
