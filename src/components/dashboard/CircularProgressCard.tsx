@@ -307,15 +307,18 @@ export function CircularProgressCard({
 
       })()}
 
-      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+      <div className="flex items-center gap-2 lg:gap-4">
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
-          <div className="hidden sm:block">
+          <div className="hidden lg:block">
             <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
           </div>
+          <div className="hidden sm:block lg:hidden">
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={72} strokeWidth={7} />
+          </div>
           <div className="block sm:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={64} strokeWidth={6} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={60} strokeWidth={6} />
           </div>
         </div>
         )}
