@@ -307,11 +307,11 @@ export function CircularProgressCard({
 
       })()}
 
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
-        <div className="shrink-0 w-1/3 flex items-center justify-center">
-          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={12} />
+        <div className="shrink-0 flex items-center justify-center">
+          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
         </div>
         )}
 
