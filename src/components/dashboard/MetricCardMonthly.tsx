@@ -327,7 +327,7 @@ export function MetricCardMonthly({
                 {hasNoData ? (
                   <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
                 ) : (
-                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate">
+                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate tracking-tighter">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
