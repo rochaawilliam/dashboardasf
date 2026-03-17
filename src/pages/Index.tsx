@@ -753,7 +753,7 @@ const Index = () => {
                 const organizedSubcategories = organizeMetricsBySubcategory(categoryMetrics, category, dbSubcategories, dbAssignments);
 
                 return (
-                  <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2.5 sm:p-3 animate-fade-in">
+                  <TabsContent key={category} value={category} className="mt-0 bg-card border border-t-0 border-border/50 rounded-b-xl p-2 sm:p-3 animate-fade-in">
                       {!canAccess ?
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                           <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
