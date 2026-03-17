@@ -714,8 +714,8 @@ const Index = () => {
                       onClick={() => canAccess && setActiveTab(category)}
                       disabled={!canAccess}
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-1 sm:px-2 rounded-t-lg transition-all relative",
-                        "text-[9px] sm:text-xs font-medium",
+                        "flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 py-1.5 sm:py-2 px-0.5 sm:px-1.5 rounded-t-lg transition-all relative",
+                        "text-[8px] sm:text-[10px] font-medium",
                         !canAccess && "opacity-50 cursor-not-allowed",
                         isActive && canAccess ?
                         "bg-primary text-primary-foreground shadow-sm z-10" :
