@@ -213,8 +213,8 @@ export function CircularProgressCard({
       onClick={() => onCardClick?.()}>
 
       {/* Header with polarity toggle */}
-      <div className="mb-1.5 sm:mb-2 flex items-center gap-1.5">
-        <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
+      <div className="mb-1.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
+        <span className="metric-label text-[10px] sm:text-xs lg:text-base font-semibold flex-1">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
