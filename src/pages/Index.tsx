@@ -726,11 +726,10 @@ const Index = () => {
                       title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : config.title}>
 
                         {!canAccess ?
-                      <Lock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" /> :
-
-                      <Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <Lock className="h-3 w-3 shrink-0" /> :
+                      <Icon className="h-3 w-3 shrink-0" />
                       }
-                    <span className="hidden sm:inline truncate text-xs">{config.shortTitle}</span>
+                    <span className="hidden md:inline truncate text-[10px]">{config.shortTitle}</span>
                         <span className={cn(
                         "hidden sm:inline text-[7px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-semibold",
                         isActive && canAccess ?
