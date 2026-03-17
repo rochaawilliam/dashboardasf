@@ -26,6 +26,7 @@ export type Database = {
           old_value: Json | null
           record_id: string
           table_name: string
+          user_display_name: string | null
           user_id: string | null
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           old_value?: Json | null
           record_id: string
           table_name: string
+          user_display_name?: string | null
           user_id?: string | null
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           old_value?: Json | null
           record_id?: string
           table_name?: string
+          user_display_name?: string | null
           user_id?: string | null
         }
         Relationships: []

@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Clock, FilePlus, FileEdit, Trash2, Target } from "lucide-react";
+import { Activity, Clock, FilePlus, FileEdit, Trash2, Target, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ interface AuditLogEntry {
   metric_name: string | null;
   metric_unit: string | null;
   description: string | null;
+  user_display_name: string | null;
   created_at: string;
 }
 
@@ -155,9 +156,17 @@ export function RecentActivity() {
                         — {entry.new_value.comment}
                       </p>
                     )}
-                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {format(new Date(entry.created_at), "dd MMM yyyy, HH:mm", { locale: ptBR })}
+                    <div className="flex items-center gap-3 mt-1">
+                      {entry.user_display_name && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {entry.user_display_name}
+                        </span>
+                      )}
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(entry.created_at), "dd MMM yyyy, HH:mm", { locale: ptBR })}
+                      </span>
                     </div>
                   </div>
                 </div>
