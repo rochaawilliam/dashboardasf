@@ -316,14 +316,14 @@ export function CircularProgressCard({
         )}
 
         {/* Target and Realized values - 2/3 */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px] mx-[6px]">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-2xl sm:text-3xl">
+            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -333,10 +333,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-sm sm:text-xs">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-3xl font-sans sm:text-4xl font-extrabold">
+            <p className="text-foreground leading-tight text-base sm:text-xl font-sans font-extrabold">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
