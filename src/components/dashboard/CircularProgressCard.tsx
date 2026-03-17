@@ -206,7 +206,7 @@ export function CircularProgressCard({
 
   return (
     <div
-      className={cn("metric-card group relative p-3 sm:p-4 px-[12px]",
+      className={cn("metric-card group relative p-2 sm:p-3",
 
       onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
