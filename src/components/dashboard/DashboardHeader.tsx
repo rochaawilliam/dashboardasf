@@ -54,7 +54,7 @@ export function DashboardHeader({
             Dashboard Executivo Geral
           </h1>
           <p className="text-muted-foreground text-[8px] sm:text-[10px] lg:text-xs uppercase tracking-wider mt-0.5 leading-tight">
-            Setor de Crescimento • Comercial & Marketing
+            Desempenho tático e operacional • Administrativo, Crescimento e Jurídico
           </p>
         </div>
         
