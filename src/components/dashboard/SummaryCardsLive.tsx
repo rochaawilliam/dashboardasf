@@ -71,9 +71,9 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
                 {item.change}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold text-foreground">{item.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{item.name}</p>
+            <div className="mt-1.5">
+              <p className="text-sm sm:text-lg font-bold text-foreground">{item.value}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{item.name}</p>
             </div>
           </div>
         );

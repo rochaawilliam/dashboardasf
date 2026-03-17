@@ -82,11 +82,11 @@ export function DashboardHeader({
               </Avatar>
               {!isMobile && (
                 <div className="flex flex-col min-w-0">
-                  <span className="text-base font-medium text-foreground max-w-[150px] truncate">
+                  <span className="text-sm font-medium text-foreground max-w-[130px] truncate">
                     {displayName}
                   </span>
                   {profile?.job_title && (
-                    <span className="text-[11px] text-muted-foreground max-w-[150px] truncate leading-tight">
+                    <span className="text-[10px] text-muted-foreground max-w-[130px] truncate leading-tight">
                       {profile.job_title}
                     </span>
                   )}

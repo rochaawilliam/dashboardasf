@@ -231,12 +231,12 @@
   }
 
   .metric-value {
-    @apply text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground;
+    @apply text-base sm:text-lg md:text-xl font-semibold tracking-tight text-foreground;
     font-family: 'Roboto', sans-serif;
   }
 
   .metric-label {
-    @apply text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider;
+    @apply text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-wider;
   }
 
   .section-title {
