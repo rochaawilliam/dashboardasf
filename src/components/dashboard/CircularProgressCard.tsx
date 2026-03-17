@@ -145,10 +145,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
-        <span className="text-foreground leading-none font-sans text-center text-lg sm:text-xl lg:text-3xl font-bold tracking-tighter">
+        <span className="text-foreground leading-none font-sans text-center text-3xl sm:text-xl lg:text-3xl font-bold tracking-tighter">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
-        <span className="text-muted-foreground mt-0.5 text-[8px] sm:text-[10px] lg:text-sm">
+        <span className="text-muted-foreground mt-0.5 text-sm sm:text-[10px] lg:text-sm">
           Meta
         </span>
       </div>
