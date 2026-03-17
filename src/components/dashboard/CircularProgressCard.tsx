@@ -375,9 +375,9 @@ export function CircularProgressCard({
 
       {/* Annual target reference when month is selected */}
       {!hideTarget && isMonthSelected && !isNonAccumulative &&
-      <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1.5 flex items-center gap-1">
-          <span className="text-xs">Meta anual:</span>
-          <span className="font-medium text-xs">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+      <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
+          <span>Meta anual:</span>
+          <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
         </div>
       }
     </div>);
