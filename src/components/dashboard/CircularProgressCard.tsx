@@ -87,8 +87,8 @@ function getInterpolatedColor(pct: number): string {
 function CircularProgress({
   percentage,
   rawPercentage,
-  size = 110,
-  strokeWidth = 8
+  size = 80,
+  strokeWidth = 7
 }: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
