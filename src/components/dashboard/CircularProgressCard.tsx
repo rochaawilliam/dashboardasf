@@ -341,10 +341,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-base sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+            <p className="text-xs sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-4xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+            <p className="text-foreground leading-none text-2xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
