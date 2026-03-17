@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          id: string
+          metric_name: string | null
+          metric_unit: string | null
+          new_value: Json | null
+          old_value: Json | null
+          record_id: string
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric_name?: string | null
+          metric_unit?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          record_id: string
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric_name?: string | null
+          metric_unit?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          record_id?: string
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       metric_history: {
         Row: {
           comment: string | null
