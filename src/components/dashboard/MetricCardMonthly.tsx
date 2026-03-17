@@ -230,7 +230,7 @@ export function MetricCardMonthly({
     <>
       <div 
         className={cn(
-          "metric-card group relative p-1.5 sm:p-2 border-l-[3px]",
+          "metric-card group relative p-1.5 sm:p-2 lg:p-2.5 border-l-[3px]",
           status === "danger" && !hasNoData && "ring-1 ring-primary/50",
           onCardClick && !isEditing && "cursor-pointer hover:shadow-md transition-shadow"
         )}
@@ -241,7 +241,7 @@ export function MetricCardMonthly({
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
-          <span className="metric-label text-[9px] sm:text-[10px] font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <span className="metric-label text-[9px] sm:text-[10px] lg:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
@@ -327,7 +327,7 @@ export function MetricCardMonthly({
                 {hasNoData ? (
                   <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
                 ) : (
-                  <div className="text-[10px] sm:text-sm font-bold leading-none text-primary truncate">
+                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
@@ -340,7 +340,7 @@ export function MetricCardMonthly({
               <div className="text-right shrink-0">
                 {isMonthSelected ? (
                   <>
-                     <div className="text-[8px] sm:text-[11px] font-semibold text-primary truncate">
+                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate">
                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
@@ -349,7 +349,7 @@ export function MetricCardMonthly({
                   </>
                 ) : (
                   <>
-                    <div className="text-[8px] sm:text-[11px] font-semibold text-primary truncate">
+                    <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate">
                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
                     </div>
                     <div className="text-[7px] sm:text-[8px] text-muted-foreground">
@@ -387,7 +387,7 @@ export function MetricCardMonthly({
             </div>
             
             {/* Sparkline + Pace Indicator - two columns */}
-            <div className="flex items-stretch gap-1 mt-1">
+            <div className="flex items-stretch gap-1 lg:gap-1.5 mt-1">
               <Sparkline
                 metricId={metric.id}
                 metricName={metric.name}
@@ -406,7 +406,7 @@ export function MetricCardMonthly({
                 selectedYear={selectedYear}
                 isInverse={isInverse}
                 isNonAccumulative={isNonAccumulative}
-                className="w-10 shrink-0"
+                className="w-10 lg:w-12 shrink-0"
               />
             </div>
           </>

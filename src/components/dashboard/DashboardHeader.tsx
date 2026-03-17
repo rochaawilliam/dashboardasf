@@ -39,27 +39,27 @@ export function DashboardHeader({
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "";
 
   return (
-    <header className="mt-2 sm:mt-3 mb-2 sm:mb-4 pb-2 sm:pb-4 border-b border-border/30">
-      <div className="flex items-center gap-2 sm:gap-3">
+    <header className="mt-2 sm:mt-3 mb-2 sm:mb-4 lg:mb-5 pb-2 sm:pb-4 lg:pb-5 border-b border-border/30">
+      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
         {mobileDrawer}
         
         <img 
           src={asfLogo} 
           alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
-          className="h-9 sm:h-12 md:h-14 w-auto"
+          className="h-9 sm:h-12 lg:h-[60px] w-auto"
         />
-        <div className="h-8 sm:h-10 w-px bg-border/50 hidden sm:block" />
+        <div className="h-8 sm:h-10 lg:h-12 w-px bg-border/50 hidden sm:block" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-sm sm:text-xl md:text-2xl font-semibold text-foreground tracking-tight truncate leading-tight">
+          <h1 className="text-sm sm:text-xl lg:text-[28px] font-semibold text-foreground tracking-tight truncate leading-tight">
             Dashboard Executivo Geral
           </h1>
-          <p className="text-muted-foreground text-[8px] sm:text-[10px] uppercase tracking-wider mt-0.5 leading-tight">
+          <p className="text-muted-foreground text-[8px] sm:text-[10px] lg:text-xs uppercase tracking-wider mt-0.5 leading-tight">
             Setor de Crescimento • Comercial & Marketing
           </p>
         </div>
         
         {/* Right side: theme toggle + notifications + user avatar */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
           <ThemeToggle />
           
           {user && metrics && (
@@ -74,19 +74,19 @@ export function DashboardHeader({
 
           {user ? (
             <Link to="/profile" className="flex items-center gap-2.5">
-              <Avatar className={cn("border border-border/50", isMobile ? "h-9 w-9" : "h-11 w-11")}>
+              <Avatar className={cn("border border-border/50", isMobile ? "h-9 w-9" : "h-11 w-11 lg:h-[60px] lg:w-[60px]")}>
                 <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-xs" : "text-sm")}>
+                <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-xs" : "text-sm lg:text-base")}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
               {!isMobile && (
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-medium text-foreground max-w-[130px] truncate">
+                  <span className="text-sm lg:text-base font-medium text-foreground max-w-[150px] truncate">
                     {displayName}
                   </span>
                   {profile?.job_title && (
-                    <span className="text-[10px] text-muted-foreground max-w-[130px] truncate leading-tight">
+                    <span className="text-[10px] lg:text-[11px] text-muted-foreground max-w-[150px] truncate leading-tight">
                       {profile.job_title}
                     </span>
                   )}

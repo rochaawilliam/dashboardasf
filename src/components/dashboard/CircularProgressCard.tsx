@@ -145,10 +145,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
-        <span className="text-foreground leading-none font-sans text-center text-lg sm:text-xl font-bold">
+        <span className="text-foreground leading-none font-sans text-center text-lg sm:text-xl lg:text-3xl font-bold">
           {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
         </span>
-        <span className="text-muted-foreground mt-0.5 text-[8px] sm:text-[10px]">
+        <span className="text-muted-foreground mt-0.5 text-[8px] sm:text-[10px] lg:text-sm">
           {displayPct >= 100 ? "Atingido" : "Meta Pontual"}
         </span>
       </div>
@@ -206,15 +206,15 @@ export function CircularProgressCard({
 
   return (
     <div
-      className={cn("metric-card group relative p-2 sm:p-3",
+      className={cn("metric-card group relative p-2 sm:p-3 lg:p-4",
 
       onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
       onClick={() => onCardClick?.()}>
 
       {/* Header with polarity toggle */}
-      <div className="mb-1.5 sm:mb-2 flex items-center gap-1.5">
-        <span className="metric-label text-[10px] sm:text-xs font-semibold flex-1">{metric.name}</span>
+      <div className="mb-1.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
+        <span className="metric-label text-[10px] sm:text-xs lg:text-base font-semibold flex-1">{metric.name}</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -289,7 +289,7 @@ export function CircularProgressCard({
 
         return (
           <div className="mb-2 flex items-center justify-end gap-[4px]">
-            <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold", badge.className)}>
+            <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] lg:text-xs font-bold", badge.className)}>
               {badge.icon}
               {badge.label}
             </span>
@@ -307,10 +307,10 @@ export function CircularProgressCard({
 
       })()}
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
-        <div className="shrink-0 flex items-center justify-center">
+        <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
           <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
         </div>
         )}
@@ -320,10 +320,10 @@ export function CircularProgressCard({
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg">
+            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg lg:text-2xl">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -333,10 +333,10 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-base sm:text-xl font-sans font-extrabold">
+            <p className="text-foreground leading-tight text-base sm:text-xl lg:text-3xl font-sans font-extrabold">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
@@ -350,7 +350,7 @@ export function CircularProgressCard({
       </div>
 
       {/* Bottom section: Sparkline + Pace */}
-      <div className="flex items-stretch gap-1 mt-auto pt-2">
+      <div className="flex items-stretch gap-1 lg:gap-1.5 mt-auto pt-2 lg:pt-3">
         <Sparkline
           metricId={metric.id}
           metricName={metric.name}
@@ -369,7 +369,7 @@ export function CircularProgressCard({
           selectedYear={selectedYear}
           isInverse={isInverse}
           isNonAccumulative={isNonAccumulative}
-          className="w-10 shrink-0" />
+          className="w-10 lg:w-12 shrink-0" />
 
       </div>
 
