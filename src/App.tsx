@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import ActivityFeed from "./pages/ActivityFeed";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/activity" 
+                element={
+                  <ProtectedRoute>
+                    <ActivityFeed />
                   </ProtectedRoute>
                 } 
               />
