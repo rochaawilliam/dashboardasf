@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Activity, Clock, FilePlus, FileEdit, Trash2, Target, ArrowLeft, Search, X } from "lucide-react";
+import { Activity, Clock, FilePlus, FileEdit, Trash2, Target, ArrowLeft, Search, X, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Link, Navigate } from "react-router-dom";
 
@@ -24,6 +24,7 @@ interface AuditLogEntry {
   metric_name: string | null;
   metric_unit: string | null;
   description: string | null;
+  user_display_name: string | null;
   created_at: string;
 }
 
@@ -111,11 +112,11 @@ export default function ActivityFeed() {
       (entry.metric_name?.toLowerCase().includes(term)) ||
       (entry.description?.toLowerCase().includes(term)) ||
       (entry.table_name?.toLowerCase().includes(term)) ||
-      (entry.action?.toLowerCase().includes(term))
+      (entry.action?.toLowerCase().includes(term)) ||
+      (entry.user_display_name?.toLowerCase().includes(term))
     );
   });
 
-  // Group by date
   const grouped = filtered?.reduce<Record<string, AuditLogEntry[]>>((acc, entry) => {
     const dateKey = format(new Date(entry.created_at), "yyyy-MM-dd");
     if (!acc[dateKey]) acc[dateKey] = [];
@@ -151,7 +152,7 @@ export default function ActivityFeed() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por métrica, descrição, tipo..."
+                  placeholder="Buscar por métrica, descrição, usuário..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 h-9"
@@ -258,9 +259,17 @@ export default function ActivityFeed() {
                               — {entry.new_value.comment}
                             </p>
                           )}
-                          <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {format(new Date(entry.created_at), "HH:mm:ss", { locale: ptBR })}
+                          <div className="flex items-center gap-3 mt-1">
+                            {entry.user_display_name && (
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {entry.user_display_name}
+                              </span>
+                            )}
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {format(new Date(entry.created_at), "HH:mm:ss", { locale: ptBR })}
+                            </span>
                           </div>
                         </div>
                       </div>

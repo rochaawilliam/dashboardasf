@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Activity, Clock, FilePlus, FileEdit, Trash2, Target, ExternalLink } from "lucide-react";
+import { Activity, Clock, FilePlus, FileEdit, Trash2, Target, ExternalLink, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ interface AuditLogEntry {
   metric_name: string | null;
   metric_unit: string | null;
   description: string | null;
+  user_display_name: string | null;
   created_at: string;
 }
 
@@ -69,11 +70,7 @@ export function ActivityFeedWidget() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <Activity className="h-4 w-4 text-primary" />
-          Atividade Recente
-        </h3>
+      <div className="flex items-center justify-end mb-2">
         <Link to="/activity">
           <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground">
             Ver tudo
@@ -113,9 +110,17 @@ export function ActivityFeedWidget() {
                   <p className="text-[10px] text-muted-foreground truncate">
                     {entry.description}
                   </p>
-                  <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
-                    <Clock className="h-2.5 w-2.5" />
-                    {format(new Date(entry.created_at), "dd MMM, HH:mm", { locale: ptBR })}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {entry.user_display_name && (
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                        <User className="h-2.5 w-2.5" />
+                        {entry.user_display_name}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                      <Clock className="h-2.5 w-2.5" />
+                      {format(new Date(entry.created_at), "dd MMM, HH:mm", { locale: ptBR })}
+                    </span>
                   </div>
                 </div>
                 <Badge variant={config.badgeVariant} className="text-[9px] h-4 px-1 shrink-0">
