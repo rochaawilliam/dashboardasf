@@ -555,7 +555,7 @@ const Index = () => {
       <PrintStyles />
       
       
-      <div className="max-w-[1178px] mx-auto px-2 sm:px-3 md:px-5 py-3 sm:py-4 md:py-[12px] lg:px-[12px]">
+      <div className="max-w-[1000px] mx-auto px-[10vw] lg:px-[12px] py-3 sm:py-4 md:py-[12px]">
         <div data-tour="header">
           <DashboardHeader
             metrics={adjustedMetrics}
