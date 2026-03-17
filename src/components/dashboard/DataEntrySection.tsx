@@ -1,22 +1,32 @@
-import { FileSpreadsheet, Upload, History, Target, ChevronDown, Activity } from "lucide-react";
+import { FileSpreadsheet, Upload, History, Target, ChevronDown, Activity, Filter, Printer } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DataEntryModal } from "./DataEntryModal";
 import { MetricHistoryModal } from "./MetricHistoryModal";
 import { MetricGoalEditor } from "./MetricGoalEditor";
 import { ActivityFeedWidget } from "./ActivityFeedWidget";
-import type { Metric, TrainingHours } from "@/hooks/useMetrics";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Metric, TrainingHours, Filters, Division } from "@/hooks/useMetrics";
 import { cn } from "@/lib/utils";
 
 interface DataEntrySectionProps {
   metrics: Metric[];
   trainingHours?: TrainingHours[];
   showGoalEditor?: boolean;
+  filters?: Filters;
+  onFiltersChange?: (filters: Filters) => void;
+  onPrint?: () => void;
 }
 
-type OpenPanel = "lancamentos" | "feed" | null;
+type OpenPanel = "lancamentos" | "feed" | "filtros" | null;
 
-export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true }: DataEntrySectionProps) {
+export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true, filters, onFiltersChange, onPrint }: DataEntrySectionProps) {
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [showGoals, setShowGoals] = useState(false);
 
@@ -26,8 +36,8 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
 
   return (
     <div className="mb-2 sm:mb-4 print:hidden">
-      {/* Two-column trigger buttons */}
-      <div className="grid grid-cols-2 gap-1.5">
+      {/* Three-column trigger buttons */}
+      <div className="grid grid-cols-3 gap-1.5">
         <Button
           variant="outline"
           onClick={() => togglePanel("lancamentos")}
@@ -60,6 +70,23 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
             </div>
           </div>
           <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform", openPanel === "feed" && "rotate-180")} />
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => togglePanel("filtros")}
+          className="w-full justify-between h-auto py-1.5 sm:py-2 px-2 sm:px-3 border-2 bg-muted text-foreground border-border hover:bg-muted/80 hover:border-border shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <div className="text-left min-w-0">
+              <span className="text-[10px] sm:text-sm font-semibold block truncate">Filtros</span>
+              <p className="text-[8px] sm:text-[10px] mt-0.5 hidden sm:block opacity-80">
+                Período, divisão e impressão
+              </p>
+            </div>
+          </div>
+          <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform", openPanel === "filtros" && "rotate-180")} />
         </Button>
       </div>
 
@@ -148,6 +175,58 @@ export function DataEntrySection({ metrics, trainingHours, showGoalEditor = true
       {openPanel === "feed" && (
         <div className="mt-1.5 sm:mt-2 bg-card border-2 border-primary/30 rounded-lg p-2.5 sm:p-3">
           <ActivityFeedWidget />
+        </div>
+      )}
+
+      {openPanel === "filtros" && filters && onFiltersChange && (
+        <div className="mt-1.5 sm:mt-2 bg-card border-2 border-border rounded-lg p-2.5 sm:p-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
+            <Select
+              value={filters.period}
+              onValueChange={(value: "month" | "quarter" | "year") =>
+                onFiltersChange({ ...filters, period: value })
+              }
+            >
+              <SelectTrigger className="flex-1 sm:w-[140px] sm:flex-none bg-background text-xs sm:text-sm h-8 sm:h-9">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border border-border z-50">
+                <SelectItem value="month">Último Mês</SelectItem>
+                <SelectItem value="quarter">Último Trimestre</SelectItem>
+                <SelectItem value="year">Último Ano</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select
+              value={filters.division}
+              onValueChange={(value: Division | "all") =>
+                onFiltersChange({ ...filters, division: value })
+              }
+            >
+              <SelectTrigger className="flex-1 sm:w-[160px] sm:flex-none bg-background text-xs sm:text-sm h-8 sm:h-9">
+                <SelectValue placeholder="Divisão" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border border-border z-50">
+                <SelectItem value="all">Todas Divisões</SelectItem>
+                <SelectItem value="juridico">Jurídico</SelectItem>
+                <SelectItem value="crescimento">Crescimento</SelectItem>
+                <SelectItem value="marketing">Marketing</SelectItem>
+                <SelectItem value="administrativo">Administrativo</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {onPrint && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onPrint}
+                className="gap-1.5 h-8 sm:h-9 w-full sm:w-auto text-xs"
+              >
+                <Printer className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Imprimir / PDF</span>
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </div>
