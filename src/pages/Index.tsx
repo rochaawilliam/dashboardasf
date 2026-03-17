@@ -729,7 +729,7 @@ const Index = () => {
                       <Lock className="h-3 w-3 shrink-0" /> :
                       <Icon className="h-3 w-3 shrink-0" />
                       }
-                    <span className="hidden md:inline truncate text-[10px]">{config.shortTitle}</span>
+                    <span className="hidden md:inline truncate text-[10px] lg:text-xs">{config.shortTitle}</span>
                         <span className={cn(
                         "hidden md:inline text-[7px] px-1 py-0.5 rounded-full font-semibold",
                         isActive && canAccess ?
