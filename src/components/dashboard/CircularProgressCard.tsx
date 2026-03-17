@@ -88,7 +88,8 @@ function CircularProgress({
   percentage,
   rawPercentage,
   size = 80,
-  strokeWidth = 7
+  strokeWidth = 7,
+  large = false
 }: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
