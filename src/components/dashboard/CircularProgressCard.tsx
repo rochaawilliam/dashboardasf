@@ -311,7 +311,7 @@ export function CircularProgressCard({
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
-          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
+          <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
         </div>
         )}
 
@@ -323,7 +323,7 @@ export function CircularProgressCard({
             <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-tight text-sm sm:text-lg lg:text-2xl tracking-tighter">
+            <p className="font-semibold text-foreground leading-tight text-xs sm:text-lg lg:text-2xl tracking-tighter">
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
@@ -336,7 +336,7 @@ export function CircularProgressCard({
             <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-tight text-base sm:text-xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+            <p className="text-foreground leading-tight text-sm sm:text-xl lg:text-3xl font-sans font-extrabold tracking-tighter break-all">
               {formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
