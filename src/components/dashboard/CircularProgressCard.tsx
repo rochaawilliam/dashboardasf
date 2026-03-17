@@ -333,7 +333,7 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px]">
+            <p className="text-muted-foreground uppercase tracking-wide text-[8px] sm:text-[10px] lg:text-xs">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <p className="text-foreground leading-tight text-base sm:text-xl font-sans font-extrabold">
