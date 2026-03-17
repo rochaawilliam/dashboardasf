@@ -107,9 +107,8 @@ export default function ActivityFeed() {
     enabled: !!user,
   });
 
-  if (!loading && !user) return <Navigate to="/login" replace />;
-
   const filtered = useMemo(() => {
+    if (!loading && !user) return [];
     return entries?.filter((entry) => {
       if (actionFilter && entry.action !== actionFilter) return false;
       if (!search.trim()) return true;
