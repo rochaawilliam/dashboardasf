@@ -47,7 +47,7 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
   }).filter(Boolean);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
       {summaryData.map((item) => {
         if (!item) return null;
         
