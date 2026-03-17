@@ -318,7 +318,7 @@ export function CircularProgressCard({
             <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
           </div>
           <div className="block sm:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={70} strokeWidth={7} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} />
           </div>
         </div>
         )}
