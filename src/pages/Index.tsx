@@ -666,7 +666,7 @@ const Index = () => {
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
-                <div data-tour="category-tabs" className="flex items-end bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
+                <div data-tour="category-tabs" className="flex items-stretch bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
                   {/* Secret Commission Tab */}
                   {isCommissionUser &&
                 <button

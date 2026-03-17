@@ -206,11 +206,11 @@
 
 @layer utilities {
   .dashboard-grid {
-    @apply grid gap-1.5 sm:gap-2 md:gap-3;
+    @apply grid gap-1.5 sm:gap-2 md:gap-2.5;
     grid-template-columns: repeat(2, 1fr);
   }
   
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {
     .dashboard-grid {
       grid-template-columns: repeat(3, 1fr);
     }
