@@ -285,19 +285,11 @@ const Index = () => {
     return values;
   }, [historyData, selectedYear]);
 
-  // IDs for "mês anterior" computed metrics
-  const CONTRATOS_EMP_MES_ANT_ID = "aaa6fbd3-75bc-43ce-9391-fd0f26ace960";
-  const CONTRATOS_TRAB_MES_ANT_ID = "290aec39-539f-4f74-a8bc-33ed2db89de0";
-
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
   const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
   const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
   const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
-
-  // IDs for Total Contratos Assessoria
-  const TOTAL_EMP_ASSESSORIA_ID = "b1c2d3e4-f5a6-7890-abcd-ef1234567890";
-  const TOTAL_TRAB_ASSESSORIA_ID = "c2d3e4f5-a6b7-8901-bcde-f12345678901";
 
   // ID for "Total de Contratos" (computed)
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
@@ -339,45 +331,6 @@ const Index = () => {
   const RECEITA_TRAB_COMPONENTS = [RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRAB_PONTUAL_ID];
   const RECEITA_TRIB_COMPONENTS = [RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID, RECEITA_TRIB_PONTUAL_ID];
 
-  // Compute previous month's contract values from history
-  // "Mês Anterior" for month M = Total Contratos Assessoria of month M-1
-  // Total Contratos Assessoria(M) = MêsAnterior(M) + NovosAssessoria(M)
-  // So we build month-by-month from Jan (base: 20 emp, 14 trab)
-  const prevMonthContractValues = useMemo(() => {
-    const refMonth = selectedMonth ?? new Date().getMonth() + 1;
-    const BASE_EMP = 20;
-    const BASE_TRAB = 14;
-
-    if (!historyData || refMonth <= 1) {
-      // January: use base values
-      return { empresarial: BASE_EMP, trabalhista: BASE_TRAB };
-    }
-
-    // Get monthly novos assessoria values from history for each month
-    const getMonthValue = (metricId: string, month: number) => {
-      let total = 0;
-      historyData.forEach((h) => {
-        const ref = getRefMonthYear(h.period_type, h.recorded_at);
-        if (ref.year === selectedYear && ref.month === month && h.metric_id === metricId) {
-          total += h.value;
-        }
-      });
-      return total;
-    };
-
-    // Build chain: Total Assessoria(1) = base + novos(1), MêsAnterior(2) = Total(1), etc.
-    let totalEmp = BASE_EMP + getMonthValue(CONTRATOS_EMP_ASSESSORIA_ID, 1);
-    let totalTrab = BASE_TRAB + getMonthValue(CONTRATOS_TRAB_ASSESSORIA_ID, 1);
-
-    for (let m = 2; m < refMonth; m++) {
-      // For month m, mêsAnterior = previous total, then total = mêsAnterior + novos(m)
-      totalEmp = totalEmp + getMonthValue(CONTRATOS_EMP_ASSESSORIA_ID, m);
-      totalTrab = totalTrab + getMonthValue(CONTRATOS_TRAB_ASSESSORIA_ID, m);
-    }
-
-    // totalEmp/totalTrab now = Total Assessoria of (refMonth - 1) = Mês Anterior for refMonth
-    return { empresarial: totalEmp, trabalhista: totalTrab };
-  }, [selectedMonth, selectedYear, historyData]);
 
   // Compute origin card values from history source field
   const originValues = useMemo(() => {
