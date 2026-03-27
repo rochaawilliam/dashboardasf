@@ -218,14 +218,19 @@ export function CommissionTab({
       ? empAss + empConsult + tribAss + tribPont + trabAss + trabConsult
       : (accumulatedValues[TOTAL_CONTRATOS_ID] ?? 0);
 
-    // Get target from monthly_targets for Total de Contratos
+    // Dynamic target: sum of monthly targets from component metrics
+    const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
     let target = 0;
     if (selectedMonth !== null && monthlyTargets) {
-      const mt = monthlyTargets.find(t => t.metric_id === TOTAL_CONTRATOS_ID && t.year === selectedYear && t.month === selectedMonth);
-      target = mt ? mt.target_value : 0;
+      target = componentIds.reduce((sum, id) => {
+        const mt = monthlyTargets.find(t => t.metric_id === id && t.month === selectedMonth && t.year === selectedYear);
+        return sum + (mt?.target_value ?? 0);
+      }, 0);
     } else {
-      const mts = (monthlyTargets || []).filter(t => t.metric_id === TOTAL_CONTRATOS_ID && t.year === selectedYear);
-      target = mts.length > 0 ? mts.reduce((s, t) => s + t.target_value, 0) : 0;
+      target = componentIds.reduce((sum, id) => {
+        const mts = (monthlyTargets || []).filter(t => t.metric_id === id && t.year === selectedYear);
+        return sum + mts.reduce((s, t) => s + t.target_value, 0);
+      }, 0);
     }
     
     return { achieved, target };

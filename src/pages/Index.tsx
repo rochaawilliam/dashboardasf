@@ -827,6 +827,24 @@ const Index = () => {
                                       const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
                                       const totalContratos = empAss + empConsult + tribAss + tribPont + trabAss + trabConsult;
                                       dynamicMetric = { ...dynamicMetric, current_value: totalContratos };
+
+                                      // Dynamic target: sum of monthly targets from component metrics
+                                      const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
+                                      if (monthlyTargets) {
+                                        if (selectedMonth !== null) {
+                                          const sumTarget = componentIds.reduce((sum, id) => {
+                                            const mt = monthlyTargets.find(t => t.metric_id === id && t.month === currentMonth && t.year === selectedYear);
+                                            return sum + (mt?.target_value ?? 0);
+                                          }, 0);
+                                          dynamicMetric = { ...dynamicMetric, target_value: sumTarget * 12 };
+                                        } else {
+                                          const sumTarget = componentIds.reduce((sum, id) => {
+                                            const mts = monthlyTargets.filter(t => t.metric_id === id && t.year === selectedYear);
+                                            return sum + mts.reduce((s, t) => s + t.target_value, 0);
+                                          }, 0);
+                                          dynamicMetric = { ...dynamicMetric, target_value: sumTarget };
+                                        }
+                                      }
                                     }
 
                                     // For "Total de Contratos", compute monthly value
@@ -980,9 +998,18 @@ const Index = () => {
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
-                                    const cardMonthlyTarget = selectedMonth && monthlyTargets ?
+                                    let cardMonthlyTarget = selectedMonth && monthlyTargets ?
                                     monthlyTargets.find((t) => t.metric_id === metric.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? null :
                                     null;
+
+                                    // For Total de Contratos, compute target dynamically from component metrics
+                                    if (isTotalContratos && selectedMonth && monthlyTargets) {
+                                      const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
+                                      cardMonthlyTarget = componentIds.reduce((sum, id) => {
+                                        const mt = monthlyTargets.find(t => t.metric_id === id && t.month === selectedMonth && t.year === selectedYear);
+                                        return sum + (mt?.target_value ?? 0);
+                                      }, 0);
+                                    }
 
                                     return (
                                       <DraggableCardWrapper key={metric.id} id={metric.id} isDragMode={isDragMode} currentSubcategoryId={subcat.id} availableSubcategories={organizedSubcategories.map((s) => ({ id: s.id, name: s.name }))} onMoveToSubcategory={(metricId, subcategoryId) => {updateAssignment.mutate({ metric_id: metricId, subcategory_id: subcategoryId, sort_order: 0 });}}>
