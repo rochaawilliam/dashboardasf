@@ -390,12 +390,6 @@ const Index = () => {
       accumulatedValues[metric.id] ?? 0 :
       metric.current_value;
 
-      // Compute "mês anterior" card values
-      if (metric.id === CONTRATOS_EMP_MES_ANT_ID) {
-        currentValue = prevMonthContractValues.empresarial;
-      } else if (metric.id === CONTRATOS_TRAB_MES_ANT_ID) {
-        currentValue = prevMonthContractValues.trabalhista;
-      }
 
       // Compute origin card values and dynamic targets
       if (metric.id === CONTRATOS_ONLINE_ID) {
