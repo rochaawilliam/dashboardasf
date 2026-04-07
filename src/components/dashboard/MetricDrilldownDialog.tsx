@@ -69,6 +69,9 @@ const isContractMetric = (name: string) =>
 const isForecastMetric = (name: string) =>
   name === "Receita Total Mensal";
 
+const isRevenueMetric = (name: string) =>
+  name === "Receita Total Mensal";
+
 const MONTH_NAMES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
