@@ -1,8 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { Sparkline } from "./Sparkline";
-import { PaceIndicator } from "./PaceIndicator";
 import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair } from "lucide-react";
 import {
   Tooltip,
