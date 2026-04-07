@@ -143,6 +143,20 @@ export function MetricDrilldownDialog({
     enabled: open && isRevenueMetric(metric.name),
   });
 
+  // Fetch all revenue component history for the chart (Realizado = sum of all sub-metrics)
+  const { data: revenueComponentHistory } = useQuery({
+    queryKey: ["revenue_components_history", filterYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("metric_history")
+        .select("*")
+        .in("metric_id", ALL_REVENUE_COMPONENT_IDS);
+      if (error) throw error;
+      return data as HistoryEntry[];
+    },
+    enabled: open && isRevenueMetric(metric.name),
+  });
+
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["metric_history"] });
     queryClient.invalidateQueries({ queryKey: ["metric_drilldown", metric.id] });
