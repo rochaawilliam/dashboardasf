@@ -550,6 +550,41 @@ export function MetricDrilldownDialog({
             </div>
           )}
 
+          {/* Revenue bar chart: Previsto vs Realizado */}
+          {isRevenueMetric(metric.name) && revenueChartData.length > 0 && (
+            <div className="border border-border rounded-lg p-3 bg-muted/20">
+              <p className="text-[10px] font-medium text-muted-foreground mb-2">Previsto vs Realizado — {filterYear}</p>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={revenueChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      color: "hsl(var(--popover-foreground))",
+                    }}
+                    formatter={(value: number) => [formatMetricValue(value, metric.unit, metric.name), undefined]}
+                    labelFormatter={(label) => `${label}/${filterYear}`}
+                  />
+                  <Legend wrapperStyle={{ fontSize: "11px" }} />
+                  <Bar dataKey="previsto" name="Previsto" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} barSize={16} />
+                  <Bar dataKey="realizado" name="Realizado" radius={[3, 3, 0, 0]} barSize={16}>
+                    {revenueChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.realizado >= entry.previsto ? "hsl(142, 65%, 38%)" : "hsl(0, 75%, 48%)"}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
           <div className="flex-1 overflow-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
