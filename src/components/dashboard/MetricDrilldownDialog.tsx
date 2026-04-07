@@ -41,7 +41,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { parseLocalDate } from "@/utils/dateUtils";
 import type { Metric } from "@/hooks/useMetrics";
-import { formatMetricValue } from "@/utils/formatters";
+import { formatMetricValue, formatNumber } from "@/utils/formatters";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 
 interface MetricDrilldownDialogProps {
   metric: Metric;
@@ -66,6 +67,9 @@ const isContractMetric = (name: string) =>
   name.toLowerCase().includes("novos contratos") && !name.toLowerCase().includes("off-line") && !name.toLowerCase().includes("on-line");
 
 const isForecastMetric = (name: string) =>
+  name === "Receita Total Mensal";
+
+const isRevenueMetric = (name: string) =>
   name === "Receita Total Mensal";
 
 const MONTH_NAMES = [
@@ -107,6 +111,21 @@ export function MetricDrilldownDialog({
       return data as HistoryEntry[];
     },
     enabled: open,
+  });
+
+  // Fetch monthly targets for revenue chart
+  const { data: monthlyTargetsData } = useQuery({
+    queryKey: ["monthly_targets_drilldown", metric.id, filterYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("monthly_targets")
+        .select("*")
+        .eq("metric_id", metric.id)
+        .eq("year", parseInt(filterYear));
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && isRevenueMetric(metric.name),
   });
 
   const invalidateAll = () => {
@@ -269,6 +288,21 @@ export function MetricDrilldownDialog({
       return { month, name: name.substring(0, 3), total };
     });
   }, [history, filterYear]);
+
+  // Revenue bar chart data: Previsto vs Realizado per month
+  const revenueChartData = useMemo(() => {
+    if (!isRevenueMetric(metric.name) || !history) return [];
+    return MONTH_NAMES.map((name, i) => {
+      const month = i + 1;
+      const monthStr = String(month).padStart(2, "0");
+      const realizado = history
+        .filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`) && e.source !== "forecast")
+        .reduce((sum, e) => sum + Number(e.value), 0);
+      const target = monthlyTargetsData?.find((t) => t.month === month);
+      const previsto = target?.target_value ?? 0;
+      return { name: name.substring(0, 3), previsto, realizado };
+    });
+  }, [history, monthlyTargetsData, filterYear, metric.name]);
 
   return (
     <>
@@ -513,6 +547,41 @@ export function MetricDrilldownDialog({
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Revenue bar chart: Previsto vs Realizado */}
+          {isRevenueMetric(metric.name) && revenueChartData.length > 0 && (
+            <div className="border border-border rounded-lg p-3 bg-muted/20">
+              <p className="text-[10px] font-medium text-muted-foreground mb-2">Previsto vs Realizado — {filterYear}</p>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={revenueChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      color: "hsl(var(--popover-foreground))",
+                    }}
+                    formatter={(value: number) => [formatMetricValue(value, metric.unit, metric.name), undefined]}
+                    labelFormatter={(label) => `${label}/${filterYear}`}
+                  />
+                  <Legend wrapperStyle={{ fontSize: "11px" }} />
+                  <Bar dataKey="previsto" name="Previsto" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} barSize={16} />
+                  <Bar dataKey="realizado" name="Realizado" radius={[3, 3, 0, 0]} barSize={16}>
+                    {revenueChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.realizado >= entry.previsto ? "hsl(142, 65%, 38%)" : "hsl(0, 75%, 48%)"}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           )}
 
