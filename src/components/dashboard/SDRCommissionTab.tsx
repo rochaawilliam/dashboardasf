@@ -142,7 +142,7 @@ function CommissionColumn({ title, pct, commission }: CommissionColumnProps) {
                 : "text-muted-foreground hover:bg-muted/30"
             )}>
               <span>≥ {tier.min}%</span>
-              <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
+              <span>R$ {formatNumber(Math.round(tier.value / 2))}</span>
             </div>
           );
         })}
