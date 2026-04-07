@@ -175,6 +175,7 @@ export function CircularProgressCard({
   hideTarget = false,
   forecastValue,
   hideValues = false,
+  forceAnnualLabel = false,
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
