@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, DollarSign, Rocket, Zap, Users, GraduationCap, ChevronRight, Briefcase, Lock } from "lucide-react";
+import { Menu, DollarSign, Rocket, Zap, Users, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,

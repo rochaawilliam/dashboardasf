@@ -63,7 +63,7 @@ import { useMetricNotifications } from "@/hooks/useMetricNotifications";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import { useAuth } from "@/hooks/useAuth";
 
-const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;subtitle: string;icon: any;variant: "primary" | "accent" | "success" | "warning";}> = {
+const categoryConfig: Record<string, {title: string;shortTitle: string;subtitle: string;icon: any;variant: "primary" | "accent" | "success" | "warning";}> = {
   lucratividade: {
     title: "Financeiro",
     shortTitle: "Financeiro",
@@ -71,49 +71,33 @@ const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;s
     icon: DollarSign,
     variant: "primary"
   },
-  execucao_comercial: {
-    title: "Execução Comercial",
-    shortTitle: "Comercial",
-    subtitle: "Acompanhar pipeline e conversão de vendas",
-    icon: Briefcase,
-    variant: "accent"
-  },
   experiencia_cliente: {
-    title: "Gestão de Crescimento",
+    title: "Crescimento",
     shortTitle: "Crescimento",
-    subtitle: "Entregar experiência consistente e previsível",
+    subtitle: "Acompanhar crescimento comercial e gestão de carteira",
     icon: Rocket,
     variant: "accent"
   },
   produtividade: {
-    title: "Produtividade",
-    shortTitle: "Produtiv.",
+    title: "Jurídico",
+    shortTitle: "Jurídico",
     subtitle: "Garantir eficiência do time jurídico",
     icon: Zap,
     variant: "warning"
   },
   gestao_pessoas: {
-    title: "Gestão de Pessoas",
-    shortTitle: "Pessoas",
+    title: "Time ASF",
+    shortTitle: "Time ASF",
     subtitle: "Construir um time estável, produtivo e engajado",
     icon: Users,
     variant: "success"
   },
-  aprendizado_crescimento: {
-    title: "Aprendizado e Crescimento",
-    shortTitle: "Aprend.",
-    subtitle: "Desenvolver competências técnicas e lideranças internas",
-    icon: GraduationCap,
-    variant: "primary"
-  }
 };
 
 const categoryOrder: MetricCategory[] = [
-"execucao_comercial",
 "experiencia_cliente",
 "produtividade",
 "gestao_pessoas",
-"aprendizado_crescimento",
 "lucratividade"];
 
 
