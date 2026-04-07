@@ -90,8 +90,9 @@ function CircularProgress({
   percentage,
   rawPercentage,
   size = 80,
-  strokeWidth = 7
-}: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;}) {
+  strokeWidth = 7,
+  hideValues = false
+}: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;hideValues?: boolean;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(percentage, 0), 100);
