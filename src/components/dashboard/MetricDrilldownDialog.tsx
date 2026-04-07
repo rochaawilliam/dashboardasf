@@ -589,6 +589,15 @@ export function MetricDrilldownDialog({
                           )}
                         </TableCell>
                       )}
+                      {isForecastMetric(metric.name) && (
+                        <TableCell>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            entry.source === "forecast" ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
+                          }`}>
+                            {entry.source === "forecast" ? "Previsto" : "Realizado"}
+                          </span>
+                        </TableCell>
+                      )}
                       <TableCell className="max-w-[150px]">
                         {editingId === entry.id ? (
                           <Input
