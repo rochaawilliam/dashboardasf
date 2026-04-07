@@ -27,6 +27,7 @@ interface CircularProgressCardProps {
   hideTarget?: boolean;
   forecastValue?: number | null;
   hideValues?: boolean;
+  forceAnnualLabel?: boolean;
 }
 
 const nonAccumulativeKeywords = [
@@ -174,6 +175,7 @@ export function CircularProgressCard({
   hideTarget = false,
   forecastValue,
   hideValues = false,
+  forceAnnualLabel = false,
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -334,7 +336,7 @@ export function CircularProgressCard({
           {!hideTarget && (
           <div>
             <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-              {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
+              {forceAnnualLabel ? "Meta Anual" : isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
             <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
               {hideValues ? "••••••" :
