@@ -341,6 +341,18 @@ export function CircularProgressCard({
           </div>
           )}
 
+          {/* Valor Previsto - middle (only when available and month selected) */}
+          {isMonthSelected && forecastValue != null && (
+          <div>
+            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+              Previsto
+            </p>
+            <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+              {formatMetricValue(forecastValue, metric.unit, metric.name)}
+            </p>
+          </div>
+          )}
+
           {/* Realized - bottom */}
           <div>
             <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
