@@ -962,7 +962,7 @@ const Index = () => {
                                     const isReceitaEmp = metric.id === RECEITA_EMP_ID;
                                     const isReceitaTrab = metric.id === RECEITA_TRAB_ID;
                                     const isReceitaTrib = metric.id === RECEITA_TRIB_ID;
-                                    const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_ANUAL_ID;
+                                    const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_MENSAL_ID;
                                     let revSumMonthly: number | null = null;
                                     let revSumAccumulated = 0;
 
