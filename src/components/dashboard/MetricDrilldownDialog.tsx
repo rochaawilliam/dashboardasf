@@ -65,6 +65,9 @@ interface HistoryEntry {
 const isContractMetric = (name: string) =>
   name.toLowerCase().includes("novos contratos") && !name.toLowerCase().includes("off-line") && !name.toLowerCase().includes("on-line");
 
+const isForecastMetric = (name: string) =>
+  name === "Receita Total Mensal";
+
 const MONTH_NAMES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
