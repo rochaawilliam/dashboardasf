@@ -1049,7 +1049,8 @@ const Index = () => {
                                             hideTarget={isResultadoAcumulado}
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
-                                            forceAnnualLabel={isARR} />
+                                            forceAnnualLabel={isARR || isResultadoAcumulado}
+                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null} />
                                     </div>
                                   </DraggableCardWrapper>);
 
