@@ -47,7 +47,9 @@ import {
   Target,
   TrendingUp,
   Settings2,
-  Move } from
+  Move,
+  Eye,
+  EyeOff } from
 "lucide-react";
 import {
   useMetrics,
