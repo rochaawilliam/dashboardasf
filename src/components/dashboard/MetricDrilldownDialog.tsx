@@ -296,11 +296,11 @@ export function MetricDrilldownDialog({
       const month = i + 1;
       const monthStr = String(month).padStart(2, "0");
       const realizado = history
-        .filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`) && e.source !== "forecast")
+        .filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`))
         .reduce((sum, e) => sum + Number(e.value), 0);
       const target = monthlyTargetsData?.find((t) => t.month === month);
-      const previsto = target?.target_value ?? 0;
-      return { name: name.substring(0, 3), previsto, realizado };
+      const meta = target?.target_value ?? 0;
+      return { name: name.substring(0, 3), meta, realizado };
     });
   }, [history, monthlyTargetsData, filterYear, metric.name]);
 
