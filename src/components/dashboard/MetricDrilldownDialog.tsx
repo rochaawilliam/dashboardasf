@@ -113,6 +113,21 @@ export function MetricDrilldownDialog({
     enabled: open,
   });
 
+  // Fetch monthly targets for revenue chart
+  const { data: monthlyTargetsData } = useQuery({
+    queryKey: ["monthly_targets_drilldown", metric.id, filterYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("monthly_targets")
+        .select("*")
+        .eq("metric_id", metric.id)
+        .eq("year", parseInt(filterYear));
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && isRevenueMetric(metric.name),
+  });
+
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["metric_history"] });
     queryClient.invalidateQueries({ queryKey: ["metric_drilldown", metric.id] });
