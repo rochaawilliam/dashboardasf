@@ -319,23 +319,32 @@ export function MetricDrilldownDialog({
   }, [history, filterYear]);
 
   // Revenue bar chart data: Previsto vs Realizado per month
+  // Realizado = sum of all revenue component sub-metrics (same as the card value)
   const revenueChartData = useMemo(() => {
-    if (!isRevenueMetric(metric.name) || !history) return [];
+    if (!isRevenueMetric(metric.name)) return [];
+    const year = parseInt(filterYear);
     return MONTH_NAMES.map((name, i) => {
       const month = i + 1;
+      // Previsto from forecast entries on the Receita Total Mensal metric itself
       const monthStr = String(month).padStart(2, "0");
-      const monthEntries = history.filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`));
+      const monthEntries = history?.filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`)) ?? [];
       const previsto = monthEntries
         .filter((e) => e.source === "forecast")
         .reduce((sum, e) => sum + Number(e.value), 0);
-      const realizado = monthEntries
-        .filter((e) => e.source !== "forecast")
-        .reduce((sum, e) => sum + Number(e.value), 0);
+      // Realizado = sum of all revenue component history entries for this month
+      let realizado = 0;
+      revenueComponentHistory?.forEach((h) => {
+        if (h.source === "forecast") return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === year && ref.month === month) {
+          realizado += Number(h.value);
+        }
+      });
       const target = monthlyTargetsData?.find((t) => t.month === month);
       const meta = target?.target_value ?? 0;
       return { name: name.substring(0, 3), meta, previsto, realizado };
     });
-  }, [history, monthlyTargetsData, filterYear, metric.name]);
+  }, [history, revenueComponentHistory, monthlyTargetsData, filterYear, metric.name]);
 
   return (
     <>
