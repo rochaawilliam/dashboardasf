@@ -931,11 +931,11 @@ const Index = () => {
                                      let eficienciaProjecao = 0;
 
                                      if (isResultadoAcumulado || isEficienciaReceita) {
-                                       // Get all revenue metrics for computing totals
-                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
-                                       const allRevenueMetrics = organizedSubcategories.
-                                       filter((s) => revenueSubcatNames.includes(s.name)).
-                                       flatMap((s) => s.metrics);
+                                       // Use only leaf-level revenue metric IDs (no computed sum cards)
+                                       const leafRevenueIds = new Set([
+                                         ...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID
+                                       ]);
+                                       const allRevenueMetrics = (metrics ?? []).filter((m) => leafRevenueIds.has(m.id));
 
                                        const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
 
