@@ -20,12 +20,10 @@ interface MobileDrawerProps {
 }
 
 const categories: { id: MetricCategory; title: string; icon: any; variant: string }[] = [
-  { id: "lucratividade", title: "Lucratividade", icon: DollarSign, variant: "primary" },
-  { id: "execucao_comercial", title: "Execução Comercial", icon: Briefcase, variant: "accent" },
-  { id: "experiencia_cliente", title: "Gestão de Crescimento", icon: Rocket, variant: "accent" },
-  { id: "produtividade", title: "Produtividade", icon: Zap, variant: "warning" },
-  { id: "gestao_pessoas", title: "Gestão de Pessoas", icon: Users, variant: "success" },
-  { id: "aprendizado_crescimento", title: "Aprendizado e Crescimento", icon: GraduationCap, variant: "primary" },
+  { id: "experiencia_cliente", title: "Crescimento", icon: Rocket, variant: "accent" },
+  { id: "produtividade", title: "Jurídico", icon: Zap, variant: "warning" },
+  { id: "gestao_pessoas", title: "Time ASF", icon: Users, variant: "success" },
+  { id: "lucratividade", title: "Financeiro", icon: DollarSign, variant: "primary" },
 ];
 
 const variantStyles: Record<string, string> = {
