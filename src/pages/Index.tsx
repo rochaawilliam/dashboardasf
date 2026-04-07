@@ -969,7 +969,7 @@ const Index = () => {
                                        eficienciaProjecao = monthsElapsed > 0 ? receitaAcumulada / monthsElapsed * 12 : 0;
 
                                        if (isResultadoAcumulado) {
-                                         dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: metaAnual };
+                                         dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0 };
                                        }
                                        if (isEficienciaReceita) {
                                          dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
