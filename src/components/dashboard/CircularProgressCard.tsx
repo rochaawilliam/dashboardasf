@@ -159,11 +159,6 @@ function CircularProgress({
 
 }
 
-// Wrapper that accepts hideValues to pass down to CircularProgress
-function CircularProgressWithHide({ hideValues, ...props }: { hideValues?: boolean; percentage: number; rawPercentage?: number; size?: number; strokeWidth?: number }) {
-  return <CircularProgress {...props} hideValues={hideValues} />;
-}
-
 export function CircularProgressCard({
   metric,
   monthlyValue,
