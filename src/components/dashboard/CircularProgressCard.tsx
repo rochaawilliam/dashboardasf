@@ -25,6 +25,7 @@ interface CircularProgressCardProps {
   monthlyTargetOverride?: number | null;
   onCardClick?: () => void;
   hideTarget?: boolean;
+  forecastValue?: number | null;
 }
 
 const nonAccumulativeKeywords = [
