@@ -109,12 +109,12 @@ const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;s
 };
 
 const categoryOrder: MetricCategory[] = [
-"lucratividade",
 "execucao_comercial",
 "experiencia_cliente",
 "produtividade",
 "gestao_pessoas",
-"aprendizado_crescimento"];
+"aprendizado_crescimento",
+"lucratividade"];
 
 
 const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
