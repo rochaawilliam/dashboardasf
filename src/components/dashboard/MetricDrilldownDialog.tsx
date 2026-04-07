@@ -42,7 +42,22 @@ import { ptBR } from "date-fns/locale";
 import { parseLocalDate } from "@/utils/dateUtils";
 import type { Metric } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
+import { getRefMonthYear } from "@/utils/dateUtils";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+
+// All revenue component metric IDs that sum up to Receita Total Mensal
+const ALL_REVENUE_COMPONENT_IDS = [
+  "b3291022-409f-4679-bddc-bc687f3d9d68", // Emp Assessoria
+  "560bece4-6e53-46be-add1-fa6dfdbdaaf7", // Emp Consultoria
+  "de3186d7-1b20-41e2-8fd9-9fef114096bb", // Emp Pontual
+  "be1fcc4f-c1b8-476a-b330-e2b8675ae458", // Trab Assessoria
+  "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1", // Trab Consultoria
+  "f1fd7525-963f-401e-a1e1-7b449f022bbd", // Trab Pontual
+  "b829cf12-3f66-4a0c-8753-70260a9645d8", // Trib Assessoria
+  "847ce517-c118-46c9-9012-c69dfa5474d9", // Trib Consultoria
+  "6122d0fc-e606-4020-afab-45658e063158", // Trib Pontual
+  "c0a1fe29-7d31-424c-9f86-6766981dcd82", // Outras Receitas
+];
 
 interface MetricDrilldownDialogProps {
   metric: Metric;
@@ -124,6 +139,20 @@ export function MetricDrilldownDialog({
         .eq("year", parseInt(filterYear));
       if (error) throw error;
       return data;
+    },
+    enabled: open && isRevenueMetric(metric.name),
+  });
+
+  // Fetch all revenue component history for the chart (Realizado = sum of all sub-metrics)
+  const { data: revenueComponentHistory } = useQuery({
+    queryKey: ["revenue_components_history", filterYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("metric_history")
+        .select("*")
+        .in("metric_id", ALL_REVENUE_COMPONENT_IDS);
+      if (error) throw error;
+      return data as HistoryEntry[];
     },
     enabled: open && isRevenueMetric(metric.name),
   });
@@ -290,23 +319,32 @@ export function MetricDrilldownDialog({
   }, [history, filterYear]);
 
   // Revenue bar chart data: Previsto vs Realizado per month
+  // Realizado = sum of all revenue component sub-metrics (same as the card value)
   const revenueChartData = useMemo(() => {
-    if (!isRevenueMetric(metric.name) || !history) return [];
+    if (!isRevenueMetric(metric.name)) return [];
+    const year = parseInt(filterYear);
     return MONTH_NAMES.map((name, i) => {
       const month = i + 1;
+      // Previsto from forecast entries on the Receita Total Mensal metric itself
       const monthStr = String(month).padStart(2, "0");
-      const monthEntries = history.filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`));
+      const monthEntries = history?.filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`)) ?? [];
       const previsto = monthEntries
         .filter((e) => e.source === "forecast")
         .reduce((sum, e) => sum + Number(e.value), 0);
-      const realizado = monthEntries
-        .filter((e) => e.source !== "forecast")
-        .reduce((sum, e) => sum + Number(e.value), 0);
+      // Realizado = sum of all revenue component history entries for this month
+      let realizado = 0;
+      revenueComponentHistory?.forEach((h) => {
+        if (h.source === "forecast") return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === year && ref.month === month) {
+          realizado += Number(h.value);
+        }
+      });
       const target = monthlyTargetsData?.find((t) => t.month === month);
       const meta = target?.target_value ?? 0;
       return { name: name.substring(0, 3), meta, previsto, realizado };
     });
-  }, [history, monthlyTargetsData, filterYear, metric.name]);
+  }, [history, revenueComponentHistory, monthlyTargetsData, filterYear, metric.name]);
 
   return (
     <>
