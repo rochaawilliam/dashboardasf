@@ -263,6 +263,7 @@ const Index = () => {
 
     const values: Record<string, number> = {};
     historyData.forEach((h) => {
+      if ((h as any).source === 'forecast') return; // Exclude forecast entries
       const ref = getRefMonthYear(h.period_type, h.recorded_at);
       if (ref.year === selectedYear && ref.month === selectedMonth) {
         values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
@@ -277,6 +278,7 @@ const Index = () => {
 
     const values: Record<string, number> = {};
     historyData.forEach((h) => {
+      if ((h as any).source === 'forecast') return; // Exclude forecast entries
       const ref = getRefMonthYear(h.period_type, h.recorded_at);
       if (ref.year === selectedYear) {
         values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
@@ -284,6 +286,21 @@ const Index = () => {
     });
     return values;
   }, [historyData, selectedYear]);
+
+  // Compute forecast values per metric per month (source='forecast')
+  const forecastValues = useMemo(() => {
+    if (!historyData || selectedMonth === null) return {};
+
+    const values: Record<string, number> = {};
+    historyData.forEach((h) => {
+      if ((h as any).source !== 'forecast') return;
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      if (ref.year === selectedYear && ref.month === selectedMonth) {
+        values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
+      }
+    });
+    return values;
+  }, [historyData, selectedMonth, selectedYear]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
@@ -312,7 +329,7 @@ const Index = () => {
   // Computed revenue cards
   const RESULTADO_ACUMULADO_ID = "8a4ed9b7-7e8b-45ff-a957-3818181a83f6";
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
-  const RECEITA_TOTAL_ANUAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
+  const RECEITA_TOTAL_MENSAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
 
   // Computed revenue sum cards
   const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";
@@ -939,7 +956,7 @@ const Index = () => {
                                       }
 
                                       // Eficiência de Receita = receita acumulada / meta anual * 100
-                                      const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_ANUAL_ID);
+                                      const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_MENSAL_ID);
                                       const metaAnual = receitaTotalMetric?.target_value || 2218000;
                                       const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
                                       eficienciaReceitaValue = metaAnual > 0 ? receitaAcumulada / metaAnual * 100 : 0;
@@ -962,7 +979,7 @@ const Index = () => {
                                     const isReceitaEmp = metric.id === RECEITA_EMP_ID;
                                     const isReceitaTrab = metric.id === RECEITA_TRAB_ID;
                                     const isReceitaTrib = metric.id === RECEITA_TRIB_ID;
-                                    const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_ANUAL_ID;
+                                    const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_MENSAL_ID;
                                     let revSumMonthly: number | null = null;
                                     let revSumAccumulated = 0;
 
@@ -1027,8 +1044,9 @@ const Index = () => {
                                             selectedMonth={selectedMonth}
                                             monthlyTargets={monthlyTargets}
                                             monthlyTargetOverride={cardMonthlyTarget}
-                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                            hideTarget={isResultadoAcumulado} />
+                                            onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
+                                            hideTarget={isResultadoAcumulado}
+                                            forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined} />
                                     </div>
                                   </DraggableCardWrapper>);
 

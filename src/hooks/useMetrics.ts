@@ -34,6 +34,8 @@ export interface MetricHistory {
   recorded_at: string;
   period_type: string;
   created_at: string;
+  source?: string | null;
+  comment?: string | null;
 }
 
 export interface TrainingHours {

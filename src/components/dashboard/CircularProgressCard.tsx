@@ -25,6 +25,7 @@ interface CircularProgressCardProps {
   monthlyTargetOverride?: number | null;
   onCardClick?: () => void;
   hideTarget?: boolean;
+  forecastValue?: number | null;
 }
 
 const nonAccumulativeKeywords = [
@@ -168,7 +169,8 @@ export function CircularProgressCard({
   monthlyTargets = [],
   monthlyTargetOverride,
   onCardClick,
-  hideTarget = false
+  hideTarget = false,
+  forecastValue,
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -335,6 +337,18 @@ export function CircularProgressCard({
               {isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
+            </p>
+          </div>
+          )}
+
+          {/* Valor Previsto - middle (only when available and month selected) */}
+          {isMonthSelected && forecastValue != null && (
+          <div>
+            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+              Previsto
+            </p>
+            <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+              {formatMetricValue(forecastValue, metric.unit, metric.name)}
             </p>
           </div>
           )}

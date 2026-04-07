@@ -65,6 +65,9 @@ interface HistoryEntry {
 const isContractMetric = (name: string) =>
   name.toLowerCase().includes("novos contratos") && !name.toLowerCase().includes("off-line") && !name.toLowerCase().includes("on-line");
 
+const isForecastMetric = (name: string) =>
+  name === "Receita Total Mensal";
+
 const MONTH_NAMES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
@@ -349,27 +352,48 @@ export function MetricDrilldownDialog({
                       maxLength={200}
                     />
                   </div>
-                  {isContractMetric(metric.name) && (
-                    <div>
-                      <label className="text-[10px] text-muted-foreground mb-1 block">Origem do Contrato</label>
-                      <div className="flex gap-2">
-                        {[{ value: "online", label: "On-line" }, { value: "offline", label: "Off-line" }].map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => setNewSource(newSource === opt.value ? null : opt.value)}
-                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors border ${
-                              newSource === opt.value
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
-                            }`}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                   {isForecastMetric(metric.name) && (
+                     <div>
+                       <label className="text-[10px] text-muted-foreground mb-1 block">Tipo de Lançamento</label>
+                       <div className="flex gap-2">
+                         {[{ value: null, label: "Realizado" }, { value: "forecast", label: "Previsto" }].map((opt) => (
+                           <button
+                             key={opt.value ?? "realizado"}
+                             type="button"
+                             onClick={() => setNewSource(opt.value)}
+                             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors border ${
+                               newSource === opt.value
+                                 ? "bg-primary text-primary-foreground border-primary"
+                                 : "bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                             }`}
+                           >
+                             {opt.label}
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+                   {isContractMetric(metric.name) && (
+                     <div>
+                       <label className="text-[10px] text-muted-foreground mb-1 block">Origem do Contrato</label>
+                       <div className="flex gap-2">
+                         {[{ value: "online", label: "On-line" }, { value: "offline", label: "Off-line" }].map((opt) => (
+                           <button
+                             key={opt.value}
+                             type="button"
+                             onClick={() => setNewSource(newSource === opt.value ? null : opt.value)}
+                             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors border ${
+                               newSource === opt.value
+                                 ? "bg-primary text-primary-foreground border-primary"
+                                 : "bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                             }`}
+                           >
+                             {opt.label}
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   )}
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -504,8 +528,9 @@ export function MetricDrilldownDialog({
                     <TableHead>Referência</TableHead>
                     <TableHead>Lançado em</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
-                    {isContractMetric(metric.name) && <TableHead>Origem</TableHead>}
-                    <TableHead>Comentário</TableHead>
+                     {isContractMetric(metric.name) && <TableHead>Origem</TableHead>}
+                     {isForecastMetric(metric.name) && <TableHead>Tipo</TableHead>}
+                     <TableHead>Comentário</TableHead>
                     {hasActions && <TableHead className="text-right w-[100px]">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
@@ -562,6 +587,15 @@ export function MetricDrilldownDialog({
                               {entry.source === "online" ? "On-line" : entry.source === "offline" ? "Off-line" : "—"}
                             </span>
                           )}
+                        </TableCell>
+                      )}
+                      {isForecastMetric(metric.name) && (
+                        <TableCell>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            entry.source === "forecast" ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
+                          }`}>
+                            {entry.source === "forecast" ? "Previsto" : "Realizado"}
+                          </span>
                         </TableCell>
                       )}
                       <TableCell className="max-w-[150px]">
