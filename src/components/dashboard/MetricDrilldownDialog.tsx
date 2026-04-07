@@ -42,7 +42,7 @@ import { ptBR } from "date-fns/locale";
 import { parseLocalDate } from "@/utils/dateUtils";
 import type { Metric } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 
 interface MetricDrilldownDialogProps {
   metric: Metric;
