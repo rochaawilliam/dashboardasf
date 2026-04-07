@@ -1065,7 +1065,7 @@ const Index = () => {
 
                       }
 
-                          {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 &&
+                          {category === "gestao_pessoas" && trainingHours && trainingHours.length > 0 &&
                       <div className="mt-4 sm:mt-6">
                               <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
                               <div className="dashboard-grid">
