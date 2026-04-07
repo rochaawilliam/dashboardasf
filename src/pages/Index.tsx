@@ -780,7 +780,7 @@ const Index = () => {
 
                         // Compute Receita Total as sum of revenue subcategories
                         const isReceitaTotal = category === "lucratividade" && subcat.name === "Receita Total";
-                        const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                        const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
 
                         const getReceitaTotalMetrics = () => {
                           if (!isReceitaTotal) return subcat.metrics;
