@@ -35,7 +35,7 @@ const SDR_METRIC_IDS = [REUNIOES_EMP, REUNIOES_TRAB, REUNIOES_TRIB, PROPOSTAS_EM
 function getHalfCommission(percentage: number): number {
   const rounded = Math.round(percentage);
   for (const tier of SDR_TIERS) {
-    if (rounded >= tier.min) return Math.round(HALF_COMMISSION * tier.pct);
+    if (rounded >= tier.min) return Math.round(tier.value / 2);
   }
   return 0;
 }
