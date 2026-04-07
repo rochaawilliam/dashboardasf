@@ -131,7 +131,7 @@ const Index = () => {
     division: "all"
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("execucao_comercial");
+  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("experiencia_cliente");
   const [showFinancialValues, setShowFinancialValues] = useState(false);
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
