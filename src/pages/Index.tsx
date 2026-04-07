@@ -894,20 +894,26 @@ const Index = () => {
                                       dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
                                     }
 
-                                    // Compute ARR % Anual = same as accumulated MRR % (weighted avg across year)
+                                    // Compute ARR % Anual = acumulado receita assessoria / soma metas mensais assessoria no ano
                                     const isARR = metric.id === ARR_METRIC_ID;
                                     let arrMonthlyValue: number | null = null;
                                     let arrAccumulatedValue = 0;
                                     if (isARR) {
-                                      // Busca dinâmica da meta anual de Receita Total do banco
-                                      const receitaTotalMetric = metrics?.find((m) => m.id === "b94952b3-b811-4200-872e-810b215240f6");
-                                      const receitaAnualTotal = receitaTotalMetric?.target_value || 2218000;
+                                      const assessoriaIds = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRIB_ASSESSORIA_ID];
+                                      
+                                      // Meta anual = soma das metas mensais de assessoria no ano
+                                      const metaAnualAssessoria = assessoriaIds.reduce((total, id) => {
+                                        for (let mo = 1; mo <= 12; mo++) {
+                                          const mt = monthlyTargets?.find((t) => t.metric_id === id && t.month === mo && t.year === selectedYear);
+                                          total += mt?.target_value ?? 0;
+                                        }
+                                        return total;
+                                      }, 0);
 
-                                      // ARR % = soma acumulada das assessorias / receita anual total * 100
-                                      const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      arrAccumulatedValue = receitaAnualTotal > 0 ? assessoriaAccum / receitaAnualTotal * 100 : 0;
+                                      // Realizado acumulado de assessoria
+                                      const assessoriaAccum = assessoriaIds.reduce((sum, id) => sum + (accumulatedValues[id] ?? 0), 0);
+                                      arrAccumulatedValue = metaAnualAssessoria > 0 ? assessoriaAccum / metaAnualAssessoria * 100 : 0;
 
-                                      // When a month is selected, show accumulated up to that month
                                       arrMonthlyValue = arrAccumulatedValue;
                                       dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
                                     }
