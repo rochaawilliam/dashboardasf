@@ -894,25 +894,24 @@ const Index = () => {
                                       dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
                                     }
 
-                                    // Compute ARR % Anual = acumulado receita assessoria / soma metas mensais assessoria no ano
+                                    // Compute ARR % Anual = receita recorrente (assessoria) acumulada / receita total realizada acumulada * 100
                                     const isARR = metric.id === ARR_METRIC_ID;
                                     let arrMonthlyValue: number | null = null;
                                     let arrAccumulatedValue = 0;
                                     if (isARR) {
                                       const assessoriaIds = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRIB_ASSESSORIA_ID];
-                                      
-                                      // Meta anual = soma das metas mensais de assessoria no ano
-                                      const metaAnualAssessoria = assessoriaIds.reduce((total, id) => {
-                                        for (let mo = 1; mo <= 12; mo++) {
-                                          const mt = monthlyTargets?.find((t) => t.metric_id === id && t.month === mo && t.year === selectedYear);
-                                          total += mt?.target_value ?? 0;
-                                        }
-                                        return total;
-                                      }, 0);
 
-                                      // Realizado acumulado de assessoria
+                                      // Receita recorrente (assessoria) acumulada
                                       const assessoriaAccum = assessoriaIds.reduce((sum, id) => sum + (accumulatedValues[id] ?? 0), 0);
-                                      arrAccumulatedValue = metaAnualAssessoria > 0 ? assessoriaAccum / metaAnualAssessoria * 100 : 0;
+
+                                      // Receita total realizada acumulada (todas as receitas)
+                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                      const allRevenueMetrics = organizedSubcategories
+                                        .filter((s) => revenueSubcatNames.includes(s.name))
+                                        .flatMap((s) => s.metrics);
+                                      const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+
+                                      arrAccumulatedValue = receitaTotalAccum > 0 ? assessoriaAccum / receitaTotalAccum * 100 : 0;
 
                                       arrMonthlyValue = arrAccumulatedValue;
                                       dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
