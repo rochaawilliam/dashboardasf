@@ -15,22 +15,18 @@ import {
   type Subcategory,
 } from "@/hooks/useSubcategories";
 
-const categoryLabels: Record<MetricCategory, string> = {
-  lucratividade: "Lucratividade",
-  execucao_comercial: "Execução Comercial",
-  experiencia_cliente: "Gestão de Crescimento",
-  produtividade: "Produtividade",
-  gestao_pessoas: "Gestão de Pessoas",
-  aprendizado_crescimento: "Aprendizado e Crescimento",
+const categoryLabels: Record<string, string> = {
+  lucratividade: "Financeiro",
+  experiencia_cliente: "Crescimento",
+  produtividade: "Jurídico",
+  gestao_pessoas: "Time ASF",
 };
 
 const categoryOrder: MetricCategory[] = [
-  "lucratividade",
-  "execucao_comercial",
   "experiencia_cliente",
   "produtividade",
   "gestao_pessoas",
-  "aprendizado_crescimento",
+  "lucratividade",
 ];
 
 interface SubcategoryManagerDialogProps {

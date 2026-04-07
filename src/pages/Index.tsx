@@ -613,7 +613,7 @@ const Index = () => {
             {/* Category Tabs with Swipe Support */}
             <SwipeableTabs<MetricCategory>
             tabs={categoryOrder}
-            activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
+            activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "experiencia_cliente" : activeTab}
             onTabChange={(tab) => setActiveTab(tab as MetricCategory)}>
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">

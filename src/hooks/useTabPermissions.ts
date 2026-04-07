@@ -24,12 +24,12 @@ export const ALL_TABS: TabKey[] = [
 ];
 
 export const TAB_LABELS: Record<TabKey, string> = {
-  lucratividade: "Lucratividade",
-  execucao_comercial: "Execução Comercial",
-  experiencia_cliente: "Gestão de Crescimento",
-  produtividade: "Produtividade",
-  gestao_pessoas: "Gestão de Pessoas",
-  aprendizado_crescimento: "Aprendizado e Crescimento",
+  lucratividade: "Financeiro",
+  execucao_comercial: "Crescimento",
+  experiencia_cliente: "Crescimento",
+  produtividade: "Jurídico",
+  gestao_pessoas: "Time ASF",
+  aprendizado_crescimento: "Time ASF",
 };
 
 export const PERMISSION_LABELS: Record<PermissionType, string> = {
