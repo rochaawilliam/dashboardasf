@@ -263,6 +263,7 @@ const Index = () => {
 
     const values: Record<string, number> = {};
     historyData.forEach((h) => {
+      if ((h as any).source === 'forecast') return; // Exclude forecast entries
       const ref = getRefMonthYear(h.period_type, h.recorded_at);
       if (ref.year === selectedYear && ref.month === selectedMonth) {
         values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
