@@ -42,7 +42,22 @@ import { ptBR } from "date-fns/locale";
 import { parseLocalDate } from "@/utils/dateUtils";
 import type { Metric } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
+import { getRefMonthYear } from "@/utils/dateUtils";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+
+// All revenue component metric IDs that sum up to Receita Total Mensal
+const ALL_REVENUE_COMPONENT_IDS = [
+  "b3291022-409f-4679-bddc-bc687f3d9d68", // Emp Assessoria
+  "560bece4-6e53-46be-add1-fa6dfdbdaaf7", // Emp Consultoria
+  "de3186d7-1b20-41e2-8fd9-9fef114096bb", // Emp Pontual
+  "be1fcc4f-c1b8-476a-b330-e2b8675ae458", // Trab Assessoria
+  "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1", // Trab Consultoria
+  "f1fd7525-963f-401e-a1e1-7b449f022bbd", // Trab Pontual
+  "b829cf12-3f66-4a0c-8753-70260a9645d8", // Trib Assessoria
+  "847ce517-c118-46c9-9012-c69dfa5474d9", // Trib Consultoria
+  "6122d0fc-e606-4020-afab-45658e063158", // Trib Pontual
+  "c0a1fe29-7d31-424c-9f86-6766981dcd82", // Outras Receitas
+];
 
 interface MetricDrilldownDialogProps {
   metric: Metric;
