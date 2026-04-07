@@ -47,7 +47,9 @@ import {
   Target,
   TrendingUp,
   Settings2,
-  Move } from
+  Move,
+  Eye,
+  EyeOff } from
 "lucide-react";
 import {
   useMetrics,
@@ -63,8 +65,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;subtitle: string;icon: any;variant: "primary" | "accent" | "success" | "warning";}> = {
   lucratividade: {
-    title: "Lucratividade",
-    shortTitle: "Lucro",
+    title: "Financeiro",
+    shortTitle: "Financeiro",
     subtitle: "Aumentar lucratividade e margem do negócio",
     icon: DollarSign,
     variant: "primary"
@@ -107,12 +109,12 @@ const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;s
 };
 
 const categoryOrder: MetricCategory[] = [
-"lucratividade",
 "execucao_comercial",
 "experiencia_cliente",
 "produtividade",
 "gestao_pessoas",
-"aprendizado_crescimento"];
+"aprendizado_crescimento",
+"lucratividade"];
 
 
 const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
@@ -147,7 +149,8 @@ const Index = () => {
     division: "all"
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("lucratividade");
+  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("execucao_comercial");
+  const [showFinancialValues, setShowFinancialValues] = useState(false);
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
@@ -357,8 +360,7 @@ const Index = () => {
     const novosContratosIds = new Set([
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
-    "4c298090-3652-442c-a69d-970ff23781eb" // Novos Contratos Patenteia
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
     ]);
 
     let onlineMonthly = 0,offlineMonthly = 0,onlineAcc = 0,offlineAcc = 0;
@@ -383,8 +385,7 @@ const Index = () => {
     const novosContratosIds = [
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
-    "4c298090-3652-442c-a69d-970ff23781eb" // Patenteia
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
     ];
     const month = selectedMonth ?? new Date().getMonth() + 1;
     const year = selectedYear;
@@ -528,7 +529,7 @@ const Index = () => {
             mobileDrawer={
             <div data-tour="mobile-menu">
                 <MobileDrawer
-                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
                 onTabChange={(tab) => setActiveTab(tab as MetricCategory)}
                 categoryMetricsCounts={categoryMetricsCounts} />
 
@@ -590,7 +591,7 @@ const Index = () => {
             <div className="pointer-events-none select-none blur-md opacity-50 min-h-[400px]">
               <SwipeableTabs<MetricCategory>
               tabs={categoryOrder}
-              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
               onTabChange={(tab) => setActiveTab(tab as MetricCategory)}>
 
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
@@ -630,7 +631,7 @@ const Index = () => {
             {/* Category Tabs with Swipe Support */}
             <SwipeableTabs<MetricCategory>
             tabs={categoryOrder}
-            activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+            activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
             onTabChange={(tab) => setActiveTab(tab as MetricCategory)}>
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
@@ -740,8 +741,20 @@ const Index = () => {
                           subtitle={config.subtitle}
                           icon={config.icon}
                           variant={config.variant} />
-                            {isAdmin &&
-                        <div className="flex items-center gap-1.5 mb-2">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              {category === "lucratividade" &&
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
+                                  onClick={() => setShowFinancialValues(!showFinancialValues)}
+                                  title={showFinancialValues ? "Ocultar valores" : "Mostrar valores"}>
+                                  {showFinancialValues ? <Eye className="h-3.5 w-3.5 sm:h-3 sm:w-3" /> : <EyeOff className="h-3.5 w-3.5 sm:h-3 sm:w-3" />}
+                                  <span className="hidden sm:inline">{showFinancialValues ? "Ocultar" : "Mostrar"}</span>
+                                </Button>
+                              }
+                              {isAdmin &&
+                            <>
                                 <Button
                             variant={isDragMode ? "default" : "outline"}
                             size="sm"
@@ -762,8 +775,9 @@ const Index = () => {
                                   <Settings2 className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                   <span className="hidden sm:inline">Subcategorias</span>
                                 </Button>
-                              </div>
+                              </>
                         }
+                            </div>
                           </div>
 
                       
@@ -777,7 +791,7 @@ const Index = () => {
 
                         // Compute Receita Total as sum of revenue subcategories
                         const isReceitaTotal = category === "lucratividade" && subcat.name === "Receita Total";
-                        const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                        const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
 
                         const getReceitaTotalMetrics = () => {
                           if (!isReceitaTotal) return subcat.metrics;
@@ -880,7 +894,7 @@ const Index = () => {
                                     let mrrAccumulatedValue = 0;
                                     if (isMRR) {
                                       // Get all revenue metrics from subcategories for Receita Total denominator
-                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
                                       const allRevenueMetrics = organizedSubcategories.
                                       filter((s) => revenueSubcatNames.includes(s.name)).
                                       flatMap((s) => s.metrics);
@@ -929,7 +943,7 @@ const Index = () => {
 
                                     if (isResultadoAcumulado || isEficienciaReceita) {
                                       // Get all revenue metrics for computing totals
-                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
                                       const allRevenueMetrics = organizedSubcategories.
                                       filter((s) => revenueSubcatNames.includes(s.name)).
                                       flatMap((s) => s.metrics);
@@ -1046,7 +1060,8 @@ const Index = () => {
                                             monthlyTargetOverride={cardMonthlyTarget}
                                             onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
                                             hideTarget={isResultadoAcumulado}
-                                            forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined} />
+                                            forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
+                                            hideValues={category === "lucratividade" && !showFinancialValues} />
                                     </div>
                                   </DraggableCardWrapper>);
 

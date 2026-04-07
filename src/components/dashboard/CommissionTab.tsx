@@ -169,7 +169,7 @@ export function CommissionTab({
     7: 168000, 8: 184700, 9: 202800, 10: 234700, 11: 234700, 12: 301800,
   };
 
-  // Compute Receita Total (sum of revenue subcategories, excluding Patenteia)
+  // Compute Receita Total (sum of revenue subcategories)
   const receitaData = useMemo(() => {
     const lucratividadeMetrics = metrics.filter(m => m.category === "lucratividade");
     const organized = organizeMetricsBySubcategory(lucratividadeMetrics, "lucratividade", dbSubcategories, dbAssignments);

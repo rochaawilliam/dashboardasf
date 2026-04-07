@@ -26,6 +26,7 @@ interface CircularProgressCardProps {
   onCardClick?: () => void;
   hideTarget?: boolean;
   forecastValue?: number | null;
+  hideValues?: boolean;
 }
 
 const nonAccumulativeKeywords = [
@@ -89,8 +90,9 @@ function CircularProgress({
   percentage,
   rawPercentage,
   size = 80,
-  strokeWidth = 7
-}: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;}) {
+  strokeWidth = 7,
+  hideValues = false
+}: {percentage: number;rawPercentage?: number;size?: number;strokeWidth?: number;hideValues?: boolean;}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(percentage, 0), 100);
@@ -147,7 +149,7 @@ function CircularProgress({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
         <span className="text-foreground leading-none font-sans text-center text-xl sm:text-xl lg:text-3xl font-bold tracking-tighter">
-          {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
+          {hideValues ? "•••" : `${formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%`}
         </span>
         <span className="text-muted-foreground mt-0 text-[9px] sm:text-[10px] lg:text-sm">
           Meta
@@ -171,6 +173,7 @@ export function CircularProgressCard({
   onCardClick,
   hideTarget = false,
   forecastValue,
+  hideValues = false,
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -314,13 +317,13 @@ export function CircularProgressCard({
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
           <div className="hidden lg:block">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} hideValues={hideValues} />
           </div>
           <div className="hidden sm:block lg:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={10} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={10} hideValues={hideValues} />
           </div>
           <div className="block sm:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} hideValues={hideValues} />
           </div>
         </div>
         )}
@@ -334,7 +337,8 @@ export function CircularProgressCard({
               {isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
             </p>
             <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
-              {isMonthSelected ?
+              {hideValues ? "••••••" :
+              isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
               formatMetricValue(metric.target_value, metric.unit, metric.name)}
             </p>
@@ -348,7 +352,7 @@ export function CircularProgressCard({
               Previsto
             </p>
             <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
-              {formatMetricValue(forecastValue, metric.unit, metric.name)}
+              {hideValues ? "••••••" : formatMetricValue(forecastValue, metric.unit, metric.name)}
             </p>
           </div>
           )}
@@ -359,7 +363,7 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-              {formatMetricValue(displayValue, metric.unit, metric.name)}
+              {hideValues ? "••••••" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
           {/* Description / projection info */}
@@ -399,7 +403,7 @@ export function CircularProgressCard({
       {!hideTarget && isMonthSelected && !isNonAccumulative &&
       <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
           <span>Meta anual:</span>
-          <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+          <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
         </div>
       }
     </div>);
