@@ -511,7 +511,7 @@ const Index = () => {
             mobileDrawer={
             <div data-tour="mobile-menu">
                 <MobileDrawer
-                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
+                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "experiencia_cliente" : activeTab}
                 onTabChange={(tab) => setActiveTab(tab as MetricCategory)}
                 categoryMetricsCounts={categoryMetricsCounts} />
 
