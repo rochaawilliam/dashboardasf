@@ -27,11 +27,11 @@ export const ptBR = {
   
   // Categories
   categories: {
-    lucratividade: "Lucratividade",
-    experiencia_cliente: "Gestão de Crescimento",
-    produtividade: "Produtividade",
-    gestao_pessoas: "Gestão de Pessoas",
-    aprendizado_crescimento: "Aprendizado e Crescimento",
+    lucratividade: "Financeiro",
+    experiencia_cliente: "Crescimento",
+    produtividade: "Jurídico",
+    gestao_pessoas: "Time ASF",
+    aprendizado_crescimento: "Time ASF",
   },
   
   // Metrics
