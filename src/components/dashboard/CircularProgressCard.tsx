@@ -413,6 +413,13 @@ export function CircularProgressCard({
               {hideValues ? "••••••" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
+          {/* Annual target in footer when viewing a specific month */}
+          {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && (
+            <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
+              <span>Meta anual:</span>
+              <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+            </div>
+          )}
           {/* Description / projection info */}
           {metric.description && (metric.description.startsWith("Projeção") || metric.description.startsWith("Meta anual")) && (
             <p className="text-xs sm:text-sm lg:text-xs text-muted-foreground mt-0 font-medium">
