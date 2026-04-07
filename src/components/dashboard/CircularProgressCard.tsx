@@ -28,6 +28,11 @@ interface CircularProgressCardProps {
   forecastValue?: number | null;
   hideValues?: boolean;
   forceAnnualLabel?: boolean;
+  resultadoData?: {
+    previsto: number;
+    realizado: number;
+    resultado: number;
+  } | null;
 }
 
 const nonAccumulativeKeywords = [
