@@ -883,7 +883,7 @@ const Index = () => {
                                     let mrrAccumulatedValue = 0;
                                     if (isMRR) {
                                       // Get all revenue metrics from subcategories for Receita Total denominator
-                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
                                       const allRevenueMetrics = organizedSubcategories.
                                       filter((s) => revenueSubcatNames.includes(s.name)).
                                       flatMap((s) => s.metrics);
