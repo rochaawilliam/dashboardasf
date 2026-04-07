@@ -528,8 +528,9 @@ export function MetricDrilldownDialog({
                     <TableHead>Referência</TableHead>
                     <TableHead>Lançado em</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
-                    {isContractMetric(metric.name) && <TableHead>Origem</TableHead>}
-                    <TableHead>Comentário</TableHead>
+                     {isContractMetric(metric.name) && <TableHead>Origem</TableHead>}
+                     {isForecastMetric(metric.name) && <TableHead>Tipo</TableHead>}
+                     <TableHead>Comentário</TableHead>
                     {hasActions && <TableHead className="text-right w-[100px]">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
