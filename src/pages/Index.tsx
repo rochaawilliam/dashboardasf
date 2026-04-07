@@ -958,21 +958,39 @@ const Index = () => {
                                        }
                                        resultadoAcumuladoValue = resultadoRealizado - resultadoPrevisto;
 
-                                       // Eficiência de Receita = receita acumulada / meta anual * 100
+                                       // Eficiência de Receita = Realizado / Meta * 100 (mês a mês)
                                        const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_MENSAL_ID);
                                        const metaAnual = receitaTotalMetric?.target_value || 2218000;
-                                       const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                       eficienciaReceitaValue = metaAnual > 0 ? receitaAcumulada / metaAnual * 100 : 0;
 
-                                       // Projeção: se em X meses geramos Y, em 12 meses geramos Y * 12/X
-                                       const monthsElapsed = currentMonthRef - 1 + (selectedMonth !== null ? 1 : 0);
-                                       eficienciaProjecao = monthsElapsed > 0 ? receitaAcumulada / monthsElapsed * 12 : 0;
+                                       if (selectedMonth !== null) {
+                                         // Monthly: realizado do mês / meta do mês
+                                         let monthRealizado = 0;
+                                         allRevenueMetrics.forEach((rm) => {
+                                           historyData?.forEach((h: any) => {
+                                             const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                             if (ref.year === selectedYear && ref.month === selectedMonth && h.metric_id === rm.id) {
+                                               monthRealizado += h.value;
+                                             }
+                                           });
+                                         });
+                                         const metaMes = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0;
+                                         eficienciaReceitaValue = metaMes > 0 ? monthRealizado / metaMes * 100 : 0;
+                                       } else {
+                                         // Annual: realizado acumulado / meta acumulada (soma das metas mensais até agora)
+                                         const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                         let metaAcumulada = 0;
+                                         for (let mo = 1; mo < currentMonthRef; mo++) {
+                                           const mt = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear);
+                                           metaAcumulada += mt?.target_value ?? 0;
+                                         }
+                                         eficienciaReceitaValue = metaAcumulada > 0 ? receitaAcumulada / metaAcumulada * 100 : 0;
+                                       }
 
                                        if (isResultadoAcumulado) {
                                          dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: metaAnual };
                                        }
                                        if (isEficienciaReceita) {
-                                         dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
+                                         dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100 };
                                        }
                                      }
 
