@@ -16,7 +16,7 @@ const inverseMetrics = ["Churn de Clientes", "Turnover"];
 
 // Abbreviations for long metric names
 const abbreviations: Record<string, string> = {
-  "Receita Total Anual": "Receita Total",
+  "Receita Total Mensal": "Receita Total",
   "Receita Área Empresarial": "Empresarial",
   "Receita Área Tributário": "Tributário",
   "Receita Área Trabalhista": "Trabalhista",
