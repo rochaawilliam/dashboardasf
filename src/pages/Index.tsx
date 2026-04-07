@@ -65,8 +65,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;subtitle: string;icon: any;variant: "primary" | "accent" | "success" | "warning";}> = {
   lucratividade: {
-    title: "Lucratividade",
-    shortTitle: "Lucro",
+    title: "Financeiro",
+    shortTitle: "Financeiro",
     subtitle: "Aumentar lucratividade e margem do negócio",
     icon: DollarSign,
     variant: "primary"
