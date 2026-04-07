@@ -550,12 +550,12 @@ export function MetricDrilldownDialog({
             </div>
           )}
 
-          {/* Revenue bar chart: Previsto vs Realizado */}
+          {/* Revenue chart: Realizado (bars) vs Meta (line) */}
           {isRevenueMetric(metric.name) && revenueChartData.length > 0 && (
             <div className="border border-border rounded-lg p-3 bg-muted/20">
-              <p className="text-[10px] font-medium text-muted-foreground mb-2">Previsto vs Realizado — {filterYear}</p>
+              <p className="text-[10px] font-medium text-muted-foreground mb-2">Realizado vs Meta — {filterYear}</p>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={revenueChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <ComposedChart data={revenueChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
@@ -567,20 +567,28 @@ export function MetricDrilldownDialog({
                       fontSize: "12px",
                       color: "hsl(var(--popover-foreground))",
                     }}
-                    formatter={(value: number) => [formatMetricValue(value, metric.unit, metric.name), undefined]}
+                    formatter={(value: number, name: string) => [formatMetricValue(value, metric.unit, metric.name), name]}
                     labelFormatter={(label) => `${label}/${filterYear}`}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
-                  <Bar dataKey="previsto" name="Previsto" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} barSize={16} />
-                  <Bar dataKey="realizado" name="Realizado" radius={[3, 3, 0, 0]} barSize={16}>
+                  <Bar dataKey="realizado" name="Realizado" radius={[3, 3, 0, 0]} barSize={20}>
                     {revenueChartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={entry.realizado >= entry.previsto ? "hsl(142, 65%, 38%)" : "hsl(0, 75%, 48%)"}
+                        fill={entry.realizado >= entry.meta ? "hsl(142, 65%, 38%)" : "hsl(var(--primary))"}
                       />
                     ))}
                   </Bar>
-                </BarChart>
+                  <Line
+                    type="monotone"
+                    dataKey="meta"
+                    name="Meta"
+                    stroke="hsl(var(--destructive))"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: "hsl(var(--destructive))", strokeWidth: 0 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           )}
