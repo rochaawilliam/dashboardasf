@@ -939,7 +939,7 @@ const Index = () => {
                                       }
 
                                       // Eficiência de Receita = receita acumulada / meta anual * 100
-                                      const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_ANUAL_ID);
+                                      const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_MENSAL_ID);
                                       const metaAnual = receitaTotalMetric?.target_value || 2218000;
                                       const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
                                       eficienciaReceitaValue = metaAnual > 0 ? receitaAcumulada / metaAnual * 100 : 0;
