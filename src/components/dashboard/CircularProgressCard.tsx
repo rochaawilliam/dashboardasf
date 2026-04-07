@@ -28,6 +28,11 @@ interface CircularProgressCardProps {
   forecastValue?: number | null;
   hideValues?: boolean;
   forceAnnualLabel?: boolean;
+  resultadoData?: {
+    previsto: number;
+    realizado: number;
+    resultado: number;
+  } | null;
 }
 
 const nonAccumulativeKeywords = [
@@ -176,6 +181,7 @@ export function CircularProgressCard({
   forecastValue,
   hideValues = false,
   forceAnnualLabel = false,
+  resultadoData,
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -332,6 +338,47 @@ export function CircularProgressCard({
 
         {/* Target and Realized values - 2/3 */}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-0">
+          {/* Resultado Acumulado custom layout */}
+          {resultadoData ? (
+            <>
+              <div>
+                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+                  Meta Anual
+                </p>
+                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                  {hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+                  Previsto
+                </p>
+                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                  {hideValues ? "••••••" : formatMetricValue(resultadoData.previsto, metric.unit, metric.name)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+                  Realizado
+                </p>
+                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                  {hideValues ? "••••••" : formatMetricValue(resultadoData.realizado, metric.unit, metric.name)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+                  Resultado
+                </p>
+                <p className={cn(
+                  "leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter",
+                  resultadoData.resultado >= 0 ? "text-success" : "text-destructive"
+                )}>
+                  {hideValues ? "••••••" : `${resultadoData.resultado >= 0 ? "+" : ""}${formatMetricValue(resultadoData.resultado, metric.unit, metric.name)}`}
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
           {/* Target - top */}
           {!hideTarget && (
           <div>
@@ -373,6 +420,8 @@ export function CircularProgressCard({
             <p className="text-xs sm:text-sm lg:text-xs text-muted-foreground mt-0 font-medium">
               📊 {metric.description}
             </p>
+          )}
+            </>
           )}
         </div>
       </div>

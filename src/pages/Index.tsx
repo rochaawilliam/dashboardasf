@@ -924,57 +924,57 @@ const Index = () => {
                                     // Compute Resultado Acumulado ASF and Eficiência de Receita ASF
                                     const isResultadoAcumulado = metric.id === RESULTADO_ACUMULADO_ID;
                                     const isEficienciaReceita = metric.id === EFICIENCIA_RECEITA_ID;
-                                    let resultadoAcumuladoValue = 0;
-                                    let eficienciaReceitaValue = 0;
-                                    let eficienciaProjecao = 0;
+                                     let resultadoAcumuladoValue = 0;
+                                     let resultadoPrevisto = 0;
+                                     let resultadoRealizado = 0;
+                                     let eficienciaReceitaValue = 0;
+                                     let eficienciaProjecao = 0;
 
-                                    if (isResultadoAcumulado || isEficienciaReceita) {
-                                      // Get all revenue metrics for computing totals
-                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
-                                      const allRevenueMetrics = organizedSubcategories.
-                                      filter((s) => revenueSubcatNames.includes(s.name)).
-                                      flatMap((s) => s.metrics);
+                                     if (isResultadoAcumulado || isEficienciaReceita) {
+                                       // Get all revenue metrics for computing totals
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                       const allRevenueMetrics = organizedSubcategories.
+                                       filter((s) => revenueSubcatNames.includes(s.name)).
+                                       flatMap((s) => s.metrics);
 
-                                      const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
+                                       const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
 
-                                      // For each completed month, compute (realizado - meta)
-                                      for (let mo = 1; mo < currentMonthRef; mo++) {
-                                        let monthRealizado = 0;
-                                        let monthMeta = 0;
-                                        allRevenueMetrics.forEach((rm) => {
-                                          // Get realized for this month
-                                          historyData?.forEach((h: any) => {
-                                            const ref = getRefMonthYear(h.period_type, h.recorded_at);
-                                            if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
-                                              monthRealizado += h.value;
-                                            }
-                                          });
-                                          // Get target for this month
-                                          const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
-                                          monthMeta += mt?.target_value ?? 0;
-                                        });
-                                        resultadoAcumuladoValue += monthRealizado - monthMeta;
-                                      }
+                                       // For each month up to currentMonthRef, compute previsto and realizado
+                                       for (let mo = 1; mo <= currentMonthRef; mo++) {
+                                         let monthRealizado = 0;
+                                         let monthMeta = 0;
+                                         allRevenueMetrics.forEach((rm) => {
+                                           historyData?.forEach((h: any) => {
+                                             const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                             if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
+                                               monthRealizado += h.value;
+                                             }
+                                           });
+                                           const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
+                                           monthMeta += mt?.target_value ?? 0;
+                                         });
+                                         resultadoPrevisto += monthMeta;
+                                         resultadoRealizado += monthRealizado;
+                                       }
+                                       resultadoAcumuladoValue = resultadoRealizado - resultadoPrevisto;
 
-                                      // Eficiência de Receita = receita acumulada / meta anual * 100
-                                      const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_MENSAL_ID);
-                                      const metaAnual = receitaTotalMetric?.target_value || 2218000;
-                                      const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                      eficienciaReceitaValue = metaAnual > 0 ? receitaAcumulada / metaAnual * 100 : 0;
+                                       // Eficiência de Receita = receita acumulada / meta anual * 100
+                                       const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_MENSAL_ID);
+                                       const metaAnual = receitaTotalMetric?.target_value || 2218000;
+                                       const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                       eficienciaReceitaValue = metaAnual > 0 ? receitaAcumulada / metaAnual * 100 : 0;
 
-                                      // Projeção: se em X meses geramos Y, em 12 meses geramos Y * 12/X
-                                      const monthsElapsed = currentMonthRef - 1 + (selectedMonth !== null ? 1 : 0);
-                                      eficienciaProjecao = monthsElapsed > 0 ? receitaAcumulada / monthsElapsed * 12 : 0;
+                                       // Projeção: se em X meses geramos Y, em 12 meses geramos Y * 12/X
+                                       const monthsElapsed = currentMonthRef - 1 + (selectedMonth !== null ? 1 : 0);
+                                       eficienciaProjecao = monthsElapsed > 0 ? receitaAcumulada / monthsElapsed * 12 : 0;
 
-                                      if (isResultadoAcumulado) {
-                                        const pctAcumulado = metaAnual > 0 ? resultadoAcumuladoValue / metaAnual * 100 : 0;
-                                        const sign = pctAcumulado >= 0 ? "+" : "";
-                                        dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0, description: `Meta anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(metaAnual)} | ${sign}${pctAcumulado.toFixed(1)}% da meta` };
-                                      }
-                                      if (isEficienciaReceita) {
-                                        dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
-                                      }
-                                    }
+                                       if (isResultadoAcumulado) {
+                                         dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: metaAnual };
+                                       }
+                                       if (isEficienciaReceita) {
+                                         dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
+                                       }
+                                     }
 
                                     // Compute Receita Empresarial/Trabalhista/Tributário as sum of sub-metrics
                                     const isReceitaEmp = metric.id === RECEITA_EMP_ID;
@@ -1049,7 +1049,8 @@ const Index = () => {
                                             hideTarget={isResultadoAcumulado}
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
-                                            forceAnnualLabel={isARR} />
+                                            forceAnnualLabel={isARR || isResultadoAcumulado}
+                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null} />
                                     </div>
                                   </DraggableCardWrapper>);
 
