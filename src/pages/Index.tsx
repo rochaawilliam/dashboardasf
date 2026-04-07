@@ -39,9 +39,7 @@ import {
   DollarSign,
   Users,
   Zap,
-  GraduationCap,
   Rocket,
-  Briefcase,
   Lock,
   LogIn,
   Target,
@@ -63,7 +61,7 @@ import { useMetricNotifications } from "@/hooks/useMetricNotifications";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import { useAuth } from "@/hooks/useAuth";
 
-const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;subtitle: string;icon: any;variant: "primary" | "accent" | "success" | "warning";}> = {
+const categoryConfig: Record<string, {title: string;shortTitle: string;subtitle: string;icon: any;variant: "primary" | "accent" | "success" | "warning";}> = {
   lucratividade: {
     title: "Financeiro",
     shortTitle: "Financeiro",
@@ -71,49 +69,33 @@ const categoryConfig: Record<MetricCategory, {title: string;shortTitle: string;s
     icon: DollarSign,
     variant: "primary"
   },
-  execucao_comercial: {
-    title: "Execução Comercial",
-    shortTitle: "Comercial",
-    subtitle: "Acompanhar pipeline e conversão de vendas",
-    icon: Briefcase,
-    variant: "accent"
-  },
   experiencia_cliente: {
-    title: "Gestão de Crescimento",
+    title: "Crescimento",
     shortTitle: "Crescimento",
-    subtitle: "Entregar experiência consistente e previsível",
+    subtitle: "Acompanhar crescimento comercial e gestão de carteira",
     icon: Rocket,
     variant: "accent"
   },
   produtividade: {
-    title: "Produtividade",
-    shortTitle: "Produtiv.",
+    title: "Jurídico",
+    shortTitle: "Jurídico",
     subtitle: "Garantir eficiência do time jurídico",
     icon: Zap,
     variant: "warning"
   },
   gestao_pessoas: {
-    title: "Gestão de Pessoas",
-    shortTitle: "Pessoas",
+    title: "Time ASF",
+    shortTitle: "Time ASF",
     subtitle: "Construir um time estável, produtivo e engajado",
     icon: Users,
     variant: "success"
   },
-  aprendizado_crescimento: {
-    title: "Aprendizado e Crescimento",
-    shortTitle: "Aprend.",
-    subtitle: "Desenvolver competências técnicas e lideranças internas",
-    icon: GraduationCap,
-    variant: "primary"
-  }
 };
 
 const categoryOrder: MetricCategory[] = [
-"execucao_comercial",
 "experiencia_cliente",
 "produtividade",
 "gestao_pessoas",
-"aprendizado_crescimento",
 "lucratividade"];
 
 
@@ -149,7 +131,7 @@ const Index = () => {
     division: "all"
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("execucao_comercial");
+  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("experiencia_cliente");
   const [showFinancialValues, setShowFinancialValues] = useState(false);
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
@@ -529,7 +511,7 @@ const Index = () => {
             mobileDrawer={
             <div data-tour="mobile-menu">
                 <MobileDrawer
-                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
+                activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "experiencia_cliente" : activeTab}
                 onTabChange={(tab) => setActiveTab(tab as MetricCategory)}
                 categoryMetricsCounts={categoryMetricsCounts} />
 
@@ -591,7 +573,7 @@ const Index = () => {
             <div className="pointer-events-none select-none blur-md opacity-50 min-h-[400px]">
               <SwipeableTabs<MetricCategory>
               tabs={categoryOrder}
-              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
+              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "experiencia_cliente" : activeTab}
               onTabChange={(tab) => setActiveTab(tab as MetricCategory)}>
 
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
@@ -631,7 +613,7 @@ const Index = () => {
             {/* Category Tabs with Swipe Support */}
             <SwipeableTabs<MetricCategory>
             tabs={categoryOrder}
-            activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
+            activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "experiencia_cliente" : activeTab}
             onTabChange={(tab) => setActiveTab(tab as MetricCategory)}>
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
@@ -1081,7 +1063,7 @@ const Index = () => {
 
                       }
 
-                          {category === "aprendizado_crescimento" && trainingHours && trainingHours.length > 0 &&
+                          {category === "gestao_pessoas" && trainingHours && trainingHours.length > 0 &&
                       <div className="mt-4 sm:mt-6">
                               <SubcategoryHeader name="Horas de Treinamento" count={trainingHours.length} />
                               <div className="dashboard-grid">
