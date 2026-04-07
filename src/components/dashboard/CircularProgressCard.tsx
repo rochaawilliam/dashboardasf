@@ -27,6 +27,7 @@ interface CircularProgressCardProps {
   hideTarget?: boolean;
   forecastValue?: number | null;
   hideValues?: boolean;
+  forceAnnualLabel?: boolean;
 }
 
 const nonAccumulativeKeywords = [
