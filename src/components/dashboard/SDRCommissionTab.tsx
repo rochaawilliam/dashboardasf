@@ -14,14 +14,12 @@ interface SDRCommissionTabProps {
   accumulatedValues: Record<string, number>;
 }
 
-const HALF_COMMISSION = 325;
-
 const SDR_TIERS = [
-  { min: 100, label: "100%", pct: 1.0 },
-  { min: 90, label: "90%", pct: 0.9 },
-  { min: 80, label: "80%", pct: 0.8 },
-  { min: 70, label: "70%", pct: 0.7 },
-  { min: 60, label: "60%", pct: 0.6 },
+  { min: 120, value: 650 },
+  { min: 110, value: 570 },
+  { min: 100, value: 490 },
+  { min: 90, value: 410 },
+  { min: 80, value: 325 },
 ];
 
 // Metric IDs
@@ -37,7 +35,7 @@ const SDR_METRIC_IDS = [REUNIOES_EMP, REUNIOES_TRAB, REUNIOES_TRIB, PROPOSTAS_EM
 function getHalfCommission(percentage: number): number {
   const rounded = Math.round(percentage);
   for (const tier of SDR_TIERS) {
-    if (rounded >= tier.min) return Math.round(HALF_COMMISSION * tier.pct);
+    if (rounded >= tier.min) return Math.round(tier.value / 2);
   }
   return 0;
 }
@@ -144,7 +142,7 @@ function CommissionColumn({ title, pct, commission }: CommissionColumnProps) {
                 : "text-muted-foreground hover:bg-muted/30"
             )}>
               <span>≥ {tier.min}%</span>
-              <span>R$ {formatNumber(Math.round(HALF_COMMISSION * tier.pct))}</span>
+              <span>R$ {formatNumber(Math.round(tier.value / 2))}</span>
             </div>
           );
         })}
