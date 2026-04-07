@@ -368,7 +368,7 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-              {formatMetricValue(displayValue, metric.unit, metric.name)}
+              {hideValues ? "••••••" : formatMetricValue(displayValue, metric.unit, metric.name)}
             </p>
           </div>
           {/* Description / projection info */}
