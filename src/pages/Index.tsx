@@ -360,8 +360,7 @@ const Index = () => {
     const novosContratosIds = new Set([
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID,
-    "4c298090-3652-442c-a69d-970ff23781eb" // Novos Contratos Patenteia
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
     ]);
 
     let onlineMonthly = 0,offlineMonthly = 0,onlineAcc = 0,offlineAcc = 0;
