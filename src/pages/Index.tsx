@@ -1048,7 +1048,8 @@ const Index = () => {
                                             onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
                                             hideTarget={isResultadoAcumulado}
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
-                                            hideValues={category === "lucratividade" && !showFinancialValues} />
+                                            hideValues={category === "lucratividade" && !showFinancialValues}
+                                            forceAnnualLabel={isARR} />
                                     </div>
                                   </DraggableCardWrapper>);
 
