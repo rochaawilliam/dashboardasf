@@ -1055,13 +1055,6 @@ const Index = () => {
 
                       })}
                           
-                          {categoryHistory && categoryHistory.length > 0 && metrics &&
-                      <MetricChart
-                        data={categoryHistory}
-                        metrics={metrics}
-                        title={`Evolução - ${config.title} (${selectedYear})`} />
-
-                      }
 
                           {category === "gestao_pessoas" && trainingHours && trainingHours.length > 0 &&
                       <div className="mt-4 sm:mt-6">
