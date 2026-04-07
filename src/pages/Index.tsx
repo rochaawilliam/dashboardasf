@@ -1044,8 +1044,9 @@ const Index = () => {
                                             selectedMonth={selectedMonth}
                                             monthlyTargets={monthlyTargets}
                                             monthlyTargetOverride={cardMonthlyTarget}
-                                            onCardClick={isComputedCard ? undefined : () => setDrilldownMetric(metric)}
-                                            hideTarget={isResultadoAcumulado} />
+                                            onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
+                                            hideTarget={isResultadoAcumulado}
+                                            forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined} />
                                     </div>
                                   </DraggableCardWrapper>);
 
