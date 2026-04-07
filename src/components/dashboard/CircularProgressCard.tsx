@@ -357,7 +357,7 @@ export function CircularProgressCard({
               Previsto
             </p>
             <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
-              {formatMetricValue(forecastValue, metric.unit, metric.name)}
+              {hideValues ? "••••••" : formatMetricValue(forecastValue, metric.unit, metric.name)}
             </p>
           </div>
           )}
