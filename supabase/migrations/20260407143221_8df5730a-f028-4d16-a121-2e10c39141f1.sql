@@ -1,0 +1,5 @@
+
+DELETE FROM metric_subcategory_assignments WHERE metric_id IN ('517204eb-92be-40c3-b6e1-031ea50aa16f', '99db02c1-d570-4057-969c-74263ffa5a07', '98b932f2-651f-4797-a048-82f757b0080a');
+DELETE FROM monthly_targets WHERE metric_id IN ('517204eb-92be-40c3-b6e1-031ea50aa16f', '99db02c1-d570-4057-969c-74263ffa5a07', '98b932f2-651f-4797-a048-82f757b0080a');
+DELETE FROM metric_history WHERE metric_id IN ('517204eb-92be-40c3-b6e1-031ea50aa16f', '99db02c1-d570-4057-969c-74263ffa5a07', '98b932f2-651f-4797-a048-82f757b0080a');
+DELETE FROM metrics WHERE id IN ('517204eb-92be-40c3-b6e1-031ea50aa16f', '99db02c1-d570-4057-969c-74263ffa5a07', '98b932f2-651f-4797-a048-82f757b0080a');
