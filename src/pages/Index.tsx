@@ -591,7 +591,7 @@ const Index = () => {
             <div className="pointer-events-none select-none blur-md opacity-50 min-h-[400px]">
               <SwipeableTabs<MetricCategory>
               tabs={categoryOrder}
-              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "lucratividade" : activeTab}
+              activeTab={activeTab === "comissao" || activeTab === "comissao_sdr" ? "execucao_comercial" : activeTab}
               onTabChange={(tab) => setActiveTab(tab as MetricCategory)}>
 
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory)} className="mb-4 sm:mb-6">
