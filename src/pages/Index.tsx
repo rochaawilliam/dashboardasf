@@ -278,6 +278,7 @@ const Index = () => {
 
     const values: Record<string, number> = {};
     historyData.forEach((h) => {
+      if ((h as any).source === 'forecast') return; // Exclude forecast entries
       const ref = getRefMonthYear(h.period_type, h.recorded_at);
       if (ref.year === selectedYear) {
         values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
@@ -285,6 +286,21 @@ const Index = () => {
     });
     return values;
   }, [historyData, selectedYear]);
+
+  // Compute forecast values per metric per month (source='forecast')
+  const forecastValues = useMemo(() => {
+    if (!historyData || selectedMonth === null) return {};
+
+    const values: Record<string, number> = {};
+    historyData.forEach((h) => {
+      if ((h as any).source !== 'forecast') return;
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      if (ref.year === selectedYear && ref.month === selectedMonth) {
+        values[h.metric_id] = (values[h.metric_id] || 0) + h.value;
+      }
+    });
+    return values;
+  }, [historyData, selectedMonth, selectedYear]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
