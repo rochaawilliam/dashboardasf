@@ -149,7 +149,8 @@ const Index = () => {
     division: "all"
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("lucratividade");
+  const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("execucao_comercial");
+  const [showFinancialValues, setShowFinancialValues] = useState(false);
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
