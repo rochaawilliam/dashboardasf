@@ -295,12 +295,16 @@ export function MetricDrilldownDialog({
     return MONTH_NAMES.map((name, i) => {
       const month = i + 1;
       const monthStr = String(month).padStart(2, "0");
-      const realizado = history
-        .filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`))
+      const monthEntries = history.filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`));
+      const previsto = monthEntries
+        .filter((e) => e.source === "forecast")
+        .reduce((sum, e) => sum + Number(e.value), 0);
+      const realizado = monthEntries
+        .filter((e) => e.source !== "forecast")
         .reduce((sum, e) => sum + Number(e.value), 0);
       const target = monthlyTargetsData?.find((t) => t.month === month);
       const meta = target?.target_value ?? 0;
-      return { name: name.substring(0, 3), meta, realizado };
+      return { name: name.substring(0, 3), meta, previsto, realizado };
     });
   }, [history, monthlyTargetsData, filterYear, metric.name]);
 
