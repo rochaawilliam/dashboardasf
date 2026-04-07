@@ -148,7 +148,7 @@ function CircularProgress({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
         <span className="text-foreground leading-none font-sans text-center text-xl sm:text-xl lg:text-3xl font-bold tracking-tighter">
-          {formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%
+          {hideValues ? "•••" : `${formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%`}
         </span>
         <span className="text-muted-foreground mt-0 text-[9px] sm:text-[10px] lg:text-sm">
           Meta
@@ -156,6 +156,11 @@ function CircularProgress({
       </div>
     </div>);
 
+}
+
+// Wrapper that accepts hideValues to pass down to CircularProgress
+function CircularProgressWithHide({ hideValues, ...props }: { hideValues?: boolean; percentage: number; rawPercentage?: number; size?: number; strokeWidth?: number }) {
+  return <CircularProgress {...props} hideValues={hideValues} />;
 }
 
 export function CircularProgressCard({
