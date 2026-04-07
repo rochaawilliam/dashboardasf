@@ -741,8 +741,20 @@ const Index = () => {
                           subtitle={config.subtitle}
                           icon={config.icon}
                           variant={config.variant} />
-                            {isAdmin &&
-                        <div className="flex items-center gap-1.5 mb-2">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              {category === "lucratividade" &&
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 sm:h-7 text-xs gap-1 px-2.5 sm:px-3"
+                                  onClick={() => setShowFinancialValues(!showFinancialValues)}
+                                  title={showFinancialValues ? "Ocultar valores" : "Mostrar valores"}>
+                                  {showFinancialValues ? <Eye className="h-3.5 w-3.5 sm:h-3 sm:w-3" /> : <EyeOff className="h-3.5 w-3.5 sm:h-3 sm:w-3" />}
+                                  <span className="hidden sm:inline">{showFinancialValues ? "Ocultar" : "Mostrar"}</span>
+                                </Button>
+                              }
+                              {isAdmin &&
+                            <>
                                 <Button
                             variant={isDragMode ? "default" : "outline"}
                             size="sm"
@@ -763,8 +775,9 @@ const Index = () => {
                                   <Settings2 className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                   <span className="hidden sm:inline">Subcategorias</span>
                                 </Button>
-                              </div>
+                              </>
                         }
+                            </div>
                           </div>
 
                       
