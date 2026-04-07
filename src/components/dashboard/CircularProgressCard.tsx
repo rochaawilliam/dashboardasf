@@ -322,13 +322,13 @@ export function CircularProgressCard({
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
           <div className="hidden lg:block">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={90} strokeWidth={9} hideValues={hideValues} />
           </div>
           <div className="hidden sm:block lg:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={10} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={110} strokeWidth={10} hideValues={hideValues} />
           </div>
           <div className="block sm:hidden">
-            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} />
+            <CircularProgress percentage={progress} rawPercentage={rawProgress} size={80} strokeWidth={8} hideValues={hideValues} />
           </div>
         </div>
         )}
