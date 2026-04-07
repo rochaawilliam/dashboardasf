@@ -341,6 +341,14 @@ export function CircularProgressCard({
             <>
               <div>
                 <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+                  Meta Anual
+                </p>
+                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                  {hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
                   Previsto
                 </p>
                 <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">

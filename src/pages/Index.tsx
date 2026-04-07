@@ -931,11 +931,11 @@ const Index = () => {
                                      let eficienciaProjecao = 0;
 
                                      if (isResultadoAcumulado || isEficienciaReceita) {
-                                       // Use only leaf-level revenue metric IDs (no computed sum cards)
-                                       const leafRevenueIds = new Set([
-                                         ...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID
-                                       ]);
-                                       const allRevenueMetrics = (metrics ?? []).filter((m) => leafRevenueIds.has(m.id));
+                                       // Get all revenue metrics for computing totals
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                       const allRevenueMetrics = organizedSubcategories.
+                                       filter((s) => revenueSubcatNames.includes(s.name)).
+                                       flatMap((s) => s.metrics);
 
                                        const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
 
@@ -969,7 +969,7 @@ const Index = () => {
                                        eficienciaProjecao = monthsElapsed > 0 ? receitaAcumulada / monthsElapsed * 12 : 0;
 
                                        if (isResultadoAcumulado) {
-                                         dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: 0 };
+                                         dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: metaAnual };
                                        }
                                        if (isEficienciaReceita) {
                                          dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100, description: `Projeção anual: R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(eficienciaProjecao)}` };
