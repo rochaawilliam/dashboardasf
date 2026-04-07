@@ -932,7 +932,7 @@ const Index = () => {
 
                                     if (isResultadoAcumulado || isEficienciaReceita) {
                                       // Get all revenue metrics for computing totals
-                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência", "Patenteia"];
+                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
                                       const allRevenueMetrics = organizedSubcategories.
                                       filter((s) => revenueSubcatNames.includes(s.name)).
                                       flatMap((s) => s.metrics);
