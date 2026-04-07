@@ -408,7 +408,7 @@ export function CircularProgressCard({
       {!hideTarget && isMonthSelected && !isNonAccumulative &&
       <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
           <span>Meta anual:</span>
-          <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+          <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
         </div>
       }
     </div>);
