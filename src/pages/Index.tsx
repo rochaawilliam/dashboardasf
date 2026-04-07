@@ -939,8 +939,8 @@ const Index = () => {
 
                                        const currentMonthRef = selectedMonth ?? new Date().getMonth() + 1;
 
-                                       // For each month up to currentMonthRef, compute previsto and realizado
-                                       for (let mo = 1; mo <= currentMonthRef; mo++) {
+                                       // For each month BEFORE currentMonthRef (exclude current month)
+                                       for (let mo = 1; mo < currentMonthRef; mo++) {
                                          let monthRealizado = 0;
                                          let monthMeta = 0;
                                          allRevenueMetrics.forEach((rm) => {

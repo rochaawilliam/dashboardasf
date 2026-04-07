@@ -1,8 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { Sparkline } from "./Sparkline";
-import { PaceIndicator } from "./PaceIndicator";
 import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair } from "lucide-react";
 import {
   Tooltip,
@@ -426,29 +424,6 @@ export function CircularProgressCard({
         </div>
       </div>
 
-      {/* Bottom section: Sparkline + Pace */}
-      <div className="flex items-stretch gap-1 lg:gap-1.5 mt-auto pt-1 sm:pt-2 lg:pt-3">
-        <Sparkline
-          metricId={metric.id}
-          metricName={metric.name}
-          unit={metric.unit}
-          historyData={historyData}
-          selectedYear={selectedYear}
-          height={32}
-          className="flex-1 min-w-0" />
-
-        <PaceIndicator
-          metricId={metric.id}
-          metricName={metric.name}
-          unit={metric.unit}
-          annualTarget={metric.target_value}
-          historyData={historyData}
-          selectedYear={selectedYear}
-          isInverse={isInverse}
-          isNonAccumulative={isNonAccumulative}
-          className="w-10 lg:w-12 shrink-0" />
-
-      </div>
 
       {/* Annual target reference when month is selected */}
       {!hideTarget && isMonthSelected && !isNonAccumulative &&
