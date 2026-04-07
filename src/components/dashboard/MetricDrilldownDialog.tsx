@@ -295,12 +295,16 @@ export function MetricDrilldownDialog({
     return MONTH_NAMES.map((name, i) => {
       const month = i + 1;
       const monthStr = String(month).padStart(2, "0");
-      const realizado = history
-        .filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`))
+      const monthEntries = history.filter((e) => e.period_type?.startsWith(`${filterYear}-${monthStr}`));
+      const previsto = monthEntries
+        .filter((e) => e.source === "forecast")
+        .reduce((sum, e) => sum + Number(e.value), 0);
+      const realizado = monthEntries
+        .filter((e) => e.source !== "forecast")
         .reduce((sum, e) => sum + Number(e.value), 0);
       const target = monthlyTargetsData?.find((t) => t.month === month);
       const meta = target?.target_value ?? 0;
-      return { name: name.substring(0, 3), meta, realizado };
+      return { name: name.substring(0, 3), meta, previsto, realizado };
     });
   }, [history, monthlyTargetsData, filterYear, metric.name]);
 
@@ -550,11 +554,11 @@ export function MetricDrilldownDialog({
             </div>
           )}
 
-          {/* Revenue chart: Realizado (bars) vs Meta (line) */}
+          {/* Revenue chart: Previsto + Realizado (bars) + Meta (line) */}
           {isRevenueMetric(metric.name) && revenueChartData.length > 0 && (
             <div className="border border-border rounded-lg p-3 bg-muted/20">
-              <p className="text-[10px] font-medium text-muted-foreground mb-2">Realizado vs Meta — {filterYear}</p>
-              <ResponsiveContainer width="100%" height={220}>
+              <p className="text-[10px] font-medium text-muted-foreground mb-2">Previsto vs Realizado vs Meta — {filterYear}</p>
+              <ResponsiveContainer width="100%" height={240}>
                 <ComposedChart data={revenueChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
@@ -571,7 +575,8 @@ export function MetricDrilldownDialog({
                     labelFormatter={(label) => `${label}/${filterYear}`}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
-                  <Bar dataKey="realizado" name="Realizado" radius={[3, 3, 0, 0]} barSize={20}>
+                  <Bar dataKey="previsto" name="Previsto" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} barSize={16} />
+                  <Bar dataKey="realizado" name="Realizado" radius={[3, 3, 0, 0]} barSize={16}>
                     {revenueChartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
