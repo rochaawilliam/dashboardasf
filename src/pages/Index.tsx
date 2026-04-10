@@ -398,7 +398,30 @@ const Index = () => {
       }
     }
 
-    // Compute rates from pipeline totals
+    // Area+Tag-based metrics (Assessoria vs Consultoria)
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_TAG_MAP)) {
+      const getAreaTagVal = (source: Record<string, Record<string, Record<string, any>>> | undefined) => {
+        if (!source) return undefined;
+        if (mapping.origin === "_all") {
+          let total = 0;
+          let found = false;
+          for (const originData of Object.values(source)) {
+            const val = originData?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+            if (val !== undefined) { total += val; found = true; }
+          }
+          return found ? total : undefined;
+        }
+        return source?.[mapping.origin]?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+      };
+
+      if (selectedMonth) {
+        const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const val = getAreaTagVal(pipelineData.byAreaTag?.[monthStr]);
+        if (val !== undefined) values[metricId] = val;
+      } else {
+        const val = getAreaTagVal(pipelineData.totalsByAreaTag);
+        if (val !== undefined) values[metricId] = val;
+      }
     const getTotal = (key: string) => {
       let sum = 0;
       const source = selectedMonth
