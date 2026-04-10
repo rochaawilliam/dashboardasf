@@ -32,6 +32,7 @@ export function SalesFunnel({
   monthlyTargets,
   onCardClick,
   colorScheme,
+  pipelineMetricIds,
 }: SalesFunnelProps) {
   const monthNames = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
