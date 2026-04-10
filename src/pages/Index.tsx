@@ -301,6 +301,7 @@ const Index = () => {
     "a1b2c3d4-5555-4aaa-bbbb-555555555555": { origin: "online", key: "propostas" },
     "1d927738-a02b-4867-8a7a-a7a2331773ec": { origin: "online", key: "contratos" },
     "a1b2c3d4-6666-4aaa-bbbb-666666666666": { origin: "online", key: "valor_gerado" },
+    "b2c3d4e5-2222-4bbb-cccc-222222222222": { origin: "offline", key: "prospects" },
     "b2c3d4e5-3333-4bbb-cccc-333333333333": { origin: "offline", key: "leads" },
     "b2c3d4e5-4444-4bbb-cccc-444444444444": { origin: "offline", key: "reunioes" },
     "b2c3d4e5-5555-4bbb-cccc-555555555555": { origin: "offline", key: "propostas" },
@@ -406,6 +407,17 @@ const Index = () => {
     // Taxa de Conversão = Contratos / Leads * 100
     if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
 
+    // Tempo Médio de Fechamento from pipeline
+    if (selectedMonth) {
+      const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+      const avgDays = pipelineData.avgCloseDaysByMonth?.[ms];
+      if (avgDays !== undefined && avgDays !== null) values[TEMPO_MEDIO_FECHAMENTO_ID] = avgDays;
+    } else {
+      if (pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined) {
+        values[TEMPO_MEDIO_FECHAMENTO_ID] = pipelineData.avgCloseDays;
+      }
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
@@ -449,6 +461,11 @@ const Index = () => {
     if (totalLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(totalReunioes / totalLeads * 10000) / 100;
     if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
     if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
+
+    // Tempo Médio accumulated
+    if (pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined) {
+      values[TEMPO_MEDIO_FECHAMENTO_ID] = pipelineData.avgCloseDays;
+    }
 
     return values;
   }, [pipelineData]);
@@ -1245,7 +1262,7 @@ const Index = () => {
                                     }
 
                                     const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
-                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID);
+                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID);
                                     const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
