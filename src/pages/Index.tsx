@@ -478,15 +478,43 @@ const Index = () => {
     return values;
   }, [pipelineData]);
 
-  const mergedMonthlyValues = useMemo(() => ({
-    ...monthlyValues,
-    ...pipelineMonthlyValues,
-  }), [monthlyValues, pipelineMonthlyValues]);
+  const mergedMonthlyValues = useMemo(() => {
+    const merged = {
+      ...monthlyValues,
+      ...pipelineMonthlyValues,
+    };
+    // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
+    const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
+    const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
+    if (valorInvestidoOnline > 0) {
+      merged[ROI_ONLINE_ID] = Math.round((valorGeradoOnline / valorInvestidoOnline) * 10000) / 100;
+    }
+    const valorGeradoOffline = merged[VALOR_GERADO_OFFLINE_ID] ?? 0;
+    const valorInvestidoOffline = merged[VALOR_INVESTIDO_OFFLINE_ID] ?? 0;
+    if (valorInvestidoOffline > 0) {
+      merged[ROI_OFFLINE_ID] = Math.round((valorGeradoOffline / valorInvestidoOffline) * 10000) / 100;
+    }
+    return merged;
+  }, [monthlyValues, pipelineMonthlyValues]);
 
-  const mergedAccumulatedValues = useMemo(() => ({
-    ...accumulatedValues,
-    ...pipelineAccumulatedValues,
-  }), [accumulatedValues, pipelineAccumulatedValues]);
+  const mergedAccumulatedValues = useMemo(() => {
+    const merged = {
+      ...accumulatedValues,
+      ...pipelineAccumulatedValues,
+    };
+    // Auto-calculate ROI accumulated
+    const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
+    const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
+    if (valorInvestidoOnline > 0) {
+      merged[ROI_ONLINE_ID] = Math.round((valorGeradoOnline / valorInvestidoOnline) * 10000) / 100;
+    }
+    const valorGeradoOffline = merged[VALOR_GERADO_OFFLINE_ID] ?? 0;
+    const valorInvestidoOffline = merged[VALOR_INVESTIDO_OFFLINE_ID] ?? 0;
+    if (valorInvestidoOffline > 0) {
+      merged[ROI_OFFLINE_ID] = Math.round((valorGeradoOffline / valorInvestidoOffline) * 10000) / 100;
+    }
+    return merged;
+  }, [accumulatedValues, pipelineAccumulatedValues]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
