@@ -36,6 +36,28 @@ function newAreaBucket(): AreaBucket {
   return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0 };
 }
 
+// Ensure nested path exists and return the bucket
+function ensureAreaTagBucket(
+  obj: Record<string, Record<string, Record<string, Record<string, AreaBucket>>>>,
+  month: string, origin: string, area: string, tag: string
+): AreaBucket {
+  if (!obj[month]) obj[month] = {};
+  if (!obj[month][origin]) obj[month][origin] = {};
+  if (!obj[month][origin][area]) obj[month][origin][area] = {};
+  if (!obj[month][origin][area][tag]) obj[month][origin][area][tag] = newAreaBucket();
+  return obj[month][origin][area][tag];
+}
+
+function ensureTotalAreaTagBucket(
+  obj: Record<string, Record<string, Record<string, AreaBucket>>>,
+  origin: string, area: string, tag: string
+): AreaBucket {
+  if (!obj[origin]) obj[origin] = {};
+  if (!obj[origin][area]) obj[origin][area] = {};
+  if (!obj[origin][area][tag]) obj[origin][area][tag] = newAreaBucket();
+  return obj[origin][area][tag];
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -48,7 +70,6 @@ Deno.serve(async (req) => {
 
     const pipeline = createClient(PIPELINE_URL, PIPELINE_ANON_KEY);
 
-    // Build month filter
     let monthStrings: string[];
     if (month) {
       monthStrings = [`${year}-${String(month).padStart(2, "0")}`];
@@ -58,7 +79,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch cards and stage history in parallel
     const [cardsRes, historyRes] = await Promise.all([
       pipeline.from("pipeline_cards")
         .select("id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at")
@@ -78,9 +98,7 @@ Deno.serve(async (req) => {
     const cards = cardsRes.data || [];
     const stageHistory = historyRes.data || [];
 
-    // Build card ID set for filtering history
     const cardIdSet = new Set(cards.map((c: any) => c.id));
-    // Build history lookup: card_id -> entries
     const historyByCard: Record<string, { to_stage: string; moved_at: string }[]> = {};
     for (const h of stageHistory) {
       if (!cardIdSet.has(h.card_id)) continue;
@@ -88,15 +106,15 @@ Deno.serve(async (req) => {
       historyByCard[h.card_id].push({ to_stage: h.to_stage, moved_at: h.moved_at });
     }
 
-    // Group by month and origin
+    // Group by month and origin (funnel totals)
     const result: Record<string, Record<string, StageBucket>> = {};
-    // Group by month, origin, and practice_area
+    // Group by month, origin, area (aggregated across tags)
     const byArea: Record<string, Record<string, Record<string, AreaBucket>>> = {};
+    // Group by month, origin, area, tag (assessoria/pontual)
+    const byAreaTag: Record<string, Record<string, Record<string, Record<string, AreaBucket>>>> = {};
 
-    // For avg close time calculation
     let totalCloseDays = 0;
     let closedCount = 0;
-    // Per-month close time
     const closeTimeByMonth: Record<string, { totalDays: number; count: number }> = {};
 
     for (const card of cards) {
@@ -105,6 +123,7 @@ Deno.serve(async (req) => {
       const stage = card.stage_id;
       const stageIdx = STAGE_ORDER.indexOf(stage);
       const area = card.practice_area || "outros";
+      const tag = card.tag || "pontual";
 
       const isExcluded = EXCLUDED_STAGES.includes(stage);
 
@@ -114,7 +133,6 @@ Deno.serve(async (req) => {
 
       const bucket = result[cardMonth][origin];
 
-      // Count prospects
       if (stage === "prospects") {
         bucket.prospects++;
       }
@@ -127,7 +145,6 @@ Deno.serve(async (req) => {
           bucket.contratos++;
           bucket.valor_gerado += card.contract_value || 0;
 
-          // Calculate close time for this contract
           const entries = historyByCard[card.id];
           if (entries) {
             const contractMove = entries
@@ -147,7 +164,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      // --- Breakdown by practice_area ---
+      // --- Breakdown by practice_area (aggregated, no tag split) ---
       if (!byArea[cardMonth]) byArea[cardMonth] = {};
       if (!byArea[cardMonth][origin]) byArea[cardMonth][origin] = {};
       if (!byArea[cardMonth][origin][area]) byArea[cardMonth][origin][area] = newAreaBucket();
@@ -162,6 +179,19 @@ Deno.serve(async (req) => {
       if (stage === "contratos") {
         areaBucket.contratos++;
         areaBucket.valor_gerado += card.contract_value || 0;
+      }
+
+      // --- Breakdown by practice_area + tag ---
+      const areaTagBucket = ensureAreaTagBucket(byAreaTag, cardMonth, origin, area, tag);
+
+      if (!isExcluded && stageIdx >= 0) {
+        areaTagBucket.leads++;
+        if (stageIdx >= 1) areaTagBucket.reunioes++;
+        if (stageIdx >= 2) areaTagBucket.propostas++;
+      }
+      if (stage === "contratos") {
+        areaTagBucket.contratos++;
+        areaTagBucket.valor_gerado += card.contract_value || 0;
       }
     }
 
@@ -190,6 +220,21 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Yearly totals by origin+area+tag
+    const totalsByAreaTag: Record<string, Record<string, Record<string, AreaBucket>>> = {};
+    for (const monthData of Object.values(byAreaTag)) {
+      for (const [origin, areas] of Object.entries(monthData)) {
+        for (const [area, tags] of Object.entries(areas)) {
+          for (const [tag, bucket] of Object.entries(tags)) {
+            const tb = ensureTotalAreaTagBucket(totalsByAreaTag, origin, area, tag);
+            for (const [key, val] of Object.entries(bucket)) {
+              (tb as any)[key] += val;
+            }
+          }
+        }
+      }
+    }
+
     // Avg close time
     const avgCloseDays = closedCount > 0 ? Math.round(totalCloseDays / closedCount) : null;
     const avgCloseDaysByMonth: Record<string, number | null> = {};
@@ -198,7 +243,17 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ months: result, totals, byArea, totalsByArea, year, avgCloseDays, avgCloseDaysByMonth }),
+      JSON.stringify({
+        months: result,
+        totals,
+        byArea,
+        totalsByArea,
+        byAreaTag,
+        totalsByAreaTag,
+        year,
+        avgCloseDays,
+        avgCloseDaysByMonth,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
