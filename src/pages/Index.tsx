@@ -339,6 +339,14 @@ const Index = () => {
   const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
   const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
 
+  // ROI metric IDs
+  const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
+  const ROI_OFFLINE_ID = "b2c3d4e5-7777-4bbb-cccc-777777777777";
+  const VALOR_INVESTIDO_ONLINE_ID = "036e92ce-4bc3-417d-922f-936c1aba7421";
+  const VALOR_INVESTIDO_OFFLINE_ID = "b2c3d4e5-1111-4bbb-cccc-111111111111";
+  const VALOR_GERADO_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
+  const VALOR_GERADO_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
+
   const pipelineMonthlyValues = useMemo(() => {
     if (!pipelineData) return {};
     const values: Record<string, number> = {};
