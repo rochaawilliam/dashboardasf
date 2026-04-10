@@ -327,10 +327,18 @@ const Index = () => {
     "af0307d2-186e-4bf3-b536-66c451ccf056": { origin: "_all", area: "empresarial", key: "propostas" },
     "a88438f0-dbd0-4230-9b18-d56117936d36": { origin: "_all", area: "trabalhista", key: "propostas" },
     "7f937d5a-6502-4fdd-810d-11fc4413d864": { origin: "_all", area: "tributario", key: "propostas" },
-    // Novos Contratos by area (from contratos stage) - Assessoria
-    "f80d5c78-cf50-4aca-befb-5808b6557d8e": { origin: "_all", area: "empresarial", key: "contratos" },
-    "ae64d582-a08d-442c-998e-b6bc214e486e": { origin: "_all", area: "trabalhista", key: "contratos" },
-    "a1102d97-a2a6-44d6-8ac7-716cc1474d16": { origin: "_all", area: "tributario", key: "contratos" },
+  };
+
+  // Pipeline area+tag mapping: metric IDs → pipeline by origin + practice_area + tag
+  const PIPELINE_AREA_TAG_MAP: Record<string, { origin: string; area: string; tag: string; key: string }> = {
+    // Novos Contratos by area - Assessoria (tag = assessoria)
+    "f80d5c78-cf50-4aca-befb-5808b6557d8e": { origin: "_all", area: "empresarial", tag: "assessoria", key: "contratos" },
+    "ae64d582-a08d-442c-998e-b6bc214e486e": { origin: "_all", area: "trabalhista", tag: "assessoria", key: "contratos" },
+    "a1102d97-a2a6-44d6-8ac7-716cc1474d16": { origin: "_all", area: "tributario", tag: "assessoria", key: "contratos" },
+    // Novos Contratos by area - Consultoria (tag = pontual)
+    "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5": { origin: "_all", area: "empresarial", tag: "pontual", key: "contratos" },
+    "0ffeaffb-ab3c-4371-be5b-172f57160ec4": { origin: "_all", area: "trabalhista", tag: "pontual", key: "contratos" },
+    "95280373-3e3b-4596-b2c4-ce8e01ee1b2c": { origin: "_all", area: "tributario", tag: "pontual", key: "contratos" },
   };
 
   // Crescimento Comercial rates from pipeline
