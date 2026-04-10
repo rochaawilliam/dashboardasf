@@ -490,6 +490,24 @@ const Index = () => {
       }
     }
 
+    // Area+Tag accumulated (Assessoria vs Consultoria)
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_TAG_MAP)) {
+      if (mapping.origin === "_all") {
+        let total = 0;
+        let found = false;
+        if (pipelineData.totalsByAreaTag) {
+          for (const originData of Object.values(pipelineData.totalsByAreaTag)) {
+            const val = originData?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+            if (val !== undefined) { total += val; found = true; }
+          }
+        }
+        if (found) values[metricId] = total;
+      } else {
+        const val = pipelineData.totalsByAreaTag?.[mapping.origin]?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+        if (val !== undefined) values[metricId] = val;
+      }
+    }
+
     // Rates accumulated
     let totalLeads = 0, totalReunioes = 0, totalPropostas = 0, totalContratos = 0;
     if (pipelineData.totals) {
