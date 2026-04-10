@@ -47,8 +47,11 @@ import {
   Settings2,
   Move,
   Eye,
-  EyeOff } from
+  EyeOff,
+  Globe,
+  Building2 } from
 "lucide-react";
+import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import {
   useMetrics,
   useMetricHistory,
@@ -763,7 +766,50 @@ const Index = () => {
                           </div>
 
                       
-                          {organizedSubcategories.map((subcat) => {
+                          {/* Render Funnel subcategories with special layout */}
+                          {(() => {
+                            const funnelOnline = organizedSubcategories.find(s => s.name === "Funil Online");
+                            const funnelOffline = organizedSubcategories.find(s => s.name === "Funil Offline");
+                            if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
+                              return (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                                  {funnelOnline && funnelOnline.metrics.length > 0 && (
+                                    <SalesFunnel
+                                      title="Funil Online"
+                                      icon={Globe}
+                                      metrics={funnelOnline.metrics}
+                                      monthlyValues={monthlyValues}
+                                      accumulatedValues={accumulatedValues}
+                                      selectedMonth={selectedMonth}
+                                      selectedYear={selectedYear}
+                                      historyData={historyData}
+                                      monthlyTargets={monthlyTargets}
+                                      onCardClick={(metric) => setDrilldownMetric(metric)}
+                                      colorScheme="blue"
+                                    />
+                                  )}
+                                  {funnelOffline && funnelOffline.metrics.length > 0 && (
+                                    <SalesFunnel
+                                      title="Funil Offline"
+                                      icon={Building2}
+                                      metrics={funnelOffline.metrics}
+                                      monthlyValues={monthlyValues}
+                                      accumulatedValues={accumulatedValues}
+                                      selectedMonth={selectedMonth}
+                                      selectedYear={selectedYear}
+                                      historyData={historyData}
+                                      monthlyTargets={monthlyTargets}
+                                      onCardClick={(metric) => setDrilldownMetric(metric)}
+                                      colorScheme="amber"
+                                    />
+                                  )}
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+
+                          {organizedSubcategories.filter(s => s.name !== "Funil Online" && s.name !== "Funil Offline").map((subcat) => {
                         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
                         const selectedMonthName = selectedMonth ? monthNames[selectedMonth - 1] : undefined;
 
