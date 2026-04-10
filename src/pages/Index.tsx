@@ -150,6 +150,9 @@ const Index = () => {
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
   const { data: monthlyTargets } = useMonthlyTargets(selectedYear);
 
+  // Pipeline Vision Board data
+  const { data: pipelineData } = usePipelineData(selectedYear, selectedMonth);
+
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
   const { data: dbAssignments } = useSubcategoryAssignments();
