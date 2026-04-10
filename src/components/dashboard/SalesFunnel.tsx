@@ -17,6 +17,7 @@ interface SalesFunnelProps {
   monthlyTargets?: MonthlyTarget[];
   onCardClick?: (metric: Metric) => void;
   colorScheme: "blue" | "amber";
+  pipelineMetricIds?: Set<string>;
 }
 
 export function SalesFunnel({
@@ -31,6 +32,7 @@ export function SalesFunnel({
   monthlyTargets,
   onCardClick,
   colorScheme,
+  pipelineMetricIds,
 }: SalesFunnelProps) {
   const monthNames = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -87,7 +89,11 @@ export function SalesFunnel({
                 selectedMonth={selectedMonth}
                 monthlyTargets={monthlyTargets}
                 monthlyTargetOverride={monthlyTarget}
-                onCardClick={onCardClick ? () => onCardClick(metric) : undefined}
+                onCardClick={
+                  pipelineMetricIds?.has(metric.id)
+                    ? undefined
+                    : onCardClick ? () => onCardClick(metric) : undefined
+                }
               />
             </React.Fragment>
           );

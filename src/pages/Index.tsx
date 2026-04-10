@@ -619,13 +619,18 @@ const Index = () => {
       accumulatedValues[metric.id] ?? 0 :
       metric.current_value;
 
-
-      // Compute origin card values and dynamic targets
+      // For origin cards, use pipeline values if available, otherwise fall back to history-based values
       if (metric.id === CONTRATOS_ONLINE_ID) {
-        currentValue = selectedMonth !== null ? originValues.online.monthly : originValues.online.accumulated;
+        const pipelineVal = pipelineAccumulatedValues[CONTRATOS_ONLINE_ID];
+        currentValue = pipelineVal !== undefined
+          ? (selectedMonth !== null ? (pipelineMonthlyValues[CONTRATOS_ONLINE_ID] ?? 0) : pipelineVal)
+          : (selectedMonth !== null ? originValues.online.monthly : originValues.online.accumulated);
         return { ...metric, current_value: currentValue, target_value: originTargets.online * 12 };
       } else if (metric.id === CONTRATOS_OFFLINE_ID) {
-        currentValue = selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated;
+        const pipelineVal = pipelineAccumulatedValues[CONTRATOS_OFFLINE_ID];
+        currentValue = pipelineVal !== undefined
+          ? (selectedMonth !== null ? (pipelineMonthlyValues[CONTRATOS_OFFLINE_ID] ?? 0) : pipelineVal)
+          : (selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated);
         return { ...metric, current_value: currentValue, target_value: originTargets.offline * 12 };
       }
 
@@ -634,7 +639,7 @@ const Index = () => {
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets]);
+  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
@@ -996,6 +1001,12 @@ const Index = () => {
                           {(() => {
                             const funnelOnline = organizedSubcategories.find(s => s.name === "Funil Online");
                             const funnelOffline = organizedSubcategories.find(s => s.name === "Funil Offline");
+                            const pipelineIds = new Set([
+                              ...Object.keys(PIPELINE_METRIC_MAP),
+                              ...Object.keys(PIPELINE_AREA_MAP),
+                              TAXA_AGENDAMENTO_ID, TAXA_COMPARECIMENTO_ID, TAXA_CONVERSAO_ID,
+                              TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
+                            ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               return (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -1012,6 +1023,7 @@ const Index = () => {
                                       monthlyTargets={monthlyTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="blue"
+                                      pipelineMetricIds={pipelineIds}
                                     />
                                   )}
                                   {funnelOffline && funnelOffline.metrics.length > 0 && (
@@ -1027,6 +1039,7 @@ const Index = () => {
                                       monthlyTargets={monthlyTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="amber"
+                                      pipelineMetricIds={pipelineIds}
                                     />
                                   )}
                                 </div>
