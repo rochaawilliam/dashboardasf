@@ -47,8 +47,11 @@ import {
   Settings2,
   Move,
   Eye,
-  EyeOff } from
+  EyeOff,
+  Globe,
+  Building2 } from
 "lucide-react";
+import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import {
   useMetrics,
   useMetricHistory,
