@@ -17,6 +17,7 @@ interface SalesFunnelProps {
   monthlyTargets?: MonthlyTarget[];
   onCardClick?: (metric: Metric) => void;
   colorScheme: "blue" | "amber";
+  pipelineMetricIds?: Set<string>;
 }
 
 export function SalesFunnel({
