@@ -8,9 +8,19 @@ export interface PipelineStageData {
   valor_gerado: number;
 }
 
+export interface PipelineAreaData {
+  leads: number;
+  reunioes: number;
+  propostas: number;
+  contratos: number;
+  valor_gerado: number;
+}
+
 export interface PipelineData {
   months: Record<string, Record<string, PipelineStageData>>;
   totals: Record<string, PipelineStageData>;
+  byArea: Record<string, Record<string, Record<string, PipelineAreaData>>>;
+  totalsByArea: Record<string, Record<string, PipelineAreaData>>;
   year: number;
 }
 
