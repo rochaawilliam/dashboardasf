@@ -17,6 +17,7 @@ interface StageBucket {
   propostas: number;
   contratos: number;
   valor_gerado: number;
+  prospects: number;
 }
 
 interface AreaBucket {
@@ -28,7 +29,7 @@ interface AreaBucket {
 }
 
 function newStageBucket(): StageBucket {
-  return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0 };
+  return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0, prospects: 0 };
 }
 
 function newAreaBucket(): AreaBucket {
@@ -47,26 +48,44 @@ Deno.serve(async (req) => {
 
     const pipeline = createClient(PIPELINE_URL, PIPELINE_ANON_KEY);
 
-    let query = pipeline.from("pipeline_cards").select("stage_id, lead_origin, contract_value, month, practice_area, tag");
-
+    // Build month filter
+    let monthStrings: string[];
     if (month) {
-      const monthStr = `${year}-${String(month).padStart(2, "0")}`;
-      query = query.eq("month", monthStr);
+      monthStrings = [`${year}-${String(month).padStart(2, "0")}`];
     } else {
-      const monthStrings = Array.from({ length: 12 }, (_, i) =>
+      monthStrings = Array.from({ length: 12 }, (_, i) =>
         `${year}-${String(i + 1).padStart(2, "0")}`
       );
-      query = query.in("month", monthStrings);
     }
 
-    const { data: cards, error } = await query;
+    // Fetch cards and stage history in parallel
+    const [cardsRes, historyRes] = await Promise.all([
+      pipeline.from("pipeline_cards")
+        .select("id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at")
+        .in("month", monthStrings),
+      pipeline.from("card_stage_history")
+        .select("card_id, to_stage, moved_at"),
+    ]);
 
-    if (error) {
-      console.error("Pipeline query error:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (cardsRes.error) {
+      console.error("Pipeline cards query error:", cardsRes.error);
+      return new Response(JSON.stringify({ error: cardsRes.error.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    const cards = cardsRes.data || [];
+    const stageHistory = historyRes.data || [];
+
+    // Build card ID set for filtering history
+    const cardIdSet = new Set(cards.map((c: any) => c.id));
+    // Build history lookup: card_id -> entries
+    const historyByCard: Record<string, { to_stage: string; moved_at: string }[]> = {};
+    for (const h of stageHistory) {
+      if (!cardIdSet.has(h.card_id)) continue;
+      if (!historyByCard[h.card_id]) historyByCard[h.card_id] = [];
+      historyByCard[h.card_id].push({ to_stage: h.to_stage, moved_at: h.moved_at });
     }
 
     // Group by month and origin
@@ -74,32 +93,61 @@ Deno.serve(async (req) => {
     // Group by month, origin, and practice_area
     const byArea: Record<string, Record<string, Record<string, AreaBucket>>> = {};
 
-    for (const card of cards || []) {
+    // For avg close time calculation
+    let totalCloseDays = 0;
+    let closedCount = 0;
+    // Per-month close time
+    const closeTimeByMonth: Record<string, { totalDays: number; count: number }> = {};
+
+    for (const card of cards) {
       const cardMonth = card.month;
       const origin = card.lead_origin || "offline";
       const stage = card.stage_id;
       const stageIdx = STAGE_ORDER.indexOf(stage);
       const area = card.practice_area || "outros";
 
-      // Skip excluded stages for area counting but NOT for funnel counting
       const isExcluded = EXCLUDED_STAGES.includes(stage);
 
-      // --- Funnel by origin (existing logic) ---
-      if (stageIdx >= 0) {
-        if (!result[cardMonth]) result[cardMonth] = {};
-        if (!result[cardMonth][origin]) result[cardMonth][origin] = newStageBucket();
+      // --- Funnel by origin ---
+      if (!result[cardMonth]) result[cardMonth] = {};
+      if (!result[cardMonth][origin]) result[cardMonth][origin] = newStageBucket();
 
-        const bucket = result[cardMonth][origin];
+      const bucket = result[cardMonth][origin];
+
+      // Count prospects
+      if (stage === "prospects") {
+        bucket.prospects++;
+      }
+
+      if (stageIdx >= 0) {
         bucket.leads++;
         if (stageIdx >= 1) bucket.reunioes++;
         if (stageIdx >= 2) bucket.propostas++;
         if (stage === "contratos") {
           bucket.contratos++;
           bucket.valor_gerado += card.contract_value || 0;
+
+          // Calculate close time for this contract
+          const entries = historyByCard[card.id];
+          if (entries) {
+            const contractMove = entries
+              .filter((h) => h.to_stage === "contratos")
+              .sort((a, b) => new Date(b.moved_at).getTime() - new Date(a.moved_at).getTime())[0];
+            if (contractMove && card.created_at) {
+              const created = new Date(card.created_at).getTime();
+              const closed = new Date(contractMove.moved_at).getTime();
+              const days = Math.max(0, Math.floor((closed - created) / (1000 * 60 * 60 * 24)));
+              totalCloseDays += days;
+              closedCount++;
+              if (!closeTimeByMonth[cardMonth]) closeTimeByMonth[cardMonth] = { totalDays: 0, count: 0 };
+              closeTimeByMonth[cardMonth].totalDays += days;
+              closeTimeByMonth[cardMonth].count++;
+            }
+          }
         }
       }
 
-      // --- Breakdown by practice_area (excluding geladeira/prospects for lead count) ---
+      // --- Breakdown by practice_area ---
       if (!byArea[cardMonth]) byArea[cardMonth] = {};
       if (!byArea[cardMonth][origin]) byArea[cardMonth][origin] = {};
       if (!byArea[cardMonth][origin][area]) byArea[cardMonth][origin][area] = newAreaBucket();
@@ -142,8 +190,15 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Avg close time
+    const avgCloseDays = closedCount > 0 ? Math.round(totalCloseDays / closedCount) : null;
+    const avgCloseDaysByMonth: Record<string, number | null> = {};
+    for (const [m, data] of Object.entries(closeTimeByMonth)) {
+      avgCloseDaysByMonth[m] = data.count > 0 ? Math.round(data.totalDays / data.count) : null;
+    }
+
     return new Response(
-      JSON.stringify({ months: result, totals, byArea, totalsByArea, year }),
+      JSON.stringify({ months: result, totals, byArea, totalsByArea, year, avgCloseDays, avgCloseDaysByMonth }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
