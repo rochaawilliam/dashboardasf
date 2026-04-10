@@ -407,6 +407,17 @@ const Index = () => {
     // Taxa de Conversão = Contratos / Leads * 100
     if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
 
+    // Tempo Médio de Fechamento from pipeline
+    if (selectedMonth) {
+      const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+      const avgDays = pipelineData.avgCloseDaysByMonth?.[ms];
+      if (avgDays !== undefined && avgDays !== null) values[TEMPO_MEDIO_FECHAMENTO_ID] = avgDays;
+    } else {
+      if (pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined) {
+        values[TEMPO_MEDIO_FECHAMENTO_ID] = pipelineData.avgCloseDays;
+      }
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
