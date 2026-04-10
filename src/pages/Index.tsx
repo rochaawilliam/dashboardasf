@@ -832,8 +832,8 @@ const Index = () => {
                                       title="Funil Online"
                                       icon={Globe}
                                       metrics={funnelOnline.metrics}
-                                      monthlyValues={monthlyValues}
-                                      accumulatedValues={accumulatedValues}
+                                      monthlyValues={mergedMonthlyValues}
+                                      accumulatedValues={mergedAccumulatedValues}
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
@@ -847,8 +847,8 @@ const Index = () => {
                                       title="Funil Offline"
                                       icon={Building2}
                                       metrics={funnelOffline.metrics}
-                                      monthlyValues={monthlyValues}
-                                      accumulatedValues={accumulatedValues}
+                                      monthlyValues={mergedMonthlyValues}
+                                      accumulatedValues={mergedAccumulatedValues}
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
