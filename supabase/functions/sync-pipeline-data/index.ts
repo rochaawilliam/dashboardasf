@@ -41,6 +41,13 @@ Deno.serve(async (req) => {
     }
 
     // Group by month, origin, and count per funnel stage
+    // Stages in pipeline: leads, reunioes (R1), propostas, r2 (R2), contratos
+    // Counting rules:
+    //   leads = cards currently at "leads" stage or beyond
+    //   reunioes = cards at "reunioes" (R1) or "r2" (R2) or beyond (propostas, contratos)
+    //   propostas = cards at "propostas" stage or beyond (r2, contratos)
+    //   contratos = cards at "contratos" stage
+    //   valor_gerado = sum of contract_value for "contratos"
     const result: Record<string, Record<string, Record<string, number>>> = {};
 
     for (const card of cards || []) {
@@ -60,12 +67,17 @@ Deno.serve(async (req) => {
 
       const bucket = result[cardMonth][origin];
 
-      // Funnel: a card at stage X counts for X and all earlier stages
-      // leads(0) <= reunioes(1) <= propostas(2) <= r2(3) <= contratos(4)
+      // Every card counts as a lead (all entered the funnel)
       bucket.leads++;
+
+      // Reuniões: card reached R1(reunioes=1) or R2(r2=3) or beyond
       if (stageIdx >= 1) bucket.reunioes++;
-      if (stageIdx >= 2) bucket.propostas++; // propostas and r2 both count as "propostas"
-      if (stageIdx >= 4) {
+
+      // Propostas: card reached propostas(2) or beyond (r2=3, contratos=4)
+      if (stageIdx >= 2) bucket.propostas++;
+
+      // Contratos: only cards at contratos stage
+      if (stage === "contratos") {
         bucket.contratos++;
         bucket.valor_gerado += card.contract_value || 0;
       }
