@@ -22,6 +22,8 @@ export interface PipelineData {
   totals: Record<string, PipelineStageData>;
   byArea: Record<string, Record<string, Record<string, PipelineAreaData>>>;
   totalsByArea: Record<string, Record<string, PipelineAreaData>>;
+  byAreaTag: Record<string, Record<string, Record<string, Record<string, PipelineAreaData>>>>;
+  totalsByAreaTag: Record<string, Record<string, Record<string, PipelineAreaData>>>;
   year: number;
   avgCloseDays: number | null;
   avgCloseDaysByMonth: Record<string, number | null>;
