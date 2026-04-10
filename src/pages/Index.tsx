@@ -52,6 +52,7 @@ import {
   Building2 } from
 "lucide-react";
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
+import { usePipelineData } from "@/hooks/usePipelineData";
 import {
   useMetrics,
   useMetricHistory,
