@@ -294,7 +294,7 @@ const Index = () => {
     return values;
   }, [historyData, selectedMonth, selectedYear]);
 
-  // Pipeline data mapping: metric IDs → pipeline stage keys
+  // Pipeline data mapping: metric IDs → pipeline stage keys (by origin)
   const PIPELINE_METRIC_MAP: Record<string, { origin: string; key: string }> = {
     "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c": { origin: "online", key: "leads" },
     "a1b2c3d4-4444-4aaa-bbbb-444444444444": { origin: "online", key: "reunioes" },
@@ -308,9 +308,41 @@ const Index = () => {
     "b2c3d4e5-6666-4bbb-cccc-666666666666": { origin: "offline", key: "valor_gerado" },
   };
 
+  // Pipeline area mapping: metric IDs → pipeline by origin + practice_area
+  const PIPELINE_AREA_MAP: Record<string, { origin: string; area: string; key: string }> = {
+    // Leads Online by area
+    "c1d2e3f4-1111-4ccc-dddd-111111111111": { origin: "online", area: "empresarial", key: "leads" },
+    "c1d2e3f4-2222-4ccc-dddd-222222222222": { origin: "online", area: "trabalhista", key: "leads" },
+    "c1d2e3f4-3333-4ccc-dddd-333333333333": { origin: "online", area: "tributario", key: "leads" },
+    // Leads Offline by area
+    "86714c67-bf73-452a-aad3-2be1691c33ac": { origin: "offline", area: "empresarial", key: "leads" },
+    "371dd70d-7c46-4488-b7ad-80ded893af5d": { origin: "offline", area: "trabalhista", key: "leads" },
+    "57ca6f08-7bb6-4697-87fe-8ac33161285c": { origin: "offline", area: "tributario", key: "leads" },
+    // Reuniões by area (all origins combined)
+    "2b59c639-5e5f-4d0d-b0aa-5a3394444389": { origin: "_all", area: "empresarial", key: "reunioes" },
+    "717fb24d-f213-4135-ae10-42a4237979bd": { origin: "_all", area: "trabalhista", key: "reunioes" },
+    "45277578-48f9-4eda-87f5-28bc66918236": { origin: "_all", area: "tributario", key: "reunioes" },
+    // Propostas by area (all origins combined)
+    "af0307d2-186e-4bf3-b536-66c451ccf056": { origin: "_all", area: "empresarial", key: "propostas" },
+    "a88438f0-dbd0-4230-9b18-d56117936d36": { origin: "_all", area: "trabalhista", key: "propostas" },
+    "7f937d5a-6502-4fdd-810d-11fc4413d864": { origin: "_all", area: "tributario", key: "propostas" },
+    // Novos Contratos by area (from contratos stage) - Assessoria
+    "f80d5c78-cf50-4aca-befb-5808b6557d8e": { origin: "_all", area: "empresarial", key: "contratos" },
+    "ae64d582-a08d-442c-998e-b6bc214e486e": { origin: "_all", area: "trabalhista", key: "contratos" },
+    "a1102d97-a2a6-44d6-8ac7-716cc1474d16": { origin: "_all", area: "tributario", key: "contratos" },
+  };
+
+  // Crescimento Comercial rates from pipeline
+  const TAXA_AGENDAMENTO_ID = "a1b2c3d4-1111-4aaa-bbbb-111111111111";
+  const TAXA_COMPARECIMENTO_ID = "a1b2c3d4-2222-4aaa-bbbb-222222222222";
+  const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
+  const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
+
   const pipelineMonthlyValues = useMemo(() => {
     if (!pipelineData) return {};
     const values: Record<string, number> = {};
+
+    // Standard origin-based metrics
     for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
       if (selectedMonth) {
         const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
@@ -321,16 +353,103 @@ const Index = () => {
         if (val !== undefined) values[metricId] = val;
       }
     }
+
+    // Area-based metrics
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      const getAreaVal = (source: Record<string, Record<string, any>> | undefined) => {
+        if (!source) return undefined;
+        if (mapping.origin === "_all") {
+          // Sum across all origins
+          let total = 0;
+          let found = false;
+          for (const originData of Object.values(source)) {
+            const val = originData?.[mapping.area]?.[mapping.key];
+            if (val !== undefined) { total += val; found = true; }
+          }
+          return found ? total : undefined;
+        }
+        return source?.[mapping.origin]?.[mapping.area]?.[mapping.key];
+      };
+
+      if (selectedMonth) {
+        const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const val = getAreaVal(pipelineData.byArea?.[monthStr]);
+        if (val !== undefined) values[metricId] = val;
+      } else {
+        const val = getAreaVal(pipelineData.totalsByArea);
+        if (val !== undefined) values[metricId] = val;
+      }
+    }
+
+    // Compute rates from pipeline totals
+    const getTotal = (key: string) => {
+      let sum = 0;
+      const source = selectedMonth
+        ? (() => { const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`; return pipelineData.months?.[ms]; })()
+        : pipelineData.totals;
+      if (!source) return 0;
+      for (const originData of Object.values(source)) {
+        sum += (originData as any)?.[key] ?? 0;
+      }
+      return sum;
+    };
+
+    const totalLeads = getTotal("leads");
+    const totalReunioes = getTotal("reunioes");
+    const totalPropostas = getTotal("propostas");
+    const totalContratos = getTotal("contratos");
+
+    // Taxa de Agendamento = Reuniões / Leads * 100
+    if (totalLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(totalReunioes / totalLeads * 10000) / 100;
+    // Taxa de Comparecimento = Propostas / Reuniões * 100
+    if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
+    // Taxa de Conversão = Contratos / Leads * 100
+    if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
   const pipelineAccumulatedValues = useMemo(() => {
     if (!pipelineData) return {};
     const values: Record<string, number> = {};
+
     for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
       const val = pipelineData.totals?.[mapping.origin]?.[mapping.key];
       if (val !== undefined) values[metricId] = val;
     }
+
+    // Area accumulated
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      if (mapping.origin === "_all") {
+        let total = 0;
+        let found = false;
+        if (pipelineData.totalsByArea) {
+          for (const originData of Object.values(pipelineData.totalsByArea)) {
+            const val = originData?.[mapping.area]?.[mapping.key];
+            if (val !== undefined) { total += val; found = true; }
+          }
+        }
+        if (found) values[metricId] = total;
+      } else {
+        const val = pipelineData.totalsByArea?.[mapping.origin]?.[mapping.area]?.[mapping.key];
+        if (val !== undefined) values[metricId] = val;
+      }
+    }
+
+    // Rates accumulated
+    let totalLeads = 0, totalReunioes = 0, totalPropostas = 0, totalContratos = 0;
+    if (pipelineData.totals) {
+      for (const originData of Object.values(pipelineData.totals)) {
+        totalLeads += originData.leads ?? 0;
+        totalReunioes += originData.reunioes ?? 0;
+        totalPropostas += originData.propostas ?? 0;
+        totalContratos += originData.contratos ?? 0;
+      }
+    }
+    if (totalLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(totalReunioes / totalLeads * 10000) / 100;
+    if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
+    if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
+
     return values;
   }, [pipelineData]);
 
