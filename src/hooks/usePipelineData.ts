@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface PipelineStageData {
   leads: number;
@@ -22,14 +21,6 @@ export function usePipelineData(year: number, month?: number | null) {
       const params = new URLSearchParams({ year: String(year) });
       if (month) params.set("month", String(month));
 
-      const { data, error } = await supabase.functions.invoke("sync-pipeline-data", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        body: undefined,
-      });
-
-      // supabase.functions.invoke doesn't support query params directly,
-      // so we'll use fetch instead
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const url = `https://${projectId}.supabase.co/functions/v1/sync-pipeline-data?${params.toString()}`;
       
@@ -46,7 +37,7 @@ export function usePipelineData(year: number, month?: number | null) {
 
       return (await response.json()) as PipelineData;
     },
-    staleTime: 5 * 60 * 1000, // 5 min cache
+    staleTime: 5 * 60 * 1000,
     retry: 2,
   });
 }
