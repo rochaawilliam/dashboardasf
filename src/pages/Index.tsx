@@ -52,6 +52,7 @@ import {
   Building2 } from
 "lucide-react";
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
+import { usePipelineData } from "@/hooks/usePipelineData";
 import {
   useMetrics,
   useMetricHistory,
@@ -148,6 +149,9 @@ const Index = () => {
   const { data: historyData, isLoading: historyLoading } = useMetricHistory(undefined, filters);
   const { data: trainingHours, isLoading: trainingLoading } = useTrainingHours(filters);
   const { data: monthlyTargets } = useMonthlyTargets(selectedYear);
+
+  // Pipeline Vision Board data
+  const { data: pipelineData } = usePipelineData(selectedYear, selectedMonth);
 
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
@@ -289,6 +293,56 @@ const Index = () => {
     });
     return values;
   }, [historyData, selectedMonth, selectedYear]);
+
+  // Pipeline data mapping: metric IDs → pipeline stage keys
+  const PIPELINE_METRIC_MAP: Record<string, { origin: string; key: string }> = {
+    "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c": { origin: "online", key: "leads" },
+    "a1b2c3d4-4444-4aaa-bbbb-444444444444": { origin: "online", key: "reunioes" },
+    "a1b2c3d4-5555-4aaa-bbbb-555555555555": { origin: "online", key: "propostas" },
+    "1d927738-a02b-4867-8a7a-a7a2331773ec": { origin: "online", key: "contratos" },
+    "a1b2c3d4-6666-4aaa-bbbb-666666666666": { origin: "online", key: "valor_gerado" },
+    "b2c3d4e5-3333-4bbb-cccc-333333333333": { origin: "offline", key: "leads" },
+    "b2c3d4e5-4444-4bbb-cccc-444444444444": { origin: "offline", key: "reunioes" },
+    "b2c3d4e5-5555-4bbb-cccc-555555555555": { origin: "offline", key: "propostas" },
+    "7ea4560c-5f42-4982-9b27-b68f2475b838": { origin: "offline", key: "contratos" },
+    "b2c3d4e5-6666-4bbb-cccc-666666666666": { origin: "offline", key: "valor_gerado" },
+  };
+
+  const pipelineMonthlyValues = useMemo(() => {
+    if (!pipelineData) return {};
+    const values: Record<string, number> = {};
+    for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
+      if (selectedMonth) {
+        const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const val = pipelineData.months?.[monthStr]?.[mapping.origin]?.[mapping.key];
+        if (val !== undefined) values[metricId] = val;
+      } else {
+        const val = pipelineData.totals?.[mapping.origin]?.[mapping.key];
+        if (val !== undefined) values[metricId] = val;
+      }
+    }
+    return values;
+  }, [pipelineData, selectedMonth, selectedYear]);
+
+  const pipelineAccumulatedValues = useMemo(() => {
+    if (!pipelineData) return {};
+    const values: Record<string, number> = {};
+    for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
+      const val = pipelineData.totals?.[mapping.origin]?.[mapping.key];
+      if (val !== undefined) values[metricId] = val;
+    }
+    return values;
+  }, [pipelineData]);
+
+  const mergedMonthlyValues = useMemo(() => ({
+    ...monthlyValues,
+    ...pipelineMonthlyValues,
+  }), [monthlyValues, pipelineMonthlyValues]);
+
+  const mergedAccumulatedValues = useMemo(() => ({
+    ...accumulatedValues,
+    ...pipelineAccumulatedValues,
+  }), [accumulatedValues, pipelineAccumulatedValues]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
@@ -778,8 +832,8 @@ const Index = () => {
                                       title="Funil Online"
                                       icon={Globe}
                                       metrics={funnelOnline.metrics}
-                                      monthlyValues={monthlyValues}
-                                      accumulatedValues={accumulatedValues}
+                                      monthlyValues={mergedMonthlyValues}
+                                      accumulatedValues={mergedAccumulatedValues}
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
@@ -793,8 +847,8 @@ const Index = () => {
                                       title="Funil Offline"
                                       icon={Building2}
                                       metrics={funnelOffline.metrics}
-                                      monthlyValues={monthlyValues}
-                                      accumulatedValues={accumulatedValues}
+                                      monthlyValues={mergedMonthlyValues}
+                                      accumulatedValues={mergedAccumulatedValues}
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
