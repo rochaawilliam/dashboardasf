@@ -6,6 +6,7 @@ export interface PipelineStageData {
   propostas: number;
   contratos: number;
   valor_gerado: number;
+  prospects: number;
 }
 
 export interface PipelineAreaData {
@@ -22,6 +23,8 @@ export interface PipelineData {
   byArea: Record<string, Record<string, Record<string, PipelineAreaData>>>;
   totalsByArea: Record<string, Record<string, PipelineAreaData>>;
   year: number;
+  avgCloseDays: number | null;
+  avgCloseDaysByMonth: Record<string, number | null>;
 }
 
 export function usePipelineData(year: number, month?: number | null) {
