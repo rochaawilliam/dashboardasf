@@ -619,13 +619,18 @@ const Index = () => {
       accumulatedValues[metric.id] ?? 0 :
       metric.current_value;
 
-
-      // Compute origin card values and dynamic targets
+      // For origin cards, use pipeline values if available, otherwise fall back to history-based values
       if (metric.id === CONTRATOS_ONLINE_ID) {
-        currentValue = selectedMonth !== null ? originValues.online.monthly : originValues.online.accumulated;
+        const pipelineVal = pipelineAccumulatedValues[CONTRATOS_ONLINE_ID];
+        currentValue = pipelineVal !== undefined
+          ? (selectedMonth !== null ? (pipelineMonthlyValues[CONTRATOS_ONLINE_ID] ?? 0) : pipelineVal)
+          : (selectedMonth !== null ? originValues.online.monthly : originValues.online.accumulated);
         return { ...metric, current_value: currentValue, target_value: originTargets.online * 12 };
       } else if (metric.id === CONTRATOS_OFFLINE_ID) {
-        currentValue = selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated;
+        const pipelineVal = pipelineAccumulatedValues[CONTRATOS_OFFLINE_ID];
+        currentValue = pipelineVal !== undefined
+          ? (selectedMonth !== null ? (pipelineMonthlyValues[CONTRATOS_OFFLINE_ID] ?? 0) : pipelineVal)
+          : (selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated);
         return { ...metric, current_value: currentValue, target_value: originTargets.offline * 12 };
       }
 
@@ -634,7 +639,7 @@ const Index = () => {
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets]);
+  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
