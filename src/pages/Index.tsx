@@ -488,11 +488,15 @@ const Index = () => {
     const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
     if (valorInvestidoOnline > 0) {
       merged[ROI_ONLINE_ID] = Math.round((valorGeradoOnline / valorInvestidoOnline) * 10000) / 100;
+    } else if (valorGeradoOnline > 0) {
+      merged[ROI_ONLINE_ID] = 100; // Revenue with no investment = 100% return
     }
     const valorGeradoOffline = merged[VALOR_GERADO_OFFLINE_ID] ?? 0;
     const valorInvestidoOffline = merged[VALOR_INVESTIDO_OFFLINE_ID] ?? 0;
     if (valorInvestidoOffline > 0) {
       merged[ROI_OFFLINE_ID] = Math.round((valorGeradoOffline / valorInvestidoOffline) * 10000) / 100;
+    } else if (valorGeradoOffline > 0) {
+      merged[ROI_OFFLINE_ID] = 100; // Revenue with no investment = 100% return
     }
     return merged;
   }, [monthlyValues, pipelineMonthlyValues]);
@@ -507,11 +511,15 @@ const Index = () => {
     const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
     if (valorInvestidoOnline > 0) {
       merged[ROI_ONLINE_ID] = Math.round((valorGeradoOnline / valorInvestidoOnline) * 10000) / 100;
+    } else if (valorGeradoOnline > 0) {
+      merged[ROI_ONLINE_ID] = 100;
     }
     const valorGeradoOffline = merged[VALOR_GERADO_OFFLINE_ID] ?? 0;
     const valorInvestidoOffline = merged[VALOR_INVESTIDO_OFFLINE_ID] ?? 0;
     if (valorInvestidoOffline > 0) {
       merged[ROI_OFFLINE_ID] = Math.round((valorGeradoOffline / valorInvestidoOffline) * 10000) / 100;
+    } else if (valorGeradoOffline > 0) {
+      merged[ROI_OFFLINE_ID] = 100;
     }
     return merged;
   }, [accumulatedValues, pipelineAccumulatedValues]);
