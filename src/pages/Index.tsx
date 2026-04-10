@@ -422,6 +422,9 @@ const Index = () => {
         const val = getAreaTagVal(pipelineData.totalsByAreaTag);
         if (val !== undefined) values[metricId] = val;
       }
+    }
+
+    // Compute rates from pipeline totals
     const getTotal = (key: string) => {
       let sum = 0;
       const source = selectedMonth
