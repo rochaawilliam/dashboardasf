@@ -301,6 +301,7 @@ const Index = () => {
     "a1b2c3d4-5555-4aaa-bbbb-555555555555": { origin: "online", key: "propostas" },
     "1d927738-a02b-4867-8a7a-a7a2331773ec": { origin: "online", key: "contratos" },
     "a1b2c3d4-6666-4aaa-bbbb-666666666666": { origin: "online", key: "valor_gerado" },
+    "b2c3d4e5-2222-4bbb-cccc-222222222222": { origin: "offline", key: "prospects" },
     "b2c3d4e5-3333-4bbb-cccc-333333333333": { origin: "offline", key: "leads" },
     "b2c3d4e5-4444-4bbb-cccc-444444444444": { origin: "offline", key: "reunioes" },
     "b2c3d4e5-5555-4bbb-cccc-555555555555": { origin: "offline", key: "propostas" },
