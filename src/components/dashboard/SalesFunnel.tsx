@@ -89,7 +89,11 @@ export function SalesFunnel({
                 selectedMonth={selectedMonth}
                 monthlyTargets={monthlyTargets}
                 monthlyTargetOverride={monthlyTarget}
-                onCardClick={onCardClick ? () => onCardClick(metric) : undefined}
+                onCardClick={
+                  pipelineMetricIds?.has(metric.id)
+                    ? undefined
+                    : onCardClick ? () => onCardClick(metric) : undefined
+                }
               />
             </React.Fragment>
           );
