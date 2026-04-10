@@ -339,6 +339,14 @@ const Index = () => {
   const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
   const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
 
+  // ROI metric IDs
+  const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
+  const ROI_OFFLINE_ID = "b2c3d4e5-7777-4bbb-cccc-777777777777";
+  const VALOR_INVESTIDO_ONLINE_ID = "036e92ce-4bc3-417d-922f-936c1aba7421";
+  const VALOR_INVESTIDO_OFFLINE_ID = "b2c3d4e5-1111-4bbb-cccc-111111111111";
+  const VALOR_GERADO_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
+  const VALOR_GERADO_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
+
   const pipelineMonthlyValues = useMemo(() => {
     if (!pipelineData) return {};
     const values: Record<string, number> = {};
@@ -470,15 +478,43 @@ const Index = () => {
     return values;
   }, [pipelineData]);
 
-  const mergedMonthlyValues = useMemo(() => ({
-    ...monthlyValues,
-    ...pipelineMonthlyValues,
-  }), [monthlyValues, pipelineMonthlyValues]);
+  const mergedMonthlyValues = useMemo(() => {
+    const merged = {
+      ...monthlyValues,
+      ...pipelineMonthlyValues,
+    };
+    // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
+    const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
+    const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
+    if (valorInvestidoOnline > 0) {
+      merged[ROI_ONLINE_ID] = Math.round((valorGeradoOnline / valorInvestidoOnline) * 10000) / 100;
+    }
+    const valorGeradoOffline = merged[VALOR_GERADO_OFFLINE_ID] ?? 0;
+    const valorInvestidoOffline = merged[VALOR_INVESTIDO_OFFLINE_ID] ?? 0;
+    if (valorInvestidoOffline > 0) {
+      merged[ROI_OFFLINE_ID] = Math.round((valorGeradoOffline / valorInvestidoOffline) * 10000) / 100;
+    }
+    return merged;
+  }, [monthlyValues, pipelineMonthlyValues]);
 
-  const mergedAccumulatedValues = useMemo(() => ({
-    ...accumulatedValues,
-    ...pipelineAccumulatedValues,
-  }), [accumulatedValues, pipelineAccumulatedValues]);
+  const mergedAccumulatedValues = useMemo(() => {
+    const merged = {
+      ...accumulatedValues,
+      ...pipelineAccumulatedValues,
+    };
+    // Auto-calculate ROI accumulated
+    const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
+    const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
+    if (valorInvestidoOnline > 0) {
+      merged[ROI_ONLINE_ID] = Math.round((valorGeradoOnline / valorInvestidoOnline) * 10000) / 100;
+    }
+    const valorGeradoOffline = merged[VALOR_GERADO_OFFLINE_ID] ?? 0;
+    const valorInvestidoOffline = merged[VALOR_INVESTIDO_OFFLINE_ID] ?? 0;
+    if (valorInvestidoOffline > 0) {
+      merged[ROI_OFFLINE_ID] = Math.round((valorGeradoOffline / valorInvestidoOffline) * 10000) / 100;
+    }
+    return merged;
+  }, [accumulatedValues, pipelineAccumulatedValues]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
@@ -1262,12 +1298,12 @@ const Index = () => {
                                     }
 
                                     const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
-                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID);
+                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID);
                                     const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : monthlyValues[metric.id] ?? null;
-                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : accumulatedValues[metric.id] ?? 0;
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
