@@ -1001,6 +1001,12 @@ const Index = () => {
                           {(() => {
                             const funnelOnline = organizedSubcategories.find(s => s.name === "Funil Online");
                             const funnelOffline = organizedSubcategories.find(s => s.name === "Funil Offline");
+                            const pipelineIds = new Set([
+                              ...Object.keys(PIPELINE_METRIC_MAP),
+                              ...Object.keys(PIPELINE_AREA_MAP),
+                              TAXA_AGENDAMENTO_ID, TAXA_COMPARECIMENTO_ID, TAXA_CONVERSAO_ID,
+                              TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
+                            ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               return (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -1017,6 +1023,7 @@ const Index = () => {
                                       monthlyTargets={monthlyTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="blue"
+                                      pipelineMetricIds={pipelineIds}
                                     />
                                   )}
                                   {funnelOffline && funnelOffline.metrics.length > 0 && (
@@ -1032,6 +1039,7 @@ const Index = () => {
                                       monthlyTargets={monthlyTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="amber"
+                                      pipelineMetricIds={pipelineIds}
                                     />
                                   )}
                                 </div>
