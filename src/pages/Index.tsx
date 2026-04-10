@@ -462,6 +462,11 @@ const Index = () => {
     if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
     if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
 
+    // Tempo Médio accumulated
+    if (pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined) {
+      values[TEMPO_MEDIO_FECHAMENTO_ID] = pipelineData.avgCloseDays;
+    }
+
     return values;
   }, [pipelineData]);
 
