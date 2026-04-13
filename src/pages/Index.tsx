@@ -623,6 +623,16 @@ const Index = () => {
       if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
     }
 
+    // Training accumulated
+    if (pipelineData.training) {
+      const tr = pipelineData.training;
+      if (tr.headcount > 0) values[HEADCOUNT_ID] = tr.headcount;
+      if (tr.avgMonths > 0) values[TEMPO_MEDIO_CASA_ID] = tr.avgMonths;
+      values[HORAS_TREINAMENTO_ID] = tr.totalHours;
+      values[MODULOS_CONCLUIDOS_ID] = tr.totalModules;
+      values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
+    }
+
     return values;
   }, [pipelineData]);
 
