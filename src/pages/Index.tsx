@@ -517,6 +517,27 @@ const Index = () => {
       if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
     }
 
+    // Training / Time ASF metrics
+    if (pipelineData.training) {
+      const tr = pipelineData.training;
+      if (tr.headcount > 0) values[HEADCOUNT_ID] = tr.headcount;
+      if (tr.avgMonths > 0) values[TEMPO_MEDIO_CASA_ID] = tr.avgMonths;
+      
+      if (selectedMonth) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const monthData = tr.byMonth?.[ms];
+        if (monthData) {
+          values[HORAS_TREINAMENTO_ID] = monthData.hours;
+          values[MODULOS_CONCLUIDOS_ID] = monthData.modules;
+          values[TAXA_CERTIFICACAO_ID] = monthData.modules > 0 ? Math.round(monthData.certified / monthData.modules * 10000) / 100 : 0;
+        }
+      } else {
+        values[HORAS_TREINAMENTO_ID] = tr.totalHours;
+        values[MODULOS_CONCLUIDOS_ID] = tr.totalModules;
+        values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
+      }
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
