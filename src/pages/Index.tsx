@@ -347,6 +347,10 @@ const Index = () => {
   const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
   const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
 
+  // Lucratividade
+  const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
+  const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
+
   // ROI metric IDs
   const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
   const ROI_OFFLINE_ID = "b2c3d4e5-7777-4bbb-cccc-777777777777";
@@ -550,8 +554,24 @@ const Index = () => {
     } else if (valorGeradoOffline > 0) {
       merged[ROI_OFFLINE_ID] = 100; // Revenue with no investment = 100% return
     }
+    // Lucratividade Anual (monthly view) = average of all months up to selected month
+    if (historyData && selectedMonth) {
+      const lucratMonthly: Record<number, number> = {};
+      historyData.forEach((h) => {
+        if (h.metric_id !== LUCRATIVIDADE_MENSAL_ID) return;
+        if ((h as any).source === 'forecast') return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month && ref.month <= selectedMonth) {
+          lucratMonthly[ref.month] = (lucratMonthly[ref.month] || 0) + h.value;
+        }
+      });
+      const months = Object.values(lucratMonthly);
+      if (months.length > 0) {
+        merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
+      }
+    }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues]);
+  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
@@ -573,8 +593,24 @@ const Index = () => {
     } else if (valorGeradoOffline > 0) {
       merged[ROI_OFFLINE_ID] = 100;
     }
+    // Lucratividade Anual = average of monthly Lucratividade Mensal values
+    if (historyData) {
+      const lucratMonthly: Record<number, number> = {};
+      historyData.forEach((h) => {
+        if (h.metric_id !== LUCRATIVIDADE_MENSAL_ID) return;
+        if ((h as any).source === 'forecast') return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month) {
+          lucratMonthly[ref.month] = (lucratMonthly[ref.month] || 0) + h.value;
+        }
+      });
+      const months = Object.values(lucratMonthly);
+      if (months.length > 0) {
+        merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
+      }
+    }
     return merged;
-  }, [accumulatedValues, pipelineAccumulatedValues]);
+  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
