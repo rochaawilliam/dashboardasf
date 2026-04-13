@@ -70,6 +70,9 @@ Deno.serve(async (req) => {
 
     const pipeline = createClient(PIPELINE_URL, PIPELINE_ANON_KEY);
 
+    // Only fetch cards from ASF Advocacia (exclude Patenteia)
+    const ASF_COMPANY_ID = "4a994724-d8ad-4bd7-8b63-73203f249556";
+
     let monthStrings: string[];
     if (month) {
       monthStrings = [`${year}-${String(month).padStart(2, "0")}`];
@@ -82,6 +85,7 @@ Deno.serve(async (req) => {
     const [cardsRes, historyRes] = await Promise.all([
       pipeline.from("pipeline_cards")
         .select("id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at")
+        .eq("company_id", ASF_COMPANY_ID)
         .in("month", monthStrings),
       pipeline.from("card_stage_history")
         .select("card_id, to_stage, moved_at"),
