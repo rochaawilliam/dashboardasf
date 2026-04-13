@@ -647,21 +647,53 @@ Deno.serve(async (req) => {
         console.error("Collaborators CSV fetch error:", e);
       }
 
-      // Compute training metrics by month and accumulated
+      // Compute training metrics by month, by collaborator, and by pilar
       const trainingByMonth: Record<string, { hours: number; modules: number; certified: number }> = {};
+      const byCollaborator: Record<string, { hours: number; modules: number; certified: number }> = {};
+      const byPilar: Record<string, { hours: number; modules: number }> = {};
+      const byCollaboratorMonth: Record<string, Record<string, number>> = {};
       let totalHours = 0, totalModules = 0, totalCertified = 0;
 
       for (const t of trainings) {
         if (t.status.toLowerCase() !== "concluído") continue;
         const monthKey = `${t.ano}-${String(t.mes).padStart(2, "0")}`;
+        
+        // By month
         if (!trainingByMonth[monthKey]) trainingByMonth[monthKey] = { hours: 0, modules: 0, certified: 0 };
         trainingByMonth[monthKey].hours += t.cargaHoraria;
         trainingByMonth[monthKey].modules += 1;
         if (t.certificado) trainingByMonth[monthKey].certified += 1;
+
+        // By collaborator
+        if (!byCollaborator[t.colaborador]) byCollaborator[t.colaborador] = { hours: 0, modules: 0, certified: 0 };
+        byCollaborator[t.colaborador].hours += t.cargaHoraria;
+        byCollaborator[t.colaborador].modules += 1;
+        if (t.certificado) byCollaborator[t.colaborador].certified += 1;
+
+        // By collaborator by month (for chart)
+        if (!byCollaboratorMonth[t.colaborador]) byCollaboratorMonth[t.colaborador] = {};
+        byCollaboratorMonth[t.colaborador][monthKey] = (byCollaboratorMonth[t.colaborador][monthKey] || 0) + t.cargaHoraria;
+
+        // By pilar/theme
+        const pilar = t.modulo || "Outros";
+        if (!byPilar[pilar]) byPilar[pilar] = { hours: 0, modules: 0 };
+        byPilar[pilar].hours += t.cargaHoraria;
+        byPilar[pilar].modules += 1;
+
         totalHours += t.cargaHoraria;
         totalModules += 1;
         if (t.certificado) totalCertified += 1;
       }
+
+      // Top collaborators sorted by hours
+      const topCollaborators = Object.entries(byCollaborator)
+        .map(([name, data]) => ({ name, ...data }))
+        .sort((a, b) => b.hours - a.hours);
+
+      // Themes sorted by hours
+      const themes = Object.entries(byPilar)
+        .map(([name, data]) => ({ name, ...data }))
+        .sort((a, b) => b.hours - a.hours);
 
       training = {
         headcount,
@@ -671,6 +703,9 @@ Deno.serve(async (req) => {
         totalModules,
         totalCertified,
         certificationRate: totalModules > 0 ? Math.round(totalCertified / totalModules * 10000) / 100 : 0,
+        topCollaborators,
+        themes,
+        byCollaboratorMonth,
       };
     } catch (err) {
       console.error("Training fetch error:", err);
