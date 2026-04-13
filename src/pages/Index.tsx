@@ -347,6 +347,17 @@ const Index = () => {
   const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
   const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
 
+  // Operational metrics from Pipeline
+  const MEDIA_ACOES_DIA_ID = "d1e2f3a4-1111-4ddd-eeee-111111111111";
+  const TAXA_ACOMPANHAMENTO_ID = "d1e2f3a4-2222-4ddd-eeee-222222222222";
+  const TAXA_AVANCO_ID = "d1e2f3a4-3333-4ddd-eeee-333333333333";
+  const COMENTARIOS_LEAD_ID = "d1e2f3a4-4444-4ddd-eeee-444444444444";
+  const TME_SLA_ID = "d1e2f3a4-5555-4ddd-eeee-555555555555";
+  const TMA_ID = "d1e2f3a4-6666-4ddd-eeee-666666666666";
+
+  // Metas Indutoras
+  const METAS_INDUTORAS_ID = "292f5034-c7ea-4e03-b53d-453622e671c7";
+
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
