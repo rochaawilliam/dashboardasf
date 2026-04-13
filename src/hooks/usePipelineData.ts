@@ -36,6 +36,19 @@ export interface OnboardingMetrics {
   overallCompletion: number;
 }
 
+export interface TrainingCollaborator {
+  name: string;
+  hours: number;
+  modules: number;
+  certified: number;
+}
+
+export interface TrainingTheme {
+  name: string;
+  hours: number;
+  modules: number;
+}
+
 export interface TrainingMetrics {
   headcount: number;
   avgMonths: number;
@@ -44,6 +57,9 @@ export interface TrainingMetrics {
   totalModules: number;
   totalCertified: number;
   certificationRate: number;
+  topCollaborators: TrainingCollaborator[];
+  themes: TrainingTheme[];
+  byCollaboratorMonth: Record<string, Record<string, number>>;
 }
 
 export interface PipelineData {
