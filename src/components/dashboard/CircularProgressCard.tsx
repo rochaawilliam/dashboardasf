@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair, Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -239,6 +239,18 @@ export function CircularProgressCard({
       {/* Header with polarity toggle */}
       <div className="mb-0.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
         <span className="metric-label text-base sm:text-lg lg:text-base font-semibold flex-1 leading-none">{metric.name}</span>
+        {metric.description && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="shrink-0 p-0.5 rounded-full transition-colors hover:bg-muted/80" aria-label="Informações do indicador" onClick={(e) => e.stopPropagation()}>
+                <Info className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs max-w-[220px]">
+              {metric.description}
+            </TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <button
