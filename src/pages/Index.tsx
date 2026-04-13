@@ -588,6 +588,13 @@ const Index = () => {
       if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
     }
 
+    // Onboarding accumulated
+    if (pipelineData.onboarding) {
+      const ob = pipelineData.onboarding;
+      if (ob.avgOnboardingDays !== null) values[LEAD_TIME_ONBOARDING_ID] = ob.avgOnboardingDays;
+      if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
+    }
+
     return values;
   }, [pipelineData]);
 
