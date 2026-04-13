@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
-import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Trophy, Rocket, Flame, Zap, TrendingUp, PlayCircle, Flag, Timer, PersonStanding, Target, Crosshair, Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
