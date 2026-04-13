@@ -3,6 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const PIPELINE_URL = "https://lhkdxtefbbpktdqenify.supabase.co";
 const PIPELINE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxoa2R4dGVmYmJwa3RkcWVuaWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzgxODQsImV4cCI6MjA4NjQxNDE4NH0.JbrxqH0ErC1sggjx0oaDwb8med1M2hy2_IKO4StbYkU";
 
+const ONBOARDING_URL = "https://ttbwpcmlhssmzsgyppho.supabase.co";
+const ONBOARDING_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YndwY21saHNzbXpzZ3lwcGhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MTg5NTcsImV4cCI6MjA4NjM5NDk1N30.SZ3iHlhAbCuZgR_P7N65CPj2hxF4yMw47GYYDk-rnrk";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -495,6 +498,78 @@ Deno.serve(async (req) => {
       avgFirstContactHours: 0, slaRate: 0, avgHandlingDays: null,
     };
 
+    // ─── Onboarding Compass Metrics ─────────────────────────────
+    let onboarding = null;
+    try {
+      const onb = createClient(ONBOARDING_URL, ONBOARDING_ANON_KEY);
+      const [clientsRes, stepsRes] = await Promise.all([
+        onb.from("onboarding_clients").select("id, entry_date, created_at"),
+        onb.from("onboarding_steps").select("client_id, status, completed_date, planned_date"),
+      ]);
+      const clients = clientsRes.data || [];
+      const steps = stepsRes.data || [];
+
+      const allSteps = steps;
+      const totalSteps = allSteps.length;
+
+      // Group steps by client
+      const stepsByClient = new Map<string, typeof steps>();
+      for (const s of allSteps) {
+        if (!stepsByClient.has(s.client_id)) stepsByClient.set(s.client_id, []);
+        stepsByClient.get(s.client_id)!.push(s);
+      }
+
+      // Completed clients = all steps are "Ok"
+      const completedClientIds: string[] = [];
+      for (const c of clients) {
+        const cs = stepsByClient.get(c.id) || [];
+        if (cs.length > 0 && cs.every((s: any) => s.status === "Ok")) {
+          completedClientIds.push(c.id);
+        }
+      }
+
+      // Avg onboarding days (completed clients only)
+      let avgOnboardingDays: number | null = null;
+      if (completedClientIds.length > 0) {
+        let totalDays = 0;
+        for (const cid of completedClientIds) {
+          const client = clients.find((c: any) => c.id === cid);
+          if (client) {
+            const entry = new Date(client.entry_date).getTime();
+            const now = Date.now();
+            totalDays += Math.floor((now - entry) / (1000 * 60 * 60 * 24));
+          }
+        }
+        avgOnboardingDays = Math.round(totalDays / completedClientIds.length);
+      }
+
+      // Compliance rate: steps completed on time (date <= plannedDate)
+      const stepsWithBothDates = allSteps.filter((s: any) => s.status === "Ok" && s.completed_date && s.planned_date);
+      const onTimeSteps = stepsWithBothDates.filter((s: any) => s.completed_date <= s.planned_date);
+      const complianceRate = stepsWithBothDates.length > 0
+        ? Math.round((onTimeSteps.length / stepsWithBothDates.length) * 100)
+        : null;
+
+      // Rescheduling rate (Prejudicado steps)
+      const prejudicadoCount = allSteps.filter((s: any) => s.status === "Prejudicado").length;
+      const reschedulingRate = totalSteps > 0 ? Math.round((prejudicadoCount / totalSteps) * 100) : 0;
+
+      // Overall completion
+      const okCount = allSteps.filter((s: any) => s.status === "Ok").length;
+      const overallCompletion = totalSteps > 0 ? Math.round((okCount / totalSteps) * 100) : 0;
+
+      onboarding = {
+        avgOnboardingDays,
+        complianceRate,
+        reschedulingRate,
+        activeClients: clients.length - completedClientIds.length,
+        completedClients: completedClientIds.length,
+        overallCompletion,
+      };
+    } catch (err) {
+      console.error("Onboarding fetch error:", err);
+    }
+
     return new Response(
       JSON.stringify({
         months: result,
@@ -508,6 +583,7 @@ Deno.serve(async (req) => {
         avgCloseDaysByMonth,
         operational: operationalByMonth,
         operationalTotals,
+        onboarding,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
