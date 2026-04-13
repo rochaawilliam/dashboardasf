@@ -347,6 +347,10 @@ const Index = () => {
   const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
   const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
 
+  // Lucratividade
+  const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
+  const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
+
   // ROI metric IDs
   const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
   const ROI_OFFLINE_ID = "b2c3d4e5-7777-4bbb-cccc-777777777777";
