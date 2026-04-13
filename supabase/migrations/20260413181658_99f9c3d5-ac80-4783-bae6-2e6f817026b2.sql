@@ -1,0 +1,26 @@
+
+UPDATE metrics SET description = 'Receita de outras fontes não categorizadas' WHERE id = 'c0a1fe29-7d31-424c-9f86-6766981dcd82';
+UPDATE metrics SET description = 'Receita mensal de assessoria empresarial' WHERE id = 'b3291022-409f-4679-bddc-bc687f3d9d68';
+UPDATE metrics SET description = 'Receita mensal de consultoria empresarial' WHERE id = '560bece4-6e53-46be-add1-fa6dfdbdaaf7';
+UPDATE metrics SET description = 'Receita mensal de serviços pontuais empresariais' WHERE id = 'de3186d7-1b20-41e2-8fd9-9fef114096bb';
+UPDATE metrics SET description = 'Receita de sucumbência da área empresarial' WHERE id = 'dad1ec57-abca-4084-8fd8-4f051b4e5a68';
+UPDATE metrics SET description = 'Receita de sucumbência da área tributária' WHERE id = 'f5f304ad-f38a-4ea1-b999-e54120f92b5b';
+UPDATE metrics SET description = 'Receita mensal de assessoria trabalhista' WHERE id = 'be1fcc4f-c1b8-476a-b330-e2b8675ae458';
+UPDATE metrics SET description = 'Receita mensal de consultoria trabalhista' WHERE id = '33d2ab91-2534-4cb0-b21c-6a2d7fc628b1';
+UPDATE metrics SET description = 'Receita mensal de serviços pontuais trabalhistas' WHERE id = 'f1fd7525-963f-401e-a1e1-7b449f022bbd';
+UPDATE metrics SET description = 'Receita mensal de assessoria tributária' WHERE id = 'b829cf12-3f66-4a0c-8753-70260a9645d8';
+UPDATE metrics SET description = 'Receita mensal de consultoria tributária' WHERE id = '847ce517-c118-46c9-9012-c69dfa5474d9';
+UPDATE metrics SET description = 'Receita mensal de serviços pontuais tributários' WHERE id = '6122d0fc-e606-4020-afab-45658e063158';
+UPDATE metrics SET description = 'Leads captados online (site, redes sociais, campanhas digitais)' WHERE id = 'dc434066-4bd6-4c89-a22e-04ba5ea1dd9c';
+UPDATE metrics SET description = 'Leads empresariais captados offline (indicações, eventos, networking)' WHERE id = '86714c67-bf73-452a-aad3-2be1691c33ac';
+UPDATE metrics SET description = 'Leads trabalhistas captados offline (indicações, eventos, networking)' WHERE id = '371dd70d-7c46-4488-b7ad-80ded893af5d';
+UPDATE metrics SET description = 'Leads tributários captados offline (indicações, eventos, networking)' WHERE id = '57ca6f08-7bb6-4697-87fe-8ac33161285c';
+UPDATE metrics SET description = 'Número de contas alcançadas nas redes sociais' WHERE id = '54a2c98b-52e6-4b8a-850c-d7a38492d030';
+UPDATE metrics SET description = 'Número de conversas iniciadas via redes sociais' WHERE id = 'ca49be98-52c9-4da8-a580-6a681b54aeba';
+UPDATE metrics SET description = 'Número de impressões nas redes sociais' WHERE id = '12574c46-d6c0-4e18-9e7e-a42b05b8fcfe';
+UPDATE metrics SET description = 'Propostas comerciais elaboradas para área empresarial' WHERE id = 'af0307d2-186e-4bf3-b536-66c451ccf056';
+UPDATE metrics SET description = 'Propostas comerciais elaboradas para área trabalhista' WHERE id = 'a88438f0-dbd0-4230-9b18-d56117936d36';
+UPDATE metrics SET description = 'Propostas comerciais elaboradas para área tributária' WHERE id = '7f937d5a-6502-4fdd-810d-11fc4413d864';
+UPDATE metrics SET description = 'Reuniões agendadas com prospects da área empresarial' WHERE id = '2b59c639-5e5f-4d0d-b0aa-5a3394444389';
+UPDATE metrics SET description = 'Reuniões agendadas com prospects da área trabalhista' WHERE id = '717fb24d-f213-4135-ae10-42a4237979bd';
+UPDATE metrics SET description = 'Reuniões agendadas com prospects da área tributária' WHERE id = '45277578-48f9-4eda-87f5-28bc66918236';
