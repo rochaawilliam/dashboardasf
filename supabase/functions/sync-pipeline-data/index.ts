@@ -690,6 +690,7 @@ Deno.serve(async (req) => {
         operational: operationalByMonth,
         operationalTotals,
         onboarding,
+        training,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
