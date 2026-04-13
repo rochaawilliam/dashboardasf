@@ -503,6 +503,13 @@ const Index = () => {
       }
     }
 
+    // Onboarding metrics (same values regardless of month - they're current state)
+    if (pipelineData.onboarding) {
+      const ob = pipelineData.onboarding;
+      if (ob.avgOnboardingDays !== null) values[LEAD_TIME_ONBOARDING_ID] = ob.avgOnboardingDays;
+      if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
