@@ -67,6 +67,32 @@ interface OperationalMetrics {
   avgHandlingDays: number | null;
 }
 
+// Paginated fetch to bypass Supabase 1000-row default limit
+async function fetchAll(
+  client: any,
+  table: string,
+  select: string,
+  filters?: (query: any) => any,
+  pageSize = 1000
+): Promise<any[]> {
+  const results: any[] = [];
+  let from = 0;
+  while (true) {
+    let query = client.from(table).select(select).range(from, from + pageSize - 1);
+    if (filters) query = filters(query);
+    const { data, error } = await query;
+    if (error) {
+      console.error(`Fetch ${table} error:`, error);
+      break;
+    }
+    if (!data || data.length === 0) break;
+    results.push(...data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return results;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -90,29 +116,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    const [cardsRes, historyRes, commentsRes] = await Promise.all([
-      pipeline.from("pipeline_cards")
-        .select("id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at, ghost_of")
-        .eq("company_id", ASF_COMPANY_ID)
-        .in("month", monthStrings),
-      pipeline.from("card_stage_history")
-        .select("card_id, from_stage, to_stage, moved_at"),
-      pipeline.from("card_comments")
-        .select("card_id, created_at"),
+    // Fetch all data with pagination to avoid 1000-row truncation
+    const [allCards, stageHistory, cardComments] = await Promise.all([
+      fetchAll(pipeline, "pipeline_cards",
+        "id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at, ghost_of, link_group, title",
+        (q: any) => q.eq("company_id", ASF_COMPANY_ID).in("month", monthStrings)),
+      fetchAll(pipeline, "card_stage_history", "card_id, from_stage, to_stage, moved_at"),
+      fetchAll(pipeline, "card_comments", "card_id, created_at"),
     ]);
 
-    if (cardsRes.error) {
-      console.error("Pipeline cards query error:", cardsRes.error);
-      return new Response(JSON.stringify({ error: cardsRes.error.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const allCards = cardsRes.data || [];
     const cards = allCards.filter((c: any) => !c.ghost_of);
-    const stageHistory = historyRes.data || [];
-    const cardComments = commentsRes.data || [];
 
     const cardIdSet = new Set(cards.map((c: any) => c.id));
     const historyByCard: Record<string, { from_stage: string | null; to_stage: string; moved_at: string }[]> = {};
@@ -122,7 +135,57 @@ Deno.serve(async (req) => {
       historyByCard[h.card_id].push({ from_stage: h.from_stage, to_stage: h.to_stage, moved_at: h.moved_at });
     }
 
-    // Group by month and origin (funnel totals)
+    // ─── Cumulative stage counting (matches Pipeline Vision Board logic) ───
+    // A card counts for a stage if: it's currently at that stage, it was ever at that stage (via history),
+    // or it's currently at a LATER stage (meaning it passed through earlier ones).
+    function countCumulativeForStage(stageId: string, cardSet: any[]): number {
+      const uniqueCards = new Set<string>();
+      const stageIdx = STAGE_ORDER.indexOf(stageId);
+      if (stageIdx < 0) return 0;
+
+      for (const card of cardSet) {
+        const cardStageIdx = STAGE_ORDER.indexOf(card.stage_id);
+        // Card is currently at this stage
+        if (card.stage_id === stageId) {
+          uniqueCards.add(card.id);
+          continue;
+        }
+        // Card is currently at a later stage (passed through this one)
+        if (cardStageIdx > stageIdx) {
+          uniqueCards.add(card.id);
+          continue;
+        }
+        // Card was at this stage per history (e.g., now at geladeira but was at leads)
+        const entries = historyByCard[card.id] || [];
+        if (entries.some((h) => h.to_stage === stageId)) {
+          uniqueCards.add(card.id);
+        }
+      }
+      return uniqueCards.size;
+    }
+
+    // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
+    // Multi-area contracts share the same link_group or title; count value only once
+    function deduplicatedValorGerado(contractCards: any[]): number {
+      const seen = new Set<string>();
+      let total = 0;
+      for (const c of contractCards) {
+        const key = c.link_group ?? c.title ?? c.id;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        total += c.contract_value || 0;
+      }
+      return total;
+    }
+
+    // Group cards by month for processing
+    const cardsByMonth: Record<string, any[]> = {};
+    for (const card of cards) {
+      if (!cardsByMonth[card.month]) cardsByMonth[card.month] = [];
+      cardsByMonth[card.month].push(card);
+    }
+
+    // ─── Build funnel results ─────────────────────────────────
     const result: Record<string, Record<string, StageBucket>> = {};
     const byArea: Record<string, Record<string, Record<string, AreaBucket>>> = {};
     const byAreaTag: Record<string, Record<string, Record<string, Record<string, AreaBucket>>>> = {};
@@ -131,33 +194,39 @@ Deno.serve(async (req) => {
     let closedCount = 0;
     const closeTimeByMonth: Record<string, { totalDays: number; count: number }> = {};
 
-    for (const card of cards) {
-      const cardMonth = card.month;
-      const origin = card.lead_origin || "offline";
-      const stage = card.stage_id;
-      const stageIdx = STAGE_ORDER.indexOf(stage);
-      const area = card.practice_area || "outros";
-      const tag = card.tag || "pontual";
+    // Process per month
+    for (const ms of monthStrings) {
+      const monthCards = cardsByMonth[ms] || [];
+      if (monthCards.length === 0) continue;
 
-      const isExcluded = EXCLUDED_STAGES.includes(stage);
-
-      if (!result[cardMonth]) result[cardMonth] = {};
-      if (!result[cardMonth][origin]) result[cardMonth][origin] = newStageBucket();
-
-      const bucket = result[cardMonth][origin];
-
-      if (stage === "prospects") {
-        bucket.prospects++;
+      // Group by origin
+      const byOrigin: Record<string, any[]> = {};
+      for (const card of monthCards) {
+        const origin = card.lead_origin || "offline";
+        if (!byOrigin[origin]) byOrigin[origin] = [];
+        byOrigin[origin].push(card);
       }
 
-      if (stageIdx >= 0) {
-        bucket.leads++;
-        if (stageIdx >= 1) bucket.reunioes++;
-        if (stageIdx >= 2) bucket.propostas++;
-        if (stage === "contratos") {
-          bucket.contratos++;
-          bucket.valor_gerado += card.contract_value || 0;
+      if (!result[ms]) result[ms] = {};
 
+      for (const [origin, originCards] of Object.entries(byOrigin)) {
+        const bucket = newStageBucket();
+
+        // Cumulative counting (matches Pipeline)
+        bucket.leads = countCumulativeForStage("leads", originCards);
+        bucket.reunioes = countCumulativeForStage("reunioes", originCards);
+        bucket.propostas = countCumulativeForStage("propostas", originCards);
+        bucket.contratos = countCumulativeForStage("contratos", originCards);
+        bucket.prospects = originCards.filter((c: any) => c.stage_id === "prospects").length;
+
+        // Deduplicated valor_gerado
+        const contractCards = originCards.filter((c: any) => c.stage_id === "contratos");
+        bucket.valor_gerado = deduplicatedValorGerado(contractCards);
+
+        result[ms][origin] = bucket;
+
+        // Close time calculation
+        for (const card of contractCards) {
           const entries = historyByCard[card.id];
           if (entries) {
             const contractMove = entries
@@ -169,40 +238,60 @@ Deno.serve(async (req) => {
               const days = Math.max(0, Math.floor((closed - created) / (1000 * 60 * 60 * 24)));
               totalCloseDays += days;
               closedCount++;
-              if (!closeTimeByMonth[cardMonth]) closeTimeByMonth[cardMonth] = { totalDays: 0, count: 0 };
-              closeTimeByMonth[cardMonth].totalDays += days;
-              closeTimeByMonth[cardMonth].count++;
+              if (!closeTimeByMonth[ms]) closeTimeByMonth[ms] = { totalDays: 0, count: 0 };
+              closeTimeByMonth[ms].totalDays += days;
+              closeTimeByMonth[ms].count++;
             }
           }
         }
       }
 
-      if (!byArea[cardMonth]) byArea[cardMonth] = {};
-      if (!byArea[cardMonth][origin]) byArea[cardMonth][origin] = {};
-      if (!byArea[cardMonth][origin][area]) byArea[cardMonth][origin][area] = newAreaBucket();
+      // byArea and byAreaTag processing
+      for (const card of monthCards) {
+        const origin = card.lead_origin || "offline";
+        const stage = card.stage_id;
+        const stageIdx = STAGE_ORDER.indexOf(stage);
+        const area = card.practice_area || "outros";
+        const tag = card.tag || "pontual";
+        const isExcluded = EXCLUDED_STAGES.includes(stage);
 
-      const areaBucket = byArea[cardMonth][origin][area];
+        if (!byArea[ms]) byArea[ms] = {};
+        if (!byArea[ms][origin]) byArea[ms][origin] = {};
+        if (!byArea[ms][origin][area]) byArea[ms][origin][area] = newAreaBucket();
+        const areaBucket = byArea[ms][origin][area];
 
-      if (!isExcluded && stageIdx >= 0) {
-        areaBucket.leads++;
-        if (stageIdx >= 1) areaBucket.reunioes++;
-        if (stageIdx >= 2) areaBucket.propostas++;
-      }
-      if (stage === "contratos") {
-        areaBucket.contratos++;
-        areaBucket.valor_gerado += card.contract_value || 0;
-      }
+        if (!isExcluded && stageIdx >= 0) {
+          areaBucket.leads++;
+          if (stageIdx >= 1) areaBucket.reunioes++;
+          if (stageIdx >= 2) areaBucket.propostas++;
+        }
+        // Also count via history for cards at excluded stages
+        if (isExcluded || stageIdx < 0) {
+          const entries = historyByCard[card.id] || [];
+          for (const h of entries) {
+            const hIdx = STAGE_ORDER.indexOf(h.to_stage);
+            if (hIdx >= 0 && hIdx <= 2) {
+              if (hIdx === 0) areaBucket.leads++;
+              // Don't double-count reunioes/propostas for history-based counting in area
+              break; // Just count as lead if it was ever in the funnel
+            }
+          }
+        }
+        if (stage === "contratos") {
+          areaBucket.contratos++;
+          areaBucket.valor_gerado += card.contract_value || 0;
+        }
 
-      const areaTagBucket = ensureAreaTagBucket(byAreaTag, cardMonth, origin, area, tag);
-
-      if (!isExcluded && stageIdx >= 0) {
-        areaTagBucket.leads++;
-        if (stageIdx >= 1) areaTagBucket.reunioes++;
-        if (stageIdx >= 2) areaTagBucket.propostas++;
-      }
-      if (stage === "contratos") {
-        areaTagBucket.contratos++;
-        areaTagBucket.valor_gerado += card.contract_value || 0;
+        const areaTagBucket = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
+        if (!isExcluded && stageIdx >= 0) {
+          areaTagBucket.leads++;
+          if (stageIdx >= 1) areaTagBucket.reunioes++;
+          if (stageIdx >= 2) areaTagBucket.propostas++;
+        }
+        if (stage === "contratos") {
+          areaTagBucket.contratos++;
+          areaTagBucket.valor_gerado += card.contract_value || 0;
+        }
       }
     }
 
@@ -215,6 +304,14 @@ Deno.serve(async (req) => {
           (totals[origin] as any)[key] += val;
         }
       }
+    }
+
+    // Deduplicate valor_gerado at yearly total level too
+    for (const [origin, bucket] of Object.entries(totals)) {
+      const allContractCards = cards.filter((c: any) =>
+        (c.lead_origin || "offline") === origin && c.stage_id === "contratos"
+      );
+      bucket.valor_gerado = deduplicatedValorGerado(allContractCards);
     }
 
     const totalsByArea: Record<string, Record<string, AreaBucket>> = {};
@@ -258,20 +355,14 @@ Deno.serve(async (req) => {
       commentsByCard.get(cm.card_id)!.push(cm);
     }
 
-    // Compute per-month operational metrics
     const operationalByMonth: Record<string, OperationalMetrics> = {};
 
     for (const ms of monthStrings) {
-      const monthCards = cards.filter((c: any) => c.month === ms);
+      const monthCards = cardsByMonth[ms] || [];
       if (monthCards.length === 0) {
         operationalByMonth[ms] = {
-          avgActionsPerDay: 0,
-          followUpRate: 0,
-          advanceRate: 0,
-          commentsPerLead: 0,
-          avgFirstContactHours: 0,
-          slaRate: 0,
-          avgHandlingDays: null,
+          avgActionsPerDay: 0, followUpRate: 0, advanceRate: 0,
+          commentsPerLead: 0, avgFirstContactHours: 0, slaRate: 0, avgHandlingDays: null,
         };
         continue;
       }
@@ -287,14 +378,12 @@ Deno.serve(async (req) => {
         return d >= monthStart && d < nextMonth;
       };
 
-      // Count activities in range
       let totalActions = 0;
       const createdIds = new Set(monthCards.map((c: any) => c.id));
       const followedUpIds = new Set<string>();
       const advancedIds = new Set<string>();
       let totalComments = 0;
 
-      // Comments
       for (const [cardId, comments] of commentsByCard.entries()) {
         if (!createdIds.has(cardId)) continue;
         const inRangeComments = comments.filter((cm) => inRange(cm.created_at));
@@ -303,7 +392,6 @@ Deno.serve(async (req) => {
         if (inRangeComments.length > 0) followedUpIds.add(cardId);
       }
 
-      // Stage moves
       for (const card of monthCards) {
         const entries = historyByCard[card.id] || [];
         const inRangeMoves = entries.filter((h) => inRange(h.moved_at));
@@ -312,7 +400,6 @@ Deno.serve(async (req) => {
         if (entries.some((h) => h.from_stage && inRange(h.moved_at))) advancedIds.add(card.id);
       }
 
-      // Creations count
       totalActions += monthCards.length;
 
       const totalDays = Math.max(1, Math.floor((effectiveEnd.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24)));
@@ -321,16 +408,24 @@ Deno.serve(async (req) => {
       const advanceRate = monthCards.length > 0 ? Math.round((advancedIds.size / monthCards.length) * 10000) / 100 : 0;
       const commentsPerLead = monthCards.length > 0 ? Math.round((totalComments / monthCards.length) * 100) / 100 : 0;
 
-      // First contact time (TME)
+      // ─── TME (First Contact Time) ──────────────────────────────
+      // Match Pipeline: only consider cards where created_at month matches the card's month
+      // (excludes cards moved from earlier months which have old created_at dates)
+      const tmeCards = monthCards.filter((c: any) => {
+        const createdMonth = c.created_at ? c.created_at.slice(0, 7) : c.month;
+        return createdMonth === ms;
+      });
+
       const firstContactTimes: number[] = [];
-      for (const card of monthCards) {
+      for (const card of tmeCards) {
         const createdAt = new Date(card.created_at).getTime();
         const cardCommentsList = commentsByCard.get(card.id) || [];
+        // Find first action after creation (comment or stage move) - no from_stage filter
         const firstComment = cardCommentsList
           .filter((cm) => new Date(cm.created_at).getTime() > createdAt)
           .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
         const cardMoves = (historyByCard[card.id] || [])
-          .filter((h) => h.from_stage && new Date(h.moved_at).getTime() > createdAt)
+          .filter((h) => new Date(h.moved_at).getTime() > createdAt)
           .sort((a, b) => new Date(a.moved_at).getTime() - new Date(b.moved_at).getTime())[0];
 
         const times: number[] = [];
@@ -350,10 +445,15 @@ Deno.serve(async (req) => {
         ? Math.round((firstContactTimes.filter((h) => h <= 24).length / firstContactTimes.length) * 10000) / 100
         : 0;
 
-      // TMA (handling time)
+      // ─── TMA (handling time) ─────────────────────────────────
       const handlingDays: number[] = [];
-      for (const card of monthCards) {
-        if (card.stage_id !== "contratos" && card.stage_id !== "geladeira") continue;
+      const tmaCards = monthCards.filter((c: any) => {
+        if (c.stage_id !== "contratos" && c.stage_id !== "geladeira") return false;
+        const createdMonth = c.created_at ? c.created_at.slice(0, 7) : c.month;
+        return createdMonth === ms;
+      });
+
+      for (const card of tmaCards) {
         const created = new Date(card.created_at).getTime();
         const entries = (historyByCard[card.id] || [])
           .filter((h) => h.to_stage === "contratos" || h.to_stage === "geladeira")
@@ -391,13 +491,8 @@ Deno.serve(async (req) => {
         return vals.length > 0 ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
       })(),
     } : {
-      avgActionsPerDay: 0,
-      followUpRate: 0,
-      advanceRate: 0,
-      commentsPerLead: 0,
-      avgFirstContactHours: 0,
-      slaRate: 0,
-      avgHandlingDays: null,
+      avgActionsPerDay: 0, followUpRate: 0, advanceRate: 0, commentsPerLead: 0,
+      avgFirstContactHours: 0, slaRate: 0, avgHandlingDays: null,
     };
 
     return new Response(
