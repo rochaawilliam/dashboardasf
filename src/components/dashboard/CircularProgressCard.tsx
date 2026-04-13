@@ -57,16 +57,17 @@ const getStatus = (current: number, target: number, isInverse: boolean = false) 
   return "danger";
 };
 
-// Extract short stage label from metric name (e.g. "Leads Empresariais Off" → "Leads")
-function getStageLabel(name: string): string | null {
+// Extract stage label from metric name with singular/plural support
+function getStageLabel(name: string, value: number): string | null {
   const lower = name.toLowerCase();
-  if (lower.startsWith("prospect")) return "Prospects";
-  if (lower.startsWith("lead")) return "Leads";
-  if (lower.startsWith("reuni")) return "Reuniões";
-  if (lower.startsWith("proposta")) return "Propostas";
-  if (lower.startsWith("novos contrato") || lower.startsWith("contrato")) return "Contratos";
-  if (lower.startsWith("impress")) return "Impressões";
-  if (lower.startsWith("conversa")) return "Conversas";
+  const singular = Math.abs(value) === 1;
+  if (lower.startsWith("prospect")) return singular ? "Prospect" : "Prospects";
+  if (lower.startsWith("lead")) return singular ? "Lead" : "Leads";
+  if (lower.startsWith("reuni")) return singular ? "Reunião" : "Reuniões";
+  if (lower.startsWith("proposta")) return singular ? "Proposta" : "Propostas";
+  if (lower.startsWith("novos contrato") || lower.startsWith("contrato")) return singular ? "Contrato" : "Contratos";
+  if (lower.startsWith("impress")) return singular ? "Impressão" : "Impressões";
+  if (lower.startsWith("conversa")) return singular ? "Conversa" : "Conversas";
   return null;
 }
 
@@ -361,9 +362,9 @@ export function CircularProgressCard({
               {hideValues ? "••••••" : (
                 <>
                   {formatMetricValue(displayValue, metric.unit, metric.name)}
-                  {getStageLabel(metric.name) && (
+                  {getStageLabel(metric.name, displayValue) && (
                     <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
-                      {getStageLabel(metric.name)}
+                      {getStageLabel(metric.name, displayValue)}
                     </span>
                   )}
                 </>
