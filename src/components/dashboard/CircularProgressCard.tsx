@@ -346,7 +346,16 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-              {hideValues ? "••••••" : formatMetricValue(displayValue, metric.unit, metric.name)}
+              {hideValues ? "••••••" : (
+                <>
+                  {formatMetricValue(displayValue, metric.unit, metric.name)}
+                  {getStageLabel(metric.name) && (
+                    <span className="text-sm sm:text-base lg:text-sm font-semibold text-muted-foreground ml-1">
+                      {getStageLabel(metric.name)}
+                    </span>
+                  )}
+                </>
+              )}
             </p>
           </div>
           {/* Annual target in footer when viewing a specific month */}
