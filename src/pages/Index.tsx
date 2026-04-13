@@ -554,8 +554,24 @@ const Index = () => {
     } else if (valorGeradoOffline > 0) {
       merged[ROI_OFFLINE_ID] = 100; // Revenue with no investment = 100% return
     }
+    // Lucratividade Anual (monthly view) = average of all months up to selected month
+    if (historyData && selectedMonth) {
+      const lucratMonthly: Record<number, number> = {};
+      historyData.forEach((h) => {
+        if (h.metric_id !== LUCRATIVIDADE_MENSAL_ID) return;
+        if ((h as any).source === 'forecast') return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month && ref.month <= selectedMonth) {
+          lucratMonthly[ref.month] = (lucratMonthly[ref.month] || 0) + h.value;
+        }
+      });
+      const months = Object.values(lucratMonthly);
+      if (months.length > 0) {
+        merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
+      }
+    }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues]);
+  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
