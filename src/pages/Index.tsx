@@ -1148,6 +1148,8 @@ const Index = () => {
                               ...Object.keys(PIPELINE_AREA_MAP),
                               TAXA_AGENDAMENTO_ID, TAXA_COMPARECIMENTO_ID, TAXA_CONVERSAO_ID,
                               TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
+                              MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID, TAXA_AVANCO_ID,
+                              COMENTARIOS_LEAD_ID, TME_SLA_ID, TMA_ID,
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               return (
