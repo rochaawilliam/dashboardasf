@@ -574,7 +574,6 @@ Deno.serve(async (req) => {
     let training: any = null;
     try {
       const TRAINING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?gid=1563700319&single=true&output=csv";
-      const COLLAB_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?output=csv";
 
       const MONTH_MAP: Record<string, number> = {
         jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6,
