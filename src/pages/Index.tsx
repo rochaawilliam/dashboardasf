@@ -1598,6 +1598,14 @@ const Index = () => {
                               </div>
                             </div>
                       }
+
+                          {category === "gestao_pessoas" && pipelineData?.training &&
+                      <TrainingDashboardComponent
+                        training={pipelineData.training}
+                        selectedMonth={selectedMonth}
+                        selectedYear={selectedYear}
+                      />
+                      }
                         </>
                     }
                     </TabsContent>);
