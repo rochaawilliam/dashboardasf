@@ -358,6 +358,10 @@ const Index = () => {
   // Metas Indutoras
   const METAS_INDUTORAS_ID = "292f5034-c7ea-4e03-b53d-453622e671c7";
 
+  // Onboarding metrics (Retenção e Lifetime)
+  const LEAD_TIME_ONBOARDING_ID = "0fa037ef-7740-4670-a7e8-f2efe4753472";
+  const TAXA_ONBOARDING_PRAZO_ID = "7fd92316-a980-4f41-b3f7-a8c126808e6c";
+
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
