@@ -17,6 +17,16 @@ export interface PipelineAreaData {
   valor_gerado: number;
 }
 
+export interface OperationalMetrics {
+  avgActionsPerDay: number;
+  followUpRate: number;
+  advanceRate: number;
+  commentsPerLead: number;
+  avgFirstContactHours: number;
+  slaRate: number;
+  avgHandlingDays: number | null;
+}
+
 export interface PipelineData {
   months: Record<string, Record<string, PipelineStageData>>;
   totals: Record<string, PipelineStageData>;
@@ -27,6 +37,8 @@ export interface PipelineData {
   year: number;
   avgCloseDays: number | null;
   avgCloseDaysByMonth: Record<string, number | null>;
+  operational: Record<string, OperationalMetrics>;
+  operationalTotals: OperationalMetrics;
 }
 
 export function usePipelineData(year: number, month?: number | null) {
