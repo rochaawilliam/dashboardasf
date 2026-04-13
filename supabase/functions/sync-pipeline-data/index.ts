@@ -574,7 +574,6 @@ Deno.serve(async (req) => {
     let training: any = null;
     try {
       const TRAINING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?gid=1563700319&single=true&output=csv";
-      const COLLAB_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?output=csv";
 
       const MONTH_MAP: Record<string, number> = {
         jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6,
@@ -612,40 +611,10 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Fetch collaborators CSV
-      let headcount = 0;
-      let avgMonths = 0;
-      try {
-        const collabRes = await fetch(COLLAB_CSV_URL);
-        const collabText = await collabRes.text();
-        // Check if it's actually CSV (not HTML login page)
-        if (collabText.startsWith("Colaborador") || !collabText.includes("<!DOCTYPE")) {
-          const collabRows = collabText.trim().split("\n").slice(1);
-          const now = new Date();
-          let totalMonths = 0;
-          let activeCount = 0;
-          for (const row of collabRows) {
-            const cols = row.split(",");
-            if (cols.length < 7) continue;
-            const status = (cols[4] || "").trim();
-            if (status.toLowerCase() === "ativo") {
-              activeCount++;
-              const yr = parseInt(cols[5]?.trim() || "0");
-              const mesStr = (cols[6] || "").trim().toLowerCase().substring(0, 3);
-              const mo = MONTH_MAP[mesStr] || 1;
-              if (yr > 0) {
-                const admDate = new Date(yr, mo - 1, 1);
-                const diffMonths = (now.getFullYear() - admDate.getFullYear()) * 12 + (now.getMonth() - admDate.getMonth());
-                totalMonths += Math.max(0, diffMonths);
-              }
-            }
-          }
-          headcount = activeCount;
-          avgMonths = activeCount > 0 ? Math.round(totalMonths / activeCount * 10) / 10 : 0;
-        }
-      } catch (e) {
-        console.error("Collaborators CSV fetch error:", e);
-      }
+      // Derive headcount from unique collaborators in training data
+      const uniqueCollaborators = new Set(trainings.map(t => t.colaborador).filter(Boolean));
+      const headcount = uniqueCollaborators.size;
+      const avgMonths = 0; // No admission date data available
 
       // Compute training metrics by month, by collaborator, and by pilar
       const trainingByMonth: Record<string, { hours: number; modules: number; certified: number }> = {};
