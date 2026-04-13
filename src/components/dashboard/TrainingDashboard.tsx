@@ -25,8 +25,8 @@ const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Se
 export function TrainingDashboard({ training, selectedMonth, selectedYear }: TrainingDashboardProps) {
   // Hours by collaborator chart data
   const collaboratorData = useMemo(() => {
-    return training.topCollaborators.map((c) => ({
-      name: c.name.split(" ")[0], // First name only
+    return (training.topCollaborators ?? []).map((c) => ({
+      name: c.name.split(" ")[0],
       fullName: c.name,
       hours: c.hours,
       modules: c.modules,
@@ -50,7 +50,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
 
   // Hours by theme
   const themeData = useMemo(() => {
-    return training.themes.slice(0, 6).map((t) => ({
+    return (training.themes ?? []).slice(0, 6).map((t) => ({
       name: t.name.length > 25 ? t.name.substring(0, 22) + "..." : t.name,
       fullName: t.name,
       hours: t.hours,
@@ -59,11 +59,12 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
   }, [training.themes]);
 
   // Top 3
-  const top3 = training.topCollaborators.slice(0, 3);
+  const top3 = (training.topCollaborators ?? []).slice(0, 3);
 
   // Average hours per collaborator
-  const avgHoursPerPerson = training.topCollaborators.length > 0
-    ? Math.round(training.totalHours / training.topCollaborators.length * 10) / 10
+  const collabs = training.topCollaborators ?? [];
+  const avgHoursPerPerson = collabs.length > 0
+    ? Math.round((training.totalHours ?? 0) / collabs.length * 10) / 10
     : 0;
 
   const chartConfig = {
