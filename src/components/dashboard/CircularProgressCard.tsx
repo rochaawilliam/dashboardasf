@@ -62,7 +62,7 @@ function getStageLabel(name: string, value: number): string | null {
   const lower = name.toLowerCase();
   const singular = Math.abs(value) === 1;
   if (lower.startsWith("prospect")) return singular ? "Prospect" : "Prospects";
-  if (lower.startsWith("lead")) return singular ? "Lead" : "Leads";
+  if (lower.startsWith("lead") && !lower.includes("lead time")) return singular ? "Lead" : "Leads";
   if (lower.startsWith("reuni")) return singular ? "Reunião" : "Reuniões";
   if (lower.startsWith("proposta")) return singular ? "Proposta" : "Propostas";
   if (lower.startsWith("novos contrato") || lower.startsWith("contrato")) return singular ? "Contrato" : "Contratos";

@@ -27,6 +27,15 @@ export interface OperationalMetrics {
   avgHandlingDays: number | null;
 }
 
+export interface OnboardingMetrics {
+  avgOnboardingDays: number | null;
+  complianceRate: number | null;
+  reschedulingRate: number;
+  activeClients: number;
+  completedClients: number;
+  overallCompletion: number;
+}
+
 export interface PipelineData {
   months: Record<string, Record<string, PipelineStageData>>;
   totals: Record<string, PipelineStageData>;
@@ -39,6 +48,36 @@ export interface PipelineData {
   avgCloseDaysByMonth: Record<string, number | null>;
   operational: Record<string, OperationalMetrics>;
   operationalTotals: OperationalMetrics;
+  onboarding?: OnboardingMetrics;
+}
+
+const CACHE_KEY = "pipeline-data-cache";
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+function getCachedPipeline(year: number, month?: number | null): PipelineData | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { data, timestamp, cacheYear, cacheMonth } = JSON.parse(raw);
+    if (cacheYear !== year || cacheMonth !== (month ?? null)) return null;
+    if (Date.now() - timestamp > CACHE_TTL) return null;
+    return data as PipelineData;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedPipeline(year: number, month: number | null | undefined, data: PipelineData) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      data,
+      timestamp: Date.now(),
+      cacheYear: year,
+      cacheMonth: month ?? null,
+    }));
+  } catch {
+    // localStorage full — ignore
+  }
 }
 
 export function usePipelineData(year: number, month?: number | null) {
@@ -62,8 +101,11 @@ export function usePipelineData(year: number, month?: number | null) {
         throw new Error(`Pipeline fetch failed: ${response.status}`);
       }
 
-      return (await response.json()) as PipelineData;
+      const data = (await response.json()) as PipelineData;
+      setCachedPipeline(year, month, data);
+      return data;
     },
+    placeholderData: () => getCachedPipeline(year, month) ?? undefined,
     staleTime: 5 * 60 * 1000,
     retry: 2,
   });
