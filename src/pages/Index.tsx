@@ -362,6 +362,13 @@ const Index = () => {
   const LEAD_TIME_ONBOARDING_ID = "0fa037ef-7740-4670-a7e8-f2efe4753472";
   const TAXA_ONBOARDING_PRAZO_ID = "7fd92316-a980-4f41-b3f7-a8c126808e6c";
 
+  // Time ASF metrics
+  const HEADCOUNT_ID = "a1b2c3d4-1001-4000-a001-000000000001";
+  const HORAS_TREINAMENTO_ID = "a1b2c3d4-1001-4000-a001-000000000002";
+  const MODULOS_CONCLUIDOS_ID = "a1b2c3d4-1001-4000-a001-000000000003";
+  const TAXA_CERTIFICACAO_ID = "a1b2c3d4-1001-4000-a001-000000000004";
+  const TEMPO_MEDIO_CASA_ID = "a1b2c3d4-1001-4000-a001-000000000005";
+
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
@@ -510,6 +517,27 @@ const Index = () => {
       if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
     }
 
+    // Training / Time ASF metrics
+    if (pipelineData.training) {
+      const tr = pipelineData.training;
+      if (tr.headcount > 0) values[HEADCOUNT_ID] = tr.headcount;
+      if (tr.avgMonths > 0) values[TEMPO_MEDIO_CASA_ID] = tr.avgMonths;
+      
+      if (selectedMonth) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const monthData = tr.byMonth?.[ms];
+        if (monthData) {
+          values[HORAS_TREINAMENTO_ID] = monthData.hours;
+          values[MODULOS_CONCLUIDOS_ID] = monthData.modules;
+          values[TAXA_CERTIFICACAO_ID] = monthData.modules > 0 ? Math.round(monthData.certified / monthData.modules * 10000) / 100 : 0;
+        }
+      } else {
+        values[HORAS_TREINAMENTO_ID] = tr.totalHours;
+        values[MODULOS_CONCLUIDOS_ID] = tr.totalModules;
+        values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
+      }
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
@@ -593,6 +621,16 @@ const Index = () => {
       const ob = pipelineData.onboarding;
       if (ob.avgOnboardingDays !== null) values[LEAD_TIME_ONBOARDING_ID] = ob.avgOnboardingDays;
       if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
+    }
+
+    // Training accumulated
+    if (pipelineData.training) {
+      const tr = pipelineData.training;
+      if (tr.headcount > 0) values[HEADCOUNT_ID] = tr.headcount;
+      if (tr.avgMonths > 0) values[TEMPO_MEDIO_CASA_ID] = tr.avgMonths;
+      values[HORAS_TREINAMENTO_ID] = tr.totalHours;
+      values[MODULOS_CONCLUIDOS_ID] = tr.totalModules;
+      values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
     }
 
     return values;

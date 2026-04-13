@@ -570,6 +570,112 @@ Deno.serve(async (req) => {
       console.error("Onboarding fetch error:", err);
     }
 
+    // ── Training data from Google Sheets ──
+    let training: any = null;
+    try {
+      const TRAINING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?gid=1563700319&single=true&output=csv";
+      const COLLAB_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?output=csv";
+
+      const MONTH_MAP: Record<string, number> = {
+        jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6,
+        jul: 7, ago: 8, set: 9, out: 10, nov: 11, dez: 12,
+      };
+
+      // Fetch training CSV
+      const trainingRes = await fetch(TRAINING_CSV_URL);
+      const trainingCsv = await trainingRes.text();
+      const trainingRows = trainingCsv.trim().split("\n").slice(1); // skip header
+
+      // Parse training rows
+      interface TrainingRow {
+        colaborador: string;
+        ano: number;
+        mes: number;
+        modulo: string;
+        cargaHoraria: number;
+        status: string;
+        certificado: boolean;
+      }
+      const trainings: TrainingRow[] = [];
+      for (const row of trainingRows) {
+        const cols = row.split(",");
+        if (cols.length < 9) continue;
+        const mesStr = (cols[2] || "").trim().toLowerCase().substring(0, 3);
+        trainings.push({
+          colaborador: cols[0]?.trim() || "",
+          ano: parseInt(cols[1]?.trim() || "0"),
+          mes: MONTH_MAP[mesStr] || 0,
+          modulo: cols[3]?.trim() || "",
+          cargaHoraria: parseFloat(cols[5]?.trim() || "0") || 0,
+          status: cols[6]?.trim() || "",
+          certificado: (cols[8]?.trim() || "").toLowerCase() === "sim",
+        });
+      }
+
+      // Fetch collaborators CSV
+      let headcount = 0;
+      let avgMonths = 0;
+      try {
+        const collabRes = await fetch(COLLAB_CSV_URL);
+        const collabText = await collabRes.text();
+        // Check if it's actually CSV (not HTML login page)
+        if (collabText.startsWith("Colaborador") || !collabText.includes("<!DOCTYPE")) {
+          const collabRows = collabText.trim().split("\n").slice(1);
+          const now = new Date();
+          let totalMonths = 0;
+          let activeCount = 0;
+          for (const row of collabRows) {
+            const cols = row.split(",");
+            if (cols.length < 7) continue;
+            const status = (cols[4] || "").trim();
+            if (status.toLowerCase() === "ativo") {
+              activeCount++;
+              const yr = parseInt(cols[5]?.trim() || "0");
+              const mesStr = (cols[6] || "").trim().toLowerCase().substring(0, 3);
+              const mo = MONTH_MAP[mesStr] || 1;
+              if (yr > 0) {
+                const admDate = new Date(yr, mo - 1, 1);
+                const diffMonths = (now.getFullYear() - admDate.getFullYear()) * 12 + (now.getMonth() - admDate.getMonth());
+                totalMonths += Math.max(0, diffMonths);
+              }
+            }
+          }
+          headcount = activeCount;
+          avgMonths = activeCount > 0 ? Math.round(totalMonths / activeCount * 10) / 10 : 0;
+        }
+      } catch (e) {
+        console.error("Collaborators CSV fetch error:", e);
+      }
+
+      // Compute training metrics by month and accumulated
+      const trainingByMonth: Record<string, { hours: number; modules: number; certified: number }> = {};
+      let totalHours = 0, totalModules = 0, totalCertified = 0;
+
+      for (const t of trainings) {
+        if (t.status.toLowerCase() !== "concluído") continue;
+        const monthKey = `${t.ano}-${String(t.mes).padStart(2, "0")}`;
+        if (!trainingByMonth[monthKey]) trainingByMonth[monthKey] = { hours: 0, modules: 0, certified: 0 };
+        trainingByMonth[monthKey].hours += t.cargaHoraria;
+        trainingByMonth[monthKey].modules += 1;
+        if (t.certificado) trainingByMonth[monthKey].certified += 1;
+        totalHours += t.cargaHoraria;
+        totalModules += 1;
+        if (t.certificado) totalCertified += 1;
+      }
+
+      training = {
+        headcount,
+        avgMonths,
+        byMonth: trainingByMonth,
+        totalHours,
+        totalModules,
+        totalCertified,
+        certificationRate: totalModules > 0 ? Math.round(totalCertified / totalModules * 10000) / 100 : 0,
+      };
+    } catch (err) {
+      console.error("Training fetch error:", err);
+    }
+
     return new Response(
       JSON.stringify({
         months: result,
@@ -584,6 +690,7 @@ Deno.serve(async (req) => {
         operational: operationalByMonth,
         operationalTotals,
         onboarding,
+        training,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

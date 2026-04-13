@@ -36,6 +36,16 @@ export interface OnboardingMetrics {
   overallCompletion: number;
 }
 
+export interface TrainingMetrics {
+  headcount: number;
+  avgMonths: number;
+  byMonth: Record<string, { hours: number; modules: number; certified: number }>;
+  totalHours: number;
+  totalModules: number;
+  totalCertified: number;
+  certificationRate: number;
+}
+
 export interface PipelineData {
   months: Record<string, Record<string, PipelineStageData>>;
   totals: Record<string, PipelineStageData>;
@@ -49,6 +59,7 @@ export interface PipelineData {
   operational: Record<string, OperationalMetrics>;
   operationalTotals: OperationalMetrics;
   onboarding?: OnboardingMetrics;
+  training?: TrainingMetrics;
 }
 
 const CACHE_KEY = "pipeline-data-cache";
