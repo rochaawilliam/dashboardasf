@@ -57,6 +57,19 @@ const getStatus = (current: number, target: number, isInverse: boolean = false) 
   return "danger";
 };
 
+// Extract short stage label from metric name (e.g. "Leads Empresariais Off" → "Leads")
+function getStageLabel(name: string): string | null {
+  const lower = name.toLowerCase();
+  if (lower.startsWith("prospect")) return "Prospects";
+  if (lower.startsWith("lead")) return "Leads";
+  if (lower.startsWith("reuni")) return "Reuniões";
+  if (lower.startsWith("proposta")) return "Propostas";
+  if (lower.startsWith("novos contrato") || lower.startsWith("contrato")) return "Contratos";
+  if (lower.startsWith("impress")) return "Impressões";
+  if (lower.startsWith("conversa")) return "Conversas";
+  return null;
+}
+
 // HSL values for each band boundary
 const BAND_HSL = [
 [0, 75, 48], // Red
@@ -333,7 +346,16 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-              {hideValues ? "••••••" : formatMetricValue(displayValue, metric.unit, metric.name)}
+              {hideValues ? "••••••" : (
+                <>
+                  {formatMetricValue(displayValue, metric.unit, metric.name)}
+                  {getStageLabel(metric.name) && (
+                    <span className="text-sm sm:text-base lg:text-sm font-semibold text-muted-foreground ml-1">
+                      {getStageLabel(metric.name)}
+                    </span>
+                  )}
+                </>
+              )}
             </p>
           </div>
           {/* Annual target in footer when viewing a specific month */}
