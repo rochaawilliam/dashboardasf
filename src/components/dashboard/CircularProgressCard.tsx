@@ -246,7 +246,7 @@ export function CircularProgressCard({
                 <Info className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs max-w-[220px]">
+            <TooltipContent side="top" className="text-xs max-w-[320px]">
               {metric.description}
             </TooltipContent>
           </Tooltip>
@@ -362,7 +362,7 @@ export function CircularProgressCard({
                 <>
                   {formatMetricValue(displayValue, metric.unit, metric.name)}
                   {getStageLabel(metric.name) && (
-                    <span className="text-sm sm:text-base lg:text-sm font-semibold text-muted-foreground ml-1">
+                    <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
                       {getStageLabel(metric.name)}
                     </span>
                   )}
