@@ -475,6 +475,30 @@ const Index = () => {
       }
     }
 
+    // Operational metrics from pipeline
+    if (selectedMonth) {
+      const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+      const ops = pipelineData.operational?.[ms];
+      if (ops) {
+        values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
+        values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
+        values[TAXA_AVANCO_ID] = ops.advanceRate;
+        values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
+        values[TME_SLA_ID] = ops.avgFirstContactHours;
+        if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
+      }
+    } else {
+      const ops = pipelineData.operationalTotals;
+      if (ops) {
+        values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
+        values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
+        values[TAXA_AVANCO_ID] = ops.advanceRate;
+        values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
+        values[TME_SLA_ID] = ops.avgFirstContactHours;
+        if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
+      }
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
