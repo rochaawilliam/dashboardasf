@@ -577,8 +577,24 @@ const Index = () => {
     } else if (valorGeradoOffline > 0) {
       merged[ROI_OFFLINE_ID] = 100;
     }
+    // Lucratividade Anual = average of monthly Lucratividade Mensal values
+    if (historyData) {
+      const lucratMonthly: Record<number, number> = {};
+      historyData.forEach((h) => {
+        if (h.metric_id !== LUCRATIVIDADE_MENSAL_ID) return;
+        if ((h as any).source === 'forecast') return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month) {
+          lucratMonthly[ref.month] = (lucratMonthly[ref.month] || 0) + h.value;
+        }
+      });
+      const months = Object.values(lucratMonthly);
+      if (months.length > 0) {
+        merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
+      }
+    }
     return merged;
-  }, [accumulatedValues, pipelineAccumulatedValues]);
+  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
