@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { Clock, BookOpen, Trophy, Users, TrendingUp } from "lucide-react";
+import { Clock, BookOpen, Trophy, Users, TrendingUp, Calendar, Award, Target } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import type { TrainingMetrics } from "@/hooks/usePipelineData";
 
 interface TrainingDashboardProps {
@@ -22,8 +23,57 @@ const COLORS = [
 
 const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
+function MetricMiniCard({
+  icon: Icon,
+  label,
+  value,
+  suffix,
+  target,
+  colorClass,
+}: {
+  icon: any;
+  label: string;
+  value: number;
+  suffix?: string;
+  target?: number;
+  colorClass: string;
+}) {
+  const progress = target && target > 0 ? Math.min(100, Math.round((value / target) * 100)) : null;
+  const status = progress !== null
+    ? progress >= 100 ? "text-green-500" : progress >= 70 ? "text-yellow-500" : "text-red-500"
+    : "";
+
+  return (
+    <Card className="bg-card border-border/50">
+      <CardContent className="p-3 space-y-2">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${colorClass}`}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">{label}</p>
+            <p className="text-xl font-bold text-foreground">
+              {value}{suffix}
+            </p>
+          </div>
+        </div>
+        {target !== undefined && (
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs">
+              <span className={`font-medium ${status}`}>{progress}%</span>
+              <span className="text-muted-foreground">Meta: {target}{suffix}</span>
+            </div>
+            <Progress value={progress ?? 0} className="h-1.5" />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function TrainingDashboard({ training, selectedMonth, selectedYear }: TrainingDashboardProps) {
-  // Hours by collaborator chart data
+  const targets = training.targets;
+
   const collaboratorData = useMemo(() => {
     return (training.topCollaborators ?? []).map((c) => ({
       name: c.name.split(" ")[0],
@@ -33,7 +83,6 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     }));
   }, [training.topCollaborators]);
 
-  // Monthly hours evolution chart data
   const monthlyData = useMemo(() => {
     const months: { month: string; hours: number; modules: number }[] = [];
     for (let m = 1; m <= 12; m++) {
@@ -48,7 +97,6 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     return months;
   }, [training.byMonth, selectedYear]);
 
-  // Hours by theme
   const themeData = useMemo(() => {
     return (training.themes ?? []).slice(0, 6).map((t) => ({
       name: t.name.length > 25 ? t.name.substring(0, 22) + "..." : t.name,
@@ -58,10 +106,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     }));
   }, [training.themes]);
 
-  // Top 3
   const top3 = (training.topCollaborators ?? []).slice(0, 3);
-
-  // Average hours per collaborator
   const collabs = training.topCollaborators ?? [];
   const avgHoursPerPerson = collabs.length > 0
     ? Math.round((training.totalHours ?? 0) / collabs.length * 10) / 10
@@ -74,52 +119,53 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
 
   return (
     <div className="space-y-4 mt-4">
-      {/* Summary mini-cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="bg-card border-border/50">
-          <CardContent className="p-3 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Horas Totais</p>
-              <p className="text-xl font-bold text-foreground">{training.totalHours}h</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border/50">
-          <CardContent className="p-3 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-accent/10">
-              <BookOpen className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Módulos</p>
-              <p className="text-xl font-bold text-foreground">{training.totalModules}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border/50">
-          <CardContent className="p-3 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-success/10">
-              <Users className="h-5 w-5 text-success" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Média/Pessoa</p>
-              <p className="text-xl font-bold text-foreground">{avgHoursPerPerson}h</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border/50">
-          <CardContent className="p-3 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-warning/10">
-              <Trophy className="h-5 w-5 text-warning" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Certificados</p>
-              <p className="text-xl font-bold text-foreground">{training.totalCertified}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Summary mini-cards with targets */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <MetricMiniCard
+          icon={Users}
+          label="Headcount Ativo"
+          value={training.headcount}
+          target={targets?.headcount}
+          colorClass="bg-primary/10 text-primary"
+        />
+        <MetricMiniCard
+          icon={Clock}
+          label="Horas de Treinamento"
+          value={training.totalHours}
+          suffix="h"
+          target={targets?.hours}
+          colorClass="bg-primary/10 text-primary"
+        />
+        <MetricMiniCard
+          icon={BookOpen}
+          label="Módulos Concluídos"
+          value={training.totalModules}
+          target={targets?.modules}
+          colorClass="bg-accent/10 text-accent"
+        />
+        <MetricMiniCard
+          icon={Award}
+          label="Taxa de Certificação"
+          value={training.certificationRate}
+          suffix="%"
+          target={targets?.certificationRate}
+          colorClass="bg-warning/10 text-warning"
+        />
+        <MetricMiniCard
+          icon={Calendar}
+          label="Tempo Médio de Casa"
+          value={training.avgMonths}
+          suffix=" meses"
+          target={targets?.avgTenureMonths}
+          colorClass="bg-success/10 text-success"
+        />
+        <MetricMiniCard
+          icon={Target}
+          label="Média/Pessoa"
+          value={avgHoursPerPerson}
+          suffix="h"
+          colorClass="bg-muted text-muted-foreground"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

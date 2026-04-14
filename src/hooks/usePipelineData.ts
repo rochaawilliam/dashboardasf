@@ -49,6 +49,14 @@ export interface TrainingTheme {
   modules: number;
 }
 
+export interface TrainingTargets {
+  headcount: number;
+  hours: number;
+  modules: number;
+  certificationRate: number;
+  avgTenureMonths: number;
+}
+
 export interface TrainingMetrics {
   headcount: number;
   avgMonths: number;
@@ -60,6 +68,7 @@ export interface TrainingMetrics {
   topCollaborators: TrainingCollaborator[];
   themes: TrainingTheme[];
   byCollaboratorMonth: Record<string, Record<string, number>>;
+  targets?: TrainingTargets;
 }
 
 export interface PipelineData {
