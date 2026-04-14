@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { ChevronDown, ChevronUp, Users as UsersDropdown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { parseLocalDate, getRefMonthYear } from "@/utils/dateUtils";
@@ -124,6 +125,36 @@ function CollapsibleSubcategory({ name, count, collapsible, defaultCollapsed, ch
       {!collapsed && children}
     </div>);
 
+}
+
+// Inline collaborator dropdown for training cards
+function CollaboratorDropdown({ data, suffix }: { data: { name: string; value: number }[]; suffix?: string }) {
+  const [open, setOpen] = useState(false);
+  const sorted = useMemo(() => [...data].sort((a, b) => b.value - a.value), [data]);
+  
+  return (
+    <div>
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-1"
+      >
+        <UsersDropdown className="h-3 w-3" />
+        <span>Por colaborador ({sorted.length})</span>
+        {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+      </button>
+      {open && (
+        <div className="space-y-1 max-h-48 overflow-y-auto mt-1">
+          {sorted.map((item, idx) => (
+            <div key={idx} className="flex justify-between items-center text-xs px-2 py-1 rounded bg-muted/50">
+              <span className="text-foreground truncate mr-2">{item.name}</span>
+              <span className="font-medium text-foreground whitespace-nowrap">{item.value}{suffix}</span>
+            </div>
+          ))}
+          {sorted.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">Sem dados</p>}
+        </div>
+      )}
+    </div>
+  );
 }
 
 const Index = () => {
@@ -1616,7 +1647,20 @@ const Index = () => {
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
                                             forceAnnualLabel={isARR || isResultadoAcumulado}
-                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null} />
+                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}>
+                                            {/* Per-collaborator dropdown for training metrics */}
+                                            {metric.id === HORAS_TREINAMENTO_ID && pipelineData?.training?.topCollaborators && (
+                                              <CollaboratorDropdown
+                                                data={pipelineData.training.topCollaborators.map(c => ({ name: c.name, value: c.hours }))}
+                                                suffix="h"
+                                              />
+                                            )}
+                                            {metric.id === MODULOS_CONCLUIDOS_ID && pipelineData?.training?.topCollaborators && (
+                                              <CollaboratorDropdown
+                                                data={pipelineData.training.topCollaborators.map(c => ({ name: c.name, value: c.modules }))}
+                                              />
+                                            )}
+                                          </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
 

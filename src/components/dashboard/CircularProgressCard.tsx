@@ -31,6 +31,7 @@ interface CircularProgressCardProps {
     realizado: number;
     resultado: number;
   } | null;
+  children?: React.ReactNode;
 }
 
 const nonAccumulativeKeywords = [
@@ -194,6 +195,7 @@ export function CircularProgressCard({
   hideValues = false,
   forceAnnualLabel = false,
   resultadoData,
+  children,
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -389,6 +391,11 @@ export function CircularProgressCard({
         </div>
       </div>
 
+      {children && (
+        <div className="px-2 pb-2">
+          {children}
+        </div>
+      )}
 
     </div>);
 
