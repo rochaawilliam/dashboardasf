@@ -105,6 +105,8 @@ export function MetricDrilldownDialog({
   onOpenChange,
   canEdit,
   canDelete,
+  collaboratorData,
+  collaboratorSuffix,
 }: MetricDrilldownDialogProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
