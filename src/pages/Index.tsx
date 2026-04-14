@@ -127,6 +127,36 @@ function CollapsibleSubcategory({ name, count, collapsible, defaultCollapsed, ch
 
 }
 
+// Inline collaborator dropdown for training cards
+function CollaboratorDropdown({ data, suffix }: { data: { name: string; value: number }[]; suffix?: string }) {
+  const [open, setOpen] = useState(false);
+  const sorted = useMemo(() => [...data].sort((a, b) => b.value - a.value), [data]);
+  
+  return (
+    <div>
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-1"
+      >
+        <UsersDropdown className="h-3 w-3" />
+        <span>Por colaborador ({sorted.length})</span>
+        {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+      </button>
+      {open && (
+        <div className="space-y-1 max-h-48 overflow-y-auto mt-1">
+          {sorted.map((item, idx) => (
+            <div key={idx} className="flex justify-between items-center text-xs px-2 py-1 rounded bg-muted/50">
+              <span className="text-foreground truncate mr-2">{item.name}</span>
+              <span className="font-medium text-foreground whitespace-nowrap">{item.value}{suffix}</span>
+            </div>
+          ))}
+          {sorted.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">Sem dados</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const Index = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
