@@ -1793,7 +1793,7 @@ const Index = () => {
             : undefined
         }
         collaboratorSuffix={drilldownMetric.id === HORAS_TREINAMENTO_ID ? "h" : undefined}
-        hideAnnualTarget={[HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID].includes(drilldownMetric.id)}
+        hideAnnualTarget={[HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(drilldownMetric.id)}
       />
 
       }
