@@ -120,20 +120,12 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
   return (
     <div className="space-y-4 mt-4">
       {/* Summary mini-cards with targets */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <MetricMiniCard
           icon={Users}
           label="Headcount Ativo"
           value={training.headcount}
           target={targets?.headcount}
-          colorClass="bg-primary/10 text-primary"
-        />
-        <MetricMiniCard
-          icon={Clock}
-          label="Horas de Treinamento"
-          value={training.totalHours}
-          suffix="h"
-          target={targets?.hours}
           colorClass="bg-primary/10 text-primary"
         />
         <MetricMiniCard
