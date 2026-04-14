@@ -633,6 +633,7 @@ const Index = () => {
       values[HORAS_TREINAMENTO_ID] = tr.totalHours;
       values[MODULOS_CONCLUIDOS_ID] = tr.totalModules;
       values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
+      values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
     }
 
     return values;
