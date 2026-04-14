@@ -1568,6 +1568,16 @@ const Index = () => {
                                     monthlyTargets.find((t) => t.metric_id === metric.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? null :
                                     null;
 
+                                    // Override monthly targets for training metrics (these are monthly, not annual/12)
+                                    if (pipelineData?.training?.targets && selectedMonth) {
+                                      const tt = pipelineData.training.targets;
+                                      if (metric.id === HEADCOUNT_ID) cardMonthlyTarget = tt.headcount;
+                                      else if (metric.id === HORAS_TREINAMENTO_ID) cardMonthlyTarget = tt.hours;
+                                      else if (metric.id === MODULOS_CONCLUIDOS_ID) cardMonthlyTarget = tt.modules;
+                                      else if (metric.id === TAXA_CERTIFICACAO_ID) cardMonthlyTarget = tt.certificationRate;
+                                      else if (metric.id === TEMPO_MEDIO_CASA_ID) cardMonthlyTarget = tt.avgTenureMonths;
+                                    }
+
                                     // For Total de Contratos, compute target dynamically from component metrics
                                     if (isTotalContratos && selectedMonth && monthlyTargets) {
                                       const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
