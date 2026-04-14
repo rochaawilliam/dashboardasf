@@ -119,47 +119,6 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
 
   return (
     <div className="space-y-4 mt-4">
-      {/* Summary mini-cards with targets */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <MetricMiniCard
-          icon={Users}
-          label="Headcount Ativo"
-          value={training.headcount}
-          target={targets?.headcount}
-          colorClass="bg-primary/10 text-primary"
-        />
-        <MetricMiniCard
-          icon={BookOpen}
-          label="Módulos Concluídos"
-          value={training.totalModules}
-          target={targets?.modules}
-          colorClass="bg-accent/10 text-accent"
-        />
-        <MetricMiniCard
-          icon={Award}
-          label="Taxa de Certificação"
-          value={training.certificationRate}
-          suffix="%"
-          target={targets?.certificationRate}
-          colorClass="bg-warning/10 text-warning"
-        />
-        <MetricMiniCard
-          icon={Calendar}
-          label="Tempo Médio de Casa"
-          value={training.avgMonths}
-          suffix=" meses"
-          target={targets?.avgTenureMonths}
-          colorClass="bg-success/10 text-success"
-        />
-        <MetricMiniCard
-          icon={Target}
-          label="Média/Pessoa"
-          value={avgHoursPerPerson}
-          suffix="h"
-          colorClass="bg-muted text-muted-foreground"
-        />
-      </div>
-
     </div>
   );
 }
