@@ -369,6 +369,7 @@ const Index = () => {
   const MODULOS_CONCLUIDOS_ID = "a1b2c3d4-1001-4000-a001-000000000003";
   const TAXA_CERTIFICACAO_ID = "a1b2c3d4-1001-4000-a001-000000000004";
   const TEMPO_MEDIO_CASA_ID = "a1b2c3d4-1001-4000-a001-000000000005";
+  const HEADCOUNT_TREINAMENTO_ID = "a1b2c3d4-1001-4000-a001-000000000006";
 
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
@@ -632,6 +633,7 @@ const Index = () => {
       values[HORAS_TREINAMENTO_ID] = tr.totalHours;
       values[MODULOS_CONCLUIDOS_ID] = tr.totalModules;
       values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
+      values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
     }
 
     return values;
@@ -850,6 +852,9 @@ const Index = () => {
         }
         if (metric.id === TEMPO_MEDIO_CASA_ID) {
           return { ...metric, current_value: currentValue, target_value: tt.avgTenureMonths };
+        }
+        if (metric.id === HEADCOUNT_TREINAMENTO_ID) {
+          return { ...metric, current_value: pipelineData.training.trainedHeadcount ?? 0, target_value: tt.headcount };
         }
       }
 
@@ -1556,7 +1561,8 @@ const Index = () => {
                                     const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === TAXA_AVANCO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
                                     const isMetasIndutoras = metric.id === METAS_INDUTORAS_ID;
-                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isMetasIndutoras;
+                                    const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
+                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isMetasIndutoras || isTrainingComputed;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
                                     const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isMetasIndutoras ? metasIndutorasValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
@@ -1576,6 +1582,7 @@ const Index = () => {
                                       else if (metric.id === MODULOS_CONCLUIDOS_ID) cardMonthlyTarget = tt.modules;
                                       else if (metric.id === TAXA_CERTIFICACAO_ID) cardMonthlyTarget = tt.certificationRate;
                                       else if (metric.id === TEMPO_MEDIO_CASA_ID) cardMonthlyTarget = tt.avgTenureMonths;
+                                      else if (metric.id === HEADCOUNT_TREINAMENTO_ID) cardMonthlyTarget = tt.headcount;
                                     }
 
                                     // For Total de Contratos, compute target dynamically from component metrics

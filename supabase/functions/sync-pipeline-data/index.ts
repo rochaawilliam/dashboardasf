@@ -716,6 +716,9 @@ Deno.serve(async (req) => {
         .map(([name, data]) => ({ name, hours: data.hours, modules: data.modules.size, certified: data.certified }))
         .sort((a, b) => b.hours - a.hours);
 
+      // Trained headcount: collaborators who completed at least 1 training
+      const trainedHeadcount = topCollaborators.filter(c => c.modules > 0).length;
+
       // Themes sorted by hours
       const themes = Object.entries(byPilar)
         .map(([name, data]) => ({ name, ...data }))
@@ -737,6 +740,7 @@ Deno.serve(async (req) => {
 
       training = {
         headcount,
+        trainedHeadcount,
         avgMonths: avgTenureMonths,
         byMonth: trainingByMonth,
         totalHours,
