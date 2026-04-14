@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ComposedChart, Legend
+  Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ComposedChart, Legend, Line
 } from "recharts";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { ChevronDown, ChevronUp, Users } from "lucide-react";
+import { ChartContainer } from "@/components/ui/chart";
+import { ChevronDown, ChevronUp, Clock, BookOpen } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { TrainingMetrics } from "@/hooks/usePipelineData";
 
@@ -15,51 +15,57 @@ interface TrainingDashboardProps {
   selectedYear: number;
 }
 
-const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
-function CollaboratorBreakdown({
+function CollaboratorList({
+  icon: Icon,
   title,
   data,
-  valueKey,
   suffix,
 }: {
+  icon: any;
   title: string;
   data: { name: string; value: number }[];
-  valueKey: string;
   suffix?: string;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 w-full justify-center">
-        <Users className="h-3 w-3" />
-        <span>Por colaborador</span>
-        {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-      </CollapsibleTrigger>
-      <CollapsibleContent className="mt-2">
-        <div className="space-y-1 max-h-48 overflow-y-auto">
-          {data.map((item, idx) => (
-            <div key={idx} className="flex justify-between items-center text-xs px-2 py-1 rounded bg-muted/50">
-              <span className="text-foreground truncate mr-2">{item.name}</span>
-              <span className="font-medium text-foreground whitespace-nowrap">
-                {item.value}{suffix}
-              </span>
+    <Card className="bg-card border-border/50">
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="w-full">
+          <CardHeader className="pb-2 pt-3 px-4 flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Icon className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold text-foreground">{title}</CardTitle>
+              <span className="text-xs text-muted-foreground">({data.length})</span>
             </div>
-          ))}
-          {data.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-2">Sem dados</p>
-          )}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+            {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="pt-0 pb-3 px-4">
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {data.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center text-sm px-3 py-1.5 rounded bg-muted/50">
+                  <span className="text-foreground truncate mr-2">{item.name}</span>
+                  <span className="font-semibold text-foreground whitespace-nowrap">
+                    {item.value}{suffix}
+                  </span>
+                </div>
+              ))}
+              {data.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-2">Sem dados no período</p>
+              )}
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   );
 }
 
 export function TrainingDashboard({ training, selectedMonth, selectedYear }: TrainingDashboardProps) {
   const targets = training.targets;
 
-  // Per-collaborator data for dropdowns
   const hoursPerCollaborator = useMemo(() => {
     return (training.topCollaborators ?? []).map((c) => ({
       name: c.name,
@@ -74,9 +80,9 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     })).sort((a, b) => b.value - a.value);
   }, [training.topCollaborators]);
 
-  // Chart data: hours per collaborator with monthly target line
+  // Chart data
   const chartData = useMemo(() => {
-    const monthlyHoursTarget = targets ? targets.hours / (training.headcount || 1) : 10;
+    const monthlyHoursTarget = targets ? Math.round(targets.hours / (training.headcount || 1)) : 10;
     return (training.topCollaborators ?? []).map((c) => ({
       name: c.name.split(" ")[0],
       fullName: c.name,
@@ -92,6 +98,21 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
 
   return (
     <div className="space-y-4 mt-4">
+      {/* Per-collaborator dropdowns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CollaboratorList
+          icon={Clock}
+          title="Horas de Treinamento por Colaborador"
+          data={hoursPerCollaborator}
+          suffix="h"
+        />
+        <CollaboratorList
+          icon={BookOpen}
+          title="Módulos Concluídos por Colaborador"
+          data={modulesPerCollaborator}
+        />
+      </div>
+
       {/* Training Hours Chart */}
       {chartData.length > 0 && (
         <Card className="bg-card border-border/50">
@@ -119,7 +140,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
                         <p className="font-medium text-foreground mb-1">{data?.fullName}</p>
                         {payload.map((p: any, i: number) => (
                           <p key={i} className="text-muted-foreground">
-                            {p.name === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas"}: <span className="font-medium text-foreground">{p.value}h</span>
+                            {p.dataKey === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas"}: <span className="font-medium text-foreground">{p.value}h</span>
                           </p>
                         ))}
                       </div>
@@ -128,7 +149,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
                 />
                 <Legend
                   wrapperStyle={{ fontSize: 11 }}
-                  formatter={(value) =>
+                  formatter={(value: string) =>
                     value === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas Geral"
                   }
                 />
@@ -155,7 +176,3 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     </div>
   );
 }
-
-// Export breakdown components for use in metric cards
-export { CollaboratorBreakdown };
-export type { TrainingDashboardProps };
