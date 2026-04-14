@@ -372,6 +372,7 @@ const Index = () => {
   const TAXA_CERTIFICACAO_ID = "a1b2c3d4-1001-4000-a001-000000000004";
   const TEMPO_MEDIO_CASA_ID = "a1b2c3d4-1001-4000-a001-000000000005";
   const HEADCOUNT_TREINAMENTO_ID = "a1b2c3d4-1001-4000-a001-000000000006";
+  const TURNOVER_ID = "c91525bc-5b10-49cd-bfcf-1179dfd89604";
 
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
@@ -678,8 +679,20 @@ const Index = () => {
         merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
       }
     }
+    // Turnover: count entries (each = 1 collaborator) / headcount * 100
+    if (historyData && selectedMonth && pipelineData?.training?.headcount) {
+      const headcount = pipelineData.training.headcount;
+      let count = 0;
+      historyData.forEach((h) => {
+        if (h.metric_id !== TURNOVER_ID) return;
+        if ((h as any).source === 'forecast') return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month === selectedMonth) count++;
+      });
+      merged[TURNOVER_ID] = headcount > 0 ? Math.round((count / headcount) * 10000) / 100 : 0;
+    }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear]);
+  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
@@ -715,6 +728,23 @@ const Index = () => {
       const months = Object.values(lucratMonthly);
       if (months.length > 0) {
         merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
+      }
+    }
+    // Turnover accumulated: average monthly turnover across the year
+    if (historyData && pipelineData?.training?.headcount) {
+      const headcount = pipelineData.training.headcount;
+      const byMonth: Record<number, number> = {};
+      historyData.forEach((h) => {
+        if (h.metric_id !== TURNOVER_ID) return;
+        if ((h as any).source === 'forecast') return;
+        const ref = getRefMonthYear(h.period_type, h.recorded_at);
+        if (ref.year === selectedYear && ref.month) {
+          byMonth[ref.month] = (byMonth[ref.month] || 0) + 1;
+        }
+      });
+      const monthlyRates = Object.values(byMonth).map(c => headcount > 0 ? (c / headcount) * 100 : 0);
+      if (monthlyRates.length > 0) {
+        merged[TURNOVER_ID] = Math.round(monthlyRates.reduce((a, b) => a + b, 0) / monthlyRates.length * 100) / 100;
       }
     }
     return merged;
