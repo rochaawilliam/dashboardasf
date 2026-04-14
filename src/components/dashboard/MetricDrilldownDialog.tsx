@@ -59,12 +59,19 @@ const ALL_REVENUE_COMPONENT_IDS = [
   "c0a1fe29-7d31-424c-9f86-6766981dcd82", // Outras Receitas
 ];
 
+interface CollaboratorBreakdown {
+  name: string;
+  value: number;
+}
+
 interface MetricDrilldownDialogProps {
   metric: Metric;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   canEdit: boolean;
   canDelete: boolean;
+  collaboratorData?: CollaboratorBreakdown[];
+  collaboratorSuffix?: string;
 }
 
 interface HistoryEntry {
@@ -98,6 +105,8 @@ export function MetricDrilldownDialog({
   onOpenChange,
   canEdit,
   canDelete,
+  collaboratorData,
+  collaboratorSuffix,
 }: MetricDrilldownDialogProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -592,6 +601,22 @@ export function MetricDrilldownDialog({
             </div>
           )}
 
+          {/* Per-collaborator breakdown for training metrics */}
+          {collaboratorData && collaboratorData.length > 0 && (
+            <div className="border border-border rounded-lg p-2 bg-muted/20">
+              <p className="text-[10px] font-medium text-muted-foreground mb-1.5">Por Colaborador</p>
+              <div className="space-y-1">
+                {[...collaboratorData].sort((a, b) => b.value - a.value).map((c, i) => (
+                  <div key={i} className="flex items-center justify-between text-xs px-1 py-0.5 rounded hover:bg-muted/40">
+                    <span className="text-foreground truncate mr-2">{c.name}</span>
+                    <span className="font-medium text-foreground whitespace-nowrap">
+                      {c.value}{collaboratorSuffix || ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {/* Revenue chart: Previsto + Realizado (bars) + Meta (line) */}
           {isRevenueMetric(metric.name) && revenueChartData.length > 0 && (
             <div className="border border-border rounded-lg p-3 bg-muted/20">
