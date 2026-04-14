@@ -369,6 +369,7 @@ const Index = () => {
   const MODULOS_CONCLUIDOS_ID = "a1b2c3d4-1001-4000-a001-000000000003";
   const TAXA_CERTIFICACAO_ID = "a1b2c3d4-1001-4000-a001-000000000004";
   const TEMPO_MEDIO_CASA_ID = "a1b2c3d4-1001-4000-a001-000000000005";
+  const HEADCOUNT_TREINAMENTO_ID = "a1b2c3d4-1001-4000-a001-000000000006";
 
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
@@ -850,6 +851,9 @@ const Index = () => {
         }
         if (metric.id === TEMPO_MEDIO_CASA_ID) {
           return { ...metric, current_value: currentValue, target_value: tt.avgTenureMonths };
+        }
+        if (metric.id === HEADCOUNT_TREINAMENTO_ID) {
+          return { ...metric, current_value: pipelineData.training.trainedHeadcount ?? 0, target_value: tt.headcount };
         }
       }
 
@@ -1576,6 +1580,7 @@ const Index = () => {
                                       else if (metric.id === MODULOS_CONCLUIDOS_ID) cardMonthlyTarget = tt.modules;
                                       else if (metric.id === TAXA_CERTIFICACAO_ID) cardMonthlyTarget = tt.certificationRate;
                                       else if (metric.id === TEMPO_MEDIO_CASA_ID) cardMonthlyTarget = tt.avgTenureMonths;
+                                      else if (metric.id === HEADCOUNT_TREINAMENTO_ID) cardMonthlyTarget = tt.headcount;
                                     }
 
                                     // For Total de Contratos, compute target dynamically from component metrics
