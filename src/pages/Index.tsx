@@ -858,7 +858,7 @@ const Index = () => {
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues]);
+  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues, pipelineData]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
