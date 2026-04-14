@@ -702,7 +702,6 @@ Deno.serve(async (req) => {
         byPilar[pilar].modules += 1;
 
         totalHours += t.cargaHoraria;
-        allUniqueModules.add(t.modulo);
       }
 
       const totalModules = allUniqueModules.size;
