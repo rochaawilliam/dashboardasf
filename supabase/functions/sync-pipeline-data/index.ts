@@ -661,6 +661,10 @@ Deno.serve(async (req) => {
       const byCollaboratorMonth: Record<string, Record<string, number>> = {};
       let totalHours = 0;
       const allUniqueModules = new Set<string>();
+      // Count ALL unique modules assigned (regardless of status)
+      for (const t of periodFiltered) {
+        if (t.modulo) allUniqueModules.add(t.modulo);
+      }
       let totalRecords = 0;
       let totalCertified = 0;
 
