@@ -1565,6 +1565,7 @@ const Index = () => {
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === TAXA_AVANCO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
                                     const isMetasIndutoras = metric.id === METAS_INDUTORAS_ID;
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
+                                    const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID].includes(metric.id);
                                     const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isMetasIndutoras || isTrainingComputed;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
@@ -1618,6 +1619,7 @@ const Index = () => {
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
                                             forceAnnualLabel={isARR || isResultadoAcumulado}
+                                            hideAnnualTarget={isTimeASFMetric}
                                             resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}>
                                           </CircularProgressCard>
                                     </div>
@@ -1696,6 +1698,7 @@ const Index = () => {
             : undefined
         }
         collaboratorSuffix={drilldownMetric.id === HORAS_TREINAMENTO_ID ? "h" : undefined}
+        hideAnnualTarget={[HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID].includes(drilldownMetric.id)}
       />
 
       }

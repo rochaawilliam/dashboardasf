@@ -72,6 +72,7 @@ interface MetricDrilldownDialogProps {
   canDelete: boolean;
   collaboratorData?: CollaboratorBreakdown[];
   collaboratorSuffix?: string;
+  hideAnnualTarget?: boolean;
 }
 
 interface HistoryEntry {
@@ -107,6 +108,7 @@ export function MetricDrilldownDialog({
   canDelete,
   collaboratorData,
   collaboratorSuffix,
+  hideAnnualTarget = false,
 }: MetricDrilldownDialogProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -364,9 +366,11 @@ export function MetricDrilldownDialog({
               <History className="h-4 w-4 text-primary" />
               {metric.name}
             </DialogTitle>
-            <p className="text-xs text-muted-foreground">
-              Meta anual: {formatMetricValue(metric.target_value, metric.unit, metric.name)}
-            </p>
+            {!hideAnnualTarget && (
+              <p className="text-xs text-muted-foreground">
+                Meta anual: {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+              </p>
+            )}
           </DialogHeader>
 
           {/* New entry form */}

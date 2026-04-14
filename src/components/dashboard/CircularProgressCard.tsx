@@ -26,6 +26,7 @@ interface CircularProgressCardProps {
   forecastValue?: number | null;
   hideValues?: boolean;
   forceAnnualLabel?: boolean;
+  hideAnnualTarget?: boolean;
   resultadoData?: {
     previsto: number;
     realizado: number;
@@ -194,6 +195,7 @@ export function CircularProgressCard({
   forecastValue,
   hideValues = false,
   forceAnnualLabel = false,
+  hideAnnualTarget = false,
   resultadoData,
   children,
 }: CircularProgressCardProps) {
@@ -332,7 +334,7 @@ export function CircularProgressCard({
           {!hideTarget && (
           <div>
             <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-              {forceAnnualLabel ? "Meta Anual" : isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : "Meta Anual"}
+              {forceAnnualLabel ? "Meta Anual" : isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : hideAnnualTarget ? "Meta Mensal" : "Meta Anual"}
             </p>
             <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
               {hideValues ? "••••••" :
@@ -374,7 +376,7 @@ export function CircularProgressCard({
             </p>
           </div>
           {/* Annual target in footer when viewing a specific month */}
-          {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && (
+          {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && !hideAnnualTarget && (
             <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
               <span>Meta anual:</span>
               <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
