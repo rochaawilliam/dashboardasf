@@ -718,21 +718,15 @@ Deno.serve(async (req) => {
         .map(([name, data]) => ({ name, ...data }))
         .sort((a, b) => b.hours - a.hours);
 
-      // Tempo Médio de Casa: derive from Ano/Mês columns in training data
-      // Each collaborator's earliest record indicates when they joined
+      // Tempo Médio de Casa: from Colaborador sheet (Ano/Mês = admission date)
       const now = new Date();
       const currentYearMonth = now.getFullYear() * 12 + (now.getMonth() + 1);
       const tenureMonths: number[] = [];
-      for (const name of uniqueCollaborators) {
-        const collabRecords = trainings.filter(t => t.colaborador === name && t.ano > 0 && t.mes > 0);
-        if (collabRecords.length === 0) continue;
-        // Find earliest year-month
-        let earliest = Infinity;
-        for (const r of collabRecords) {
-          const ym = r.ano * 12 + r.mes;
-          if (ym < earliest) earliest = ym;
+      for (const c of activeCollabs) {
+        if (c.ano > 0 && c.mes > 0) {
+          const entryYM = c.ano * 12 + c.mes;
+          tenureMonths.push(Math.max(0, currentYearMonth - entryYM));
         }
-        tenureMonths.push(currentYearMonth - earliest);
       }
       const avgTenureMonths = tenureMonths.length > 0
         ? Math.round(tenureMonths.reduce((a, b) => a + b, 0) / tenureMonths.length * 10) / 10
