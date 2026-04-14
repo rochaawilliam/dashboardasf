@@ -157,6 +157,9 @@ const Index = () => {
   // Pipeline Vision Board data
   const { data: pipelineData } = usePipelineData(selectedYear, selectedMonth);
 
+  // Ritual completions data
+  const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
+
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
   const { data: dbAssignments } = useSubcategoryAssignments();
