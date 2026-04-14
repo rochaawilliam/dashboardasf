@@ -75,6 +75,16 @@ export function formatMetricValue(value: number, unit: string, metricName?: stri
   if (unit.toLowerCase().includes("mes") || unit.toLowerCase().includes("mês") || unit.toLowerCase().includes("meses")) {
     return `${formatNumber(value, 0)} meses`;
   }
+
+  // People units
+  if (unit.toLowerCase() === "pessoas") {
+    return `${formatNumber(value, 0)} pessoas`;
+  }
+
+  // Modules units
+  if (unit.toLowerCase() === "módulos") {
+    return `${formatNumber(value, 0)} módulos`;
+  }
   
   // "número", "contratos", or "un" - just show the number, no unit label
   if (unit.toLowerCase() === "número" || unit.toLowerCase() === "contratos" || unit.toLowerCase() === "un") {
