@@ -59,6 +59,7 @@ export interface TrainingTargets {
 
 export interface TrainingMetrics {
   headcount: number;
+  trainedHeadcount: number;
   avgMonths: number;
   byMonth: Record<string, { hours: number; modules: number; certified: number }>;
   totalHours: number;
