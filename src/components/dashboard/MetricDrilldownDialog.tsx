@@ -59,12 +59,19 @@ const ALL_REVENUE_COMPONENT_IDS = [
   "c0a1fe29-7d31-424c-9f86-6766981dcd82", // Outras Receitas
 ];
 
+interface CollaboratorBreakdown {
+  name: string;
+  value: number;
+}
+
 interface MetricDrilldownDialogProps {
   metric: Metric;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   canEdit: boolean;
   canDelete: boolean;
+  collaboratorData?: CollaboratorBreakdown[];
+  collaboratorSuffix?: string;
 }
 
 interface HistoryEntry {
