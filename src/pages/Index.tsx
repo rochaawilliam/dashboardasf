@@ -37,6 +37,7 @@ import { DraggableCardWrapper } from "@/components/dashboard/DraggableCardWrappe
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
+import { useAllRitualCompletions, CUMPRIMENTO_RITUAIS_ID, RITUAIS_ASF_ID, RITUAIS_CRESCIMENTO_ID, RITUAIS_JURIDICO_ID, ALL_RITUAL_IDS, getTotalExpected, getActiveRituals } from "@/hooks/useRitualCompletions";
 import {
   DollarSign,
   Users,
