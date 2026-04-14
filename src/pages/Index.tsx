@@ -770,8 +770,50 @@ const Index = () => {
         merged[TURNOVER_ID] = Math.round(monthlyRates.reduce((a, b) => a + b, 0) / monthlyRates.length * 100) / 100;
       }
     }
+    // Ritual metrics accumulated: average monthly completion across months with data
+    if (ritualCompletions) {
+      const ritualMetricIds = [RITUAIS_ASF_ID, RITUAIS_CRESCIMENTO_ID, RITUAIS_JURIDICO_ID];
+      const allMonthPcts: number[] = [];
+      for (let m = 1; m <= 12; m++) {
+        let totalExpectedAll = 0;
+        let totalCompletedAll = 0;
+        ritualMetricIds.forEach((metricId) => {
+          const expected = getTotalExpected(metricId, m);
+          const completed = ritualCompletions.filter(
+            (c) => c.metric_id === metricId && c.month === m && c.completed
+          ).length;
+          totalExpectedAll += expected;
+          totalCompletedAll += completed;
+          // Per-metric accumulated
+          const pct = expected > 0 ? Math.round((completed / expected) * 10000) / 100 : 0;
+          if (!merged[metricId] && m === 1) merged[metricId] = 0;
+        });
+        if (totalCompletedAll > 0) {
+          allMonthPcts.push(totalExpectedAll > 0 ? (totalCompletedAll / totalExpectedAll) * 100 : 0);
+        }
+      }
+      // For each ritual metric, compute average across months
+      ritualMetricIds.forEach((metricId) => {
+        const monthPcts: number[] = [];
+        for (let m = 1; m <= 12; m++) {
+          const expected = getTotalExpected(metricId, m);
+          const completed = ritualCompletions.filter(
+            (c) => c.metric_id === metricId && c.month === m && c.completed
+          ).length;
+          if (completed > 0 || expected > 0) {
+            monthPcts.push(expected > 0 ? (completed / expected) * 100 : 0);
+          }
+        }
+        if (monthPcts.length > 0) {
+          merged[metricId] = Math.round(monthPcts.reduce((a, b) => a + b, 0) / monthPcts.length * 100) / 100;
+        }
+      });
+      if (allMonthPcts.length > 0) {
+        merged[CUMPRIMENTO_RITUAIS_ID] = Math.round(allMonthPcts.reduce((a, b) => a + b, 0) / allMonthPcts.length * 100) / 100;
+      }
+    }
     return merged;
-  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear]);
+  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
