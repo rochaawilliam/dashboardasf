@@ -143,6 +143,9 @@ export function usePipelineData(year: number, month?: number | null) {
     },
     placeholderData: () => getCachedPipeline(year, month) ?? undefined,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: 10 * 60 * 1000, // auto-refresh every 10 minutes
+    refetchOnWindowFocus: "always",   // refresh on tab/page focus
+    refetchOnMount: "always",         // refresh on page load
     retry: 2,
   });
 }
