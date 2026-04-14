@@ -391,6 +391,11 @@ export function CircularProgressCard({
         </div>
       </div>
 
+      {children && (
+        <div className="px-2 pb-2">
+          {children}
+        </div>
+      )}
 
     </div>);
 
