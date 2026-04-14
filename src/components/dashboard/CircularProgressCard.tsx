@@ -31,6 +31,7 @@ interface CircularProgressCardProps {
     realizado: number;
     resultado: number;
   } | null;
+  children?: React.ReactNode;
 }
 
 const nonAccumulativeKeywords = [
