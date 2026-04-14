@@ -279,6 +279,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ritual_completions: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          metric_id: string
+          month: number
+          occurrence: number
+          ritual_key: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          metric_id: string
+          month: number
+          occurrence?: number
+          ritual_key: string
+          updated_at?: string
+          year?: number
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          metric_id?: string
+          month?: number
+          occurrence?: number
+          ritual_key?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       training_hours: {
         Row: {
           created_at: string
