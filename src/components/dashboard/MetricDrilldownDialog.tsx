@@ -44,6 +44,8 @@ import type { Metric } from "@/hooks/useMetrics";
 import { formatMetricValue, formatNumber } from "@/utils/formatters";
 import { getRefMonthYear } from "@/utils/dateUtils";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+import { ALL_RITUAL_IDS } from "@/hooks/useRitualCompletions";
+import { RitualChecklist } from "@/components/dashboard/RitualChecklist";
 
 // All revenue component metric IDs that sum up to Receita Total Mensal
 const ALL_REVENUE_COMPONENT_IDS = [
@@ -373,8 +375,8 @@ export function MetricDrilldownDialog({
             )}
           </DialogHeader>
 
-          {/* New entry form */}
-          {canEdit && (
+          {/* New entry form - hide for ritual metrics */}
+          {canEdit && !ALL_RITUAL_IDS.includes(metric.id) && (
             <div className="border border-border rounded-lg p-3 bg-muted/30">
               {showNewEntry ? (
                 <div className="space-y-3">
@@ -603,6 +605,16 @@ export function MetricDrilldownDialog({
                 })}
               </div>
             </div>
+          )}
+
+          {/* Ritual Checklist for ritual metrics */}
+          {ALL_RITUAL_IDS.includes(metric.id) && metric.id !== "a1b2c3d4-2001-4000-a001-000000000001" && (
+            <RitualChecklist
+              metricId={metric.id}
+              year={parseInt(filterYear)}
+              month={filterMonth !== "all" ? parseInt(filterMonth) : new Date().getMonth() + 1}
+              canEdit={canEdit}
+            />
           )}
 
           {/* Per-collaborator breakdown for training metrics */}

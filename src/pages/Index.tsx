@@ -37,6 +37,7 @@ import { DraggableCardWrapper } from "@/components/dashboard/DraggableCardWrappe
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
+import { useAllRitualCompletions, CUMPRIMENTO_RITUAIS_ID, RITUAIS_ASF_ID, RITUAIS_CRESCIMENTO_ID, RITUAIS_JURIDICO_ID, ALL_RITUAL_IDS, getTotalExpected, getActiveRituals } from "@/hooks/useRitualCompletions";
 import {
   DollarSign,
   Users,
@@ -155,6 +156,9 @@ const Index = () => {
 
   // Pipeline Vision Board data
   const { data: pipelineData } = usePipelineData(selectedYear, selectedMonth);
+
+  // Ritual completions data
+  const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
 
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
@@ -691,8 +695,27 @@ const Index = () => {
       });
       merged[TURNOVER_ID] = headcount > 0 ? Math.round((count / headcount) * 10000) / 100 : 0;
     }
+    // Ritual metrics: calculate % from completions
+    if (ritualCompletions && selectedMonth) {
+      const ritualMetricIds = [RITUAIS_ASF_ID, RITUAIS_CRESCIMENTO_ID, RITUAIS_JURIDICO_ID];
+      let totalExpectedAll = 0;
+      let totalCompletedAll = 0;
+      ritualMetricIds.forEach((metricId) => {
+        const expected = getTotalExpected(metricId, selectedMonth);
+        const completed = ritualCompletions.filter(
+          (c) => c.metric_id === metricId && c.month === selectedMonth && c.completed
+        ).length;
+        const pct = expected > 0 ? Math.round((completed / expected) * 10000) / 100 : 0;
+        merged[metricId] = pct;
+        totalExpectedAll += expected;
+        totalCompletedAll += completed;
+      });
+      merged[CUMPRIMENTO_RITUAIS_ID] = totalExpectedAll > 0
+        ? Math.round((totalCompletedAll / totalExpectedAll) * 10000) / 100
+        : 0;
+    }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData]);
+  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
@@ -747,8 +770,50 @@ const Index = () => {
         merged[TURNOVER_ID] = Math.round(monthlyRates.reduce((a, b) => a + b, 0) / monthlyRates.length * 100) / 100;
       }
     }
+    // Ritual metrics accumulated: average monthly completion across months with data
+    if (ritualCompletions) {
+      const ritualMetricIds = [RITUAIS_ASF_ID, RITUAIS_CRESCIMENTO_ID, RITUAIS_JURIDICO_ID];
+      const allMonthPcts: number[] = [];
+      for (let m = 1; m <= 12; m++) {
+        let totalExpectedAll = 0;
+        let totalCompletedAll = 0;
+        ritualMetricIds.forEach((metricId) => {
+          const expected = getTotalExpected(metricId, m);
+          const completed = ritualCompletions.filter(
+            (c) => c.metric_id === metricId && c.month === m && c.completed
+          ).length;
+          totalExpectedAll += expected;
+          totalCompletedAll += completed;
+          // Per-metric accumulated
+          const pct = expected > 0 ? Math.round((completed / expected) * 10000) / 100 : 0;
+          if (!merged[metricId] && m === 1) merged[metricId] = 0;
+        });
+        if (totalCompletedAll > 0) {
+          allMonthPcts.push(totalExpectedAll > 0 ? (totalCompletedAll / totalExpectedAll) * 100 : 0);
+        }
+      }
+      // For each ritual metric, compute average across months
+      ritualMetricIds.forEach((metricId) => {
+        const monthPcts: number[] = [];
+        for (let m = 1; m <= 12; m++) {
+          const expected = getTotalExpected(metricId, m);
+          const completed = ritualCompletions.filter(
+            (c) => c.metric_id === metricId && c.month === m && c.completed
+          ).length;
+          if (completed > 0 || expected > 0) {
+            monthPcts.push(expected > 0 ? (completed / expected) * 100 : 0);
+          }
+        }
+        if (monthPcts.length > 0) {
+          merged[metricId] = Math.round(monthPcts.reduce((a, b) => a + b, 0) / monthPcts.length * 100) / 100;
+        }
+      });
+      if (allMonthPcts.length > 0) {
+        merged[CUMPRIMENTO_RITUAIS_ID] = Math.round(allMonthPcts.reduce((a, b) => a + b, 0) / allMonthPcts.length * 100) / 100;
+      }
+    }
     return merged;
-  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear]);
+  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
   // IDs for contract metrics used in the sum
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
@@ -1595,7 +1660,7 @@ const Index = () => {
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === TAXA_AVANCO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
                                     const isMetasIndutoras = metric.id === METAS_INDUTORAS_ID;
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
-                                    const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID].includes(metric.id);
+                                    const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
                                     const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isMetasIndutoras || isTrainingComputed;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
@@ -1728,7 +1793,7 @@ const Index = () => {
             : undefined
         }
         collaboratorSuffix={drilldownMetric.id === HORAS_TREINAMENTO_ID ? "h" : undefined}
-        hideAnnualTarget={[HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID].includes(drilldownMetric.id)}
+        hideAnnualTarget={[HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(drilldownMetric.id)}
       />
 
       }
