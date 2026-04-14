@@ -647,10 +647,10 @@ Deno.serve(async (req) => {
       const activeCollabs = collaborators.filter(c => c.status.toLowerCase() === "ativo");
       const headcount = activeCollabs.length;
 
-      // Targets (dynamic based on actual headcount)
-      const HEADCOUNT_TARGET = 12;
-      const HOURS_TARGET = HEADCOUNT_TARGET * 10; // 120
-      const MODULES_TARGET = headcount * 2; // dynamic: headcount * 2
+      // Targets (all dynamic based on actual headcount)
+      const HEADCOUNT_TARGET = headcount;
+      const HOURS_TARGET = headcount * 10;
+      const MODULES_TARGET = headcount * 2;
       const CERTIFICATION_TARGET = 70; // %
       const AVG_TENURE_TARGET = 12; // months
 
