@@ -36,11 +36,14 @@ const TRIMESTRAL_MONTHS = [3, 6, 9, 12];
 export const RITUAL_DEFINITIONS: Record<string, RitualDefinition[]> = {
   [RITUAIS_JURIDICO_ID]: [
     { key: "reuniao_tecnica", name: "Reunião Técnica Semanal", frequency: "semanal", occurrencesPerMonth: 4 },
+    { key: "kickoff_juridico", name: "Kickoff Semanal", frequency: "semanal", occurrencesPerMonth: 4 },
     { key: "minicursos", name: "Minicursos Jurídicos (Trilhas ASF)", frequency: "quinzenal", occurrencesPerMonth: 2 },
     { key: "performance_carteiras", name: "Performance das Carteiras", frequency: "mensal", occurrencesPerMonth: 1 },
   ],
   [RITUAIS_CRESCIMENTO_ID]: [
     { key: "reuniao_comercial", name: "Reunião Comercial Semanal", frequency: "semanal", occurrencesPerMonth: 4 },
+    { key: "kickoff", name: "Kickoff Semanal", frequency: "semanal", occurrencesPerMonth: 4 },
+    { key: "alinhamento_associados", name: "Alinhamento Associados Semanal", frequency: "semanal", occurrencesPerMonth: 4 },
   ],
   [RITUAIS_ASF_ID]: [
     { key: "oneone", name: "Reuniões 1:1", frequency: "mensal", occurrencesPerMonth: 1 },
