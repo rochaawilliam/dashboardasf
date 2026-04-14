@@ -375,8 +375,8 @@ export function MetricDrilldownDialog({
             )}
           </DialogHeader>
 
-          {/* New entry form */}
-          {canEdit && (
+          {/* New entry form - hide for ritual metrics */}
+          {canEdit && !ALL_RITUAL_IDS.includes(metric.id) && (
             <div className="border border-border rounded-lg p-3 bg-muted/30">
               {showNewEntry ? (
                 <div className="space-y-3">
