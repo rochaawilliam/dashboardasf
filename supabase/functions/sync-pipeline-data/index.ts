@@ -573,6 +573,7 @@ Deno.serve(async (req) => {
     // ── Training data from Google Sheets ──
     let training: any = null;
     try {
+      const COLLAB_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?output=csv";
       const TRAINING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt7ycB9864ONAqIp-4b7Midf3h0gli77qQFBil21vv1nWHo0KrCWIEG9ig4RVJYg/pub?gid=1563700319&single=true&output=csv";
 
       const MONTH_MAP: Record<string, number> = {
@@ -580,12 +581,37 @@ Deno.serve(async (req) => {
         jul: 7, ago: 8, set: 9, out: 10, nov: 11, dez: 12,
       };
 
-      // Fetch training CSV
-      const trainingRes = await fetch(TRAINING_CSV_URL);
+      // Fetch both CSVs in parallel
+      const [collabRes, trainingRes] = await Promise.all([
+        fetch(COLLAB_CSV_URL),
+        fetch(TRAINING_CSV_URL),
+      ]);
+      const collabCsv = await collabRes.text();
       const trainingCsv = await trainingRes.text();
-      const trainingRows = trainingCsv.trim().split("\n").slice(1); // skip header
+
+      // Parse collaborator rows (Colaborador, Cargo, Área, Nível, Status, Ano, Mês)
+      interface CollabRow {
+        nome: string;
+        status: string;
+        ano: number;
+        mes: number;
+      }
+      const collabRows = collabCsv.trim().split("\n").slice(1);
+      const collaborators: CollabRow[] = [];
+      for (const row of collabRows) {
+        const cols = row.split(",");
+        if (cols.length < 7) continue;
+        const mesStr = (cols[6] || "").trim().toLowerCase().substring(0, 3);
+        collaborators.push({
+          nome: cols[0]?.trim() || "",
+          status: cols[4]?.trim() || "",
+          ano: parseInt(cols[5]?.trim() || "0"),
+          mes: MONTH_MAP[mesStr] || 0,
+        });
+      }
 
       // Parse training rows
+      const trainingRows = trainingCsv.trim().split("\n").slice(1);
       interface TrainingRow {
         colaborador: string;
         ano: number;
@@ -617,9 +643,9 @@ Deno.serve(async (req) => {
         ? yearFiltered.filter(t => t.mes === month)
         : yearFiltered;
 
-      // Headcount: unique collaborators in year data
-      const uniqueCollaborators = new Set(yearFiltered.map(t => t.colaborador).filter(Boolean));
-      const headcount = uniqueCollaborators.size;
+      // Headcount: active collaborators from Colaborador sheet
+      const activeCollabs = collaborators.filter(c => c.status.toLowerCase() === "ativo");
+      const headcount = activeCollabs.length;
 
       // Targets
       const HEADCOUNT_TARGET = 12;
@@ -692,21 +718,15 @@ Deno.serve(async (req) => {
         .map(([name, data]) => ({ name, ...data }))
         .sort((a, b) => b.hours - a.hours);
 
-      // Tempo Médio de Casa: derive from Ano/Mês columns in training data
-      // Each collaborator's earliest record indicates when they joined
+      // Tempo Médio de Casa: from Colaborador sheet (Ano/Mês = admission date)
       const now = new Date();
       const currentYearMonth = now.getFullYear() * 12 + (now.getMonth() + 1);
       const tenureMonths: number[] = [];
-      for (const name of uniqueCollaborators) {
-        const collabRecords = trainings.filter(t => t.colaborador === name && t.ano > 0 && t.mes > 0);
-        if (collabRecords.length === 0) continue;
-        // Find earliest year-month
-        let earliest = Infinity;
-        for (const r of collabRecords) {
-          const ym = r.ano * 12 + r.mes;
-          if (ym < earliest) earliest = ym;
+      for (const c of activeCollabs) {
+        if (c.ano > 0 && c.mes > 0) {
+          const entryYM = c.ano * 12 + c.mes;
+          tenureMonths.push(Math.max(0, currentYearMonth - entryYM));
         }
-        tenureMonths.push(currentYearMonth - earliest);
       }
       const avgTenureMonths = tenureMonths.length > 0
         ? Math.round(tenureMonths.reduce((a, b) => a + b, 0) / tenureMonths.length * 10) / 10
