@@ -695,8 +695,27 @@ const Index = () => {
       });
       merged[TURNOVER_ID] = headcount > 0 ? Math.round((count / headcount) * 10000) / 100 : 0;
     }
+    // Ritual metrics: calculate % from completions
+    if (ritualCompletions && selectedMonth) {
+      const ritualMetricIds = [RITUAIS_ASF_ID, RITUAIS_CRESCIMENTO_ID, RITUAIS_JURIDICO_ID];
+      let totalExpectedAll = 0;
+      let totalCompletedAll = 0;
+      ritualMetricIds.forEach((metricId) => {
+        const expected = getTotalExpected(metricId, selectedMonth);
+        const completed = ritualCompletions.filter(
+          (c) => c.metric_id === metricId && c.month === selectedMonth && c.completed
+        ).length;
+        const pct = expected > 0 ? Math.round((completed / expected) * 10000) / 100 : 0;
+        merged[metricId] = pct;
+        totalExpectedAll += expected;
+        totalCompletedAll += completed;
+      });
+      merged[CUMPRIMENTO_RITUAIS_ID] = totalExpectedAll > 0
+        ? Math.round((totalCompletedAll / totalExpectedAll) * 10000) / 100
+        : 0;
+    }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData]);
+  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
