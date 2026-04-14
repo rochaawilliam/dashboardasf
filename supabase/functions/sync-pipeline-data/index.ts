@@ -647,10 +647,10 @@ Deno.serve(async (req) => {
       const activeCollabs = collaborators.filter(c => c.status.toLowerCase() === "ativo");
       const headcount = activeCollabs.length;
 
-      // Targets
+      // Targets (dynamic based on actual headcount)
       const HEADCOUNT_TARGET = 12;
       const HOURS_TARGET = HEADCOUNT_TARGET * 10; // 120
-      const MODULES_TARGET = HEADCOUNT_TARGET * 2; // 24
+      const MODULES_TARGET = headcount * 2; // dynamic: headcount * 2
       const CERTIFICATION_TARGET = 70; // %
       const AVG_TENURE_TARGET = 12; // months
 
@@ -661,6 +661,10 @@ Deno.serve(async (req) => {
       const byCollaboratorMonth: Record<string, Record<string, number>> = {};
       let totalHours = 0;
       const allUniqueModules = new Set<string>();
+      // Count ALL unique modules assigned (regardless of status)
+      for (const t of periodFiltered) {
+        if (t.modulo) allUniqueModules.add(t.modulo);
+      }
       let totalRecords = 0;
       let totalCertified = 0;
 
@@ -698,7 +702,6 @@ Deno.serve(async (req) => {
         byPilar[pilar].modules += 1;
 
         totalHours += t.cargaHoraria;
-        allUniqueModules.add(t.modulo);
       }
 
       const totalModules = allUniqueModules.size;
