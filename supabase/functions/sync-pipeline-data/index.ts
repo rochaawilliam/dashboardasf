@@ -611,22 +611,44 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Derive headcount from unique collaborators in training data
-      const uniqueCollaborators = new Set(trainings.map(t => t.colaborador).filter(Boolean));
-      const headcount = uniqueCollaborators.size;
-      const avgMonths = 0; // No admission date data available
+      // Filter trainings by selected year (and month if specified)
+      const yearFiltered = trainings.filter(t => t.ano === year);
+      const periodFiltered = month
+        ? yearFiltered.filter(t => t.mes === month)
+        : yearFiltered;
 
-      // Compute training metrics by month, by collaborator, and by pilar
+      // Headcount: unique collaborators in year data
+      const uniqueCollaborators = new Set(yearFiltered.map(t => t.colaborador).filter(Boolean));
+      const headcount = uniqueCollaborators.size;
+
+      // Targets
+      const HEADCOUNT_TARGET = 12;
+      const HOURS_TARGET = HEADCOUNT_TARGET * 10; // 120
+      const MODULES_TARGET = HEADCOUNT_TARGET * 2; // 24
+      const CERTIFICATION_TARGET = 70; // %
+      const AVG_TENURE_TARGET = 12; // months
+
+      // Compute training metrics from period-filtered data
       const trainingByMonth: Record<string, { hours: number; modules: number; certified: number }> = {};
-      const byCollaborator: Record<string, { hours: number; modules: number; certified: number }> = {};
+      const byCollaborator: Record<string, { hours: number; modules: Set<string>; certified: number }> = {};
       const byPilar: Record<string, { hours: number; modules: number }> = {};
       const byCollaboratorMonth: Record<string, Record<string, number>> = {};
-      let totalHours = 0, totalModules = 0, totalCertified = 0;
+      let totalHours = 0;
+      const allUniqueModules = new Set<string>();
+      let totalRecords = 0;
+      let totalCertified = 0;
 
-      for (const t of trainings) {
+      // Process ALL records (not just concluído) for certification rate denominator
+      for (const t of periodFiltered) {
+        totalRecords++;
+        if (t.certificado) totalCertified++;
+      }
+
+      // Process concluído records for hours/modules/charts
+      for (const t of periodFiltered) {
         if (t.status.toLowerCase() !== "concluído") continue;
         const monthKey = `${t.ano}-${String(t.mes).padStart(2, "0")}`;
-        
+
         // By month
         if (!trainingByMonth[monthKey]) trainingByMonth[monthKey] = { hours: 0, modules: 0, certified: 0 };
         trainingByMonth[monthKey].hours += t.cargaHoraria;
@@ -634,12 +656,12 @@ Deno.serve(async (req) => {
         if (t.certificado) trainingByMonth[monthKey].certified += 1;
 
         // By collaborator
-        if (!byCollaborator[t.colaborador]) byCollaborator[t.colaborador] = { hours: 0, modules: 0, certified: 0 };
+        if (!byCollaborator[t.colaborador]) byCollaborator[t.colaborador] = { hours: 0, modules: new Set(), certified: 0 };
         byCollaborator[t.colaborador].hours += t.cargaHoraria;
-        byCollaborator[t.colaborador].modules += 1;
+        byCollaborator[t.colaborador].modules.add(t.modulo);
         if (t.certificado) byCollaborator[t.colaborador].certified += 1;
 
-        // By collaborator by month (for chart)
+        // By collaborator by month
         if (!byCollaboratorMonth[t.colaborador]) byCollaboratorMonth[t.colaborador] = {};
         byCollaboratorMonth[t.colaborador][monthKey] = (byCollaboratorMonth[t.colaborador][monthKey] || 0) + t.cargaHoraria;
 
@@ -650,13 +672,19 @@ Deno.serve(async (req) => {
         byPilar[pilar].modules += 1;
 
         totalHours += t.cargaHoraria;
-        totalModules += 1;
-        if (t.certificado) totalCertified += 1;
+        allUniqueModules.add(t.modulo);
       }
 
-      // Top collaborators sorted by hours
+      const totalModules = allUniqueModules.size;
+
+      // Certification rate: certified records / total records (all statuses)
+      const certificationRate = totalRecords > 0
+        ? Math.round(totalCertified / totalRecords * 10000) / 100
+        : 0;
+
+      // Top collaborators sorted by hours (convert Set to count)
       const topCollaborators = Object.entries(byCollaborator)
-        .map(([name, data]) => ({ name, ...data }))
+        .map(([name, data]) => ({ name, hours: data.hours, modules: data.modules.size, certified: data.certified }))
         .sort((a, b) => b.hours - a.hours);
 
       // Themes sorted by hours
@@ -664,17 +692,44 @@ Deno.serve(async (req) => {
         .map(([name, data]) => ({ name, ...data }))
         .sort((a, b) => b.hours - a.hours);
 
+      // Tempo Médio de Casa: derive from Ano/Mês columns in training data
+      // Each collaborator's earliest record indicates when they joined
+      const now = new Date();
+      const currentYearMonth = now.getFullYear() * 12 + (now.getMonth() + 1);
+      const tenureMonths: number[] = [];
+      for (const name of uniqueCollaborators) {
+        const collabRecords = trainings.filter(t => t.colaborador === name && t.ano > 0 && t.mes > 0);
+        if (collabRecords.length === 0) continue;
+        // Find earliest year-month
+        let earliest = Infinity;
+        for (const r of collabRecords) {
+          const ym = r.ano * 12 + r.mes;
+          if (ym < earliest) earliest = ym;
+        }
+        tenureMonths.push(currentYearMonth - earliest);
+      }
+      const avgTenureMonths = tenureMonths.length > 0
+        ? Math.round(tenureMonths.reduce((a, b) => a + b, 0) / tenureMonths.length * 10) / 10
+        : 0;
+
       training = {
         headcount,
-        avgMonths,
+        avgMonths: avgTenureMonths,
         byMonth: trainingByMonth,
         totalHours,
         totalModules,
         totalCertified,
-        certificationRate: totalModules > 0 ? Math.round(totalCertified / totalModules * 10000) / 100 : 0,
+        certificationRate,
         topCollaborators,
         themes,
         byCollaboratorMonth,
+        targets: {
+          headcount: HEADCOUNT_TARGET,
+          hours: HOURS_TARGET,
+          modules: MODULES_TARGET,
+          certificationRate: CERTIFICATION_TARGET,
+          avgTenureMonths: AVG_TENURE_TARGET,
+        },
       };
     } catch (err) {
       console.error("Training fetch error:", err);
