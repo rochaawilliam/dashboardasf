@@ -524,6 +524,7 @@ const Index = () => {
       const tr = pipelineData.training;
       if (tr.headcount > 0) values[HEADCOUNT_ID] = tr.headcount;
       if (tr.avgMonths > 0) values[TEMPO_MEDIO_CASA_ID] = tr.avgMonths;
+      values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
       
       if (selectedMonth) {
         const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
