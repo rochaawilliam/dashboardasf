@@ -1617,7 +1617,20 @@ const Index = () => {
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? null) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
                                             forceAnnualLabel={isARR || isResultadoAcumulado}
-                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null} />
+                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}>
+                                            {/* Per-collaborator dropdown for training metrics */}
+                                            {metric.id === HORAS_TREINAMENTO_ID && pipelineData?.training?.topCollaborators && (
+                                              <CollaboratorDropdown
+                                                data={pipelineData.training.topCollaborators.map(c => ({ name: c.name, value: c.hours }))}
+                                                suffix="h"
+                                              />
+                                            )}
+                                            {metric.id === MODULOS_CONCLUIDOS_ID && pipelineData?.training?.topCollaborators && (
+                                              <CollaboratorDropdown
+                                                data={pipelineData.training.topCollaborators.map(c => ({ name: c.name, value: c.modules }))}
+                                              />
+                                            )}
+                                          </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
 
