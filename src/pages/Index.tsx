@@ -833,12 +833,32 @@ const Index = () => {
         return { ...metric, current_value: currentValue, target_value: originTargets.offline * 12 };
       }
 
+      // Override training metric targets dynamically from pipeline data
+      if (pipelineData?.training?.targets) {
+        const tt = pipelineData.training.targets;
+        if (metric.id === HEADCOUNT_ID) {
+          return { ...metric, current_value: currentValue, target_value: tt.headcount };
+        }
+        if (metric.id === HORAS_TREINAMENTO_ID) {
+          return { ...metric, current_value: currentValue, target_value: tt.hours };
+        }
+        if (metric.id === MODULOS_CONCLUIDOS_ID) {
+          return { ...metric, current_value: currentValue, target_value: tt.modules };
+        }
+        if (metric.id === TAXA_CERTIFICACAO_ID) {
+          return { ...metric, current_value: currentValue, target_value: tt.certificationRate };
+        }
+        if (metric.id === TEMPO_MEDIO_CASA_ID) {
+          return { ...metric, current_value: currentValue, target_value: tt.avgTenureMonths };
+        }
+      }
+
       return {
         ...metric,
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues]);
+  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues, pipelineData]);
 
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
