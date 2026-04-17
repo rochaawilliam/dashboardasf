@@ -152,30 +152,32 @@ Deno.serve(async (req) => {
     // or it's currently at a LATER stage (meaning it passed through earlier ones).
     // Note: stage "r2" is canonicalized to "reunioes" — it does NOT imply the card passed through "propostas".
     function countCumulativeForStage(stageId: string, cardSet: any[]): number {
-      const uniqueCards = new Set<string>();
+      const uniqueKeys = new Set<string>();
       const stageIdx = STAGE_ORDER.indexOf(stageId);
       if (stageIdx < 0) return 0;
 
       for (const card of cardSet) {
         const cardCanon = canonicalStage(card.stage_id);
         const cardStageIdx = STAGE_ORDER.indexOf(cardCanon);
+        // Dedupe multi-area cards by link_group / title (same as valor_gerado)
+        const dedupKey = card.link_group ?? card.title ?? card.id;
         // Card is currently at this stage (canonical match, e.g. r2 → reunioes)
         if (cardCanon === stageId) {
-          uniqueCards.add(card.id);
+          uniqueKeys.add(dedupKey);
           continue;
         }
         // Card is currently at a later stage (passed through this one)
         if (cardStageIdx > stageIdx) {
-          uniqueCards.add(card.id);
+          uniqueKeys.add(dedupKey);
           continue;
         }
         // Card was at this stage per history (canonicalize history stages too)
         const entries = historyByCard[card.id] || [];
         if (entries.some((h) => canonicalStage(h.to_stage) === stageId)) {
-          uniqueCards.add(card.id);
+          uniqueKeys.add(dedupKey);
         }
       }
-      return uniqueCards.size;
+      return uniqueKeys.size;
     }
 
     // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
