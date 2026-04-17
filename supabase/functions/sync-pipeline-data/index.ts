@@ -11,8 +11,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const STAGE_ORDER = ["leads", "reunioes", "propostas", "r2", "contratos"];
+// Funnel order for cumulative counting. R2 (segunda reunião) is treated as part of "reunioes",
+// not as a separate stage between propostas and contratos.
+const STAGE_ORDER = ["leads", "reunioes", "propostas", "contratos"];
+const REUNIOES_STAGES = new Set(["reunioes", "r2"]);
 const EXCLUDED_STAGES = ["geladeira", "prospects"];
+
+// Map any raw stage_id to its canonical funnel stage for indexing purposes.
+function canonicalStage(stage: string): string {
+  if (stage === "r2") return "reunioes";
+  return stage;
+}
 
 interface StageBucket {
   leads: number;
@@ -141,15 +150,17 @@ Deno.serve(async (req) => {
     // ─── Cumulative stage counting (matches Pipeline Vision Board logic) ───
     // A card counts for a stage if: it's currently at that stage, it was ever at that stage (via history),
     // or it's currently at a LATER stage (meaning it passed through earlier ones).
+    // Note: stage "r2" is canonicalized to "reunioes" — it does NOT imply the card passed through "propostas".
     function countCumulativeForStage(stageId: string, cardSet: any[]): number {
       const uniqueCards = new Set<string>();
       const stageIdx = STAGE_ORDER.indexOf(stageId);
       if (stageIdx < 0) return 0;
 
       for (const card of cardSet) {
-        const cardStageIdx = STAGE_ORDER.indexOf(card.stage_id);
-        // Card is currently at this stage
-        if (card.stage_id === stageId) {
+        const cardCanon = canonicalStage(card.stage_id);
+        const cardStageIdx = STAGE_ORDER.indexOf(cardCanon);
+        // Card is currently at this stage (canonical match, e.g. r2 → reunioes)
+        if (cardCanon === stageId) {
           uniqueCards.add(card.id);
           continue;
         }
@@ -158,9 +169,9 @@ Deno.serve(async (req) => {
           uniqueCards.add(card.id);
           continue;
         }
-        // Card was at this stage per history (e.g., now at geladeira but was at leads)
+        // Card was at this stage per history (canonicalize history stages too)
         const entries = historyByCard[card.id] || [];
-        if (entries.some((h) => h.to_stage === stageId)) {
+        if (entries.some((h) => canonicalStage(h.to_stage) === stageId)) {
           uniqueCards.add(card.id);
         }
       }
@@ -252,11 +263,12 @@ Deno.serve(async (req) => {
       // byArea and byAreaTag processing
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
-        const stage = card.stage_id;
+        const rawStage = card.stage_id;
+        const stage = canonicalStage(rawStage); // r2 → reunioes
         const stageIdx = STAGE_ORDER.indexOf(stage);
         const area = card.practice_area || "outros";
         const tag = card.tag || "pontual";
-        const isExcluded = EXCLUDED_STAGES.includes(stage);
+        const isExcluded = EXCLUDED_STAGES.includes(rawStage);
 
         if (!byArea[ms]) byArea[ms] = {};
         if (!byArea[ms][origin]) byArea[ms][origin] = {};
@@ -272,7 +284,7 @@ Deno.serve(async (req) => {
         if (isExcluded || stageIdx < 0) {
           const entries = historyByCard[card.id] || [];
           for (const h of entries) {
-            const hIdx = STAGE_ORDER.indexOf(h.to_stage);
+            const hIdx = STAGE_ORDER.indexOf(canonicalStage(h.to_stage));
             if (hIdx >= 0 && hIdx <= 2) {
               if (hIdx === 0) areaBucket.leads++;
               // Don't double-count reunioes/propostas for history-based counting in area
