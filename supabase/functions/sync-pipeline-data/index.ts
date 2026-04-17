@@ -263,11 +263,12 @@ Deno.serve(async (req) => {
       // byArea and byAreaTag processing
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
-        const stage = card.stage_id;
+        const rawStage = card.stage_id;
+        const stage = canonicalStage(rawStage); // r2 → reunioes
         const stageIdx = STAGE_ORDER.indexOf(stage);
         const area = card.practice_area || "outros";
         const tag = card.tag || "pontual";
-        const isExcluded = EXCLUDED_STAGES.includes(stage);
+        const isExcluded = EXCLUDED_STAGES.includes(rawStage);
 
         if (!byArea[ms]) byArea[ms] = {};
         if (!byArea[ms][origin]) byArea[ms][origin] = {};
@@ -283,7 +284,7 @@ Deno.serve(async (req) => {
         if (isExcluded || stageIdx < 0) {
           const entries = historyByCard[card.id] || [];
           for (const h of entries) {
-            const hIdx = STAGE_ORDER.indexOf(h.to_stage);
+            const hIdx = STAGE_ORDER.indexOf(canonicalStage(h.to_stage));
             if (hIdx >= 0 && hIdx <= 2) {
               if (hIdx === 0) areaBucket.leads++;
               // Don't double-count reunioes/propostas for history-based counting in area
