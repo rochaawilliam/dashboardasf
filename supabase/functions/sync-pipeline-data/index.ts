@@ -150,15 +150,17 @@ Deno.serve(async (req) => {
     // ─── Cumulative stage counting (matches Pipeline Vision Board logic) ───
     // A card counts for a stage if: it's currently at that stage, it was ever at that stage (via history),
     // or it's currently at a LATER stage (meaning it passed through earlier ones).
+    // Note: stage "r2" is canonicalized to "reunioes" — it does NOT imply the card passed through "propostas".
     function countCumulativeForStage(stageId: string, cardSet: any[]): number {
       const uniqueCards = new Set<string>();
       const stageIdx = STAGE_ORDER.indexOf(stageId);
       if (stageIdx < 0) return 0;
 
       for (const card of cardSet) {
-        const cardStageIdx = STAGE_ORDER.indexOf(card.stage_id);
-        // Card is currently at this stage
-        if (card.stage_id === stageId) {
+        const cardCanon = canonicalStage(card.stage_id);
+        const cardStageIdx = STAGE_ORDER.indexOf(cardCanon);
+        // Card is currently at this stage (canonical match, e.g. r2 → reunioes)
+        if (cardCanon === stageId) {
           uniqueCards.add(card.id);
           continue;
         }
@@ -167,9 +169,9 @@ Deno.serve(async (req) => {
           uniqueCards.add(card.id);
           continue;
         }
-        // Card was at this stage per history (e.g., now at geladeira but was at leads)
+        // Card was at this stage per history (canonicalize history stages too)
         const entries = historyByCard[card.id] || [];
-        if (entries.some((h) => h.to_stage === stageId)) {
+        if (entries.some((h) => canonicalStage(h.to_stage) === stageId)) {
           uniqueCards.add(card.id);
         }
       }
