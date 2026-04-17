@@ -11,8 +11,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const STAGE_ORDER = ["leads", "reunioes", "propostas", "r2", "contratos"];
+// Funnel order for cumulative counting. R2 (segunda reunião) is treated as part of "reunioes",
+// not as a separate stage between propostas and contratos.
+const STAGE_ORDER = ["leads", "reunioes", "propostas", "contratos"];
+const REUNIOES_STAGES = new Set(["reunioes", "r2"]);
 const EXCLUDED_STAGES = ["geladeira", "prospects"];
+
+// Map any raw stage_id to its canonical funnel stage for indexing purposes.
+function canonicalStage(stage: string): string {
+  if (stage === "r2") return "reunioes";
+  return stage;
+}
 
 interface StageBucket {
   leads: number;
