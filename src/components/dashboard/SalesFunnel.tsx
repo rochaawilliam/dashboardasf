@@ -18,6 +18,7 @@ interface SalesFunnelProps {
   onCardClick?: (metric: Metric) => void;
   colorScheme: "blue" | "amber";
   pipelineMetricIds?: Set<string>;
+  pipelineCardNames?: Record<string, string[]>;
 }
 
 export function SalesFunnel({
@@ -33,6 +34,7 @@ export function SalesFunnel({
   onCardClick,
   colorScheme,
   pipelineMetricIds,
+  pipelineCardNames,
 }: SalesFunnelProps) {
   const monthNames = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -94,6 +96,7 @@ export function SalesFunnel({
                     ? undefined
                     : onCardClick ? () => onCardClick(metric) : undefined
                 }
+                pipelineCardNames={pipelineCardNames?.[metric.id]}
               />
             </React.Fragment>
           );
