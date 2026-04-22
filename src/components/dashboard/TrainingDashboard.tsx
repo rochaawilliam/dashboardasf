@@ -17,14 +17,14 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
   const targets = training.targets;
 
   const chartData = useMemo(() => {
-    const monthlyHoursTarget = targets ? Math.round(targets.hours / (training.headcount || 1)) : 10;
     return (training.topCollaborators ?? []).map((c) => ({
       name: c.name.split(" ")[0],
       fullName: c.name,
       totalHours: c.hours,
-      monthlyTarget: monthlyHoursTarget,
+      monthlyTarget: c.hoursTarget ?? 5,
+      nivel: c.nivel ?? "",
     })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [training.topCollaborators, targets, training.headcount]);
+  }, [training.topCollaborators]);
 
   const chartConfig = {
     monthlyTarget: { label: "Carga Horária Mês", color: "hsl(45, 93%, 47%)" },
