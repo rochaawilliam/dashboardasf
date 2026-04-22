@@ -72,6 +72,23 @@ export interface TrainingMetrics {
   targets?: TrainingTargets;
 }
 
+export interface DashboardMonthData {
+  leads: number;
+  reunioes: number;
+  propostas: number;
+  r2: number;
+  contratos: number;
+  prospects: number;
+  valor_gerado: number;
+  conversao: number;
+  taxaAgendamento: number;
+  taxaComparecimento: number;
+  avgCloseTimeDays: number | null;
+  tmeMinutes: number | null;
+  tmaDays: number | null;
+  tarefasRealizadas: number;
+}
+
 export interface PipelineData {
   months: Record<string, Record<string, PipelineStageData>>;
   totals: Record<string, PipelineStageData>;
@@ -89,6 +106,8 @@ export interface PipelineData {
   cardNames?: Record<string, Record<string, Record<string, string[]>>>;
   cardNamesByArea?: Record<string, Record<string, Record<string, Record<string, string[]>>>>;
   cardNamesByAreaTag?: Record<string, Record<string, Record<string, Record<string, Record<string, string[]>>>>>;
+  dashboard?: Record<string, DashboardMonthData>;
+  dashboardTotals?: DashboardMonthData;
 }
 
 const CACHE_KEY = "pipeline-data-cache";
