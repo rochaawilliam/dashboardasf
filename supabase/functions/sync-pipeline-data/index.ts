@@ -286,10 +286,13 @@ Deno.serve(async (req) => {
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
 
         // Deduplicated valor_gerado
-        const contractCards = originCards.filter((c: any) => c.stage_id === "contratos");
+        const contractCards = originMonthCards.filter((c: any) => c.stage_id === "contratos");
         bucket.valor_gerado = deduplicatedValorGerado(contractCards);
 
-        result[ms][origin] = bucket;
+        if (bucket.leads > 0 || bucket.reunioes > 0 || bucket.propostas > 0 || bucket.contratos > 0 || bucket.prospects > 0) {
+          if (!result[ms]) result[ms] = {};
+          result[ms][origin] = bucket;
+        }
 
         // Close time calculation
         for (const card of contractCards) {
@@ -312,48 +315,70 @@ Deno.serve(async (req) => {
         }
       }
 
-      // byArea and byAreaTag — passage-based counting per area
-      const byOriginAreaCards: Record<string, Record<string, { cards: any[]; ids: Set<string> }>> = {};
-      const byOriginAreaTagCards: Record<string, Record<string, Record<string, { cards: any[]; ids: Set<string> }>>> = {};
+      // byArea and byAreaTag — passage-based counting using ALL card IDs per origin/area/tag
+      const byOriginAreaMonthCards: Record<string, Record<string, any[]>> = {};
+      const byOriginAreaTagMonthCards: Record<string, Record<string, Record<string, any[]>>> = {};
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
         const area = card.practice_area || "outros";
         const tag = card.tag || "pontual";
-        if (!byOriginAreaCards[origin]) byOriginAreaCards[origin] = {};
-        if (!byOriginAreaCards[origin][area]) byOriginAreaCards[origin][area] = { cards: [], ids: new Set() };
-        byOriginAreaCards[origin][area].cards.push(card);
-        byOriginAreaCards[origin][area].ids.add(card.id);
-        if (!byOriginAreaTagCards[origin]) byOriginAreaTagCards[origin] = {};
-        if (!byOriginAreaTagCards[origin][area]) byOriginAreaTagCards[origin][area] = {};
-        if (!byOriginAreaTagCards[origin][area][tag]) byOriginAreaTagCards[origin][area][tag] = { cards: [], ids: new Set() };
-        byOriginAreaTagCards[origin][area][tag].cards.push(card);
-        byOriginAreaTagCards[origin][area][tag].ids.add(card.id);
+        if (!byOriginAreaMonthCards[origin]) byOriginAreaMonthCards[origin] = {};
+        if (!byOriginAreaMonthCards[origin][area]) byOriginAreaMonthCards[origin][area] = [];
+        byOriginAreaMonthCards[origin][area].push(card);
+        if (!byOriginAreaTagMonthCards[origin]) byOriginAreaTagMonthCards[origin] = {};
+        if (!byOriginAreaTagMonthCards[origin][area]) byOriginAreaTagMonthCards[origin][area] = {};
+        if (!byOriginAreaTagMonthCards[origin][area][tag]) byOriginAreaTagMonthCards[origin][area][tag] = [];
+        byOriginAreaTagMonthCards[origin][area][tag].push(card);
       }
 
-      for (const [origin, areas] of Object.entries(byOriginAreaCards)) {
+      // Also include origins/areas/tags that have no month-created cards but have history passages
+      const allAreaOrigins = new Set([
+        ...Object.keys(byOriginAreaMonthCards),
+        ...Object.keys(allCardIdsByOriginArea),
+      ]);
+
+      for (const origin of allAreaOrigins) {
         if (!byArea[ms]) byArea[ms] = {};
         if (!byArea[ms][origin]) byArea[ms][origin] = {};
-        for (const [area, { cards: areaCards, ids: areaIds }] of Object.entries(areas)) {
+        const allAreas = new Set([
+          ...Object.keys(byOriginAreaMonthCards[origin] || {}),
+          ...Object.keys(allCardIdsByOriginArea[origin] || {}),
+        ]);
+        for (const area of allAreas) {
+          const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
+          const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          b.leads = countPassages(STAGE_TARGETS.leads, areaCards, areaIds, rangeStart, rangeEnd);
-          b.reunioes = countPassages(STAGE_TARGETS.reunioes, areaCards, areaIds, rangeStart, rangeEnd);
-          b.propostas = countPassages(STAGE_TARGETS.propostas, areaCards, areaIds, rangeStart, rangeEnd);
-          b.contratos = countPassages(STAGE_TARGETS.contratos, areaCards, areaIds, rangeStart, rangeEnd);
-          const contractCards = areaCards.filter((c: any) => c.stage_id === "contratos");
+          b.leads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          b.reunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          b.propostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          b.contratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          const contractCards = areaMonthCards.filter((c: any) => c.stage_id === "contratos");
           b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
-          byArea[ms][origin][area] = b;
+          if (b.leads > 0 || b.reunioes > 0 || b.propostas > 0 || b.contratos > 0) {
+            byArea[ms][origin][area] = b;
+          }
         }
       }
 
-      for (const [origin, areas] of Object.entries(byOriginAreaTagCards)) {
-        for (const [area, tags] of Object.entries(areas)) {
-          for (const [tag, { cards: tagCards, ids: tagIds }] of Object.entries(tags)) {
+      for (const origin of allAreaOrigins) {
+        const allAreas = new Set([
+          ...Object.keys(byOriginAreaTagMonthCards[origin] || {}),
+          ...Object.keys(allCardIdsByOriginAreaTag[origin] || {}),
+        ]);
+        for (const area of allAreas) {
+          const allTags = new Set([
+            ...Object.keys(byOriginAreaTagMonthCards[origin]?.[area] || {}),
+            ...Object.keys(allCardIdsByOriginAreaTag[origin]?.[area] || {}),
+          ]);
+          for (const tag of allTags) {
+            const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
+            const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            b.leads = countPassages(STAGE_TARGETS.leads, tagCards, tagIds, rangeStart, rangeEnd);
-            b.reunioes = countPassages(STAGE_TARGETS.reunioes, tagCards, tagIds, rangeStart, rangeEnd);
-            b.propostas = countPassages(STAGE_TARGETS.propostas, tagCards, tagIds, rangeStart, rangeEnd);
-            b.contratos = countPassages(STAGE_TARGETS.contratos, tagCards, tagIds, rangeStart, rangeEnd);
-            const contractCards = tagCards.filter((c: any) => c.stage_id === "contratos");
+            b.leads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            b.reunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            b.propostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            b.contratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            const contractCards = tagMonthCards.filter((c: any) => c.stage_id === "contratos");
             b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           }
         }
