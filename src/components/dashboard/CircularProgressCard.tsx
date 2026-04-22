@@ -364,18 +364,37 @@ export function CircularProgressCard({
             <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
-            <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-              {hideValues ? "••••••" : (
-                <>
-                  {formatMetricValue(displayValue, metric.unit, metric.name)}
-                  {getStageLabel(metric.name, displayValue) && (
-                    <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
-                      {getStageLabel(metric.name, displayValue)}
-                    </span>
-                  )}
-                </>
+            <div className="flex items-center gap-1">
+              <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+                {hideValues ? "••••••" : (
+                  <>
+                    {formatMetricValue(displayValue, metric.unit, metric.name)}
+                    {getStageLabel(metric.name, displayValue) && (
+                      <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
+                        {getStageLabel(metric.name, displayValue)}
+                      </span>
+                    )}
+                  </>
+                )}
+              </p>
+              {pipelineCardNames && pipelineCardNames.length > 0 && !hideValues && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="shrink-0 p-0.5 rounded-full transition-colors hover:bg-muted/80" aria-label="Ver nomes dos leads" onClick={(e) => e.stopPropagation()}>
+                      <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs max-w-[320px] max-h-[300px] overflow-y-auto">
+                    <p className="font-semibold mb-1">{metric.name} ({pipelineCardNames.length})</p>
+                    <ul className="space-y-0.5">
+                      {pipelineCardNames.map((name, i) => (
+                        <li key={i} className="text-popover-foreground/80">• {name}</li>
+                      ))}
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
               )}
-            </p>
+            </div>
           </div>
           {/* Annual target in footer when viewing a specific month */}
           {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && !hideAnnualTarget && (
