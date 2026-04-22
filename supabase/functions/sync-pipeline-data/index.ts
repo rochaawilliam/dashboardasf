@@ -418,15 +418,12 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const monthStart = new Date(`${ms}-01T00:00:00Z`);
-      const nextMonth = new Date(monthStart);
-      nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
       const now = new Date();
-      const effectiveEnd = nextMonth > now ? now : nextMonth;
+      const effectiveEnd = opRangeEnd > now ? now : opRangeEnd;
 
       const inRange = (dateStr: string) => {
         const d = new Date(dateStr);
-        return d >= monthStart && d < nextMonth;
+        return d >= opRangeStart && d < opRangeEnd;
       };
 
       let totalActions = 0;
