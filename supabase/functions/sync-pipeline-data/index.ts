@@ -491,11 +491,9 @@ Deno.serve(async (req) => {
 
       // ─── TMA (handling time) ─────────────────────────────────
       const handlingDays: number[] = [];
-      const tmaCards = monthCards.filter((c: any) => {
-        if (c.stage_id !== "contratos" && c.stage_id !== "geladeira") return false;
-        const createdMonth = c.created_at ? c.created_at.slice(0, 7) : c.month;
-        return createdMonth === ms;
-      });
+      const tmaCards = monthCards.filter((c: any) =>
+        c.stage_id === "contratos" || c.stage_id === "geladeira"
+      );
 
       for (const card of tmaCards) {
         const created = new Date(card.created_at).getTime();
