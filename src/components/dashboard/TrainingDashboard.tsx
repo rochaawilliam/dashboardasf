@@ -69,7 +69,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
               <Legend
                 wrapperStyle={{ fontSize: 11 }}
                 formatter={(value: string) =>
-                  value === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas Geral"
+                  value === "monthlyTarget" ? "Meta Individual" : "Total de horas Geral"
                 }
               />
               <Bar
