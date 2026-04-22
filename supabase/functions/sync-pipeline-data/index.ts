@@ -254,52 +254,49 @@ Deno.serve(async (req) => {
         }
       }
 
-      // byArea and byAreaTag processing
+      // byArea and byAreaTag processing — use same cumulative logic as Pipeline
+      // Group cards by origin+area and origin+area+tag, then count cumulatively
+      const byOriginAreaCards: Record<string, Record<string, any[]>> = {};
+      const byOriginAreaTagCards: Record<string, Record<string, Record<string, any[]>>> = {};
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
-        const rawStage = card.stage_id;
-        const stage = canonicalStage(rawStage); // r2 → reunioes
-        const stageIdx = STAGE_ORDER.indexOf(stage);
         const area = card.practice_area || "outros";
         const tag = card.tag || "pontual";
-        const isExcluded = EXCLUDED_STAGES.includes(rawStage);
+        if (!byOriginAreaCards[origin]) byOriginAreaCards[origin] = {};
+        if (!byOriginAreaCards[origin][area]) byOriginAreaCards[origin][area] = [];
+        byOriginAreaCards[origin][area].push(card);
+        if (!byOriginAreaTagCards[origin]) byOriginAreaTagCards[origin] = {};
+        if (!byOriginAreaTagCards[origin][area]) byOriginAreaTagCards[origin][area] = {};
+        if (!byOriginAreaTagCards[origin][area][tag]) byOriginAreaTagCards[origin][area][tag] = [];
+        byOriginAreaTagCards[origin][area][tag].push(card);
+      }
 
+      for (const [origin, areas] of Object.entries(byOriginAreaCards)) {
         if (!byArea[ms]) byArea[ms] = {};
         if (!byArea[ms][origin]) byArea[ms][origin] = {};
-        if (!byArea[ms][origin][area]) byArea[ms][origin][area] = newAreaBucket();
-        const areaBucket = byArea[ms][origin][area];
-
-        if (!isExcluded && stageIdx >= 0) {
-          areaBucket.leads++;
-          if (stageIdx >= 1) areaBucket.reunioes++;
-          if (stageIdx >= 2) areaBucket.propostas++;
+        for (const [area, areaCards] of Object.entries(areas)) {
+          const b = newAreaBucket();
+          b.leads = countCumulativeForStage("leads", areaCards);
+          b.reunioes = countCumulativeForStage("reunioes", areaCards);
+          b.propostas = countCumulativeForStage("propostas", areaCards);
+          b.contratos = countCumulativeForStage("contratos", areaCards);
+          const contractCards = areaCards.filter((c: any) => c.stage_id === "contratos");
+          b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+          byArea[ms][origin][area] = b;
         }
-        // Also count via history for cards at excluded stages
-        if (isExcluded || stageIdx < 0) {
-          const entries = historyByCard[card.id] || [];
-          for (const h of entries) {
-            const hIdx = STAGE_ORDER.indexOf(canonicalStage(h.to_stage));
-            if (hIdx >= 0 && hIdx <= 2) {
-              if (hIdx === 0) areaBucket.leads++;
-              // Don't double-count reunioes/propostas for history-based counting in area
-              break; // Just count as lead if it was ever in the funnel
-            }
+      }
+
+      for (const [origin, areas] of Object.entries(byOriginAreaTagCards)) {
+        for (const [area, tags] of Object.entries(areas)) {
+          for (const [tag, tagCards] of Object.entries(tags)) {
+            const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
+            b.leads = countCumulativeForStage("leads", tagCards);
+            b.reunioes = countCumulativeForStage("reunioes", tagCards);
+            b.propostas = countCumulativeForStage("propostas", tagCards);
+            b.contratos = countCumulativeForStage("contratos", tagCards);
+            const contractCards = tagCards.filter((c: any) => c.stage_id === "contratos");
+            b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           }
-        }
-        if (stage === "contratos") {
-          areaBucket.contratos++;
-          areaBucket.valor_gerado += card.contract_value || 0;
-        }
-
-        const areaTagBucket = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-        if (!isExcluded && stageIdx >= 0) {
-          areaTagBucket.leads++;
-          if (stageIdx >= 1) areaTagBucket.reunioes++;
-          if (stageIdx >= 2) areaTagBucket.propostas++;
-        }
-        if (stage === "contratos") {
-          areaTagBucket.contratos++;
-          areaTagBucket.valor_gerado += card.contract_value || 0;
         }
       }
     }
