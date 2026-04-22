@@ -1460,6 +1460,7 @@ const Index = () => {
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="blue"
                                       pipelineMetricIds={pipelineIds}
+                                      pipelineCardNames={pipelineCardNames}
                                     />
                                   )}
                                   {funnelOffline && funnelOffline.metrics.length > 0 && (
