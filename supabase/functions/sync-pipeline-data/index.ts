@@ -722,6 +722,7 @@ Deno.serve(async (req) => {
       // Parse collaborator rows (Colaborador, Cargo, Área, Nível, Status, Ano, Mês)
       interface CollabRow {
         nome: string;
+        nivel: string;
         status: string;
         ano: number;
         mes: number;
@@ -734,6 +735,7 @@ Deno.serve(async (req) => {
         const mesStr = (cols[6] || "").trim().toLowerCase().substring(0, 3);
         collaborators.push({
           nome: cols[0]?.trim() || "",
+          nivel: cols[3]?.trim() || "",
           status: cols[4]?.trim() || "",
           ano: parseInt(cols[5]?.trim() || "0"),
           mes: MONTH_MAP[mesStr] || 0,
