@@ -779,9 +779,26 @@ Deno.serve(async (req) => {
       const activeCollabs = collaborators.filter(c => c.status.toLowerCase() === "ativo");
       const headcount = activeCollabs.length;
 
+      // Training hour target per level: Liderança=6, Time=5, Estagiários=4
+      function getHoursTargetByLevel(nivel: string): number {
+        const n = nivel.toLowerCase();
+        if (n.includes("lideran")) return 6;
+        if (n.includes("estagi")) return 4;
+        return 5; // Time (default)
+      }
+
+      // Build a map of active collaborator name -> their level & target
+      const collabLevelMap: Record<string, { nivel: string; hoursTarget: number }> = {};
+      let totalHoursTarget = 0;
+      for (const c of activeCollabs) {
+        const target = getHoursTargetByLevel(c.nivel);
+        collabLevelMap[c.nome] = { nivel: c.nivel, hoursTarget: target };
+        totalHoursTarget += target;
+      }
+
       // Targets (all dynamic based on actual headcount)
       const HEADCOUNT_TARGET = headcount;
-      const HOURS_TARGET = headcount * 10;
+      const HOURS_TARGET = totalHoursTarget;
       const MODULES_TARGET = headcount * 2;
       const CERTIFICATION_TARGET = 70; // %
       const AVG_TENURE_TARGET = 12; // months
