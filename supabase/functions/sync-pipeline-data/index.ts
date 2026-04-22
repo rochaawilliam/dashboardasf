@@ -218,6 +218,26 @@ Deno.serve(async (req) => {
       return total;
     }
 
+    // Build card ID sets from ALL cards (not just month-created) for history passage checks
+    // Operacional uses companyCardIds (all cards) for history filtering
+    const allCardIdsByOrigin: Record<string, Set<string>> = {};
+    const allCardIdsByOriginArea: Record<string, Record<string, Set<string>>> = {};
+    const allCardIdsByOriginAreaTag: Record<string, Record<string, Record<string, Set<string>>>> = {};
+    for (const c of cards) {
+      const origin = c.lead_origin || "offline";
+      const area = c.practice_area || "outros";
+      const tag = c.tag || "pontual";
+      if (!allCardIdsByOrigin[origin]) allCardIdsByOrigin[origin] = new Set();
+      allCardIdsByOrigin[origin].add(c.id);
+      if (!allCardIdsByOriginArea[origin]) allCardIdsByOriginArea[origin] = {};
+      if (!allCardIdsByOriginArea[origin][area]) allCardIdsByOriginArea[origin][area] = new Set();
+      allCardIdsByOriginArea[origin][area].add(c.id);
+      if (!allCardIdsByOriginAreaTag[origin]) allCardIdsByOriginAreaTag[origin] = {};
+      if (!allCardIdsByOriginAreaTag[origin][area]) allCardIdsByOriginAreaTag[origin][area] = {};
+      if (!allCardIdsByOriginAreaTag[origin][area][tag]) allCardIdsByOriginAreaTag[origin][area][tag] = new Set();
+      allCardIdsByOriginAreaTag[origin][area][tag].add(c.id);
+    }
+
     // ─── Build funnel results ─────────────────────────────────
     const result: Record<string, Record<string, StageBucket>> = {};
     const byArea: Record<string, Record<string, Record<string, AreaBucket>>> = {};
@@ -239,19 +259,12 @@ Deno.serve(async (req) => {
         return d >= rangeStart && d < rangeEnd;
       });
 
-      if (monthCards.length === 0) continue;
-
-      const monthCardIds = new Set(monthCards.map((c: any) => c.id));
-
-      // Group by origin
-      const byOriginCards: Record<string, any[]> = {};
-      const byOriginIds: Record<string, Set<string>> = {};
+      // Group month-created cards by origin
+      const byOriginMonthCards: Record<string, any[]> = {};
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
-        if (!byOriginCards[origin]) byOriginCards[origin] = [];
-        if (!byOriginIds[origin]) byOriginIds[origin] = new Set();
-        byOriginCards[origin].push(card);
-        byOriginIds[origin].add(card.id);
+        if (!byOriginMonthCards[origin]) byOriginMonthCards[origin] = [];
+        byOriginMonthCards[origin].push(card);
       }
 
       if (!result[ms]) result[ms] = {};
