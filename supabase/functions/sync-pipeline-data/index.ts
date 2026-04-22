@@ -457,12 +457,8 @@ Deno.serve(async (req) => {
       const commentsPerLead = monthCards.length > 0 ? Math.round((totalComments / monthCards.length) * 100) / 100 : 0;
 
       // ─── TME (First Contact Time) ──────────────────────────────
-      // Match Pipeline: only consider cards where created_at month matches the card's month
-      // (excludes cards moved from earlier months which have old created_at dates)
-      const tmeCards = monthCards.filter((c: any) => {
-        const createdMonth = c.created_at ? c.created_at.slice(0, 7) : c.month;
-        return createdMonth === ms;
-      });
+      // All monthCards are already filtered by created_at range
+      const tmeCards = monthCards;
 
       const firstContactTimes: number[] = [];
       for (const card of tmeCards) {
