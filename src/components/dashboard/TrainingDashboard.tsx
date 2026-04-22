@@ -27,7 +27,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
   }, [training.topCollaborators]);
 
   const chartConfig = {
-    monthlyTarget: { label: "Carga Horária Mês", color: "hsl(45, 93%, 47%)" },
+    monthlyTarget: { label: "Meta Individual", color: "hsl(45, 93%, 47%)" },
     totalHours: { label: "Total de horas Geral", color: "hsl(213, 57%, 51%)" },
   };
 
