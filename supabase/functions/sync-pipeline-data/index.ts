@@ -1199,6 +1199,18 @@ Deno.serve(async (req) => {
       dashboardTotals.tarefasRealizadas = totalTarefas;
     }
 
+    // Dashboard totals by origin
+    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number }> = {};
+    {
+      const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
+      for (const origin of ["online", "offline"]) {
+        const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
+        const oLeads = computeCumulative(originCards, "leads");
+        const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
+        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects };
+      }
+    }
+
     return new Response(
       JSON.stringify({
         months: result,
