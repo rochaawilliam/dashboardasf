@@ -892,6 +892,221 @@ Deno.serve(async (req) => {
       console.error("Training fetch error:", err);
     }
 
+    // ─── Dashboard-style cumulative counts (matches Pipeline Dashboard panel) ───
+    // Uses `month` field filtering and cumulative counting:
+    // A card counts for a stage if it's (a) currently at that stage, (b) has history to that stage, or (c) at a later stage
+    const DASHBOARD_FUNNEL = ["leads", "reunioes", "propostas", "r2", "contratos"];
+
+    function computeCumulative(filteredCards: any[], stageId: string): { count: number; names: string[] } {
+      const uniqueCards = new Set<string>();
+      const namesList: string[] = [];
+      const stageIdx = DASHBOARD_FUNNEL.indexOf(stageId);
+
+      // Cards currently at this stage
+      for (const c of filteredCards) {
+        if (c.stage_id === stageId) uniqueCards.add(c.id);
+      }
+      // Cards that passed through this stage (history)
+      const filteredIds = new Set(filteredCards.map((c: any) => c.id));
+      for (const h of stageHistory) {
+        if (h.to_stage === stageId && filteredIds.has(h.card_id)) {
+          uniqueCards.add(h.card_id);
+        }
+      }
+      // Cards at later stages
+      for (const c of filteredCards) {
+        const cardIdx = DASHBOARD_FUNNEL.indexOf(c.stage_id);
+        if (cardIdx > stageIdx) uniqueCards.add(c.id);
+      }
+
+      for (const id of uniqueCards) {
+        const card = cardById.get(id);
+        namesList.push(card?.title ?? id);
+      }
+      return { count: uniqueCards.size, names: namesList };
+    }
+
+    // Contratos in Dashboard = snapshot count (cards currently sitting in contratos)
+    function computeContratosSnapshot(filteredCards: any[]): { count: number; names: string[] } {
+      const namesList: string[] = [];
+      for (const c of filteredCards) {
+        if (c.stage_id === "contratos" && !c.ghost_of) {
+          namesList.push(c.title ?? c.id);
+        }
+      }
+      return { count: namesList.length, names: namesList };
+    }
+
+    interface DashboardMonthData {
+      leads: number;
+      reunioes: number;
+      propostas: number;
+      r2: number;
+      contratos: number;
+      prospects: number;
+      valor_gerado: number;
+      conversao: number;
+      taxaAgendamento: number;
+      taxaComparecimento: number;
+      avgCloseTimeDays: number | null;
+      tmeMinutes: number | null;
+      tmaDays: number | null;
+      tarefasRealizadas: number;
+    }
+
+    const dashboardByMonth: Record<string, DashboardMonthData> = {};
+
+    for (const ms of monthStrings) {
+      // Dashboard uses `month` field filtering
+      const monthFilteredCards = cards.filter((c: any) => c.month === ms);
+
+      const leads = computeCumulative(monthFilteredCards, "leads");
+      const reunioes = computeCumulative(monthFilteredCards, "reunioes");
+      const propostas = computeCumulative(monthFilteredCards, "propostas");
+      const r2 = computeCumulative(monthFilteredCards, "r2");
+      const contratosSnap = computeContratosSnapshot(monthFilteredCards);
+      const prospects = monthFilteredCards.filter((c: any) => c.stage_id === "prospects").length;
+
+      // Valor gerado (deduplicated)
+      const contractCards = monthFilteredCards.filter((c: any) => c.stage_id === "contratos" && c.contract_value);
+      const valorGerado = deduplicatedValorGerado(contractCards);
+
+      // Conversão = contratos snapshot / leads cumulative * 100
+      const conversao = leads.count > 0 ? Math.round((contratosSnap.count / leads.count) * 10000) / 100 : 0;
+      const taxaAgendamento = leads.count > 0 ? Math.round((reunioes.count / leads.count) * 10000) / 100 : 0;
+      const taxaComparecimento = reunioes.count > 0 ? Math.round((propostas.count / reunioes.count) * 10000) / 100 : 0;
+
+      // Avg close time (matching Dashboard)
+      const contratosCards = monthFilteredCards.filter((c: any) => c.stage_id === "contratos");
+      let closeTotal = 0, closeN = 0;
+      for (const c of contratosCards) {
+        const entry = (historyByCard[c.id] || [])
+          .filter((h: any) => h.to_stage === "contratos")
+          .sort((a: any, b: any) => new Date(b.moved_at).getTime() - new Date(a.moved_at).getTime())[0];
+        if (entry && c.created_at) {
+          const days = Math.max(0, Math.floor((new Date(entry.moved_at).getTime() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)));
+          closeTotal += days; closeN++;
+        }
+      }
+
+      // TME (minutes) - matching Dashboard computeTme
+      const tmeCards = monthFilteredCards.filter((c: any) => !c.ghost_of);
+      const tmeValues: number[] = [];
+      for (const c of tmeCards) {
+        const created = new Date(c.created_at).getTime();
+        const firstComment = (commentsByCard.get(c.id) || [])
+          .map((cm: any) => new Date(cm.created_at).getTime())
+          .filter((t: number) => t > created)
+          .sort((a: number, b: number) => a - b)[0];
+        const firstMove = (historyByCard[c.id] || [])
+          .map((h: any) => new Date(h.moved_at).getTime())
+          .filter((t: number) => t > created)
+          .sort((a: number, b: number) => a - b)[0];
+        const candidates = [firstComment, firstMove].filter(Boolean) as number[];
+        if (candidates.length > 0) {
+          tmeValues.push(Math.max(0, Math.round((Math.min(...candidates) - created) / (1000 * 60))));
+        }
+      }
+      const tmeAvg = tmeValues.length > 0 ? Math.round(tmeValues.reduce((a, b) => a + b, 0) / tmeValues.length) : null;
+
+      // TMA (days) - matching Dashboard computeTma
+      const tmaValues: number[] = [];
+      for (const c of monthFilteredCards) {
+        if (c.stage_id !== "contratos" && c.stage_id !== "geladeira") continue;
+        const created = new Date(c.created_at).getTime();
+        const arrival = (historyByCard[c.id] || [])
+          .filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira")
+          .map((h: any) => new Date(h.moved_at).getTime())
+          .sort((a: number, b: number) => a - b)[0];
+        if (arrival) {
+          tmaValues.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
+        }
+      }
+      const tmaAvg = tmaValues.length > 0 ? Math.round(tmaValues.reduce((a, b) => a + b, 0) / tmaValues.length) : null;
+
+      // Tarefas Realizadas
+      const [y, m] = ms.split("-").map(Number);
+      const trRangeStart = new Date(y, m - 1, 1);
+      const trRangeEnd = new Date(y, m, 1);
+      const inTrRange = (dateStr: string) => { const d = new Date(dateStr); return d >= trRangeStart && d < trRangeEnd; };
+      const companyCardIds = new Set(cards.map((c: any) => c.id));
+      const creations = cards.filter((c: any) => !c.ghost_of && inTrRange(c.created_at)).length;
+      const comments = cardComments.filter((cm: any) => companyCardIds.has(cm.card_id) && inTrRange(cm.created_at)).length;
+      const moves = stageHistory.filter((h: any) => companyCardIds.has(h.card_id) && inTrRange(h.moved_at)).length;
+
+      dashboardByMonth[ms] = {
+        leads: leads.count,
+        reunioes: reunioes.count,
+        propostas: propostas.count,
+        r2: r2.count,
+        contratos: contratosSnap.count,
+        prospects,
+        valor_gerado: valorGerado,
+        conversao,
+        taxaAgendamento,
+        taxaComparecimento,
+        avgCloseTimeDays: closeN > 0 ? Math.round(closeTotal / closeN) : null,
+        tmeMinutes: tmeAvg,
+        tmaDays: tmaAvg,
+        tarefasRealizadas: creations + comments + moves,
+      };
+    }
+
+    // Dashboard yearly totals
+    const dashboardTotals: DashboardMonthData = {
+      leads: 0, reunioes: 0, propostas: 0, r2: 0, contratos: 0, prospects: 0, valor_gerado: 0,
+      conversao: 0, taxaAgendamento: 0, taxaComparecimento: 0,
+      avgCloseTimeDays: null, tmeMinutes: null, tmaDays: null, tarefasRealizadas: 0,
+    };
+    {
+      const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
+      const tLeads = computeCumulative(allMonthCards, "leads");
+      const tReunioes = computeCumulative(allMonthCards, "reunioes");
+      const tPropostas = computeCumulative(allMonthCards, "propostas");
+      const tR2 = computeCumulative(allMonthCards, "r2");
+      const tContratos = computeContratosSnapshot(allMonthCards);
+      dashboardTotals.leads = tLeads.count;
+      dashboardTotals.reunioes = tReunioes.count;
+      dashboardTotals.propostas = tPropostas.count;
+      dashboardTotals.r2 = tR2.count;
+      dashboardTotals.contratos = tContratos.count;
+      dashboardTotals.prospects = allMonthCards.filter((c: any) => c.stage_id === "prospects").length;
+      dashboardTotals.valor_gerado = deduplicatedValorGerado(allMonthCards.filter((c: any) => c.stage_id === "contratos"));
+      dashboardTotals.conversao = tLeads.count > 0 ? Math.round((tContratos.count / tLeads.count) * 10000) / 100 : 0;
+      dashboardTotals.taxaAgendamento = tLeads.count > 0 ? Math.round((tReunioes.count / tLeads.count) * 10000) / 100 : 0;
+      dashboardTotals.taxaComparecimento = tReunioes.count > 0 ? Math.round((tPropostas.count / tReunioes.count) * 10000) / 100 : 0;
+
+      // Totals TME/TMA/close
+      const tmeVals: number[] = [];
+      const tmaVals: number[] = [];
+      let closeTotalY = 0, closeNY = 0;
+      for (const c of allMonthCards) {
+        if (!c.ghost_of) {
+          const created = new Date(c.created_at).getTime();
+          const fc = (commentsByCard.get(c.id) || []).map((cm: any) => new Date(cm.created_at).getTime()).filter((t: number) => t > created).sort((a: number, b: number) => a - b)[0];
+          const fm = (historyByCard[c.id] || []).map((h: any) => new Date(h.moved_at).getTime()).filter((t: number) => t > created).sort((a: number, b: number) => a - b)[0];
+          const cands = [fc, fm].filter(Boolean) as number[];
+          if (cands.length > 0) tmeVals.push(Math.max(0, Math.round((Math.min(...cands) - created) / (1000 * 60))));
+        }
+        if (c.stage_id === "contratos" || c.stage_id === "geladeira") {
+          const created = new Date(c.created_at).getTime();
+          const arrival = (historyByCard[c.id] || []).filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira").map((h: any) => new Date(h.moved_at).getTime()).sort((a: number, b: number) => a - b)[0];
+          if (arrival) tmaVals.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
+        }
+        if (c.stage_id === "contratos") {
+          const entry = (historyByCard[c.id] || []).filter((h: any) => h.to_stage === "contratos").sort((a: any, b: any) => new Date(b.moved_at).getTime() - new Date(a.moved_at).getTime())[0];
+          if (entry) { const d = Math.max(0, Math.floor((new Date(entry.moved_at).getTime() - new Date(c.created_at).getTime()) / (1000*60*60*24))); closeTotalY += d; closeNY++; }
+        }
+      }
+      dashboardTotals.tmeMinutes = tmeVals.length > 0 ? Math.round(tmeVals.reduce((a, b) => a + b, 0) / tmeVals.length) : null;
+      dashboardTotals.tmaDays = tmaVals.length > 0 ? Math.round(tmaVals.reduce((a, b) => a + b, 0) / tmaVals.length) : null;
+      dashboardTotals.avgCloseTimeDays = closeNY > 0 ? Math.round(closeTotalY / closeNY) : null;
+      // Tarefas totals
+      let totalTarefas = 0;
+      for (const md of Object.values(dashboardByMonth)) totalTarefas += md.tarefasRealizadas;
+      dashboardTotals.tarefasRealizadas = totalTarefas;
+    }
+
     return new Response(
       JSON.stringify({
         months: result,
@@ -910,6 +1125,8 @@ Deno.serve(async (req) => {
         cardNames,
         cardNamesByArea,
         cardNamesByAreaTag,
+        dashboard: dashboardByMonth,
+        dashboardTotals,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
