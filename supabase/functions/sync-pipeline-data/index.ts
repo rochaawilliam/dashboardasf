@@ -24,6 +24,7 @@ interface StageBucket {
   contratos: number;
   valor_gerado: number;
   prospects: number;
+  new_leads: number;
 }
 
 interface AreaBucket {
@@ -35,7 +36,7 @@ interface AreaBucket {
 }
 
 function newStageBucket(): StageBucket {
-  return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0, prospects: 0 };
+  return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0, prospects: 0, new_leads: 0 };
 }
 
 function newAreaBucket(): AreaBucket {
@@ -295,6 +296,8 @@ Deno.serve(async (req) => {
         bucket.propostas = pPropostas.count;
         bucket.contratos = pContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
+        // New leads = cards created in this month (excluding prospects and geladeira)
+        bucket.new_leads = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).length;
 
         // Store card names
         if (!cardNames[ms]) cardNames[ms] = {};
@@ -304,12 +307,13 @@ Deno.serve(async (req) => {
         cardNames[ms][origin]["propostas"] = pPropostas.names;
         cardNames[ms][origin]["contratos"] = pContratos.names;
         cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
+        cardNames[ms][origin]["new_leads"] = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).map((c: any) => c.title ?? c.id);
 
         // Deduplicated valor_gerado
         const contractCards = originMonthCards.filter((c: any) => c.stage_id === "contratos");
         bucket.valor_gerado = deduplicatedValorGerado(contractCards);
 
-        if (bucket.leads > 0 || bucket.reunioes > 0 || bucket.propostas > 0 || bucket.contratos > 0 || bucket.prospects > 0) {
+        if (bucket.leads > 0 || bucket.reunioes > 0 || bucket.propostas > 0 || bucket.contratos > 0 || bucket.prospects > 0 || bucket.new_leads > 0) {
           if (!result[ms]) result[ms] = {};
           result[ms][origin] = bucket;
         }

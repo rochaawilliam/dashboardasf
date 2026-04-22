@@ -7,6 +7,7 @@ export interface PipelineStageData {
   contratos: number;
   valor_gerado: number;
   prospects: number;
+  new_leads: number;
 }
 
 export interface PipelineAreaData {
