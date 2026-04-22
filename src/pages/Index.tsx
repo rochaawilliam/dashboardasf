@@ -659,6 +659,11 @@ const Index = () => {
       values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
     }
 
+    // Override "Leads no Funil" accumulated with Dashboard origin totals
+    const dbo = pipelineData.dashboardTotalsByOrigin;
+    if (dbo?.online) values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
+    if (dbo?.offline) values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
+
     return values;
   }, [pipelineData]);
 
