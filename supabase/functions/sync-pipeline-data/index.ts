@@ -788,12 +788,42 @@ Deno.serve(async (req) => {
       }
 
       // Build a map of active collaborator name -> their level & target
-      const collabLevelMap: Record<string, { nivel: string; hoursTarget: number }> = {};
+      // Training sheet uses short names (e.g. "Adriano Gorgulho"), collab sheet has full names
+      // Build multiple keys for matching: full name, first+second word, first+last word
+      function getNameKeys(fullName: string): string[] {
+        const parts = fullName.trim().split(/\s+/);
+        const keys: string[] = [fullName.trim().toLowerCase()];
+        if (parts.length >= 2) {
+          keys.push(`${parts[0]} ${parts[1]}`.toLowerCase());
+          if (parts.length > 2) {
+            keys.push(`${parts[0]} ${parts[parts.length - 1]}`.toLowerCase());
+          }
+        }
+        if (parts.length >= 1) {
+          keys.push(parts[0].toLowerCase());
+        }
+        return keys;
+      }
+
+      const collabLevelByKey: Record<string, { nivel: string; hoursTarget: number }> = {};
       let totalHoursTarget = 0;
       for (const c of activeCollabs) {
         const target = getHoursTargetByLevel(c.nivel);
-        collabLevelMap[c.nome] = { nivel: c.nivel, hoursTarget: target };
+        const entry = { nivel: c.nivel, hoursTarget: target };
+        for (const key of getNameKeys(c.nome)) {
+          if (!collabLevelByKey[key]) {
+            collabLevelByKey[key] = entry;
+          }
+        }
         totalHoursTarget += target;
+      }
+
+      // Lookup function: tries all name key variants
+      function lookupLevel(name: string): { nivel: string; hoursTarget: number } | undefined {
+        for (const key of getNameKeys(name)) {
+          if (collabLevelByKey[key]) return collabLevelByKey[key];
+        }
+        return undefined;
       }
 
       // Targets (all dynamic based on actual headcount)
@@ -862,14 +892,17 @@ Deno.serve(async (req) => {
 
       // Top collaborators sorted by hours (convert Set to count), include level target
       const topCollaborators = Object.entries(byCollaborator)
-        .map(([name, data]) => ({
-          name,
-          hours: data.hours,
-          modules: data.modules.size,
-          certified: data.certified,
-          nivel: collabLevelMap[name]?.nivel || "",
-          hoursTarget: collabLevelMap[name]?.hoursTarget || 5,
-        }))
+        .map(([name, data]) => {
+          const levelInfo = lookupLevel(name);
+          return {
+            name,
+            hours: data.hours,
+            modules: data.modules.size,
+            certified: data.certified,
+            nivel: levelInfo?.nivel || "",
+            hoursTarget: levelInfo?.hoursTarget || 5,
+          };
+        })
         .sort((a, b) => b.hours - a.hours);
 
       // Trained headcount: collaborators who completed at least 1 training
