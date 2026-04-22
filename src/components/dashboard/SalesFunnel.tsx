@@ -96,6 +96,7 @@ export function SalesFunnel({
                     ? undefined
                     : onCardClick ? () => onCardClick(metric) : undefined
                 }
+                pipelineCardNames={pipelineCardNames?.[metric.id]}
               />
             </React.Fragment>
           );
