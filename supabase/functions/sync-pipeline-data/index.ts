@@ -402,7 +402,14 @@ Deno.serve(async (req) => {
     const operationalByMonth: Record<string, OperationalMetrics> = {};
 
     for (const ms of monthStrings) {
-      const monthCards = cardsByMonth[ms] || [];
+      const [y, m] = ms.split("-").map(Number);
+      const opRangeStart = new Date(y, m - 1, 1);
+      const opRangeEnd = new Date(y, m, 1);
+      // Use created_at filtering to match Operacional (not the month field)
+      const monthCards = cards.filter((c: any) => {
+        const d = new Date(c.created_at);
+        return d >= opRangeStart && d < opRangeEnd;
+      });
       if (monthCards.length === 0) {
         operationalByMonth[ms] = {
           avgActionsPerDay: 0, followUpRate: 0, advanceRate: 0,
