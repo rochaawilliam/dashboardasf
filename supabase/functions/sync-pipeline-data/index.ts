@@ -122,11 +122,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch all data with pagination to avoid 1000-row truncation
+    // Fetch ALL company cards (no month filter) — Operacional uses created_at, not month field
     const [allCards, stageHistory, cardComments] = await Promise.all([
       fetchAll(pipeline, "pipeline_cards",
         "id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at, ghost_of, link_group, title",
-        (q: any) => q.eq("company_id", ASF_COMPANY_ID).in("month", monthStrings)),
+        (q: any) => q.eq("company_id", ASF_COMPANY_ID)),
       fetchAll(pipeline, "card_stage_history", "card_id, from_stage, to_stage, moved_at"),
       fetchAll(pipeline, "card_comments", "card_id, created_at"),
     ]);
@@ -141,39 +141,68 @@ Deno.serve(async (req) => {
       historyByCard[h.card_id].push({ from_stage: h.from_stage, to_stage: h.to_stage, moved_at: h.moved_at });
     }
 
-    // ─── Cumulative stage counting (matches Pipeline Vision Board logic) ───
-    // ─── Cumulative stage counting (replicates Pipeline Vision Board exactly) ───
-    // A card counts for a stage if: it's currently at that stage, it was ever at that stage (via history),
-    // or it's currently at a LATER stage in FULL_STAGE_ORDER (meaning it passed through earlier ones).
-    // Uses card.id for uniqueness (NOT link_group/title) — same as Pipeline's computeCumulativeStageTotals.
-    function countCumulativeForStage(stageId: string, cardSet: any[]): number {
-      const uniqueCards = new Set<string>();
-      const stageIdx = FULL_STAGE_ORDER.indexOf(stageId);
-      if (stageIdx < 0) return 0;
+    // Build card lookup for origin/area/tag
+    const cardById = new Map<string, any>();
+    for (const c of cards) cardById.set(c.id, c);
 
-      for (const card of cardSet) {
-        const cardStageIdx = FULL_STAGE_ORDER.indexOf(card.stage_id);
-        // Card is currently at this exact stage
-        if (card.stage_id === stageId) {
-          uniqueCards.add(card.id);
-          continue;
-        }
-        // Card is currently at a later stage (passed through this one)
-        if (cardStageIdx > stageIdx) {
-          uniqueCards.add(card.id);
-          continue;
-        }
-        // Card was at this stage per history
-        const entries = historyByCard[card.id] || [];
-        if (entries.some((h) => h.to_stage === stageId)) {
-          uniqueCards.add(card.id);
+    // ─── Passage-based counting (replicates Pipeline Operacional exactly) ───
+    // Matches buildPassages() from Operacional.tsx:
+    // 1) History: cards with card_stage_history.to_stage in targetStages AND moved_at within month range
+    // 2) Legacy: monthCards currently at/past targetStage, created in the month, with NO history entry for targetStage
+    const STAGE_ORDER_FULL = ["prospects", "leads", "reunioes", "propostas", "r2", "contratos", "geladeira"];
+
+    function countPassages(
+      targetStages: string[],
+      monthCreatedCards: any[],   // cards created in this month (like Operacional's monthCards)
+      subsetCardIds: Set<string>, // IDs of cards in the relevant subset (for history filtering)
+      rangeStart: Date,
+      rangeEnd: Date,
+    ): number {
+      const passageIds = new Set<string>();
+      const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
+      const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
+
+      // 1) History passages within month range
+      for (const cardId of subsetCardIds) {
+        const entries = historyByCard[cardId] || [];
+        for (const h of entries) {
+          if (targetStages.includes(h.to_stage)) {
+            const d = new Date(h.moved_at);
+            if (d >= rangeStart && d < rangeEnd) {
+              passageIds.add(cardId);
+              break;
+            }
+          }
         }
       }
-      return uniqueCards.size;
+
+      // 2) Legacy: monthCards at/past target stage without history entry for target
+      for (const c of monthCreatedCards) {
+        const currentIdx = STAGE_ORDER_FULL.indexOf(c.stage_id);
+        if (currentIdx < minTargetIdx || currentIdx > contratosIdx) continue;
+        const cardHistory = historyByCard[c.id] || [];
+        const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
+        if (!hasEntry) {
+          passageIds.add(c.id);
+        }
+      }
+
+      return passageIds.size;
     }
 
+    // Stage-to-targetStages mapping (matching Operacional):
+    // reuniões = passages through ["reunioes", "r2"]
+    // propostas = passages through ["propostas"]
+    // leads = passages through ["leads"]
+    // contratos = passages through ["contratos"]
+    const STAGE_TARGETS: Record<string, string[]> = {
+      leads: ["leads"],
+      reunioes: ["reunioes", "r2"],
+      propostas: ["propostas"],
+      contratos: ["contratos"],
+    };
+
     // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
-    // Multi-area contracts share the same link_group or title; count value only once
     function deduplicatedValorGerado(contractCards: any[]): number {
       const seen = new Set<string>();
       let total = 0;
@@ -184,13 +213,6 @@ Deno.serve(async (req) => {
         total += c.contract_value || 0;
       }
       return total;
-    }
-
-    // Group cards by month for processing
-    const cardsByMonth: Record<string, any[]> = {};
-    for (const card of cards) {
-      if (!cardsByMonth[card.month]) cardsByMonth[card.month] = [];
-      cardsByMonth[card.month].push(card);
     }
 
     // ─── Build funnel results ─────────────────────────────────
@@ -204,27 +226,42 @@ Deno.serve(async (req) => {
 
     // Process per month
     for (const ms of monthStrings) {
-      const monthCards = cardsByMonth[ms] || [];
+      const [y, m] = ms.split("-").map(Number);
+      const rangeStart = new Date(y, m - 1, 1);
+      const rangeEnd = new Date(y, m, 1);
+
+      // monthCards: cards created in this month range, not ghosts (matching Operacional)
+      const monthCards = cards.filter((c: any) => {
+        const d = new Date(c.created_at);
+        return d >= rangeStart && d < rangeEnd;
+      });
+
       if (monthCards.length === 0) continue;
 
+      const monthCardIds = new Set(monthCards.map((c: any) => c.id));
+
       // Group by origin
-      const byOrigin: Record<string, any[]> = {};
+      const byOriginCards: Record<string, any[]> = {};
+      const byOriginIds: Record<string, Set<string>> = {};
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
-        if (!byOrigin[origin]) byOrigin[origin] = [];
-        byOrigin[origin].push(card);
+        if (!byOriginCards[origin]) byOriginCards[origin] = [];
+        if (!byOriginIds[origin]) byOriginIds[origin] = new Set();
+        byOriginCards[origin].push(card);
+        byOriginIds[origin].add(card.id);
       }
 
       if (!result[ms]) result[ms] = {};
 
-      for (const [origin, originCards] of Object.entries(byOrigin)) {
+      for (const [origin, originCards] of Object.entries(byOriginCards)) {
         const bucket = newStageBucket();
+        const originIdSet = byOriginIds[origin];
 
-        // Cumulative counting (matches Pipeline)
-        bucket.leads = countCumulativeForStage("leads", originCards);
-        bucket.reunioes = countCumulativeForStage("reunioes", originCards);
-        bucket.propostas = countCumulativeForStage("propostas", originCards);
-        bucket.contratos = countCumulativeForStage("contratos", originCards);
+        // Passage-based counting (matching Operacional)
+        bucket.leads = countPassages(STAGE_TARGETS.leads, originCards, originIdSet, rangeStart, rangeEnd);
+        bucket.reunioes = countPassages(STAGE_TARGETS.reunioes, originCards, originIdSet, rangeStart, rangeEnd);
+        bucket.propostas = countPassages(STAGE_TARGETS.propostas, originCards, originIdSet, rangeStart, rangeEnd);
+        bucket.contratos = countPassages(STAGE_TARGETS.contratos, originCards, originIdSet, rangeStart, rangeEnd);
         bucket.prospects = originCards.filter((c: any) => c.stage_id === "prospects").length;
 
         // Deduplicated valor_gerado
@@ -254,32 +291,33 @@ Deno.serve(async (req) => {
         }
       }
 
-      // byArea and byAreaTag processing — use same cumulative logic as Pipeline
-      // Group cards by origin+area and origin+area+tag, then count cumulatively
-      const byOriginAreaCards: Record<string, Record<string, any[]>> = {};
-      const byOriginAreaTagCards: Record<string, Record<string, Record<string, any[]>>> = {};
+      // byArea and byAreaTag — passage-based counting per area
+      const byOriginAreaCards: Record<string, Record<string, { cards: any[]; ids: Set<string> }>> = {};
+      const byOriginAreaTagCards: Record<string, Record<string, Record<string, { cards: any[]; ids: Set<string> }>>> = {};
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
         const area = card.practice_area || "outros";
         const tag = card.tag || "pontual";
         if (!byOriginAreaCards[origin]) byOriginAreaCards[origin] = {};
-        if (!byOriginAreaCards[origin][area]) byOriginAreaCards[origin][area] = [];
-        byOriginAreaCards[origin][area].push(card);
+        if (!byOriginAreaCards[origin][area]) byOriginAreaCards[origin][area] = { cards: [], ids: new Set() };
+        byOriginAreaCards[origin][area].cards.push(card);
+        byOriginAreaCards[origin][area].ids.add(card.id);
         if (!byOriginAreaTagCards[origin]) byOriginAreaTagCards[origin] = {};
         if (!byOriginAreaTagCards[origin][area]) byOriginAreaTagCards[origin][area] = {};
-        if (!byOriginAreaTagCards[origin][area][tag]) byOriginAreaTagCards[origin][area][tag] = [];
-        byOriginAreaTagCards[origin][area][tag].push(card);
+        if (!byOriginAreaTagCards[origin][area][tag]) byOriginAreaTagCards[origin][area][tag] = { cards: [], ids: new Set() };
+        byOriginAreaTagCards[origin][area][tag].cards.push(card);
+        byOriginAreaTagCards[origin][area][tag].ids.add(card.id);
       }
 
       for (const [origin, areas] of Object.entries(byOriginAreaCards)) {
         if (!byArea[ms]) byArea[ms] = {};
         if (!byArea[ms][origin]) byArea[ms][origin] = {};
-        for (const [area, areaCards] of Object.entries(areas)) {
+        for (const [area, { cards: areaCards, ids: areaIds }] of Object.entries(areas)) {
           const b = newAreaBucket();
-          b.leads = countCumulativeForStage("leads", areaCards);
-          b.reunioes = countCumulativeForStage("reunioes", areaCards);
-          b.propostas = countCumulativeForStage("propostas", areaCards);
-          b.contratos = countCumulativeForStage("contratos", areaCards);
+          b.leads = countPassages(STAGE_TARGETS.leads, areaCards, areaIds, rangeStart, rangeEnd);
+          b.reunioes = countPassages(STAGE_TARGETS.reunioes, areaCards, areaIds, rangeStart, rangeEnd);
+          b.propostas = countPassages(STAGE_TARGETS.propostas, areaCards, areaIds, rangeStart, rangeEnd);
+          b.contratos = countPassages(STAGE_TARGETS.contratos, areaCards, areaIds, rangeStart, rangeEnd);
           const contractCards = areaCards.filter((c: any) => c.stage_id === "contratos");
           b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           byArea[ms][origin][area] = b;
@@ -288,12 +326,12 @@ Deno.serve(async (req) => {
 
       for (const [origin, areas] of Object.entries(byOriginAreaTagCards)) {
         for (const [area, tags] of Object.entries(areas)) {
-          for (const [tag, tagCards] of Object.entries(tags)) {
+          for (const [tag, { cards: tagCards, ids: tagIds }] of Object.entries(tags)) {
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            b.leads = countCumulativeForStage("leads", tagCards);
-            b.reunioes = countCumulativeForStage("reunioes", tagCards);
-            b.propostas = countCumulativeForStage("propostas", tagCards);
-            b.contratos = countCumulativeForStage("contratos", tagCards);
+            b.leads = countPassages(STAGE_TARGETS.leads, tagCards, tagIds, rangeStart, rangeEnd);
+            b.reunioes = countPassages(STAGE_TARGETS.reunioes, tagCards, tagIds, rangeStart, rangeEnd);
+            b.propostas = countPassages(STAGE_TARGETS.propostas, tagCards, tagIds, rangeStart, rangeEnd);
+            b.contratos = countPassages(STAGE_TARGETS.contratos, tagCards, tagIds, rangeStart, rangeEnd);
             const contractCards = tagCards.filter((c: any) => c.stage_id === "contratos");
             b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           }
