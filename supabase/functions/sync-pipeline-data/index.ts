@@ -368,15 +368,27 @@ Deno.serve(async (req) => {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
           const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          b.leads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          b.reunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          b.propostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          b.contratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          b.leads = paLeads.count;
+          b.reunioes = paReunioes.count;
+          b.propostas = paPropostas.count;
+          b.contratos = paContratos.count;
           const contractCards = areaMonthCards.filter((c: any) => c.stage_id === "contratos");
           b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           if (b.leads > 0 || b.reunioes > 0 || b.propostas > 0 || b.contratos > 0) {
             byArea[ms][origin][area] = b;
           }
+          // Store area card names
+          if (!cardNamesByArea[ms]) cardNamesByArea[ms] = {};
+          if (!cardNamesByArea[ms][origin]) cardNamesByArea[ms][origin] = {};
+          if (!cardNamesByArea[ms][origin][area]) cardNamesByArea[ms][origin][area] = {};
+          cardNamesByArea[ms][origin][area]["leads"] = paLeads.names;
+          cardNamesByArea[ms][origin][area]["reunioes"] = paReunioes.names;
+          cardNamesByArea[ms][origin][area]["propostas"] = paPropostas.names;
+          cardNamesByArea[ms][origin][area]["contratos"] = paContratos.names;
         }
       }
 
