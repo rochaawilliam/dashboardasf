@@ -908,6 +908,24 @@ Deno.serve(async (req) => {
       // Trained headcount: collaborators who completed at least 1 training
       const trainedHeadcount = topCollaborators.filter(c => c.modules > 0).length;
 
+      // All active collaborators with their level info (including those with no training)
+      const allCollaborators = activeCollabs.map(c => {
+        const trained = topCollaborators.find(tc => {
+          // Match by name keys
+          const tcKeys = getNameKeys(tc.name);
+          const cKeys = getNameKeys(c.nome);
+          return tcKeys.some(k => cKeys.includes(k));
+        });
+        return {
+          name: c.nome.split(" ").slice(0, 2).join(" "),
+          fullName: c.nome,
+          nivel: c.nivel,
+          hoursTarget: getHoursTargetByLevel(c.nivel),
+          hours: trained?.hours || 0,
+          modules: trained?.modules || 0,
+        };
+      });
+
       // Themes sorted by hours
       const themes = Object.entries(byPilar)
         .map(([name, data]) => ({ name, ...data }))
@@ -937,6 +955,7 @@ Deno.serve(async (req) => {
         totalCertified,
         certificationRate,
         topCollaborators,
+        allCollaborators,
         themes,
         byCollaboratorMonth,
         targets: {

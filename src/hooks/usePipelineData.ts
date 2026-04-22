@@ -69,6 +69,7 @@ export interface TrainingMetrics {
   totalCertified: number;
   certificationRate: number;
   topCollaborators: TrainingCollaborator[];
+  allCollaborators?: { name: string; fullName: string; nivel: string; hoursTarget: number; hours: number; modules: number }[];
   themes: TrainingTheme[];
   byCollaboratorMonth: Record<string, Record<string, number>>;
   targets?: TrainingTargets;
