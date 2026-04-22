@@ -304,12 +304,14 @@ const Index = () => {
   // Pipeline data mapping: metric IDs → pipeline stage keys (by origin)
   const PIPELINE_METRIC_MAP: Record<string, { origin: string; key: string }> = {
     "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c": { origin: "online", key: "leads" },
+    "e1f2a3b4-1111-4eee-ffff-111111111111": { origin: "online", key: "new_leads" },
     "a1b2c3d4-4444-4aaa-bbbb-444444444444": { origin: "online", key: "reunioes" },
     "a1b2c3d4-5555-4aaa-bbbb-555555555555": { origin: "online", key: "propostas" },
     "1d927738-a02b-4867-8a7a-a7a2331773ec": { origin: "online", key: "contratos" },
     "a1b2c3d4-6666-4aaa-bbbb-666666666666": { origin: "online", key: "valor_gerado" },
     "b2c3d4e5-2222-4bbb-cccc-222222222222": { origin: "offline", key: "prospects" },
     "b2c3d4e5-3333-4bbb-cccc-333333333333": { origin: "offline", key: "leads" },
+    "e1f2a3b4-2222-4eee-ffff-222222222222": { origin: "offline", key: "new_leads" },
     "b2c3d4e5-4444-4bbb-cccc-444444444444": { origin: "offline", key: "reunioes" },
     "b2c3d4e5-5555-4bbb-cccc-555555555555": { origin: "offline", key: "propostas" },
     "7ea4560c-5f42-4982-9b27-b68f2475b838": { origin: "offline", key: "contratos" },

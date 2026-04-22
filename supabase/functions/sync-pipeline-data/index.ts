@@ -24,6 +24,7 @@ interface StageBucket {
   contratos: number;
   valor_gerado: number;
   prospects: number;
+  new_leads: number;
 }
 
 interface AreaBucket {
@@ -35,7 +36,7 @@ interface AreaBucket {
 }
 
 function newStageBucket(): StageBucket {
-  return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0, prospects: 0 };
+  return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0, prospects: 0, new_leads: 0 };
 }
 
 function newAreaBucket(): AreaBucket {
@@ -295,6 +296,8 @@ Deno.serve(async (req) => {
         bucket.propostas = pPropostas.count;
         bucket.contratos = pContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
+        // New leads = cards created in this month (excluding prospects and geladeira)
+        bucket.new_leads = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).length;
 
         // Store card names
         if (!cardNames[ms]) cardNames[ms] = {};
