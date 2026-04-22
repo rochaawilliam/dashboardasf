@@ -243,6 +243,12 @@ Deno.serve(async (req) => {
     const result: Record<string, Record<string, StageBucket>> = {};
     const byArea: Record<string, Record<string, Record<string, AreaBucket>>> = {};
     const byAreaTag: Record<string, Record<string, Record<string, Record<string, AreaBucket>>>> = {};
+    // Card names: month -> origin -> stage -> string[]
+    const cardNames: Record<string, Record<string, Record<string, string[]>>> = {};
+    // Card names by area: month -> origin -> area -> stage -> string[]
+    const cardNamesByArea: Record<string, Record<string, Record<string, Record<string, string[]>>>> = {};
+    // Card names by area+tag: month -> origin -> area -> tag -> stage -> string[]
+    const cardNamesByAreaTag: Record<string, Record<string, Record<string, Record<string, Record<string, string[]>>>>> = {};
 
     let totalCloseDays = 0;
     let closedCount = 0;
@@ -280,11 +286,24 @@ Deno.serve(async (req) => {
         const bucket = newStageBucket();
 
         // Passage-based counting (matching Operacional)
-        bucket.leads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        bucket.reunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        bucket.propostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        bucket.contratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        bucket.leads = pLeads.count;
+        bucket.reunioes = pReunioes.count;
+        bucket.propostas = pPropostas.count;
+        bucket.contratos = pContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
+
+        // Store card names
+        if (!cardNames[ms]) cardNames[ms] = {};
+        if (!cardNames[ms][origin]) cardNames[ms][origin] = {};
+        cardNames[ms][origin]["leads"] = pLeads.names;
+        cardNames[ms][origin]["reunioes"] = pReunioes.names;
+        cardNames[ms][origin]["propostas"] = pPropostas.names;
+        cardNames[ms][origin]["contratos"] = pContratos.names;
+        cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
 
         // Deduplicated valor_gerado
         const contractCards = originMonthCards.filter((c: any) => c.stage_id === "contratos");
