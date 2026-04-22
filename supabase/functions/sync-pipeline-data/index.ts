@@ -11,17 +11,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Funnel order for cumulative counting. R2 (segunda reunião) is treated as part of "reunioes",
-// not as a separate stage between propostas and contratos.
-const STAGE_ORDER = ["leads", "reunioes", "propostas", "contratos"];
-const REUNIOES_STAGES = new Set(["reunioes", "r2"]);
+// Funnel order matching Pipeline Vision Board exactly:
+// leads → reunioes (R1) → propostas → r2 (R2) → contratos
+// R2 is a SEPARATE stage AFTER propostas, not part of reunioes.
+const FULL_STAGE_ORDER = ["leads", "reunioes", "propostas", "r2", "contratos"];
 const EXCLUDED_STAGES = ["geladeira", "prospects"];
-
-// Map any raw stage_id to its canonical funnel stage for indexing purposes.
-function canonicalStage(stage: string): string {
-  if (stage === "r2") return "reunioes";
-  return stage;
-}
 
 interface StageBucket {
   leads: number;
@@ -148,36 +142,34 @@ Deno.serve(async (req) => {
     }
 
     // ─── Cumulative stage counting (matches Pipeline Vision Board logic) ───
+    // ─── Cumulative stage counting (replicates Pipeline Vision Board exactly) ───
     // A card counts for a stage if: it's currently at that stage, it was ever at that stage (via history),
-    // or it's currently at a LATER stage (meaning it passed through earlier ones).
-    // Note: stage "r2" is canonicalized to "reunioes" — it does NOT imply the card passed through "propostas".
+    // or it's currently at a LATER stage in FULL_STAGE_ORDER (meaning it passed through earlier ones).
+    // Uses card.id for uniqueness (NOT link_group/title) — same as Pipeline's computeCumulativeStageTotals.
     function countCumulativeForStage(stageId: string, cardSet: any[]): number {
-      const uniqueKeys = new Set<string>();
-      const stageIdx = STAGE_ORDER.indexOf(stageId);
+      const uniqueCards = new Set<string>();
+      const stageIdx = FULL_STAGE_ORDER.indexOf(stageId);
       if (stageIdx < 0) return 0;
 
       for (const card of cardSet) {
-        const cardCanon = canonicalStage(card.stage_id);
-        const cardStageIdx = STAGE_ORDER.indexOf(cardCanon);
-        // Dedupe multi-area cards by link_group / title (same as valor_gerado)
-        const dedupKey = card.link_group ?? card.title ?? card.id;
-        // Card is currently at this stage (canonical match, e.g. r2 → reunioes)
-        if (cardCanon === stageId) {
-          uniqueKeys.add(dedupKey);
+        const cardStageIdx = FULL_STAGE_ORDER.indexOf(card.stage_id);
+        // Card is currently at this exact stage
+        if (card.stage_id === stageId) {
+          uniqueCards.add(card.id);
           continue;
         }
         // Card is currently at a later stage (passed through this one)
         if (cardStageIdx > stageIdx) {
-          uniqueKeys.add(dedupKey);
+          uniqueCards.add(card.id);
           continue;
         }
-        // Card was at this stage per history (canonicalize history stages too)
+        // Card was at this stage per history
         const entries = historyByCard[card.id] || [];
-        if (entries.some((h) => canonicalStage(h.to_stage) === stageId)) {
-          uniqueKeys.add(dedupKey);
+        if (entries.some((h) => h.to_stage === stageId)) {
+          uniqueCards.add(card.id);
         }
       }
-      return uniqueKeys.size;
+      return uniqueCards.size;
     }
 
     // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
@@ -262,52 +254,49 @@ Deno.serve(async (req) => {
         }
       }
 
-      // byArea and byAreaTag processing
+      // byArea and byAreaTag processing — use same cumulative logic as Pipeline
+      // Group cards by origin+area and origin+area+tag, then count cumulatively
+      const byOriginAreaCards: Record<string, Record<string, any[]>> = {};
+      const byOriginAreaTagCards: Record<string, Record<string, Record<string, any[]>>> = {};
       for (const card of monthCards) {
         const origin = card.lead_origin || "offline";
-        const rawStage = card.stage_id;
-        const stage = canonicalStage(rawStage); // r2 → reunioes
-        const stageIdx = STAGE_ORDER.indexOf(stage);
         const area = card.practice_area || "outros";
         const tag = card.tag || "pontual";
-        const isExcluded = EXCLUDED_STAGES.includes(rawStage);
+        if (!byOriginAreaCards[origin]) byOriginAreaCards[origin] = {};
+        if (!byOriginAreaCards[origin][area]) byOriginAreaCards[origin][area] = [];
+        byOriginAreaCards[origin][area].push(card);
+        if (!byOriginAreaTagCards[origin]) byOriginAreaTagCards[origin] = {};
+        if (!byOriginAreaTagCards[origin][area]) byOriginAreaTagCards[origin][area] = {};
+        if (!byOriginAreaTagCards[origin][area][tag]) byOriginAreaTagCards[origin][area][tag] = [];
+        byOriginAreaTagCards[origin][area][tag].push(card);
+      }
 
+      for (const [origin, areas] of Object.entries(byOriginAreaCards)) {
         if (!byArea[ms]) byArea[ms] = {};
         if (!byArea[ms][origin]) byArea[ms][origin] = {};
-        if (!byArea[ms][origin][area]) byArea[ms][origin][area] = newAreaBucket();
-        const areaBucket = byArea[ms][origin][area];
-
-        if (!isExcluded && stageIdx >= 0) {
-          areaBucket.leads++;
-          if (stageIdx >= 1) areaBucket.reunioes++;
-          if (stageIdx >= 2) areaBucket.propostas++;
+        for (const [area, areaCards] of Object.entries(areas)) {
+          const b = newAreaBucket();
+          b.leads = countCumulativeForStage("leads", areaCards);
+          b.reunioes = countCumulativeForStage("reunioes", areaCards);
+          b.propostas = countCumulativeForStage("propostas", areaCards);
+          b.contratos = countCumulativeForStage("contratos", areaCards);
+          const contractCards = areaCards.filter((c: any) => c.stage_id === "contratos");
+          b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+          byArea[ms][origin][area] = b;
         }
-        // Also count via history for cards at excluded stages
-        if (isExcluded || stageIdx < 0) {
-          const entries = historyByCard[card.id] || [];
-          for (const h of entries) {
-            const hIdx = STAGE_ORDER.indexOf(canonicalStage(h.to_stage));
-            if (hIdx >= 0 && hIdx <= 2) {
-              if (hIdx === 0) areaBucket.leads++;
-              // Don't double-count reunioes/propostas for history-based counting in area
-              break; // Just count as lead if it was ever in the funnel
-            }
+      }
+
+      for (const [origin, areas] of Object.entries(byOriginAreaTagCards)) {
+        for (const [area, tags] of Object.entries(areas)) {
+          for (const [tag, tagCards] of Object.entries(tags)) {
+            const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
+            b.leads = countCumulativeForStage("leads", tagCards);
+            b.reunioes = countCumulativeForStage("reunioes", tagCards);
+            b.propostas = countCumulativeForStage("propostas", tagCards);
+            b.contratos = countCumulativeForStage("contratos", tagCards);
+            const contractCards = tagCards.filter((c: any) => c.stage_id === "contratos");
+            b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           }
-        }
-        if (stage === "contratos") {
-          areaBucket.contratos++;
-          areaBucket.valor_gerado += card.contract_value || 0;
-        }
-
-        const areaTagBucket = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-        if (!isExcluded && stageIdx >= 0) {
-          areaTagBucket.leads++;
-          if (stageIdx >= 1) areaTagBucket.reunioes++;
-          if (stageIdx >= 2) areaTagBucket.propostas++;
-        }
-        if (stage === "contratos") {
-          areaTagBucket.contratos++;
-          areaTagBucket.valor_gerado += card.contract_value || 0;
         }
       }
     }
