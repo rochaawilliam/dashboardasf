@@ -86,6 +86,9 @@ export interface PipelineData {
   operationalTotals: OperationalMetrics;
   onboarding?: OnboardingMetrics;
   training?: TrainingMetrics;
+  cardNames?: Record<string, Record<string, Record<string, string[]>>>;
+  cardNamesByArea?: Record<string, Record<string, Record<string, Record<string, string[]>>>>;
+  cardNamesByAreaTag?: Record<string, Record<string, Record<string, Record<string, Record<string, string[]>>>>>;
 }
 
 const CACHE_KEY = "pipeline-data-cache";
