@@ -146,48 +146,51 @@ Deno.serve(async (req) => {
     for (const c of cards) cardById.set(c.id, c);
 
     // ─── Passage-based counting (replicates Pipeline Operacional exactly) ───
-    // Matches buildPassages() from Operacional.tsx:
-    // 1) History: cards with card_stage_history.to_stage in targetStages AND moved_at within month range
-    // 2) Legacy: monthCards currently at/past targetStage, created in the month, with NO history entry for targetStage
+    // Matches buildPassages() from Operacional.tsx exactly:
+    // 1) History: ANY company card with card_stage_history.to_stage in targetStages AND moved_at within month range
+    //    (not limited to month-created cards — a card from March moved to propostas in April counts in April)
+    // 2) Legacy: monthCards (created in month) currently at/past targetStage, with NO history entry for targetStage
+    // Count = total passage entries (.length), NOT unique cards (same as Operacional)
     const STAGE_ORDER_FULL = ["prospects", "leads", "reunioes", "propostas", "r2", "contratos", "geladeira"];
 
+    // For origin/area/tag filtered counting, we need to know each card's origin/area/tag
     function countPassages(
       targetStages: string[],
-      monthCreatedCards: any[],   // cards created in this month (like Operacional's monthCards)
-      subsetCardIds: Set<string>, // IDs of cards in the relevant subset (for history filtering)
+      monthCreatedCards: any[],   // cards created in this month (for legacy check)
+      filterCardIds: Set<string>, // ALL card IDs that match the filter (origin/area/tag) across ALL months
       rangeStart: Date,
       rangeEnd: Date,
     ): number {
-      const passageIds = new Set<string>();
+      let count = 0;
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
-      // 1) History passages within month range
-      for (const cardId of subsetCardIds) {
+      // 1) History passages: check ALL matching cards (any month), filter by moved_at in range
+      for (const cardId of filterCardIds) {
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
           if (targetStages.includes(h.to_stage)) {
             const d = new Date(h.moved_at);
             if (d >= rangeStart && d < rangeEnd) {
-              passageIds.add(cardId);
-              break;
+              count++;
             }
           }
         }
       }
 
-      // 2) Legacy: monthCards at/past target stage without history entry for target
+      // 2) Legacy: monthCards at/past target stage without ANY history entry for target stage
       for (const c of monthCreatedCards) {
+        if (!filterCardIds.has(c.id)) continue;
         const currentIdx = STAGE_ORDER_FULL.indexOf(c.stage_id);
         if (currentIdx < minTargetIdx || currentIdx > contratosIdx) continue;
         const cardHistory = historyByCard[c.id] || [];
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
-          passageIds.add(c.id);
+          count++;
         }
       }
 
-      return passageIds.size;
+      return count;
     }
 
     // Stage-to-targetStages mapping (matching Operacional):
