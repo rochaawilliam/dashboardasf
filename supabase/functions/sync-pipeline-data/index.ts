@@ -156,29 +156,30 @@ Deno.serve(async (req) => {
     // For origin/area/tag filtered counting, we need to know each card's origin/area/tag
     function countPassages(
       targetStages: string[],
-      monthCreatedCards: any[],   // cards created in this month (for legacy check)
-      filterCardIds: Set<string>, // ALL card IDs that match the filter (origin/area/tag) across ALL months
+      monthCreatedCards: any[],
+      filterCardIds: Set<string>,
       rangeStart: Date,
       rangeEnd: Date,
-    ): number {
-      let count = 0;
+    ): { count: number; names: string[] } {
+      const names: string[] = [];
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
-      // 1) History passages: check ALL matching cards (any month), filter by moved_at in range
+      // 1) History passages
       for (const cardId of filterCardIds) {
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
           if (targetStages.includes(h.to_stage)) {
             const d = new Date(h.moved_at);
             if (d >= rangeStart && d < rangeEnd) {
-              count++;
+              const card = cardById.get(cardId);
+              names.push(card?.title ?? cardId);
             }
           }
         }
       }
 
-      // 2) Legacy: monthCards at/past target stage without ANY history entry for target stage
+      // 2) Legacy
       for (const c of monthCreatedCards) {
         if (!filterCardIds.has(c.id)) continue;
         const currentIdx = STAGE_ORDER_FULL.indexOf(c.stage_id);
@@ -186,11 +187,11 @@ Deno.serve(async (req) => {
         const cardHistory = historyByCard[c.id] || [];
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
-          count++;
+          names.push(c.title ?? c.id);
         }
       }
 
-      return count;
+      return { count: names.length, names };
     }
 
     // Stage-to-targetStages mapping (matching Operacional):
