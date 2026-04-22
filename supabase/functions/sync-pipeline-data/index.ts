@@ -955,6 +955,7 @@ Deno.serve(async (req) => {
         totalCertified,
         certificationRate,
         topCollaborators,
+        allCollaborators,
         themes,
         byCollaboratorMonth,
         targets: {
