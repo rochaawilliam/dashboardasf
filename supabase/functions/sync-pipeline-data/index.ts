@@ -878,14 +878,17 @@ Deno.serve(async (req) => {
 
       // Top collaborators sorted by hours (convert Set to count), include level target
       const topCollaborators = Object.entries(byCollaborator)
-        .map(([name, data]) => ({
-          name,
-          hours: data.hours,
-          modules: data.modules.size,
-          certified: data.certified,
-          nivel: collabLevelMap[name]?.nivel || "",
-          hoursTarget: collabLevelMap[name]?.hoursTarget || 5,
-        }))
+        .map(([name, data]) => {
+          const levelInfo = lookupLevel(name);
+          return {
+            name,
+            hours: data.hours,
+            modules: data.modules.size,
+            certified: data.certified,
+            nivel: levelInfo?.nivel || "",
+            hoursTarget: levelInfo?.hoursTarget || 5,
+          };
+        })
         .sort((a, b) => b.hours - a.hours);
 
       // Trained headcount: collaborators who completed at least 1 training
