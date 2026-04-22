@@ -450,7 +450,7 @@ Deno.serve(async (req) => {
 
       totalActions += monthCards.length;
 
-      const totalDays = Math.max(1, Math.floor((effectiveEnd.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24)));
+      const totalDays = Math.max(1, Math.floor((effectiveEnd.getTime() - opRangeStart.getTime()) / (1000 * 60 * 60 * 24)));
       const avgActionsPerDay = Math.round((totalActions / totalDays) * 100) / 100;
       const followUpRate = createdIds.size > 0 ? Math.round((followedUpIds.size / createdIds.size) * 10000) / 100 : 0;
       const advanceRate = monthCards.length > 0 ? Math.round((advancedIds.size / monthCards.length) * 10000) / 100 : 0;
