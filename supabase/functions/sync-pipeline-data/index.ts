@@ -1231,6 +1231,8 @@ Deno.serve(async (req) => {
         cardNamesByAreaTag,
         dashboard: dashboardByMonth,
         dashboardTotals,
+        dashboardByOrigin: dashboardByOriginMonth,
+        dashboardTotalsByOrigin,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
