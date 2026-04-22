@@ -907,6 +907,9 @@ Deno.serve(async (req) => {
         operationalTotals,
         onboarding,
         training,
+        cardNames,
+        cardNamesByArea,
+        cardNamesByAreaTag,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
