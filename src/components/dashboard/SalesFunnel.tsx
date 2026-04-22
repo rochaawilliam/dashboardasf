@@ -18,6 +18,7 @@ interface SalesFunnelProps {
   onCardClick?: (metric: Metric) => void;
   colorScheme: "blue" | "amber";
   pipelineMetricIds?: Set<string>;
+  pipelineCardNames?: Record<string, string[]>;
 }
 
 export function SalesFunnel({
