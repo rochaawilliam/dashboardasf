@@ -1829,7 +1829,8 @@ const Index = () => {
                                             hideValues={category === "lucratividade" && !showFinancialValues}
                                             forceAnnualLabel={isARR || isResultadoAcumulado}
                                             hideAnnualTarget={isTimeASFMetric}
-                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}>
+                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}
+                                            pipelineCardNames={pipelineCardNames[metric.id]}>
                                           </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
