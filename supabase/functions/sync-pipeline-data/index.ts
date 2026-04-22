@@ -142,36 +142,34 @@ Deno.serve(async (req) => {
     }
 
     // ─── Cumulative stage counting (matches Pipeline Vision Board logic) ───
+    // ─── Cumulative stage counting (replicates Pipeline Vision Board exactly) ───
     // A card counts for a stage if: it's currently at that stage, it was ever at that stage (via history),
-    // or it's currently at a LATER stage (meaning it passed through earlier ones).
-    // Note: stage "r2" is canonicalized to "reunioes" — it does NOT imply the card passed through "propostas".
+    // or it's currently at a LATER stage in FULL_STAGE_ORDER (meaning it passed through earlier ones).
+    // Uses card.id for uniqueness (NOT link_group/title) — same as Pipeline's computeCumulativeStageTotals.
     function countCumulativeForStage(stageId: string, cardSet: any[]): number {
-      const uniqueKeys = new Set<string>();
-      const stageIdx = STAGE_ORDER.indexOf(stageId);
+      const uniqueCards = new Set<string>();
+      const stageIdx = FULL_STAGE_ORDER.indexOf(stageId);
       if (stageIdx < 0) return 0;
 
       for (const card of cardSet) {
-        const cardCanon = canonicalStage(card.stage_id);
-        const cardStageIdx = STAGE_ORDER.indexOf(cardCanon);
-        // Dedupe multi-area cards by link_group / title (same as valor_gerado)
-        const dedupKey = card.link_group ?? card.title ?? card.id;
-        // Card is currently at this stage (canonical match, e.g. r2 → reunioes)
-        if (cardCanon === stageId) {
-          uniqueKeys.add(dedupKey);
+        const cardStageIdx = FULL_STAGE_ORDER.indexOf(card.stage_id);
+        // Card is currently at this exact stage
+        if (card.stage_id === stageId) {
+          uniqueCards.add(card.id);
           continue;
         }
         // Card is currently at a later stage (passed through this one)
         if (cardStageIdx > stageIdx) {
-          uniqueKeys.add(dedupKey);
+          uniqueCards.add(card.id);
           continue;
         }
-        // Card was at this stage per history (canonicalize history stages too)
+        // Card was at this stage per history
         const entries = historyByCard[card.id] || [];
-        if (entries.some((h) => canonicalStage(h.to_stage) === stageId)) {
-          uniqueKeys.add(dedupKey);
+        if (entries.some((h) => h.to_stage === stageId)) {
+          uniqueCards.add(card.id);
         }
       }
-      return uniqueKeys.size;
+      return uniqueCards.size;
     }
 
     // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
