@@ -267,18 +267,23 @@ Deno.serve(async (req) => {
         byOriginMonthCards[origin].push(card);
       }
 
-      if (!result[ms]) result[ms] = {};
+      // Get all unique origins that have either month cards or all-time cards
+      const allOrigins = new Set([
+        ...Object.keys(byOriginMonthCards),
+        ...Object.keys(allCardIdsByOrigin),
+      ]);
 
-      for (const [origin, originCards] of Object.entries(byOriginCards)) {
+      for (const origin of allOrigins) {
+        const originMonthCards = byOriginMonthCards[origin] || [];
+        const originAllIds = allCardIdsByOrigin[origin] || new Set();
         const bucket = newStageBucket();
-        const originIdSet = byOriginIds[origin];
 
         // Passage-based counting (matching Operacional)
-        bucket.leads = countPassages(STAGE_TARGETS.leads, originCards, originIdSet, rangeStart, rangeEnd);
-        bucket.reunioes = countPassages(STAGE_TARGETS.reunioes, originCards, originIdSet, rangeStart, rangeEnd);
-        bucket.propostas = countPassages(STAGE_TARGETS.propostas, originCards, originIdSet, rangeStart, rangeEnd);
-        bucket.contratos = countPassages(STAGE_TARGETS.contratos, originCards, originIdSet, rangeStart, rangeEnd);
-        bucket.prospects = originCards.filter((c: any) => c.stage_id === "prospects").length;
+        bucket.leads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        bucket.reunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        bucket.propostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        bucket.contratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
 
         // Deduplicated valor_gerado
         const contractCards = originCards.filter((c: any) => c.stage_id === "contratos");
