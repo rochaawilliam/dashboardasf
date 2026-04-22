@@ -815,7 +815,119 @@ const Index = () => {
     return merged;
   }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
-  // IDs for contract metrics used in the sum
+  // Build card names mapping: metric ID → string[] of lead names from pipeline
+  const pipelineCardNames = useMemo(() => {
+    if (!pipelineData) return {};
+    const names: Record<string, string[]> = {};
+
+    // Helper: get names for a stage from cardNames (month -> origin -> stage)
+    const getNames = (origin: string, key: string): string[] => {
+      if (selectedMonth) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        return pipelineData.cardNames?.[ms]?.[origin]?.[key] ?? [];
+      }
+      // Accumulated: merge all months
+      const allNames: string[] = [];
+      if (pipelineData.cardNames) {
+        for (const monthData of Object.values(pipelineData.cardNames)) {
+          const arr = monthData?.[origin]?.[key];
+          if (arr) allNames.push(...arr);
+        }
+      }
+      return allNames;
+    };
+
+    // Standard origin-based metrics
+    for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
+      const n = getNames(mapping.origin, mapping.key);
+      if (n.length > 0) names[metricId] = n;
+    }
+
+    // Area-based metrics
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      const getAreaNames = (): string[] => {
+        const source = selectedMonth
+          ? (() => { const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`; return pipelineData.cardNamesByArea?.[ms]; })()
+          : undefined;
+        if (mapping.origin === "_all") {
+          const result: string[] = [];
+          if (selectedMonth) {
+            if (source) {
+              for (const originData of Object.values(source)) {
+                const arr = originData?.[mapping.area]?.[mapping.key];
+                if (arr) result.push(...arr);
+              }
+            }
+          } else if (pipelineData.cardNamesByArea) {
+            for (const monthData of Object.values(pipelineData.cardNamesByArea)) {
+              for (const originData of Object.values(monthData)) {
+                const arr = originData?.[mapping.area]?.[mapping.key];
+                if (arr) result.push(...arr);
+              }
+            }
+          }
+          return result;
+        }
+        if (selectedMonth) {
+          return source?.[mapping.origin]?.[mapping.area]?.[mapping.key] ?? [];
+        }
+        const result: string[] = [];
+        if (pipelineData.cardNamesByArea) {
+          for (const monthData of Object.values(pipelineData.cardNamesByArea)) {
+            const arr = monthData?.[mapping.origin]?.[mapping.area]?.[mapping.key];
+            if (arr) result.push(...arr);
+          }
+        }
+        return result;
+      };
+      const n = getAreaNames();
+      if (n.length > 0) names[metricId] = n;
+    }
+
+    // Area+Tag based metrics
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_TAG_MAP)) {
+      const getTagNames = (): string[] => {
+        const source = selectedMonth
+          ? (() => { const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`; return pipelineData.cardNamesByAreaTag?.[ms]; })()
+          : undefined;
+        if (mapping.origin === "_all") {
+          const result: string[] = [];
+          if (selectedMonth) {
+            if (source) {
+              for (const originData of Object.values(source)) {
+                const arr = originData?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+                if (arr) result.push(...arr);
+              }
+            }
+          } else if (pipelineData.cardNamesByAreaTag) {
+            for (const monthData of Object.values(pipelineData.cardNamesByAreaTag)) {
+              for (const originData of Object.values(monthData)) {
+                const arr = originData?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+                if (arr) result.push(...arr);
+              }
+            }
+          }
+          return result;
+        }
+        if (selectedMonth) {
+          return source?.[mapping.origin]?.[mapping.area]?.[mapping.tag]?.[mapping.key] ?? [];
+        }
+        const result: string[] = [];
+        if (pipelineData.cardNamesByAreaTag) {
+          for (const monthData of Object.values(pipelineData.cardNamesByAreaTag)) {
+            const arr = monthData?.[mapping.origin]?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+            if (arr) result.push(...arr);
+          }
+        }
+        return result;
+      };
+      const n = getTagNames();
+      if (n.length > 0) names[metricId] = n;
+    }
+
+    return names;
+  }, [pipelineData, selectedMonth, selectedYear]);
+
   const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
   const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
   const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
