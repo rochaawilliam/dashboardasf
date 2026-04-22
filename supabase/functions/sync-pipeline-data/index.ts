@@ -722,6 +722,7 @@ Deno.serve(async (req) => {
       // Parse collaborator rows (Colaborador, Cargo, Área, Nível, Status, Ano, Mês)
       interface CollabRow {
         nome: string;
+        nivel: string;
         status: string;
         ano: number;
         mes: number;
@@ -734,6 +735,7 @@ Deno.serve(async (req) => {
         const mesStr = (cols[6] || "").trim().toLowerCase().substring(0, 3);
         collaborators.push({
           nome: cols[0]?.trim() || "",
+          nivel: cols[3]?.trim() || "",
           status: cols[4]?.trim() || "",
           ano: parseInt(cols[5]?.trim() || "0"),
           mes: MONTH_MAP[mesStr] || 0,
@@ -777,9 +779,26 @@ Deno.serve(async (req) => {
       const activeCollabs = collaborators.filter(c => c.status.toLowerCase() === "ativo");
       const headcount = activeCollabs.length;
 
+      // Training hour target per level: Liderança=6, Time=5, Estagiários=4
+      function getHoursTargetByLevel(nivel: string): number {
+        const n = nivel.toLowerCase();
+        if (n.includes("lideran")) return 6;
+        if (n.includes("estagi")) return 4;
+        return 5; // Time (default)
+      }
+
+      // Build a map of active collaborator name -> their level & target
+      const collabLevelMap: Record<string, { nivel: string; hoursTarget: number }> = {};
+      let totalHoursTarget = 0;
+      for (const c of activeCollabs) {
+        const target = getHoursTargetByLevel(c.nivel);
+        collabLevelMap[c.nome] = { nivel: c.nivel, hoursTarget: target };
+        totalHoursTarget += target;
+      }
+
       // Targets (all dynamic based on actual headcount)
       const HEADCOUNT_TARGET = headcount;
-      const HOURS_TARGET = headcount * 10;
+      const HOURS_TARGET = totalHoursTarget;
       const MODULES_TARGET = headcount * 2;
       const CERTIFICATION_TARGET = 70; // %
       const AVG_TENURE_TARGET = 12; // months
@@ -841,9 +860,16 @@ Deno.serve(async (req) => {
         ? Math.round(totalCertified / totalRecords * 10000) / 100
         : 0;
 
-      // Top collaborators sorted by hours (convert Set to count)
+      // Top collaborators sorted by hours (convert Set to count), include level target
       const topCollaborators = Object.entries(byCollaborator)
-        .map(([name, data]) => ({ name, hours: data.hours, modules: data.modules.size, certified: data.certified }))
+        .map(([name, data]) => ({
+          name,
+          hours: data.hours,
+          modules: data.modules.size,
+          certified: data.certified,
+          nivel: collabLevelMap[name]?.nivel || "",
+          hoursTarget: collabLevelMap[name]?.hoursTarget || 5,
+        }))
         .sort((a, b) => b.hours - a.hours);
 
       // Trained headcount: collaborators who completed at least 1 training

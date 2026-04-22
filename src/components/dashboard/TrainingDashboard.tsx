@@ -17,17 +17,17 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
   const targets = training.targets;
 
   const chartData = useMemo(() => {
-    const monthlyHoursTarget = targets ? Math.round(targets.hours / (training.headcount || 1)) : 10;
     return (training.topCollaborators ?? []).map((c) => ({
       name: c.name.split(" ")[0],
       fullName: c.name,
       totalHours: c.hours,
-      monthlyTarget: monthlyHoursTarget,
+      monthlyTarget: c.hoursTarget ?? 5,
+      nivel: c.nivel ?? "",
     })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [training.topCollaborators, targets, training.headcount]);
+  }, [training.topCollaborators]);
 
   const chartConfig = {
-    monthlyTarget: { label: "Carga Horária Mês", color: "hsl(45, 93%, 47%)" },
+    monthlyTarget: { label: "Meta Individual", color: "hsl(45, 93%, 47%)" },
     totalHours: { label: "Total de horas Geral", color: "hsl(213, 57%, 51%)" },
   };
 
@@ -54,9 +54,12 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
                   return (
                     <div className="rounded-lg border bg-popover p-2 shadow-md text-xs">
                       <p className="font-medium text-foreground mb-1">{data?.fullName}</p>
+                      {data?.nivel && (
+                        <p className="text-muted-foreground mb-1">Nível: <span className="font-medium text-foreground">{data.nivel}</span></p>
+                      )}
                       {payload.map((p: any, i: number) => (
                         <p key={i} className="text-muted-foreground">
-                          {p.dataKey === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas"}: <span className="font-medium text-foreground">{p.value}h</span>
+                          {p.dataKey === "monthlyTarget" ? "Meta Individual" : "Total de horas"}: <span className="font-medium text-foreground">{p.value}h</span>
                         </p>
                       ))}
                     </div>
@@ -66,7 +69,7 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
               <Legend
                 wrapperStyle={{ fontSize: 11 }}
                 formatter={(value: string) =>
-                  value === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas Geral"
+                  value === "monthlyTarget" ? "Meta Individual" : "Total de horas Geral"
                 }
               />
               <Bar

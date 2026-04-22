@@ -41,6 +41,8 @@ export interface TrainingCollaborator {
   hours: number;
   modules: number;
   certified: number;
+  nivel?: string;
+  hoursTarget?: number;
 }
 
 export interface TrainingTheme {
