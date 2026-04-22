@@ -1477,6 +1477,7 @@ const Index = () => {
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="amber"
                                       pipelineMetricIds={pipelineIds}
+                                      pipelineCardNames={pipelineCardNames}
                                     />
                                   )}
                                 </div>
