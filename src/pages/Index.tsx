@@ -550,6 +550,19 @@ const Index = () => {
       }
     }
 
+    // Override "Leads no Funil" with Dashboard origin data (cumulative, not passage-based)
+    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
+    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
+    if (ms) {
+      const dbo = pipelineData.dashboardByOrigin?.[ms];
+      if (dbo?.online) values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
+      if (dbo?.offline) values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
+    } else {
+      const dbo = pipelineData.dashboardTotalsByOrigin;
+      if (dbo?.online) values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
+      if (dbo?.offline) values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
+    }
+
     return values;
   }, [pipelineData, selectedMonth, selectedYear]);
 
@@ -645,6 +658,11 @@ const Index = () => {
       values[TAXA_CERTIFICACAO_ID] = tr.certificationRate;
       values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
     }
+
+    // Override "Leads no Funil" accumulated with Dashboard origin totals
+    const dbo = pipelineData.dashboardTotalsByOrigin;
+    if (dbo?.online) values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
+    if (dbo?.offline) values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
 
     return values;
   }, [pipelineData]);
