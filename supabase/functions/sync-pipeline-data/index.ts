@@ -406,12 +406,25 @@ Deno.serve(async (req) => {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
             const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            b.leads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            b.reunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            b.propostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            b.contratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            b.leads = ptLeads.count;
+            b.reunioes = ptReunioes.count;
+            b.propostas = ptPropostas.count;
+            b.contratos = ptContratos.count;
             const contractCards = tagMonthCards.filter((c: any) => c.stage_id === "contratos");
             b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+            // Store area+tag card names
+            if (!cardNamesByAreaTag[ms]) cardNamesByAreaTag[ms] = {};
+            if (!cardNamesByAreaTag[ms][origin]) cardNamesByAreaTag[ms][origin] = {};
+            if (!cardNamesByAreaTag[ms][origin][area]) cardNamesByAreaTag[ms][origin][area] = {};
+            if (!cardNamesByAreaTag[ms][origin][area][tag]) cardNamesByAreaTag[ms][origin][area][tag] = {};
+            cardNamesByAreaTag[ms][origin][area][tag]["leads"] = ptLeads.names;
+            cardNamesByAreaTag[ms][origin][area][tag]["reunioes"] = ptReunioes.names;
+            cardNamesByAreaTag[ms][origin][area][tag]["propostas"] = ptPropostas.names;
+            cardNamesByAreaTag[ms][origin][area][tag]["contratos"] = ptContratos.names;
           }
         }
       }
