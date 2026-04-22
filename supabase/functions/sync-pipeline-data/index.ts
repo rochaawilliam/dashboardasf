@@ -788,12 +788,28 @@ Deno.serve(async (req) => {
       }
 
       // Build a map of active collaborator name -> their level & target
+      // Use first+last name as key for fuzzy matching with training sheet names
+      function getNameKey(fullName: string): string {
+        const parts = fullName.trim().split(/\s+/);
+        if (parts.length <= 2) return fullName.trim().toLowerCase();
+        return `${parts[0]} ${parts[parts.length - 1]}`.toLowerCase();
+      }
+
       const collabLevelMap: Record<string, { nivel: string; hoursTarget: number }> = {};
+      const collabLevelByKey: Record<string, { nivel: string; hoursTarget: number }> = {};
       let totalHoursTarget = 0;
       for (const c of activeCollabs) {
         const target = getHoursTargetByLevel(c.nivel);
-        collabLevelMap[c.nome] = { nivel: c.nivel, hoursTarget: target };
+        const entry = { nivel: c.nivel, hoursTarget: target };
+        collabLevelMap[c.nome] = entry;
+        collabLevelByKey[getNameKey(c.nome)] = entry;
         totalHoursTarget += target;
+      }
+
+      // Lookup function that tries exact match, then first+last name match
+      function lookupLevel(name: string): { nivel: string; hoursTarget: number } | undefined {
+        if (collabLevelMap[name]) return collabLevelMap[name];
+        return collabLevelByKey[getNameKey(name)];
       }
 
       // Targets (all dynamic based on actual headcount)
