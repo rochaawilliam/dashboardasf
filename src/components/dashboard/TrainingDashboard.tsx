@@ -54,9 +54,12 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
                   return (
                     <div className="rounded-lg border bg-popover p-2 shadow-md text-xs">
                       <p className="font-medium text-foreground mb-1">{data?.fullName}</p>
+                      {data?.nivel && (
+                        <p className="text-muted-foreground mb-1">Nível: <span className="font-medium text-foreground">{data.nivel}</span></p>
+                      )}
                       {payload.map((p: any, i: number) => (
                         <p key={i} className="text-muted-foreground">
-                          {p.dataKey === "monthlyTarget" ? "Carga Horária Mês" : "Total de horas"}: <span className="font-medium text-foreground">{p.value}h</span>
+                          {p.dataKey === "monthlyTarget" ? "Meta Individual" : "Total de horas"}: <span className="font-medium text-foreground">{p.value}h</span>
                         </p>
                       ))}
                     </div>
