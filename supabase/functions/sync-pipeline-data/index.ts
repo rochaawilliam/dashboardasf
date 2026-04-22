@@ -788,28 +788,42 @@ Deno.serve(async (req) => {
       }
 
       // Build a map of active collaborator name -> their level & target
-      // Use first+last name as key for fuzzy matching with training sheet names
-      function getNameKey(fullName: string): string {
+      // Training sheet uses short names (e.g. "Adriano Gorgulho"), collab sheet has full names
+      // Build multiple keys for matching: full name, first+second word, first+last word
+      function getNameKeys(fullName: string): string[] {
         const parts = fullName.trim().split(/\s+/);
-        if (parts.length <= 2) return fullName.trim().toLowerCase();
-        return `${parts[0]} ${parts[parts.length - 1]}`.toLowerCase();
+        const keys: string[] = [fullName.trim().toLowerCase()];
+        if (parts.length >= 2) {
+          keys.push(`${parts[0]} ${parts[1]}`.toLowerCase());
+          if (parts.length > 2) {
+            keys.push(`${parts[0]} ${parts[parts.length - 1]}`.toLowerCase());
+          }
+        }
+        if (parts.length >= 1) {
+          keys.push(parts[0].toLowerCase());
+        }
+        return keys;
       }
 
-      const collabLevelMap: Record<string, { nivel: string; hoursTarget: number }> = {};
       const collabLevelByKey: Record<string, { nivel: string; hoursTarget: number }> = {};
       let totalHoursTarget = 0;
       for (const c of activeCollabs) {
         const target = getHoursTargetByLevel(c.nivel);
         const entry = { nivel: c.nivel, hoursTarget: target };
-        collabLevelMap[c.nome] = entry;
-        collabLevelByKey[getNameKey(c.nome)] = entry;
+        for (const key of getNameKeys(c.nome)) {
+          if (!collabLevelByKey[key]) {
+            collabLevelByKey[key] = entry;
+          }
+        }
         totalHoursTarget += target;
       }
 
-      // Lookup function that tries exact match, then first+last name match
+      // Lookup function: tries all name key variants
       function lookupLevel(name: string): { nivel: string; hoursTarget: number } | undefined {
-        if (collabLevelMap[name]) return collabLevelMap[name];
-        return collabLevelByKey[getNameKey(name)];
+        for (const key of getNameKeys(name)) {
+          if (collabLevelByKey[key]) return collabLevelByKey[key];
+        }
+        return undefined;
       }
 
       // Targets (all dynamic based on actual headcount)
