@@ -1037,6 +1037,8 @@ Deno.serve(async (req) => {
     }
 
     const dashboardByMonth: Record<string, DashboardMonthData> = {};
+    // Dashboard leads/prospects by origin per month
+    const dashboardByOriginMonth: Record<string, Record<string, { leads: number; prospects: number }>> = {};
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
@@ -1100,13 +1102,11 @@ Deno.serve(async (req) => {
           .filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira")
           .map((h: any) => new Date(h.moved_at).getTime())
           .sort((a: number, b: number) => a - b)[0];
-        if (arrival) {
-          tmaValues.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
-        }
+        if (arrival) tmaValues.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
       }
       const tmaAvg = tmaValues.length > 0 ? Math.round(tmaValues.reduce((a, b) => a + b, 0) / tmaValues.length) : null;
 
-      // Tarefas Realizadas
+      // Tarefas realizadas = creations + comments + moves in this month
       const [y, m] = ms.split("-").map(Number);
       const trRangeStart = new Date(y, m - 1, 1);
       const trRangeEnd = new Date(y, m, 1);
@@ -1132,6 +1132,16 @@ Deno.serve(async (req) => {
         tmaDays: tmaAvg,
         tarefasRealizadas: creations + comments + moves,
       };
+
+      // Dashboard leads by origin
+      dashboardByOriginMonth[ms] = {};
+      for (const origin of ["online", "offline"]) {
+        const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
+        const oLeads = computeCumulative(originCards, "leads");
+        const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
+        dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
+        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects };
+      }
     }
 
     // Dashboard yearly totals
