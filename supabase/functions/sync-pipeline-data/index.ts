@@ -1207,14 +1207,15 @@ Deno.serve(async (req) => {
     }
 
     // Dashboard totals by origin
-    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number }> = {};
+    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number }> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
       for (const origin of ["online", "offline"]) {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects };
+        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
 
