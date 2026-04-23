@@ -1139,14 +1139,15 @@ Deno.serve(async (req) => {
         tarefasRealizadas: creations + comments + moves,
       };
 
-      // Dashboard leads by origin
+      // Dashboard leads/contratos by origin
       dashboardByOriginMonth[ms] = {};
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
+        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
-        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects };
+        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
 
