@@ -296,11 +296,13 @@ Deno.serve(async (req) => {
         const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        // Contratos = snapshot (cards currently in contratos stage), matching Pipeline dashboard
+        const contratosSnapshot = originMonthCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of);
+        const contratosNames = contratosSnapshot.map((c: any) => c.title ?? c.id);
         bucket.leads = pLeads.count;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
-        bucket.contratos = pContratos.count;
+        bucket.contratos = contratosSnapshot.length;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
         // New leads = cards created in this month (excluding prospects and geladeira)
         bucket.new_leads = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).length;
@@ -311,7 +313,7 @@ Deno.serve(async (req) => {
         cardNames[ms][origin]["leads"] = pLeads.names;
         cardNames[ms][origin]["reunioes"] = pReunioes.names;
         cardNames[ms][origin]["propostas"] = pPropostas.names;
-        cardNames[ms][origin]["contratos"] = pContratos.names;
+        cardNames[ms][origin]["contratos"] = contratosNames;
         cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["new_leads"] = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).map((c: any) => c.title ?? c.id);
 
