@@ -163,11 +163,13 @@ Deno.serve(async (req) => {
       rangeEnd: Date,
     ): { count: number; names: string[] } {
       const names: string[] = [];
+      const countedCardIds = new Set<string>();
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
-      // 1) History passages
+      // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
+        if (countedCardIds.has(cardId)) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
           if (targetStages.includes(h.to_stage)) {
@@ -175,6 +177,8 @@ Deno.serve(async (req) => {
             if (d >= rangeStart && d < rangeEnd) {
               const card = cardById.get(cardId);
               names.push(card?.title ?? cardId);
+              countedCardIds.add(cardId);
+              break; // count this card only once
             }
           }
         }
@@ -183,12 +187,14 @@ Deno.serve(async (req) => {
       // 2) Legacy
       for (const c of monthCreatedCards) {
         if (!filterCardIds.has(c.id)) continue;
+        if (countedCardIds.has(c.id)) continue;
         const currentIdx = STAGE_ORDER_FULL.indexOf(c.stage_id);
         if (currentIdx < minTargetIdx || currentIdx > contratosIdx) continue;
         const cardHistory = historyByCard[c.id] || [];
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
           names.push(c.title ?? c.id);
+          countedCardIds.add(c.id);
         }
       }
 
