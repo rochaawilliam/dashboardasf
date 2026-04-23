@@ -163,11 +163,13 @@ Deno.serve(async (req) => {
       rangeEnd: Date,
     ): { count: number; names: string[] } {
       const names: string[] = [];
+      const countedCardIds = new Set<string>();
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
-      // 1) History passages
+      // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
+        if (countedCardIds.has(cardId)) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
           if (targetStages.includes(h.to_stage)) {
@@ -175,6 +177,8 @@ Deno.serve(async (req) => {
             if (d >= rangeStart && d < rangeEnd) {
               const card = cardById.get(cardId);
               names.push(card?.title ?? cardId);
+              countedCardIds.add(cardId);
+              break; // count this card only once
             }
           }
         }
@@ -183,12 +187,14 @@ Deno.serve(async (req) => {
       // 2) Legacy
       for (const c of monthCreatedCards) {
         if (!filterCardIds.has(c.id)) continue;
+        if (countedCardIds.has(c.id)) continue;
         const currentIdx = STAGE_ORDER_FULL.indexOf(c.stage_id);
         if (currentIdx < minTargetIdx || currentIdx > contratosIdx) continue;
         const cardHistory = historyByCard[c.id] || [];
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
           names.push(c.title ?? c.id);
+          countedCardIds.add(c.id);
         }
       }
 
@@ -1133,14 +1139,15 @@ Deno.serve(async (req) => {
         tarefasRealizadas: creations + comments + moves,
       };
 
-      // Dashboard leads by origin
+      // Dashboard leads/contratos by origin
       dashboardByOriginMonth[ms] = {};
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
+        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
-        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects };
+        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
 
@@ -1200,14 +1207,15 @@ Deno.serve(async (req) => {
     }
 
     // Dashboard totals by origin
-    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number }> = {};
+    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number }> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
       for (const origin of ["online", "offline"]) {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects };
+        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
 

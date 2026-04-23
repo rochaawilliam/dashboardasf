@@ -550,17 +550,31 @@ const Index = () => {
       }
     }
 
-    // Override "Leads no Funil" with Dashboard origin data (cumulative, not passage-based)
+    // Override "Leads no Funil" and "Contratos" with Dashboard origin data (snapshot, not passage-based)
     const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
     const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
+    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
+    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     if (ms) {
       const dbo = pipelineData.dashboardByOrigin?.[ms];
-      if (dbo?.online) values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
-      if (dbo?.offline) values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
+      if (dbo?.online) {
+        values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
+        values[CONTRATOS_ONLINE_ID] = dbo.online.contratos ?? 0;
+      }
+      if (dbo?.offline) {
+        values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
+        values[CONTRATOS_OFFLINE_ID] = dbo.offline.contratos ?? 0;
+      }
     } else {
       const dbo = pipelineData.dashboardTotalsByOrigin;
-      if (dbo?.online) values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
-      if (dbo?.offline) values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
+      if (dbo?.online) {
+        values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
+        values[CONTRATOS_ONLINE_ID] = dbo.online.contratos ?? 0;
+      }
+      if (dbo?.offline) {
+        values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
+        values[CONTRATOS_OFFLINE_ID] = dbo.offline.contratos ?? 0;
+      }
     }
 
     return values;
