@@ -167,14 +167,8 @@ Deno.serve(async (req) => {
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
-      // Restrict counting to cards CREATED in this month (matches Pipeline dashboard rule).
-      // This prevents legacy cards (created in previous months) from inflating passage counts
-      // when they happen to move stages within the current month.
-      const monthCreatedIds = new Set<string>(monthCreatedCards.map((c: any) => c.id));
-
       // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
-        if (!monthCreatedIds.has(cardId)) continue;
         if (countedCardIds.has(cardId)) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
@@ -302,15 +296,7 @@ Deno.serve(async (req) => {
         const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        // Contratos: snapshot (cards currently in "contratos" stage assigned to this month) — avoids
-        // counting cards that passed through and were later moved out (e.g. back to other stages).
-        const pContratos = (() => {
-          const names: string[] = [];
-          for (const c of originMonthCards) {
-            if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
-          }
-          return { count: names.length, names };
-        })();
+        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
         bucket.leads = pLeads.count;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
@@ -375,33 +361,10 @@ Deno.serve(async (req) => {
         byOriginAreaTagMonthCards[origin][area][tag].push(card);
       }
 
-      // For contratos snapshot ONLY: use cards assigned to this month (c.month === ms),
-      // currently in "contratos", non-ghost. This captures cards intentionally duplicated
-      // across practice areas (e.g. RAPEL CONSULTORIA that counts in both Empresarial and
-      // Trabalhista assessoria) and cards created in a previous month but assigned to this one.
-      const snapshotContractsByOriginArea: Record<string, Record<string, any[]>> = {};
-      const snapshotContractsByOriginAreaTag: Record<string, Record<string, Record<string, any[]>>> = {};
-      for (const card of cards) {
-        if (card.month !== ms) continue;
-        if (card.stage_id !== "contratos") continue;
-        if (card.ghost_of) continue;
-        const origin = card.lead_origin || "offline";
-        const area = card.practice_area || "outros";
-        const tag = card.tag || "pontual";
-        if (!snapshotContractsByOriginArea[origin]) snapshotContractsByOriginArea[origin] = {};
-        if (!snapshotContractsByOriginArea[origin][area]) snapshotContractsByOriginArea[origin][area] = [];
-        snapshotContractsByOriginArea[origin][area].push(card);
-        if (!snapshotContractsByOriginAreaTag[origin]) snapshotContractsByOriginAreaTag[origin] = {};
-        if (!snapshotContractsByOriginAreaTag[origin][area]) snapshotContractsByOriginAreaTag[origin][area] = {};
-        if (!snapshotContractsByOriginAreaTag[origin][area][tag]) snapshotContractsByOriginAreaTag[origin][area][tag] = [];
-        snapshotContractsByOriginAreaTag[origin][area][tag].push(card);
-      }
-
-      // Also include origins/areas/tags that have no month-created cards but have history passages or contract snapshots
+      // Also include origins/areas/tags that have no month-created cards but have history passages
       const allAreaOrigins = new Set([
         ...Object.keys(byOriginAreaMonthCards),
         ...Object.keys(allCardIdsByOriginArea),
-        ...Object.keys(snapshotContractsByOriginArea),
       ]);
 
       for (const origin of allAreaOrigins) {
@@ -410,7 +373,6 @@ Deno.serve(async (req) => {
         const allAreas = new Set([
           ...Object.keys(byOriginAreaMonthCards[origin] || {}),
           ...Object.keys(allCardIdsByOriginArea[origin] || {}),
-          ...Object.keys(snapshotContractsByOriginArea[origin] || {}),
         ]);
         for (const area of allAreas) {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
@@ -419,18 +381,12 @@ Deno.serve(async (req) => {
           const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          // Contratos: snapshot of cards assigned to this month and currently in "contratos" within this area
-          const paContratos = (() => {
-            const names: string[] = [];
-            const snapCards = snapshotContractsByOriginArea[origin]?.[area] || [];
-            for (const c of snapCards) names.push(c.title ?? c.id);
-            return { count: names.length, names };
-          })();
+          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
           b.leads = paLeads.count;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
           b.contratos = paContratos.count;
-          const contractCards = snapshotContractsByOriginArea[origin]?.[area] || [];
+          const contractCards = areaMonthCards.filter((c: any) => c.stage_id === "contratos");
           b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
           if (b.leads > 0 || b.reunioes > 0 || b.propostas > 0 || b.contratos > 0) {
             byArea[ms][origin][area] = b;
@@ -450,13 +406,11 @@ Deno.serve(async (req) => {
         const allAreas = new Set([
           ...Object.keys(byOriginAreaTagMonthCards[origin] || {}),
           ...Object.keys(allCardIdsByOriginAreaTag[origin] || {}),
-          ...Object.keys(snapshotContractsByOriginAreaTag[origin] || {}),
         ]);
         for (const area of allAreas) {
           const allTags = new Set([
             ...Object.keys(byOriginAreaTagMonthCards[origin]?.[area] || {}),
             ...Object.keys(allCardIdsByOriginAreaTag[origin]?.[area] || {}),
-            ...Object.keys(snapshotContractsByOriginAreaTag[origin]?.[area] || {}),
           ]);
           for (const tag of allTags) {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
@@ -465,18 +419,12 @@ Deno.serve(async (req) => {
             const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            // Contratos: snapshot of cards assigned to this month and currently in "contratos" within this area+tag
-            const ptContratos = (() => {
-              const names: string[] = [];
-              const snapCards = snapshotContractsByOriginAreaTag[origin]?.[area]?.[tag] || [];
-              for (const c of snapCards) names.push(c.title ?? c.id);
-              return { count: names.length, names };
-            })();
+            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             b.leads = ptLeads.count;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
             b.contratos = ptContratos.count;
-            const contractCards = snapshotContractsByOriginAreaTag[origin]?.[area]?.[tag] || [];
+            const contractCards = tagMonthCards.filter((c: any) => c.stage_id === "contratos");
             b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
             // Store area+tag card names
             if (!cardNamesByAreaTag[ms]) cardNamesByAreaTag[ms] = {};
@@ -1192,25 +1140,12 @@ Deno.serve(async (req) => {
       };
 
       // Dashboard leads/contratos by origin
-      // Contratos snapshot: only cards CREATED in this month and currently in "contratos" stage
-      // (matches the funnel logic to keep counts in sync with the Pipeline dashboard).
-      const [yMs, mMs] = ms.split("-").map(Number);
-      const msStart = new Date(yMs, mMs - 1, 1);
-      const msEnd = new Date(yMs, mMs, 1);
-      const monthCreatedCards = cards.filter((c: any) => {
-        const d = new Date(c.created_at);
-        return d >= msStart && d < msEnd;
-      });
       dashboardByOriginMonth[ms] = {};
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = monthCreatedCards.filter((c: any) =>
-          (c.lead_origin || "offline") === origin &&
-          c.stage_id === "contratos" &&
-          !c.ghost_of
-        ).length;
+        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
         dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
@@ -1275,22 +1210,11 @@ Deno.serve(async (req) => {
     const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number }> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
-      // For contratos: only cards created within the year range AND currently in contratos stage
-      const yearStart = new Date(year, 0, 1);
-      const yearEnd = new Date(year + 1, 0, 1);
-      const yearCreatedCards = cards.filter((c: any) => {
-        const d = new Date(c.created_at);
-        return d >= yearStart && d < yearEnd;
-      });
       for (const origin of ["online", "offline"]) {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = yearCreatedCards.filter((c: any) =>
-          (c.lead_origin || "offline") === origin &&
-          c.stage_id === "contratos" &&
-          !c.ghost_of
-        ).length;
+        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
         dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
