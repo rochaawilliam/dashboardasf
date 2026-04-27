@@ -296,7 +296,15 @@ Deno.serve(async (req) => {
         const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        // Contratos: snapshot (cards currently in "contratos" stage assigned to this month) — avoids
+        // counting cards that passed through and were later moved out (e.g. back to other stages).
+        const pContratos = (() => {
+          const names: string[] = [];
+          for (const c of originMonthCards) {
+            if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
+          }
+          return { count: names.length, names };
+        })();
         bucket.leads = pLeads.count;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
