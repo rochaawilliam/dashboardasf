@@ -1462,6 +1462,16 @@ const Index = () => {
               </div>
             } />
 
+          {selectedMonth !== null && Object.keys(pipelineDataSourceInfo).length > 0 && (
+            <div className="flex justify-end mt-2 print:hidden">
+              <AuditPanel
+                metrics={adjustedMetrics}
+                sourceInfo={pipelineDataSourceInfo}
+                selectedMonthName={selectedMonthName}
+                selectedYear={selectedYear}
+              />
+            </div>
+          )}
         </div>
         
         {/* Data Entry Section - only for authenticated users */}
