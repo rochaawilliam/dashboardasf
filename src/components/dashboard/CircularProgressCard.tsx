@@ -34,6 +34,7 @@ interface CircularProgressCardProps {
   } | null;
   children?: React.ReactNode;
   pipelineCardNames?: string[];
+  dataSourceBadge?: { source: "Operacional" | "Dashboard"; filter: "created_at" | "month" };
 }
 
 const nonAccumulativeKeywords = [
