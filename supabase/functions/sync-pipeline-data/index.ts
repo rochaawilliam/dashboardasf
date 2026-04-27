@@ -375,6 +375,28 @@ Deno.serve(async (req) => {
         byOriginAreaTagMonthCards[origin][area][tag].push(card);
       }
 
+      // For contratos snapshot ONLY: use cards assigned to this month (c.month === ms),
+      // currently in "contratos", non-ghost. This captures cards intentionally duplicated
+      // across practice areas (e.g. RAPEL CONSULTORIA that counts in both Empresarial and
+      // Trabalhista assessoria) and cards created in a previous month but assigned to this one.
+      const snapshotContractsByOriginArea: Record<string, Record<string, any[]>> = {};
+      const snapshotContractsByOriginAreaTag: Record<string, Record<string, Record<string, any[]>>> = {};
+      for (const card of cards) {
+        if (card.month !== ms) continue;
+        if (card.stage_id !== "contratos") continue;
+        if (card.ghost_of) continue;
+        const origin = card.lead_origin || "offline";
+        const area = card.practice_area || "outros";
+        const tag = card.tag || "pontual";
+        if (!snapshotContractsByOriginArea[origin]) snapshotContractsByOriginArea[origin] = {};
+        if (!snapshotContractsByOriginArea[origin][area]) snapshotContractsByOriginArea[origin][area] = [];
+        snapshotContractsByOriginArea[origin][area].push(card);
+        if (!snapshotContractsByOriginAreaTag[origin]) snapshotContractsByOriginAreaTag[origin] = {};
+        if (!snapshotContractsByOriginAreaTag[origin][area]) snapshotContractsByOriginAreaTag[origin][area] = {};
+        if (!snapshotContractsByOriginAreaTag[origin][area][tag]) snapshotContractsByOriginAreaTag[origin][area][tag] = [];
+        snapshotContractsByOriginAreaTag[origin][area][tag].push(card);
+      }
+
       // Also include origins/areas/tags that have no month-created cards but have history passages
       const allAreaOrigins = new Set([
         ...Object.keys(byOriginAreaMonthCards),
