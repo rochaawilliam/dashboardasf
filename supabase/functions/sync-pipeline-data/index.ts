@@ -434,7 +434,14 @@ Deno.serve(async (req) => {
             const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            // Contratos: snapshot of cards currently in "contratos" within this area+tag
+            const ptContratos = (() => {
+              const names: string[] = [];
+              for (const c of tagMonthCards) {
+                if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
+              }
+              return { count: names.length, names };
+            })();
             b.leads = ptLeads.count;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
