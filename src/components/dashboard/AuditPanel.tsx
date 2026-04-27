@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardList, Download, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Metric } from "@/types/metric";
+import type { Metric } from "@/hooks/useMetrics";
 
 type SourceInfo = {
   source: "Operacional" | "Dashboard";
