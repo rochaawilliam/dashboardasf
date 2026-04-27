@@ -793,8 +793,135 @@ const Index = () => {
         };
       }
     }
+
+    // Operacional-only metrics
+    if (ops) {
+      info[MEDIA_ACOES_DIA_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "total_ações ÷ dias_úteis",
+        calculation: `Média de ${fmt(ops.avgActionsPerDay)} ações/dia.`,
+      };
+      info[TAXA_ACOMPANHAMENTO_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "leads_com_followup ÷ leads_totais × 100",
+        calculation: `Taxa: ${fmt(ops.followUpRate)}%`,
+      };
+      info[TAXA_AVANCO_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "leads_avançados ÷ leads_totais × 100",
+        calculation: `Taxa: ${fmt(ops.advanceRate)}%`,
+      };
+      info[COMENTARIOS_LEAD_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "total_comentários ÷ total_leads",
+        calculation: `Média de ${fmt(ops.commentsPerLead)} comentários por lead.`,
+      };
+    }
+
+    // Funnel snapshot metrics from Dashboard panel (PIPELINE_METRIC_MAP — by origin)
+    const originSource = ms ? pipelineData.months?.[ms] : pipelineData.totals;
+    const dashOriginSource = ms ? pipelineData.dashboardByOrigin?.[ms] : pipelineData.dashboardTotalsByOrigin;
+    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
+    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
+    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
+    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
+    for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
+      const isDashSnapshot =
+        metricId === LEADS_FUNIL_ONLINE_ID ||
+        metricId === LEADS_FUNIL_OFFLINE_ID ||
+        metricId === CONTRATOS_ONLINE_ID ||
+        metricId === CONTRATOS_OFFLINE_ID;
+      let val: number | undefined;
+      if (isDashSnapshot && dashOriginSource) {
+        val = (dashOriginSource as any)?.[mapping.origin]?.[mapping.key === "contratos" ? "contratos" : "leads"];
+        info[metricId] = {
+          source: "Dashboard",
+          filter: "month",
+          formula: `snapshot[${mapping.origin}].${mapping.key}`,
+          calculation: `Valor: ${fmtInt(val)} (cards do funil ${mapping.origin} cujo campo 'mês' = período selecionado).`,
+        };
+      } else {
+        val = (originSource as any)?.[mapping.origin]?.[mapping.key];
+        info[metricId] = {
+          source: "Operacional",
+          filter: "created_at",
+          formula: `passagens[${mapping.origin}].${mapping.key} (deduplicado por card)`,
+          calculation: `Valor: ${fmtInt(val)} (cards ${mapping.origin} criados no período que passaram por '${mapping.key}').`,
+        };
+      }
+    }
+
+    // Funnel by area (PIPELINE_AREA_MAP) — Operacional / passagens
+    const areaSource = ms ? pipelineData.byArea?.[ms] : pipelineData.totalsByArea;
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      let val: number | undefined;
+      if (mapping.origin === "_all" && areaSource) {
+        let total = 0; let found = false;
+        for (const od of Object.values(areaSource)) {
+          const v = (od as any)?.[mapping.area]?.[mapping.key];
+          if (v !== undefined) { total += v; found = true; }
+        }
+        if (found) val = total;
+      } else {
+        val = (areaSource as any)?.[mapping.origin]?.[mapping.area]?.[mapping.key];
+      }
+      info[metricId] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: `passagens[${mapping.origin}][${mapping.area}].${mapping.key}`,
+        calculation: `Valor: ${fmtInt(val)} (área ${mapping.area}, origem ${mapping.origin}).`,
+      };
+    }
+
+    // Funnel by area + tag (PIPELINE_AREA_TAG_MAP) — Operacional / passagens
+    const areaTagSource = ms ? pipelineData.byAreaTag?.[ms] : pipelineData.totalsByAreaTag;
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_TAG_MAP)) {
+      let val: number | undefined;
+      if (mapping.origin === "_all" && areaTagSource) {
+        let total = 0; let found = false;
+        for (const od of Object.values(areaTagSource)) {
+          const v = (od as any)?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+          if (v !== undefined) { total += v; found = true; }
+        }
+        if (found) val = total;
+      } else {
+        val = (areaTagSource as any)?.[mapping.origin]?.[mapping.area]?.[mapping.tag]?.[mapping.key];
+      }
+      info[metricId] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: `passagens[${mapping.origin}][${mapping.area}][${mapping.tag}].${mapping.key}`,
+        calculation: `Valor: ${fmtInt(val)} (${mapping.area} · ${mapping.tag}).`,
+      };
+    }
+
+    // Onboarding (Compass) — sempre estado atual
+    if (pipelineData.onboarding) {
+      const ob = pipelineData.onboarding;
+      if (ob.avgOnboardingDays !== null) {
+        info[LEAD_TIME_ONBOARDING_ID] = {
+          source: "Operacional",
+          filter: "created_at",
+          formula: "média(data_fim − data_início) em dias (Compass)",
+          calculation: `Média de ${fmt(ob.avgOnboardingDays)} dias.`,
+        };
+      }
+      if (ob.complianceRate !== null) {
+        info[TAXA_ONBOARDING_PRAZO_ID] = {
+          source: "Operacional",
+          filter: "created_at",
+          formula: "onboardings_no_prazo ÷ onboardings_totais × 100",
+          calculation: `Taxa: ${fmt(ob.complianceRate)}%`,
+        };
+      }
+    }
+
     return info;
-  }, [pipelineData, selectedMonth, selectedYear]);
+  }, [pipelineData, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP]);
 
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
