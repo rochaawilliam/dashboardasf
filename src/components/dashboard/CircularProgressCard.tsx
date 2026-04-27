@@ -34,7 +34,12 @@ interface CircularProgressCardProps {
   } | null;
   children?: React.ReactNode;
   pipelineCardNames?: string[];
-  dataSourceBadge?: { source: "Operacional" | "Dashboard"; filter: "created_at" | "month" };
+  dataSourceBadge?: {
+    source: "Operacional" | "Dashboard";
+    filter: "created_at" | "month";
+    formula?: string;
+    calculation?: string;
+  };
 }
 
 const nonAccumulativeKeywords = [
@@ -264,18 +269,33 @@ export function CircularProgressCard({
                 {dataSourceBadge.source === "Operacional" ? "OP" : "DB"}
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs max-w-[280px]">
-              <p className="font-semibold mb-0.5">
+            <TooltipContent side="top" className="text-xs max-w-[320px]">
+              <p className="font-semibold mb-1">
                 Painel {dataSourceBadge.source}
                 {dataSourceBadge.source === "Dashboard" ? " (fallback)" : ""}
               </p>
               <p className="text-popover-foreground/80">
-                Filtro: <span className="font-mono">{dataSourceBadge.filter}</span>
+                <span className="text-popover-foreground/60">Campo filtrado:</span>{" "}
+                <span className="font-mono">{dataSourceBadge.filter}</span>
+                <span className="text-popover-foreground/60">
+                  {dataSourceBadge.filter === "created_at"
+                    ? " (data de criação do card)"
+                    : " (mês atribuído ao card)"}
+                </span>
               </p>
-              <p className="text-popover-foreground/70 mt-1">
+              {dataSourceBadge.formula && (
+                <p className="mt-1.5">
+                  <span className="text-popover-foreground/60">Fórmula:</span>{" "}
+                  <span className="font-mono text-popover-foreground/90">{dataSourceBadge.formula}</span>
+                </p>
+              )}
+              {dataSourceBadge.calculation && (
+                <p className="text-popover-foreground/80 mt-1">{dataSourceBadge.calculation}</p>
+              )}
+              <p className="text-popover-foreground/60 mt-1.5 italic">
                 {dataSourceBadge.source === "Operacional"
-                  ? "Calculado a partir de passagens no Pipeline filtradas por data de criação do card."
-                  : "Calculado a partir do snapshot do Dashboard filtrado pelo campo 'mês' do card."}
+                  ? "Cards filtrados por data de criação; cada passagem entre etapas é contada (deduplicada por card)."
+                  : "Snapshot do funil filtrado pelo campo 'mês' atribuído ao card."}
               </p>
             </TooltipContent>
           </Tooltip>

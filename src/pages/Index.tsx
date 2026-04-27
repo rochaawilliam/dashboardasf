@@ -679,44 +679,119 @@ const Index = () => {
   // Map of metric IDs (rates & times in Crescimento) to the source panel & filter that supplied the value.
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
   const pipelineDataSourceInfo = useMemo(() => {
-    const info: Record<string, { source: "Operacional" | "Dashboard"; filter: "created_at" | "month" }> = {};
+    type Info = {
+      source: "Operacional" | "Dashboard";
+      filter: "created_at" | "month";
+      formula?: string;
+      calculation?: string;
+    };
+    const info: Record<string, Info> = {};
     if (!pipelineData) return info;
     const ms = selectedMonth ? `${selectedYear}-${String(selectedMonth).padStart(2, "0")}` : null;
     const ops = ms ? pipelineData.operational?.[ms] : pipelineData.operationalTotals;
     const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+    const fmt = (n: number | null | undefined, decimals = 2) =>
+      n === null || n === undefined ? "—" : Number(n).toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    const fmtInt = (n: number | null | undefined) =>
+      n === null || n === undefined ? "—" : Number(n).toLocaleString("pt-BR");
 
     // Rates: primary source = Operacional (passages, created_at). Fallback = Dashboard (month field).
-    // Replicates the priority logic in pipelineMonthlyValues / pipelineAccumulatedValues.
-    let opLeads = 0, opReunioes = 0, opContratos = 0;
+    let opLeads = 0, opReunioes = 0, opPropostas = 0, opContratos = 0;
     const passSource = ms ? pipelineData.months?.[ms] : pipelineData.totals;
     if (passSource) {
       for (const od of Object.values(passSource)) {
         opLeads += (od as any)?.leads ?? 0;
         opReunioes += (od as any)?.reunioes ?? 0;
+        opPropostas += (od as any)?.propostas ?? 0;
         opContratos += (od as any)?.contratos ?? 0;
       }
     }
-    const setRate = (id: string, hasOps: boolean) => {
-      if (hasOps) info[id] = { source: "Operacional", filter: "created_at" };
-      else if (dash) info[id] = { source: "Dashboard", filter: "month" };
-    };
-    setRate(TAXA_AGENDAMENTO_ID, opLeads > 0);
-    setRate(TAXA_COMPARECIMENTO_ID, opReunioes > 0);
-    setRate(TAXA_CONVERSAO_ID, opLeads > 0);
 
-    // Tempo Médio de Fechamento: primary = passage avgCloseDays. Fallback = Dashboard avgCloseTimeDays.
-    const hasCloseOps = ms
-      ? pipelineData.avgCloseDaysByMonth?.[ms] !== undefined && pipelineData.avgCloseDaysByMonth?.[ms] !== null
-      : pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined;
-    if (hasCloseOps) info[TEMPO_MEDIO_FECHAMENTO_ID] = { source: "Operacional", filter: "created_at" };
-    else if (dash?.avgCloseTimeDays !== null && dash?.avgCloseTimeDays !== undefined) {
-      info[TEMPO_MEDIO_FECHAMENTO_ID] = { source: "Dashboard", filter: "month" };
+    // Taxa de Agendamento = Reuniões / Leads
+    if (opLeads > 0) {
+      info[TAXA_AGENDAMENTO_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "Reuniões ÷ Leads × 100",
+        calculation: `${fmtInt(opReunioes)} ÷ ${fmtInt(opLeads)} × 100 = ${fmt(opReunioes / opLeads * 100)}%`,
+      };
+    } else if (dash) {
+      info[TAXA_AGENDAMENTO_ID] = {
+        source: "Dashboard",
+        filter: "month",
+        formula: "Reuniões ÷ Leads × 100 (snapshot)",
+        calculation: `Resultado: ${fmt(dash.taxaAgendamento)}%`,
+      };
     }
 
-    // TME / TMA / Operacional-only metrics: always from Operacional panel.
+    // Taxa de Comparecimento = Propostas / Reuniões
+    if (opReunioes > 0) {
+      info[TAXA_COMPARECIMENTO_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "Propostas ÷ Reuniões × 100",
+        calculation: `${fmtInt(opPropostas)} ÷ ${fmtInt(opReunioes)} × 100 = ${fmt(opPropostas / opReunioes * 100)}%`,
+      };
+    } else if (dash) {
+      info[TAXA_COMPARECIMENTO_ID] = {
+        source: "Dashboard",
+        filter: "month",
+        formula: "Propostas ÷ Reuniões × 100 (snapshot)",
+        calculation: `Resultado: ${fmt(dash.taxaComparecimento)}%`,
+      };
+    }
+
+    // Taxa de Conversão = Contratos / Leads
+    if (opLeads > 0) {
+      info[TAXA_CONVERSAO_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "Contratos ÷ Leads × 100",
+        calculation: `${fmtInt(opContratos)} ÷ ${fmtInt(opLeads)} × 100 = ${fmt(opContratos / opLeads * 100)}%`,
+      };
+    } else if (dash) {
+      info[TAXA_CONVERSAO_ID] = {
+        source: "Dashboard",
+        filter: "month",
+        formula: "Contratos ÷ Leads × 100 (snapshot)",
+        calculation: `Resultado: ${fmt(dash.conversao)}%`,
+      };
+    }
+
+    // Tempo Médio de Fechamento (dias)
+    const closeOps = ms ? pipelineData.avgCloseDaysByMonth?.[ms] : pipelineData.avgCloseDays;
+    if (closeOps !== undefined && closeOps !== null) {
+      info[TEMPO_MEDIO_FECHAMENTO_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "média(data_contrato − data_criação) em dias",
+        calculation: `Média de ${fmt(closeOps)} dias entre criação do card e estágio Contratos.`,
+      };
+    } else if (dash?.avgCloseTimeDays !== null && dash?.avgCloseTimeDays !== undefined) {
+      info[TEMPO_MEDIO_FECHAMENTO_ID] = {
+        source: "Dashboard",
+        filter: "month",
+        formula: "média(data_contrato − data_criação) em dias",
+        calculation: `Média de ${fmt(dash.avgCloseTimeDays)} dias (snapshot do Dashboard).`,
+      };
+    }
+
+    // TME (Tempo Médio até Primeiro Contato) — horas
     if (ops) {
-      info[TME_SLA_ID] = { source: "Operacional", filter: "created_at" };
-      if (ops.avgHandlingDays !== null) info[TMA_ID] = { source: "Operacional", filter: "created_at" };
+      info[TME_SLA_ID] = {
+        source: "Operacional",
+        filter: "created_at",
+        formula: "média(primeiro_contato − criação) em horas",
+        calculation: `Média de ${fmt(ops.avgFirstContactHours)} h entre criação do lead e o primeiro atendimento.`,
+      };
+      if (ops.avgHandlingDays !== null) {
+        info[TMA_ID] = {
+          source: "Operacional",
+          filter: "created_at",
+          formula: "média(última_atividade − criação) em dias",
+          calculation: `Média de ${fmt(ops.avgHandlingDays)} dias de tratativa por lead.`,
+        };
+      }
     }
     return info;
   }, [pipelineData, selectedMonth, selectedYear]);
