@@ -248,6 +248,38 @@ export function CircularProgressCard({
       {/* Header with polarity toggle */}
       <div className="mb-0.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
         <span className="metric-label text-base sm:text-lg lg:text-base font-semibold flex-1 leading-none">{metric.name}</span>
+        {dataSourceBadge && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className={cn(
+                  "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium leading-none border transition-colors",
+                  dataSourceBadge.source === "Operacional"
+                    ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                    : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                )}
+                aria-label={`Origem: ${dataSourceBadge.source}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {dataSourceBadge.source === "Operacional" ? "OP" : "DB"}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs max-w-[280px]">
+              <p className="font-semibold mb-0.5">
+                Painel {dataSourceBadge.source}
+                {dataSourceBadge.source === "Dashboard" ? " (fallback)" : ""}
+              </p>
+              <p className="text-popover-foreground/80">
+                Filtro: <span className="font-mono">{dataSourceBadge.filter}</span>
+              </p>
+              <p className="text-popover-foreground/70 mt-1">
+                {dataSourceBadge.source === "Operacional"
+                  ? "Calculado a partir de passagens no Pipeline filtradas por data de criação do card."
+                  : "Calculado a partir do snapshot do Dashboard filtrado pelo campo 'mês' do card."}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        )}
         {metric.description && (
           <Tooltip>
             <TooltipTrigger asChild>
