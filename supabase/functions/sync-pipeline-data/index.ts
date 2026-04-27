@@ -397,10 +397,11 @@ Deno.serve(async (req) => {
         snapshotContractsByOriginAreaTag[origin][area][tag].push(card);
       }
 
-      // Also include origins/areas/tags that have no month-created cards but have history passages
+      // Also include origins/areas/tags that have no month-created cards but have history passages or contract snapshots
       const allAreaOrigins = new Set([
         ...Object.keys(byOriginAreaMonthCards),
         ...Object.keys(allCardIdsByOriginArea),
+        ...Object.keys(snapshotContractsByOriginArea),
       ]);
 
       for (const origin of allAreaOrigins) {
@@ -409,6 +410,7 @@ Deno.serve(async (req) => {
         const allAreas = new Set([
           ...Object.keys(byOriginAreaMonthCards[origin] || {}),
           ...Object.keys(allCardIdsByOriginArea[origin] || {}),
+          ...Object.keys(snapshotContractsByOriginArea[origin] || {}),
         ]);
         for (const area of allAreas) {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
