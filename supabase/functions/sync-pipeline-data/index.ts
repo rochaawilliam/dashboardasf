@@ -167,8 +167,14 @@ Deno.serve(async (req) => {
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
+      // Restrict counting to cards CREATED in this month (matches Pipeline dashboard rule).
+      // This prevents legacy cards (created in previous months) from inflating passage counts
+      // when they happen to move stages within the current month.
+      const monthCreatedIds = new Set<string>(monthCreatedCards.map((c: any) => c.id));
+
       // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
+        if (!monthCreatedIds.has(cardId)) continue;
         if (countedCardIds.has(cardId)) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
