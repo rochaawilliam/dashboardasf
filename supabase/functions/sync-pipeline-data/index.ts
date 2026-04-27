@@ -167,8 +167,14 @@ Deno.serve(async (req) => {
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
+      // Restrict counting to cards CREATED in this month (matches Pipeline dashboard rule).
+      // This prevents legacy cards (created in previous months) from inflating passage counts
+      // when they happen to move stages within the current month.
+      const monthCreatedIds = new Set<string>(monthCreatedCards.map((c: any) => c.id));
+
       // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
+        if (!monthCreatedIds.has(cardId)) continue;
         if (countedCardIds.has(cardId)) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
@@ -1162,12 +1168,25 @@ Deno.serve(async (req) => {
       };
 
       // Dashboard leads/contratos by origin
+      // Contratos snapshot: only cards CREATED in this month and currently in "contratos" stage
+      // (matches the funnel logic to keep counts in sync with the Pipeline dashboard).
+      const [yMs, mMs] = ms.split("-").map(Number);
+      const msStart = new Date(yMs, mMs - 1, 1);
+      const msEnd = new Date(yMs, mMs, 1);
+      const monthCreatedCards = cards.filter((c: any) => {
+        const d = new Date(c.created_at);
+        return d >= msStart && d < msEnd;
+      });
       dashboardByOriginMonth[ms] = {};
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        const oContratos = monthCreatedCards.filter((c: any) =>
+          (c.lead_origin || "offline") === origin &&
+          c.stage_id === "contratos" &&
+          !c.ghost_of
+        ).length;
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
         dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
@@ -1232,11 +1251,22 @@ Deno.serve(async (req) => {
     const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number }> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
+      // For contratos: only cards created within the year range AND currently in contratos stage
+      const yearStart = new Date(year, 0, 1);
+      const yearEnd = new Date(year + 1, 0, 1);
+      const yearCreatedCards = cards.filter((c: any) => {
+        const d = new Date(c.created_at);
+        return d >= yearStart && d < yearEnd;
+      });
       for (const origin of ["online", "offline"]) {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        const oContratos = yearCreatedCards.filter((c: any) =>
+          (c.lead_origin || "offline") === origin &&
+          c.stage_id === "contratos" &&
+          !c.ghost_of
+        ).length;
         dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
