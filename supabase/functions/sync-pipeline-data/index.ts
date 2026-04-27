@@ -1162,12 +1162,25 @@ Deno.serve(async (req) => {
       };
 
       // Dashboard leads/contratos by origin
+      // Contratos snapshot: only cards CREATED in this month and currently in "contratos" stage
+      // (matches the funnel logic to keep counts in sync with the Pipeline dashboard).
+      const [yMs, mMs] = ms.split("-").map(Number);
+      const msStart = new Date(yMs, mMs - 1, 1);
+      const msEnd = new Date(yMs, mMs, 1);
+      const monthCreatedCards = cards.filter((c: any) => {
+        const d = new Date(c.created_at);
+        return d >= msStart && d < msEnd;
+      });
       dashboardByOriginMonth[ms] = {};
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        const oContratos = monthCreatedCards.filter((c: any) =>
+          (c.lead_origin || "offline") === origin &&
+          c.stage_id === "contratos" &&
+          !c.ghost_of
+        ).length;
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
         dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
