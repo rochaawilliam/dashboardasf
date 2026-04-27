@@ -461,64 +461,59 @@ const Index = () => {
       }
     }
 
-    // ─── Crescimento Comercial: use Dashboard panel data first, fallback to Operacional ───
+    // ─── Crescimento Comercial: use Operacional panel (passage-based, created_at filter) ───
+    // Mirrors Pipeline Vision Board "Operacional" panel logic for rates and times.
     const ms = selectedMonth ? `${selectedYear}-${String(selectedMonth).padStart(2, "0")}` : null;
-    const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
 
-    if (dash) {
-      // Rates from Dashboard cumulative counts
-      values[TAXA_AGENDAMENTO_ID] = dash.taxaAgendamento;
-      values[TAXA_COMPARECIMENTO_ID] = dash.taxaComparecimento;
-      values[TAXA_CONVERSAO_ID] = dash.conversao;
-
-      // Tempo Médio de Fechamento from Dashboard
-      if (dash.avgCloseTimeDays !== null) values[TEMPO_MEDIO_FECHAMENTO_ID] = dash.avgCloseTimeDays;
-
-      // TME (Dashboard returns minutes, convert to hours for the metric)
-      if (dash.tmeMinutes !== null) values[TME_SLA_ID] = Math.round(dash.tmeMinutes / 60 * 100) / 100;
-
-      // TMA from Dashboard (days)
-      if (dash.tmaDays !== null) values[TMA_ID] = dash.tmaDays;
-    } else {
-      // Fallback: compute rates from passage-based (Operacional) data
-      const getTotal = (key: string) => {
-        let sum = 0;
-        const source = ms ? pipelineData.months?.[ms] : pipelineData.totals;
-        if (!source) return 0;
-        for (const originData of Object.values(source)) {
-          sum += (originData as any)?.[key] ?? 0;
-        }
-        return sum;
-      };
-      const totalLeads = getTotal("leads");
-      const totalReunioes = getTotal("reunioes");
-      const totalPropostas = getTotal("propostas");
-      const totalContratos = getTotal("contratos");
-      if (totalLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(totalReunioes / totalLeads * 10000) / 100;
-      if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
-      if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
-
-      // Tempo Médio de Fechamento fallback
-      if (ms) {
-        const avgDays = pipelineData.avgCloseDaysByMonth?.[ms];
-        if (avgDays !== undefined && avgDays !== null) values[TEMPO_MEDIO_FECHAMENTO_ID] = avgDays;
-      } else {
-        if (pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined) {
-          values[TEMPO_MEDIO_FECHAMENTO_ID] = pipelineData.avgCloseDays;
-        }
+    // Rates derived from passage-based counts (months/totals — created_at filtered, deduplicated by card per stage)
+    const getPassageTotal = (key: string) => {
+      let sum = 0;
+      const source = ms ? pipelineData.months?.[ms] : pipelineData.totals;
+      if (!source) return 0;
+      for (const originData of Object.values(source)) {
+        sum += (originData as any)?.[key] ?? 0;
       }
+      return sum;
+    };
+    const opLeads = getPassageTotal("leads");
+    const opReunioes = getPassageTotal("reunioes");
+    const opPropostas = getPassageTotal("propostas");
+    const opContratos = getPassageTotal("contratos");
+    if (opLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(opReunioes / opLeads * 10000) / 100;
+    if (opReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(opPropostas / opReunioes * 10000) / 100;
+    if (opLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(opContratos / opLeads * 10000) / 100;
+
+    // Tempo Médio de Fechamento (passage-based, by created_at month bucket)
+    if (ms) {
+      const avgDays = pipelineData.avgCloseDaysByMonth?.[ms];
+      if (avgDays !== undefined && avgDays !== null) values[TEMPO_MEDIO_FECHAMENTO_ID] = avgDays;
+    } else if (pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined) {
+      values[TEMPO_MEDIO_FECHAMENTO_ID] = pipelineData.avgCloseDays;
     }
 
-    // Operational metrics: use Dashboard first for TME/TMA, then fill remaining from Operacional
+    // Operational metrics (Operacional panel — created_at filtered)
     const ops = ms ? pipelineData.operational?.[ms] : pipelineData.operationalTotals;
     if (ops) {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
       values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
-      // TME/TMA: only set from Operacional if not already set from Dashboard
-      if (values[TME_SLA_ID] === undefined) values[TME_SLA_ID] = ops.avgFirstContactHours;
-      if (values[TMA_ID] === undefined && ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
+      // TME (Operacional: hours) and TMA (Operacional: days)
+      values[TME_SLA_ID] = ops.avgFirstContactHours;
+      if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
+    }
+
+    // Fallback to Dashboard panel only if Operacional has no data for this period
+    if (values[TAXA_AGENDAMENTO_ID] === undefined || values[TAXA_CONVERSAO_ID] === undefined) {
+      const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+      if (dash) {
+        if (values[TAXA_AGENDAMENTO_ID] === undefined) values[TAXA_AGENDAMENTO_ID] = dash.taxaAgendamento;
+        if (values[TAXA_COMPARECIMENTO_ID] === undefined) values[TAXA_COMPARECIMENTO_ID] = dash.taxaComparecimento;
+        if (values[TAXA_CONVERSAO_ID] === undefined) values[TAXA_CONVERSAO_ID] = dash.conversao;
+        if (values[TEMPO_MEDIO_FECHAMENTO_ID] === undefined && dash.avgCloseTimeDays !== null) {
+          values[TEMPO_MEDIO_FECHAMENTO_ID] = dash.avgCloseTimeDays;
+        }
+      }
     }
 
     // Onboarding metrics (same values regardless of month - they're current state)
