@@ -676,6 +676,51 @@ const Index = () => {
     return values;
   }, [pipelineData]);
 
+  // Map of metric IDs (rates & times in Crescimento) to the source panel & filter that supplied the value.
+  // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
+  const pipelineDataSourceInfo = useMemo(() => {
+    const info: Record<string, { source: "Operacional" | "Dashboard"; filter: "created_at" | "month" }> = {};
+    if (!pipelineData) return info;
+    const ms = selectedMonth ? `${selectedYear}-${String(selectedMonth).padStart(2, "0")}` : null;
+    const ops = ms ? pipelineData.operational?.[ms] : pipelineData.operationalTotals;
+    const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+
+    // Rates: primary source = Operacional (passages, created_at). Fallback = Dashboard (month field).
+    // Replicates the priority logic in pipelineMonthlyValues / pipelineAccumulatedValues.
+    let opLeads = 0, opReunioes = 0, opContratos = 0;
+    const passSource = ms ? pipelineData.months?.[ms] : pipelineData.totals;
+    if (passSource) {
+      for (const od of Object.values(passSource)) {
+        opLeads += (od as any)?.leads ?? 0;
+        opReunioes += (od as any)?.reunioes ?? 0;
+        opContratos += (od as any)?.contratos ?? 0;
+      }
+    }
+    const setRate = (id: string, hasOps: boolean) => {
+      if (hasOps) info[id] = { source: "Operacional", filter: "created_at" };
+      else if (dash) info[id] = { source: "Dashboard", filter: "month" };
+    };
+    setRate(TAXA_AGENDAMENTO_ID, opLeads > 0);
+    setRate(TAXA_COMPARECIMENTO_ID, opReunioes > 0);
+    setRate(TAXA_CONVERSAO_ID, opLeads > 0);
+
+    // Tempo Médio de Fechamento: primary = passage avgCloseDays. Fallback = Dashboard avgCloseTimeDays.
+    const hasCloseOps = ms
+      ? pipelineData.avgCloseDaysByMonth?.[ms] !== undefined && pipelineData.avgCloseDaysByMonth?.[ms] !== null
+      : pipelineData.avgCloseDays !== null && pipelineData.avgCloseDays !== undefined;
+    if (hasCloseOps) info[TEMPO_MEDIO_FECHAMENTO_ID] = { source: "Operacional", filter: "created_at" };
+    else if (dash?.avgCloseTimeDays !== null && dash?.avgCloseTimeDays !== undefined) {
+      info[TEMPO_MEDIO_FECHAMENTO_ID] = { source: "Dashboard", filter: "month" };
+    }
+
+    // TME / TMA / Operacional-only metrics: always from Operacional panel.
+    if (ops) {
+      info[TME_SLA_ID] = { source: "Operacional", filter: "created_at" };
+      if (ops.avgHandlingDays !== null) info[TMA_ID] = { source: "Operacional", filter: "created_at" };
+    }
+    return info;
+  }, [pipelineData, selectedMonth, selectedYear]);
+
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
       ...monthlyValues,
@@ -1859,7 +1904,8 @@ const Index = () => {
                                             forceAnnualLabel={isARR || isResultadoAcumulado}
                                             hideAnnualTarget={isTimeASFMetric}
                                             resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}
-                                            pipelineCardNames={pipelineCardNames[metric.id]}>
+                                            pipelineCardNames={pipelineCardNames[metric.id]}
+                                            dataSourceBadge={pipelineDataSourceInfo[metric.id]}>
                                           </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
