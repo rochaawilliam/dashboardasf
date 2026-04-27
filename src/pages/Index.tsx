@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/error-handler";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { AuditPanel } from "@/components/dashboard/AuditPanel";
 import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
 import { CircularProgressCard } from "@/components/dashboard/CircularProgressCard";
 import { MetricDrilldownDialog } from "@/components/dashboard/MetricDrilldownDialog";
