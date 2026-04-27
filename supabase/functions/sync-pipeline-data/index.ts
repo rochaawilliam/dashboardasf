@@ -461,19 +461,18 @@ Deno.serve(async (req) => {
             const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            // Contratos: snapshot of cards currently in "contratos" within this area+tag
+            // Contratos: snapshot of cards assigned to this month and currently in "contratos" within this area+tag
             const ptContratos = (() => {
               const names: string[] = [];
-              for (const c of tagMonthCards) {
-                if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
-              }
+              const snapCards = snapshotContractsByOriginAreaTag[origin]?.[area]?.[tag] || [];
+              for (const c of snapCards) names.push(c.title ?? c.id);
               return { count: names.length, names };
             })();
             b.leads = ptLeads.count;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
             b.contratos = ptContratos.count;
-            const contractCards = tagMonthCards.filter((c: any) => c.stage_id === "contratos");
+            const contractCards = snapshotContractsByOriginAreaTag[origin]?.[area]?.[tag] || [];
             b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
             // Store area+tag card names
             if (!cardNamesByAreaTag[ms]) cardNamesByAreaTag[ms] = {};
