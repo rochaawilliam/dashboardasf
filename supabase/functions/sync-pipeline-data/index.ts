@@ -450,11 +450,13 @@ Deno.serve(async (req) => {
         const allAreas = new Set([
           ...Object.keys(byOriginAreaTagMonthCards[origin] || {}),
           ...Object.keys(allCardIdsByOriginAreaTag[origin] || {}),
+          ...Object.keys(snapshotContractsByOriginAreaTag[origin] || {}),
         ]);
         for (const area of allAreas) {
           const allTags = new Set([
             ...Object.keys(byOriginAreaTagMonthCards[origin]?.[area] || {}),
             ...Object.keys(allCardIdsByOriginAreaTag[origin]?.[area] || {}),
+            ...Object.keys(snapshotContractsByOriginAreaTag[origin]?.[area] || {}),
           ]);
           for (const tag of allTags) {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
