@@ -1904,7 +1904,8 @@ const Index = () => {
                                             forceAnnualLabel={isARR || isResultadoAcumulado}
                                             hideAnnualTarget={isTimeASFMetric}
                                             resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}
-                                            pipelineCardNames={pipelineCardNames[metric.id]}>
+                                            pipelineCardNames={pipelineCardNames[metric.id]}
+                                            dataSourceBadge={pipelineDataSourceInfo[metric.id]}>
                                           </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
