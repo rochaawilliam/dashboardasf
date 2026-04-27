@@ -1468,7 +1468,7 @@ const Index = () => {
               <AuditPanel
                 metrics={adjustedMetrics}
                 sourceInfo={pipelineDataSourceInfo}
-                selectedMonthName={selectedMonthName}
+                selectedMonthName={selectedMonth ? ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"][selectedMonth - 1] : undefined}
                 selectedYear={selectedYear}
               />
             </div>
