@@ -296,7 +296,15 @@ Deno.serve(async (req) => {
         const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        // Contratos: snapshot (cards currently in "contratos" stage assigned to this month) — avoids
+        // counting cards that passed through and were later moved out (e.g. back to other stages).
+        const pContratos = (() => {
+          const names: string[] = [];
+          for (const c of originMonthCards) {
+            if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
+          }
+          return { count: names.length, names };
+        })();
         bucket.leads = pLeads.count;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
@@ -381,7 +389,14 @@ Deno.serve(async (req) => {
           const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          // Contratos: snapshot of cards currently in "contratos" within this area
+          const paContratos = (() => {
+            const names: string[] = [];
+            for (const c of areaMonthCards) {
+              if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
+            }
+            return { count: names.length, names };
+          })();
           b.leads = paLeads.count;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
@@ -419,7 +434,14 @@ Deno.serve(async (req) => {
             const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            // Contratos: snapshot of cards currently in "contratos" within this area+tag
+            const ptContratos = (() => {
+              const names: string[] = [];
+              for (const c of tagMonthCards) {
+                if (c.stage_id === "contratos" && !c.ghost_of) names.push(c.title ?? c.id);
+              }
+              return { count: names.length, names };
+            })();
             b.leads = ptLeads.count;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
