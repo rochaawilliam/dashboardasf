@@ -1245,11 +1245,22 @@ Deno.serve(async (req) => {
     const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number }> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
+      // For contratos: only cards created within the year range AND currently in contratos stage
+      const yearStart = new Date(year, 0, 1);
+      const yearEnd = new Date(year + 1, 0, 1);
+      const yearCreatedCards = cards.filter((c: any) => {
+        const d = new Date(c.created_at);
+        return d >= yearStart && d < yearEnd;
+      });
       for (const origin of ["online", "offline"]) {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        const oContratos = yearCreatedCards.filter((c: any) =>
+          (c.lead_origin || "offline") === origin &&
+          c.stage_id === "contratos" &&
+          !c.ghost_of
+        ).length;
         dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
       }
     }
