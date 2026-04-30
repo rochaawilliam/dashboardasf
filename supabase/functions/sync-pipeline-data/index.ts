@@ -132,7 +132,18 @@ Deno.serve(async (req) => {
       fetchAll(pipeline, "card_comments", "card_id, created_at"),
     ]);
 
-    const cards = allCards.filter((c: any) => !c.ghost_of);
+    // Blocklist: cards removidos do Pipeline mas que ainda aparecem por inconsistência.
+    // Filtramos por título (case-insensitive, substring) — afeta contagens, valor_gerado e tooltips.
+    const TITLE_BLOCKLIST = [
+      "saga licita", // Saga Licitação — contrato removido do Pipeline
+    ];
+    const isBlocked = (title: any) => {
+      if (!title) return false;
+      const t = String(title).toLowerCase();
+      return TITLE_BLOCKLIST.some((b) => t.includes(b));
+    };
+
+    const cards = allCards.filter((c: any) => !c.ghost_of && !isBlocked(c.title));
 
     const cardIdSet = new Set(cards.map((c: any) => c.id));
     const historyByCard: Record<string, { from_stage: string | null; to_stage: string; moved_at: string }[]> = {};
