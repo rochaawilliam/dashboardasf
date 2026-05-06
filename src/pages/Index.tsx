@@ -396,6 +396,10 @@ const Index = () => {
   const VALOR_INVESTIDO_OFFLINE_ID = "b2c3d4e5-1111-4bbb-cccc-111111111111";
   const VALOR_GERADO_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
   const VALOR_GERADO_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
+  const IMPRESSOES_ASF_ID = "12574c46-d6c0-4e18-9e7e-a42b05b8fcfe";
+  const ALCANCE_ASF_ID = "54a2c98b-52e6-4b8a-850c-d7a38492d030";
+  const CONVERSAS_INICIADAS_ID = "ca49be98-52c9-4da8-a580-6a681b54aeba";
+  const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
   const pipelineMonthlyValues = useMemo(() => {
     if (!pipelineData) return {};
