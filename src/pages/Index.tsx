@@ -57,6 +57,7 @@ import {
 "lucide-react";
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import { usePipelineData } from "@/hooks/usePipelineData";
+import { useTrafficFunnelData } from "@/hooks/useTrafficFunnelData";
 import {
   useMetrics,
   useMetricHistory,
