@@ -57,6 +57,7 @@ import {
 "lucide-react";
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import { usePipelineData } from "@/hooks/usePipelineData";
+import { useTrafficFunnelData } from "@/hooks/useTrafficFunnelData";
 import {
   useMetrics,
   useMetricHistory,
@@ -157,6 +158,9 @@ const Index = () => {
 
   // Pipeline Vision Board data
   const { data: pipelineData } = usePipelineData(selectedYear, selectedMonth);
+
+  // Traffic Funnel (Google Sheets) data
+  const { data: trafficFunnelData } = useTrafficFunnelData(selectedYear);
 
   // Ritual completions data
   const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
@@ -392,6 +396,10 @@ const Index = () => {
   const VALOR_INVESTIDO_OFFLINE_ID = "b2c3d4e5-1111-4bbb-cccc-111111111111";
   const VALOR_GERADO_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
   const VALOR_GERADO_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
+  const IMPRESSOES_ASF_ID = "12574c46-d6c0-4e18-9e7e-a42b05b8fcfe";
+  const ALCANCE_ASF_ID = "54a2c98b-52e6-4b8a-850c-d7a38492d030";
+  const CONVERSAS_INICIADAS_ID = "ca49be98-52c9-4da8-a580-6a681b54aeba";
+  const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
   const pipelineMonthlyValues = useMemo(() => {
     if (!pipelineData) return {};
@@ -573,8 +581,30 @@ const Index = () => {
       }
     }
 
+    // Traffic Funnel data (Google Sheets)
+    if (trafficFunnelData) {
+      if (selectedMonth) {
+        const ms2 = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const tf = trafficFunnelData.months?.[ms2];
+        if (tf) {
+          values[VALOR_INVESTIDO_ONLINE_ID] = tf.valor_investido;
+          values[IMPRESSOES_ASF_ID] = tf.impressoes;
+          values[ALCANCE_ASF_ID] = tf.alcance;
+          values[CONVERSAS_INICIADAS_ID] = tf.conversas_iniciadas;
+        }
+      } else {
+        const tf = trafficFunnelData.totals;
+        if (tf) {
+          values[VALOR_INVESTIDO_ONLINE_ID] = tf.valor_investido;
+          values[IMPRESSOES_ASF_ID] = tf.impressoes;
+          values[ALCANCE_ASF_ID] = tf.alcance;
+          values[CONVERSAS_INICIADAS_ID] = tf.conversas_iniciadas;
+        }
+      }
+    }
+
     return values;
-  }, [pipelineData, selectedMonth, selectedYear]);
+  }, [pipelineData, trafficFunnelData, selectedMonth, selectedYear]);
 
   const pipelineAccumulatedValues = useMemo(() => {
     if (!pipelineData) return {};
@@ -674,8 +704,17 @@ const Index = () => {
     if (dbo?.online) values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
     if (dbo?.offline) values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
 
+    // Traffic Funnel accumulated totals
+    if (trafficFunnelData?.totals) {
+      const tf = trafficFunnelData.totals;
+      values[VALOR_INVESTIDO_ONLINE_ID] = tf.valor_investido;
+      values[IMPRESSOES_ASF_ID] = tf.impressoes;
+      values[ALCANCE_ASF_ID] = tf.alcance;
+      values[CONVERSAS_INICIADAS_ID] = tf.conversas_iniciadas;
+    }
+
     return values;
-  }, [pipelineData]);
+  }, [pipelineData, trafficFunnelData]);
 
   // Map of metric IDs (rates & times in Crescimento) to the source panel & filter that supplied the value.
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
@@ -1729,6 +1768,7 @@ const Index = () => {
                               TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
                               MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID, TAXA_AVANCO_ID,
                               COMENTARIOS_LEAD_ID, TME_SLA_ID, TMA_ID,
+                              VALOR_INVESTIDO_ONLINE_ID, IMPRESSOES_ASF_ID, ALCANCE_ASF_ID, CONVERSAS_INICIADAS_ID,
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               return (
