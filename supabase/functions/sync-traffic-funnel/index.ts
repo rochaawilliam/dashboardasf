@@ -46,6 +46,25 @@ function parseBRNumber(str: string): number {
   return isNaN(n) ? 0 : n;
 }
 
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === "," && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
 function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
   const lines = csv.split("\n").map((l) => l.trim());
   const months: Record<string, MonthData> = {};
