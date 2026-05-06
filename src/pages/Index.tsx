@@ -1768,6 +1768,7 @@ const Index = () => {
                               TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
                               MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID, TAXA_AVANCO_ID,
                               COMENTARIOS_LEAD_ID, TME_SLA_ID, TMA_ID,
+                              VALOR_INVESTIDO_ONLINE_ID, IMPRESSOES_ASF_ID, ALCANCE_ASF_ID, CONVERSAS_INICIADAS_ID,
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               return (
