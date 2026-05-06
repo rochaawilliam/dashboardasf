@@ -159,6 +159,9 @@ const Index = () => {
   // Pipeline Vision Board data
   const { data: pipelineData } = usePipelineData(selectedYear, selectedMonth);
 
+  // Traffic Funnel (Google Sheets) data
+  const { data: trafficFunnelData } = useTrafficFunnelData(selectedYear);
+
   // Ritual completions data
   const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
 
