@@ -704,8 +704,17 @@ const Index = () => {
     if (dbo?.online) values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
     if (dbo?.offline) values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
 
+    // Traffic Funnel accumulated totals
+    if (trafficFunnelData?.totals) {
+      const tf = trafficFunnelData.totals;
+      values[VALOR_INVESTIDO_ONLINE_ID] = tf.valor_investido;
+      values[IMPRESSOES_ASF_ID] = tf.impressoes;
+      values[ALCANCE_ASF_ID] = tf.alcance;
+      values[CONVERSAS_INICIADAS_ID] = tf.conversas_iniciadas;
+    }
+
     return values;
-  }, [pipelineData]);
+  }, [pipelineData, trafficFunnelData]);
 
   // Map of metric IDs (rates & times in Crescimento) to the source panel & filter that supplied the value.
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
