@@ -72,7 +72,7 @@ function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
   };
 
   for (const line of lines) {
-    const cols = line.split(",").map((c) => c.replace(/^"|"$/g, "").trim());
+    const cols = parseCSVLine(line);
     const first = cols[0]?.toUpperCase() || "";
 
     // Detect "FUNIL DE <MONTH> [DE <YEAR>]"
