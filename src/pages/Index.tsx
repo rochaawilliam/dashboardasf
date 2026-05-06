@@ -581,8 +581,30 @@ const Index = () => {
       }
     }
 
+    // Traffic Funnel data (Google Sheets)
+    if (trafficFunnelData) {
+      if (selectedMonth) {
+        const ms2 = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const tf = trafficFunnelData.months?.[ms2];
+        if (tf) {
+          values[VALOR_INVESTIDO_ONLINE_ID] = tf.valor_investido;
+          values[IMPRESSOES_ASF_ID] = tf.impressoes;
+          values[ALCANCE_ASF_ID] = tf.alcance;
+          values[CONVERSAS_INICIADAS_ID] = tf.conversas_iniciadas;
+        }
+      } else {
+        const tf = trafficFunnelData.totals;
+        if (tf) {
+          values[VALOR_INVESTIDO_ONLINE_ID] = tf.valor_investido;
+          values[IMPRESSOES_ASF_ID] = tf.impressoes;
+          values[ALCANCE_ASF_ID] = tf.alcance;
+          values[CONVERSAS_INICIADAS_ID] = tf.conversas_iniciadas;
+        }
+      }
+    }
+
     return values;
-  }, [pipelineData, selectedMonth, selectedYear]);
+  }, [pipelineData, trafficFunnelData, selectedMonth, selectedYear]);
 
   const pipelineAccumulatedValues = useMemo(() => {
     if (!pipelineData) return {};
