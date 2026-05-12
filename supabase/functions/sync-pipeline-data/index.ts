@@ -399,8 +399,7 @@ Deno.serve(async (req) => {
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
           b.contratos = paContratos.count;
-          const contractCards = areaMonthCards.filter((c: any) => c.stage_id === "contratos");
-          b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+          b.valor_gerado = deduplicatedValorGerado(paContratos.cards);
           if (b.leads > 0 || b.reunioes > 0 || b.propostas > 0 || b.contratos > 0) {
             byArea[ms][origin][area] = b;
           }
