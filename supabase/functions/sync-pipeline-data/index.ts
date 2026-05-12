@@ -172,8 +172,9 @@ Deno.serve(async (req) => {
       filterCardIds: Set<string>,
       rangeStart: Date,
       rangeEnd: Date,
-    ): { count: number; names: string[] } {
+    ): { count: number; names: string[], cards: any[] } {
       const names: string[] = [];
+      const matchedCards: any[] = [];
       const countedCardIds = new Set<string>();
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
@@ -188,6 +189,7 @@ Deno.serve(async (req) => {
             if (d >= rangeStart && d < rangeEnd) {
               const card = cardById.get(cardId);
               names.push(card?.title ?? cardId);
+              if (card) matchedCards.push(card);
               countedCardIds.add(cardId);
               break; // count this card only once
             }
@@ -205,11 +207,12 @@ Deno.serve(async (req) => {
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
           names.push(c.title ?? c.id);
+          matchedCards.push(c);
           countedCardIds.add(c.id);
         }
       }
 
-      return { count: names.length, names };
+      return { count: names.length, names, cards: matchedCards };
     }
 
     // Stage-to-targetStages mapping (matching Operacional):
@@ -327,8 +330,7 @@ Deno.serve(async (req) => {
         cardNames[ms][origin]["new_leads"] = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).map((c: any) => c.title ?? c.id);
 
         // Deduplicated valor_gerado
-        const contractCards = originMonthCards.filter((c: any) => c.stage_id === "contratos");
-        bucket.valor_gerado = deduplicatedValorGerado(contractCards);
+        bucket.valor_gerado = deduplicatedValorGerado(pContratos.cards);
 
         if (bucket.leads > 0 || bucket.reunioes > 0 || bucket.propostas > 0 || bucket.contratos > 0 || bucket.prospects > 0 || bucket.new_leads > 0) {
           if (!result[ms]) result[ms] = {};
@@ -336,7 +338,7 @@ Deno.serve(async (req) => {
         }
 
         // Close time calculation
-        for (const card of contractCards) {
+        for (const card of pContratos.cards) {
           const entries = historyByCard[card.id];
           if (entries) {
             const contractMove = entries
@@ -397,8 +399,7 @@ Deno.serve(async (req) => {
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
           b.contratos = paContratos.count;
-          const contractCards = areaMonthCards.filter((c: any) => c.stage_id === "contratos");
-          b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+          b.valor_gerado = deduplicatedValorGerado(paContratos.cards);
           if (b.leads > 0 || b.reunioes > 0 || b.propostas > 0 || b.contratos > 0) {
             byArea[ms][origin][area] = b;
           }
@@ -435,8 +436,7 @@ Deno.serve(async (req) => {
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
             b.contratos = ptContratos.count;
-            const contractCards = tagMonthCards.filter((c: any) => c.stage_id === "contratos");
-            b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+            b.valor_gerado = deduplicatedValorGerado(ptContratos.cards);
             // Store area+tag card names
             if (!cardNamesByAreaTag[ms]) cardNamesByAreaTag[ms] = {};
             if (!cardNamesByAreaTag[ms][origin]) cardNamesByAreaTag[ms][origin] = {};
@@ -462,13 +462,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Deduplicate valor_gerado at yearly total level too
-    for (const [origin, bucket] of Object.entries(totals)) {
-      const allContractCards = cards.filter((c: any) =>
-        (c.lead_origin || "offline") === origin && c.stage_id === "contratos"
-      );
-      bucket.valor_gerado = deduplicatedValorGerado(allContractCards);
-    }
 
     const totalsByArea: Record<string, Record<string, AreaBucket>> = {};
     for (const monthData of Object.values(byArea)) {
