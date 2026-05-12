@@ -172,8 +172,9 @@ Deno.serve(async (req) => {
       filterCardIds: Set<string>,
       rangeStart: Date,
       rangeEnd: Date,
-    ): { count: number; names: string[] } {
+    ): { count: number; names: string[], cards: any[] } {
       const names: string[] = [];
+      const matchedCards: any[] = [];
       const countedCardIds = new Set<string>();
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
@@ -188,6 +189,7 @@ Deno.serve(async (req) => {
             if (d >= rangeStart && d < rangeEnd) {
               const card = cardById.get(cardId);
               names.push(card?.title ?? cardId);
+              if (card) matchedCards.push(card);
               countedCardIds.add(cardId);
               break; // count this card only once
             }
@@ -205,11 +207,12 @@ Deno.serve(async (req) => {
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
           names.push(c.title ?? c.id);
+          matchedCards.push(c);
           countedCardIds.add(c.id);
         }
       }
 
-      return { count: names.length, names };
+      return { count: names.length, names, cards: matchedCards };
     }
 
     // Stage-to-targetStages mapping (matching Operacional):
