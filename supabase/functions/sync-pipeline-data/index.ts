@@ -462,13 +462,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Deduplicate valor_gerado at yearly total level too
-    for (const [origin, bucket] of Object.entries(totals)) {
-      const allContractCards = cards.filter((c: any) =>
-        (c.lead_origin || "offline") === origin && c.stage_id === "contratos"
-      );
-      bucket.valor_gerado = deduplicatedValorGerado(allContractCards);
-    }
 
     const totalsByArea: Record<string, Record<string, AreaBucket>> = {};
     for (const monthData of Object.values(byArea)) {
