@@ -338,7 +338,7 @@ Deno.serve(async (req) => {
         }
 
         // Close time calculation
-        for (const card of contractCards) {
+        for (const card of pContratos.cards) {
           const entries = historyByCard[card.id];
           if (entries) {
             const contractMove = entries
