@@ -436,8 +436,7 @@ Deno.serve(async (req) => {
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
             b.contratos = ptContratos.count;
-            const contractCards = tagMonthCards.filter((c: any) => c.stage_id === "contratos");
-            b.valor_gerado = contractCards.reduce((s: number, c: any) => s + (c.contract_value || 0), 0);
+            b.valor_gerado = deduplicatedValorGerado(ptContratos.cards);
             // Store area+tag card names
             if (!cardNamesByAreaTag[ms]) cardNamesByAreaTag[ms] = {};
             if (!cardNamesByAreaTag[ms][origin]) cardNamesByAreaTag[ms][origin] = {};
