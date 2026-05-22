@@ -280,7 +280,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Base de cálculo da Receita: meta mensal ajustada, sem considerar o valor do Patenteia.
+        * Receita Total = soma dos cards Valor Gerado (Online + Offline) do Pipeline. Meta mensal ajustada, sem considerar Patenteia.
       </p>
 
       {/* Total Commission */}
