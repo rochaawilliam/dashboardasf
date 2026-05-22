@@ -163,6 +163,7 @@ export function CommissionTab({
 }: CommissionTabProps) {
   const { data: dbSubcategories } = useSubcategories();
   const { data: dbAssignments } = useSubcategoryAssignments();
+  const { data: pipelineData } = usePipelineData(selectedYear);
 
   // Fixed monthly revenue targets (without Patenteia)
   const RECEITA_MONTHLY_TARGETS: Record<number, number> = {
@@ -170,31 +171,31 @@ export function CommissionTab({
     7: 168000, 8: 184700, 9: 202800, 10: 234700, 11: 234700, 12: 301800,
   };
 
-  // Compute Receita Total (sum of revenue subcategories)
+  // Receita Total = soma de Valor Gerado Online + Offline do Pipeline
   const receitaData = useMemo(() => {
-    const lucratividadeMetrics = metrics.filter(m => m.category === "lucratividade");
-    const organized = organizeMetricsBySubcategory(lucratividadeMetrics, "lucratividade", dbSubcategories, dbAssignments);
-    const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
-    
-    const revenueMetrics = organized
-      .filter(s => revenueSubcats.includes(s.name))
-      .flatMap(s => s.metrics);
-    
-    const achieved = selectedMonth !== null
-      ? revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0)
-      : revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-    
+    let achieved = 0;
+    if (pipelineData) {
+      if (selectedMonth !== null) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const m = pipelineData.months?.[ms];
+        achieved = (m?.offline?.valor_gerado ?? 0) + (m?.online?.valor_gerado ?? 0);
+      } else {
+        achieved =
+          (pipelineData.totals?.offline?.valor_gerado ?? 0) +
+          (pipelineData.totals?.online?.valor_gerado ?? 0);
+      }
+    }
+
     // Use fixed monthly targets
     let target = 0;
     if (selectedMonth !== null) {
       target = RECEITA_MONTHLY_TARGETS[selectedMonth] ?? 0;
     } else {
-      // Annual: sum all monthly targets
       target = Object.values(RECEITA_MONTHLY_TARGETS).reduce((s, v) => s + v, 0);
     }
-    
+
     return { achieved, target };
-  }, [metrics, monthlyValues, accumulatedValues, selectedMonth, selectedYear]);
+  }, [pipelineData, selectedMonth, selectedYear]);
 
   // Compute Total Contratos using the "Total de Contratos" card value and monthly targets
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
