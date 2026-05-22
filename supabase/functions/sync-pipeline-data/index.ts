@@ -172,6 +172,7 @@ Deno.serve(async (req) => {
       filterCardIds: Set<string>,
       rangeStart: Date,
       rangeEnd: Date,
+      currentMs?: string,
     ): { count: number; names: string[], cards: any[] } {
       const names: string[] = [];
       const matchedCards: any[] = [];
@@ -182,12 +183,18 @@ Deno.serve(async (req) => {
       // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
         if (countedCardIds.has(cardId)) continue;
+        const card = cardById.get(cardId);
+        // If a card has an explicit `month` field, attribute it strictly to that month
+        // (Pipeline uses this to migrate cards between months).
+        if (currentMs && card?.month && card.month !== currentMs) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
           if (targetStages.includes(h.to_stage)) {
             const d = new Date(h.moved_at);
-            if (d >= rangeStart && d < rangeEnd) {
-              const card = cardById.get(cardId);
+            const inRange = d >= rangeStart && d < rangeEnd;
+            // Accept if moved_at is in this month, OR if the card was migrated to this month
+            // via its `month` field (then attribute to currentMs regardless of moved_at).
+            if (inRange || (currentMs && card?.month === currentMs)) {
               names.push(card?.title ?? cardId);
               if (card) matchedCards.push(card);
               countedCardIds.add(cardId);
@@ -281,8 +288,11 @@ Deno.serve(async (req) => {
       const rangeStart = new Date(y, m - 1, 1);
       const rangeEnd = new Date(y, m, 1);
 
-      // monthCards: cards created in this month range, not ghosts (matching Operacional)
+      // monthCards: cards belonging to this month.
+      // Prefer the explicit `month` field (set by Pipeline when a card is migrated between months);
+      // fall back to created_at when month is null/empty.
       const monthCards = cards.filter((c: any) => {
+        if (c.month) return c.month === ms;
         const d = new Date(c.created_at);
         return d >= rangeStart && d < rangeEnd;
       });
@@ -307,10 +317,10 @@ Deno.serve(async (req) => {
         const bucket = newStageBucket();
 
         // Passage-based counting (matching Operacional)
-        const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd);
-        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd);
+        const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         bucket.leads = pLeads.count;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
@@ -391,10 +401,10 @@ Deno.serve(async (req) => {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
           const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
-          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd);
+          const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           b.leads = paLeads.count;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
@@ -428,10 +438,10 @@ Deno.serve(async (req) => {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
             const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
-            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd);
+            const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             b.leads = ptLeads.count;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
