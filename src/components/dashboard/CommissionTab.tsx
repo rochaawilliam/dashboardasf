@@ -282,7 +282,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Receita Total = soma dos cards Valor Gerado (Online + Offline) do Pipeline. Meta mensal ajustada, sem considerar Patenteia.
+        * Receita Total e Total de Contratos = soma dos cards Valor Gerado e Novos Contratos (Online + Offline) do Pipeline ASF.
       </p>
 
       {/* Total Commission */}
