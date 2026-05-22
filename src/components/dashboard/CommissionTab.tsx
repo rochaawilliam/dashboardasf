@@ -7,6 +7,7 @@ import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { useSubcategories, useSubcategoryAssignments } from "@/hooks/useSubcategories";
 import { getRefMonthYear } from "@/utils/dateUtils";
 import { formatNumber } from "@/utils/formatters";
+import { usePipelineData } from "@/hooks/usePipelineData";
 
 interface CommissionTabProps {
   metrics: Metric[];
