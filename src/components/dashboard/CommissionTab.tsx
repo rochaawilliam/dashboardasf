@@ -208,17 +208,19 @@ export function CommissionTab({
     const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
     const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
 
-    // Total de Contratos = sum of all Novos Contratos
-    const empAss = monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0;
-    const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
-    const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
-    const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
-    const trabAss = monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0;
-    const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
-
-    const achieved = selectedMonth !== null
-      ? empAss + empConsult + tribAss + tribPont + trabAss + trabConsult
-      : (accumulatedValues[TOTAL_CONTRATOS_ID] ?? 0);
+    // Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF
+    let achieved = 0;
+    if (pipelineData) {
+      if (selectedMonth !== null) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const m = pipelineData.months?.[ms];
+        achieved = (m?.offline?.contratos ?? 0) + (m?.online?.contratos ?? 0);
+      } else {
+        achieved =
+          (pipelineData.totals?.offline?.contratos ?? 0) +
+          (pipelineData.totals?.online?.contratos ?? 0);
+      }
+    }
 
     // Dynamic target: sum of monthly targets from component metrics
     const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
@@ -234,9 +236,9 @@ export function CommissionTab({
         return sum + mts.reduce((s, t) => s + t.target_value, 0);
       }, 0);
     }
-    
+
     return { achieved, target };
-  }, [metrics, monthlyValues, accumulatedValues, monthlyTargets, selectedMonth, selectedYear]);
+  }, [pipelineData, monthlyTargets, selectedMonth, selectedYear]);
 
   const receitaCommission = getCommission(receitaData.target > 0 ? (receitaData.achieved / receitaData.target) * 100 : 0);
   const contratosCommission = getCommission(contratosData.target > 0 ? (contratosData.achieved / contratosData.target) * 100 : 0);
@@ -280,7 +282,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Receita Total = soma dos cards Valor Gerado (Online + Offline) do Pipeline. Meta mensal ajustada, sem considerar Patenteia.
+        * Receita Total e Total de Contratos = soma dos cards Valor Gerado e Novos Contratos (Online + Offline) do Pipeline ASF.
       </p>
 
       {/* Total Commission */}
