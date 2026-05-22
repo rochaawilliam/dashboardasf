@@ -172,6 +172,7 @@ Deno.serve(async (req) => {
       filterCardIds: Set<string>,
       rangeStart: Date,
       rangeEnd: Date,
+      currentMs?: string,
     ): { count: number; names: string[], cards: any[] } {
       const names: string[] = [];
       const matchedCards: any[] = [];
@@ -182,12 +183,18 @@ Deno.serve(async (req) => {
       // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
         if (countedCardIds.has(cardId)) continue;
+        const card = cardById.get(cardId);
+        // If a card has an explicit `month` field, attribute it strictly to that month
+        // (Pipeline uses this to migrate cards between months).
+        if (currentMs && card?.month && card.month !== currentMs) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
           if (targetStages.includes(h.to_stage)) {
             const d = new Date(h.moved_at);
-            if (d >= rangeStart && d < rangeEnd) {
-              const card = cardById.get(cardId);
+            const inRange = d >= rangeStart && d < rangeEnd;
+            // Accept if moved_at is in this month, OR if the card was migrated to this month
+            // via its `month` field (then attribute to currentMs regardless of moved_at).
+            if (inRange || (currentMs && card?.month === currentMs)) {
               names.push(card?.title ?? cardId);
               if (card) matchedCards.push(card);
               countedCardIds.add(cardId);
