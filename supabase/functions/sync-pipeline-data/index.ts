@@ -281,8 +281,11 @@ Deno.serve(async (req) => {
       const rangeStart = new Date(y, m - 1, 1);
       const rangeEnd = new Date(y, m, 1);
 
-      // monthCards: cards created in this month range, not ghosts (matching Operacional)
+      // monthCards: cards belonging to this month.
+      // Prefer the explicit `month` field (set by Pipeline when a card is migrated between months);
+      // fall back to created_at when month is null/empty.
       const monthCards = cards.filter((c: any) => {
+        if (c.month) return c.month === ms;
         const d = new Date(c.created_at);
         return d >= rangeStart && d < rangeEnd;
       });
