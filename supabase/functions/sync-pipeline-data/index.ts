@@ -403,11 +403,11 @@ Deno.serve(async (req) => {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
           const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const areaLeadsCards = areaMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
-          b.leads = paLeads.count;
+          b.leads = areaLeadsCards.length;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
           b.contratos = paContratos.count;
@@ -419,7 +419,7 @@ Deno.serve(async (req) => {
           if (!cardNamesByArea[ms]) cardNamesByArea[ms] = {};
           if (!cardNamesByArea[ms][origin]) cardNamesByArea[ms][origin] = {};
           if (!cardNamesByArea[ms][origin][area]) cardNamesByArea[ms][origin][area] = {};
-          cardNamesByArea[ms][origin][area]["leads"] = paLeads.names;
+          cardNamesByArea[ms][origin][area]["leads"] = areaLeadsCards.map((c: any) => c.title ?? c.id);
           cardNamesByArea[ms][origin][area]["reunioes"] = paReunioes.names;
           cardNamesByArea[ms][origin][area]["propostas"] = paPropostas.names;
           cardNamesByArea[ms][origin][area]["contratos"] = paContratos.names;
