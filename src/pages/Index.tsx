@@ -704,6 +704,8 @@ const Index = () => {
     }
 
     // Override origin snapshot accumulated values with Dashboard origin totals
+    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
+    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     const dbo = pipelineData.dashboardTotalsByOrigin;
     if (dbo?.online) {
       values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
