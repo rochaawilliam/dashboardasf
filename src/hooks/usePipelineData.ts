@@ -116,7 +116,7 @@ export interface PipelineData {
   dashboardTotalsByOrigin?: Record<string, { leads: number; prospects: number; contratos: number; valor_gerado?: number }>;
 }
 
-const CACHE_KEY = "pipeline-data-cache";
+const CACHE_KEY = "pipeline-data-cache-v2";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 function getCachedPipeline(year: number, month?: number | null): PipelineData | null {
