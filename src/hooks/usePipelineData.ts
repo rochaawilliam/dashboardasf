@@ -112,8 +112,8 @@ export interface PipelineData {
   cardNamesByAreaTag?: Record<string, Record<string, Record<string, Record<string, Record<string, string[]>>>>>;
   dashboard?: Record<string, DashboardMonthData>;
   dashboardTotals?: DashboardMonthData;
-  dashboardByOrigin?: Record<string, Record<string, { leads: number; prospects: number; contratos: number }>>;
-  dashboardTotalsByOrigin?: Record<string, { leads: number; prospects: number; contratos: number }>;
+  dashboardByOrigin?: Record<string, Record<string, { leads: number; prospects: number; contratos: number; valor_gerado?: number }>>;
+  dashboardTotalsByOrigin?: Record<string, { leads: number; prospects: number; contratos: number; valor_gerado?: number }>;
 }
 
 const CACHE_KEY = "pipeline-data-cache";
