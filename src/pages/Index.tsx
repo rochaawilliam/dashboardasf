@@ -564,20 +564,24 @@ const Index = () => {
       if (dbo?.online) {
         values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
         values[CONTRATOS_ONLINE_ID] = dbo.online.contratos ?? 0;
+        values[VALOR_GERADO_ONLINE_ID] = dbo.online.valor_gerado ?? values[VALOR_GERADO_ONLINE_ID] ?? 0;
       }
       if (dbo?.offline) {
         values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
         values[CONTRATOS_OFFLINE_ID] = dbo.offline.contratos ?? 0;
+        values[VALOR_GERADO_OFFLINE_ID] = dbo.offline.valor_gerado ?? values[VALOR_GERADO_OFFLINE_ID] ?? 0;
       }
     } else {
       const dbo = pipelineData.dashboardTotalsByOrigin;
       if (dbo?.online) {
         values[LEADS_FUNIL_ONLINE_ID] = dbo.online.leads;
         values[CONTRATOS_ONLINE_ID] = dbo.online.contratos ?? 0;
+        values[VALOR_GERADO_ONLINE_ID] = dbo.online.valor_gerado ?? values[VALOR_GERADO_ONLINE_ID] ?? 0;
       }
       if (dbo?.offline) {
         values[LEADS_FUNIL_OFFLINE_ID] = dbo.offline.leads;
         values[CONTRATOS_OFFLINE_ID] = dbo.offline.contratos ?? 0;
+        values[VALOR_GERADO_OFFLINE_ID] = dbo.offline.valor_gerado ?? values[VALOR_GERADO_OFFLINE_ID] ?? 0;
       }
     }
 
@@ -699,10 +703,18 @@ const Index = () => {
       values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
     }
 
-    // Override "Leads no Funil" accumulated with Dashboard origin totals
+    // Override origin snapshot accumulated values with Dashboard origin totals
     const dbo = pipelineData.dashboardTotalsByOrigin;
-    if (dbo?.online) values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
-    if (dbo?.offline) values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
+    if (dbo?.online) {
+      values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
+      values[CONTRATOS_ONLINE_ID] = dbo.online.contratos ?? 0;
+      values[VALOR_GERADO_ONLINE_ID] = dbo.online.valor_gerado ?? values[VALOR_GERADO_ONLINE_ID] ?? 0;
+    }
+    if (dbo?.offline) {
+      values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
+      values[CONTRATOS_OFFLINE_ID] = dbo.offline.contratos ?? 0;
+      values[VALOR_GERADO_OFFLINE_ID] = dbo.offline.valor_gerado ?? values[VALOR_GERADO_OFFLINE_ID] ?? 0;
+    }
 
     // Traffic Funnel accumulated totals
     if (trafficFunnelData?.totals) {
