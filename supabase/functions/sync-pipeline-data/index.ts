@@ -177,6 +177,15 @@ Deno.serve(async (req) => {
       const names: string[] = [];
       const matchedCards: any[] = [];
       const countedCardIds = new Set<string>();
+      // Dedup por link_group (com fallback para título) — replica o Pipeline:
+      // múltiplos cards do mesmo lead/contrato contam uma vez só.
+      const countedGroupKeys = new Set<string>();
+      const groupKeyOf = (card: any) => {
+        const lg = card?.link_group;
+        if (lg) return `lg:${lg}`;
+        const t = (card?.title ?? "").toString().trim().toLowerCase();
+        return t ? `t:${t}` : "";
+      };
       const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
       const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
 
@@ -195,9 +204,15 @@ Deno.serve(async (req) => {
             // Accept if moved_at is in this month, OR if the card was migrated to this month
             // via its `month` field (then attribute to currentMs regardless of moved_at).
             if (inRange || (currentMs && card?.month === currentMs)) {
+              const gk = groupKeyOf(card);
+              if (gk && countedGroupKeys.has(gk)) {
+                countedCardIds.add(cardId);
+                break;
+              }
               names.push(card?.title ?? cardId);
               if (card) matchedCards.push(card);
               countedCardIds.add(cardId);
+              if (gk) countedGroupKeys.add(gk);
               break; // count this card only once
             }
           }
@@ -213,9 +228,15 @@ Deno.serve(async (req) => {
         const cardHistory = historyByCard[c.id] || [];
         const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
         if (!hasEntry) {
+          const gk = groupKeyOf(c);
+          if (gk && countedGroupKeys.has(gk)) {
+            countedCardIds.add(c.id);
+            continue;
+          }
           names.push(c.title ?? c.id);
           matchedCards.push(c);
           countedCardIds.add(c.id);
+          if (gk) countedGroupKeys.add(gk);
         }
       }
 
