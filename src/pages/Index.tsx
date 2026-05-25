@@ -1879,11 +1879,19 @@ const Index = () => {
                                     let dynamicMetric = metric;
                                     const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
 
-                                    // Compute "Total de Contratos" = Novos Contratos Online + Offline ASF (Pipeline)
+                                    // Compute "Total de Contratos" = Novos Contratos Online + Offline ASF
                                     const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
+                                    const totalContratosMonthly = isTotalContratos
+                                      ? (pipelineMonthlyValues[CONTRATOS_ONLINE_ID] ?? originValues.online.monthly ?? 0) +
+                                        (pipelineMonthlyValues[CONTRATOS_OFFLINE_ID] ?? originValues.offline.monthly ?? 0)
+                                      : null;
+                                    const totalContratosAccumulated = isTotalContratos
+                                      ? (pipelineAccumulatedValues[CONTRATOS_ONLINE_ID] ?? originValues.online.accumulated ?? 0) +
+                                        (pipelineAccumulatedValues[CONTRATOS_OFFLINE_ID] ?? originValues.offline.accumulated ?? 0)
+                                      : 0;
+
                                     if (isTotalContratos) {
-                                      const totalContratosAcc = (originValues.online.accumulated ?? 0) + (originValues.offline.accumulated ?? 0);
-                                      dynamicMetric = { ...dynamicMetric, current_value: totalContratosAcc };
+                                      dynamicMetric = { ...dynamicMetric, current_value: totalContratosAccumulated };
 
                                       // Dynamic target: sum of monthly targets from origin cards
                                       const componentIds = [CONTRATOS_ONLINE_ID, CONTRATOS_OFFLINE_ID];
@@ -1903,14 +1911,6 @@ const Index = () => {
                                         }
                                       }
                                     }
-
-                                    // For "Total de Contratos", compute monthly value (Online + Offline)
-                                    const totalContratosMonthly = isTotalContratos
-                                      ? (originValues.online.monthly ?? 0) + (originValues.offline.monthly ?? 0)
-                                      : null;
-                                    const totalContratosAccumulated = isTotalContratos
-                                      ? (originValues.online.accumulated ?? 0) + (originValues.offline.accumulated ?? 0)
-                                      : 0;
 
                                     // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
                                     const isMRR = metric.id === MRR_METRIC_ID;
