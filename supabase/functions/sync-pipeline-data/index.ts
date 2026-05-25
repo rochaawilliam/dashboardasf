@@ -316,28 +316,30 @@ Deno.serve(async (req) => {
         const originAllIds = allCardIdsByOrigin[origin] || new Set();
         const bucket = newStageBucket();
 
-        // Passage-based counting (matching Operacional)
-        const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        // Passage-based counting (matching Operacional) — usada para reuniões/propostas/contratos
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
-        bucket.leads = pLeads.count;
+
+        // Leads = cards cadastrados (criados) no mês, excluindo prospects e geladeira
+        const leadsCards = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+        bucket.leads = leadsCards.length;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
         bucket.contratos = pContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
-        // New leads = cards created in this month (excluding prospects and geladeira)
-        bucket.new_leads = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).length;
+        // New leads = mesma definição (cards criados no mês excluindo prospects/geladeira)
+        bucket.new_leads = leadsCards.length;
 
         // Store card names
         if (!cardNames[ms]) cardNames[ms] = {};
         if (!cardNames[ms][origin]) cardNames[ms][origin] = {};
-        cardNames[ms][origin]["leads"] = pLeads.names;
+        cardNames[ms][origin]["leads"] = leadsCards.map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["reunioes"] = pReunioes.names;
         cardNames[ms][origin]["propostas"] = pPropostas.names;
         cardNames[ms][origin]["contratos"] = pContratos.names;
         cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
-        cardNames[ms][origin]["new_leads"] = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).map((c: any) => c.title ?? c.id);
+        cardNames[ms][origin]["new_leads"] = leadsCards.map((c: any) => c.title ?? c.id);
 
         // Deduplicated valor_gerado
         bucket.valor_gerado = deduplicatedValorGerado(pContratos.cards);
