@@ -157,91 +157,42 @@ Deno.serve(async (req) => {
     const cardById = new Map<string, any>();
     for (const c of cards) cardById.set(c.id, c);
 
-    // ─── Passage-based counting (replicates Pipeline Operacional exactly) ───
-    // Matches buildPassages() from Operacional.tsx exactly:
-    // 1) History: ANY company card with card_stage_history.to_stage in targetStages AND moved_at within month range
-    //    (not limited to month-created cards — a card from March moved to propostas in April counts in April)
-    // 2) Legacy: monthCards (created in month) currently at/past targetStage, with NO history entry for targetStage
-    // Count = total passage entries (.length), NOT unique cards (same as Operacional)
+    // ─── Passage-based counting ───
+    // Regra: conta CADA movimentação (passage) para qualquer stage em targetStages
+    // cujo moved_at caia dentro do mês. Sem dedupe por card ou link_group — cada
+    // movimentação representa uma reunião/proposta/contrato realizado(a) no mês,
+    // espelhando "qualquer movimentação para a etapa" do Operacional do Pipeline.
+    // Filtros (origem/área/tag) são aplicados via filterCardIds.
     const STAGE_ORDER_FULL = ["prospects", "leads", "reunioes", "propostas", "r2", "contratos", "geladeira"];
 
-    // For origin/area/tag filtered counting, we need to know each card's origin/area/tag
     function countPassages(
       targetStages: string[],
-      monthCreatedCards: any[],
+      _monthCreatedCards: any[], // mantido por compatibilidade de assinatura
       filterCardIds: Set<string>,
       rangeStart: Date,
       rangeEnd: Date,
-      currentMs?: string,
+      _currentMs?: string,
     ): { count: number; names: string[], cards: any[] } {
       const names: string[] = [];
       const matchedCards: any[] = [];
-      const countedCardIds = new Set<string>();
-      // Dedup por link_group (com fallback para título) — replica o Pipeline:
-      // múltiplos cards do mesmo lead/contrato contam uma vez só.
-      const countedGroupKeys = new Set<string>();
-      const groupKeyOf = (card: any) => {
-        const lg = card?.link_group;
-        if (lg) return `lg:${lg}`;
-        const t = (card?.title ?? "").toString().trim().toLowerCase();
-        return t ? `t:${t}` : "";
-      };
-      const minTargetIdx = Math.min(...targetStages.map(s => STAGE_ORDER_FULL.indexOf(s)));
-      const contratosIdx = STAGE_ORDER_FULL.indexOf("contratos");
+      let count = 0;
 
-      // 1) History passages — deduplicate by card ID
       for (const cardId of filterCardIds) {
-        if (countedCardIds.has(cardId)) continue;
         const card = cardById.get(cardId);
-        // If a card has an explicit `month` field, attribute it strictly to that month
-        // (Pipeline uses this to migrate cards between months).
-        if (currentMs && card?.month && card.month !== currentMs) continue;
         const entries = historyByCard[cardId] || [];
         for (const h of entries) {
-          if (targetStages.includes(h.to_stage)) {
-            const d = new Date(h.moved_at);
-            const inRange = d >= rangeStart && d < rangeEnd;
-            // Accept if moved_at is in this month, OR if the card was migrated to this month
-            // via its `month` field (then attribute to currentMs regardless of moved_at).
-            if (inRange || (currentMs && card?.month === currentMs)) {
-              const gk = groupKeyOf(card);
-              if (gk && countedGroupKeys.has(gk)) {
-                countedCardIds.add(cardId);
-                break;
-              }
-              names.push(card?.title ?? cardId);
-              if (card) matchedCards.push(card);
-              countedCardIds.add(cardId);
-              if (gk) countedGroupKeys.add(gk);
-              break; // count this card only once
-            }
-          }
+          if (!targetStages.includes(h.to_stage)) continue;
+          const d = new Date(h.moved_at);
+          if (d < rangeStart || d >= rangeEnd) continue;
+          count += 1;
+          names.push(card?.title ?? cardId);
+          if (card) matchedCards.push(card);
         }
       }
 
-      // 2) Legacy
-      for (const c of monthCreatedCards) {
-        if (!filterCardIds.has(c.id)) continue;
-        if (countedCardIds.has(c.id)) continue;
-        const currentIdx = STAGE_ORDER_FULL.indexOf(c.stage_id);
-        if (currentIdx < minTargetIdx || currentIdx > contratosIdx) continue;
-        const cardHistory = historyByCard[c.id] || [];
-        const hasEntry = cardHistory.some((h: any) => targetStages.includes(h.to_stage));
-        if (!hasEntry) {
-          const gk = groupKeyOf(c);
-          if (gk && countedGroupKeys.has(gk)) {
-            countedCardIds.add(c.id);
-            continue;
-          }
-          names.push(c.title ?? c.id);
-          matchedCards.push(c);
-          countedCardIds.add(c.id);
-          if (gk) countedGroupKeys.add(gk);
-        }
-      }
-
-      return { count: names.length, names, cards: matchedCards };
+      return { count, names, cards: matchedCards };
     }
+
 
     // Stage-to-targetStages mapping (matching Operacional):
     // reuniões = passages through ["reunioes", "r2"]
