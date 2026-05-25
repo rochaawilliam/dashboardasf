@@ -1972,8 +1972,16 @@ const Index = () => {
                                     }
 
                                     const isOriginCard = metric.id === CONTRATOS_ONLINE_ID || metric.id === CONTRATOS_OFFLINE_ID;
-                                    const originMonthly = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.monthly : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.monthly : null;
-                                    const originAccumulated = metric.id === CONTRATOS_ONLINE_ID ? originValues.online.accumulated : metric.id === CONTRATOS_OFFLINE_ID ? originValues.offline.accumulated : 0;
+                                    const originMonthly = metric.id === CONTRATOS_ONLINE_ID
+                                      ? pipelineMonthlyValues[CONTRATOS_ONLINE_ID] ?? originValues.online.monthly
+                                      : metric.id === CONTRATOS_OFFLINE_ID
+                                      ? pipelineMonthlyValues[CONTRATOS_OFFLINE_ID] ?? originValues.offline.monthly
+                                      : null;
+                                    const originAccumulated = metric.id === CONTRATOS_ONLINE_ID
+                                      ? pipelineAccumulatedValues[CONTRATOS_ONLINE_ID] ?? originValues.online.accumulated
+                                      : metric.id === CONTRATOS_OFFLINE_ID
+                                      ? pipelineAccumulatedValues[CONTRATOS_OFFLINE_ID] ?? originValues.offline.accumulated
+                                      : 0;
 
                                     // Compute Resultado Acumulado ASF and Eficiência de Receita ASF
                                     const isResultadoAcumulado = metric.id === RESULTADO_ACUMULADO_ID;
