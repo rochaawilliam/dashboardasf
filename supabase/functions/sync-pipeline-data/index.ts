@@ -440,11 +440,11 @@ Deno.serve(async (req) => {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
             const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const tagLeadsCards = tagMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
-            b.leads = ptLeads.count;
+            b.leads = tagLeadsCards.length;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
             b.contratos = ptContratos.count;
@@ -454,7 +454,7 @@ Deno.serve(async (req) => {
             if (!cardNamesByAreaTag[ms][origin]) cardNamesByAreaTag[ms][origin] = {};
             if (!cardNamesByAreaTag[ms][origin][area]) cardNamesByAreaTag[ms][origin][area] = {};
             if (!cardNamesByAreaTag[ms][origin][area][tag]) cardNamesByAreaTag[ms][origin][area][tag] = {};
-            cardNamesByAreaTag[ms][origin][area][tag]["leads"] = ptLeads.names;
+            cardNamesByAreaTag[ms][origin][area][tag]["leads"] = tagLeadsCards.map((c: any) => c.title ?? c.id);
             cardNamesByAreaTag[ms][origin][area][tag]["reunioes"] = ptReunioes.names;
             cardNamesByAreaTag[ms][origin][area][tag]["propostas"] = ptPropostas.names;
             cardNamesByAreaTag[ms][origin][area][tag]["contratos"] = ptContratos.names;
