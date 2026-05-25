@@ -1044,8 +1044,8 @@ Deno.serve(async (req) => {
     }
 
     const dashboardByMonth: Record<string, DashboardMonthData> = {};
-    // Dashboard leads/prospects by origin per month
-    const dashboardByOriginMonth: Record<string, Record<string, { leads: number; prospects: number }>> = {};
+    // Dashboard leads/prospects/contratos/valor_gerado by origin per month
+    const dashboardByOriginMonth: Record<string, Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }>> = {};
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
@@ -1147,8 +1147,9 @@ Deno.serve(async (req) => {
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
         const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
+        const oValorGerado = deduplicatedValorGerado(originCards.filter((c: any) => c.stage_id === "contratos" && c.contract_value));
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
-        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
+        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
       }
     }
 
@@ -1208,7 +1209,7 @@ Deno.serve(async (req) => {
     }
 
     // Dashboard totals by origin
-    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number }> = {};
+    const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
       for (const origin of ["online", "offline"]) {
@@ -1216,7 +1217,8 @@ Deno.serve(async (req) => {
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
         const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
-        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos };
+        const oValorGerado = deduplicatedValorGerado(originCards.filter((c: any) => c.stage_id === "contratos" && c.contract_value));
+        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
       }
     }
 
