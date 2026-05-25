@@ -408,7 +408,11 @@ Deno.serve(async (req) => {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
           const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          const areaLeadsCards = areaMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+          const areaLeadsCards = areaMonthCards.filter((c: any) => {
+            if (["prospects", "geladeira"].includes(c.stage_id)) return false;
+            const d = c.created_at ? new Date(c.created_at) : null;
+            return d !== null && d >= rangeStart && d < rangeEnd;
+          });
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
