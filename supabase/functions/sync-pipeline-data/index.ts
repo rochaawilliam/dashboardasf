@@ -449,7 +449,11 @@ Deno.serve(async (req) => {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
             const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            const tagLeadsCards = tagMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+            const tagLeadsCards = tagMonthCards.filter((c: any) => {
+              if (["prospects", "geladeira"].includes(c.stage_id)) return false;
+              const d = c.created_at ? new Date(c.created_at) : null;
+              return d !== null && d >= rangeStart && d < rangeEnd;
+            });
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
