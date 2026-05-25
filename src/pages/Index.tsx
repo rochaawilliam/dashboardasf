@@ -2117,9 +2117,9 @@ const Index = () => {
                                       else if (metric.id === HEADCOUNT_TREINAMENTO_ID) cardMonthlyTarget = tt.headcount;
                                     }
 
-                                    // For Total de Contratos, compute target dynamically from component metrics
+                                    // For Total de Contratos, compute target dynamically from Online + Offline cards
                                     if (isTotalContratos && selectedMonth && monthlyTargets) {
-                                      const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
+                                      const componentIds = [CONTRATOS_ONLINE_ID, CONTRATOS_OFFLINE_ID];
                                       cardMonthlyTarget = componentIds.reduce((sum, id) => {
                                         const mt = monthlyTargets.find(t => t.metric_id === id && t.month === selectedMonth && t.year === selectedYear);
                                         return sum + (mt?.target_value ?? 0);
