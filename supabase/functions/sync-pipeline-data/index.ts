@@ -321,8 +321,13 @@ Deno.serve(async (req) => {
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
 
-        // Leads = cards cadastrados (criados) no mês, excluindo prospects e geladeira
-        const leadsCards = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+        // Leads = cards cadastrados (created_at) DENTRO do mês, excluindo prospects/geladeira.
+        // Cards migrados de outro mês (created_at fora do range) NÃO contam aqui, mesmo que `month` aponte para este mês.
+        const leadsCards = originMonthCards.filter((c: any) => {
+          if (["prospects", "geladeira"].includes(c.stage_id)) return false;
+          const d = c.created_at ? new Date(c.created_at) : null;
+          return d !== null && d >= rangeStart && d < rangeEnd;
+        });
         bucket.leads = leadsCards.length;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
@@ -403,7 +408,11 @@ Deno.serve(async (req) => {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
           const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          const areaLeadsCards = areaMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+          const areaLeadsCards = areaMonthCards.filter((c: any) => {
+            if (["prospects", "geladeira"].includes(c.stage_id)) return false;
+            const d = c.created_at ? new Date(c.created_at) : null;
+            return d !== null && d >= rangeStart && d < rangeEnd;
+          });
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
@@ -440,7 +449,11 @@ Deno.serve(async (req) => {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
             const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            const tagLeadsCards = tagMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+            const tagLeadsCards = tagMonthCards.filter((c: any) => {
+              if (["prospects", "geladeira"].includes(c.stage_id)) return false;
+              const d = c.created_at ? new Date(c.created_at) : null;
+              return d !== null && d >= rangeStart && d < rangeEnd;
+            });
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
