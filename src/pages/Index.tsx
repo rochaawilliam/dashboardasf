@@ -1879,20 +1879,14 @@ const Index = () => {
                                     let dynamicMetric = metric;
                                     const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
 
-                                    // Compute "Total de Contratos" = sum of all Novos Contratos
+                                    // Compute "Total de Contratos" = Novos Contratos Online + Offline ASF (Pipeline)
                                     const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
                                     if (isTotalContratos) {
-                                      const empAss = monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0;
-                                      const empConsult = monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0;
-                                      const tribAss = monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0;
-                                      const tribPont = monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0;
-                                      const trabAss = monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0;
-                                      const trabConsult = monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0;
-                                      const totalContratos = empAss + empConsult + tribAss + tribPont + trabAss + trabConsult;
-                                      dynamicMetric = { ...dynamicMetric, current_value: totalContratos };
+                                      const totalContratosAcc = (originValues.online.accumulated ?? 0) + (originValues.offline.accumulated ?? 0);
+                                      dynamicMetric = { ...dynamicMetric, current_value: totalContratosAcc };
 
-                                      // Dynamic target: sum of monthly targets from component metrics
-                                      const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
+                                      // Dynamic target: sum of monthly targets from origin cards
+                                      const componentIds = [CONTRATOS_ONLINE_ID, CONTRATOS_OFFLINE_ID];
                                       if (monthlyTargets) {
                                         if (selectedMonth !== null) {
                                           const sumTarget = componentIds.reduce((sum, id) => {
@@ -1910,15 +1904,13 @@ const Index = () => {
                                       }
                                     }
 
-                                    // For "Total de Contratos", compute monthly value
-                                    const totalContratosMonthly = isTotalContratos ?
-                                    (monthlyValues[CONTRATOS_EMP_ASSESSORIA_ID] ?? 0) + (
-                                    monthlyValues[CONTRATOS_EMP_CONSULTORIA_ID] ?? 0) + (
-                                    monthlyValues[CONTRATOS_TRIB_ASSESSORIA_ID] ?? 0) + (
-                                    monthlyValues[CONTRATOS_TRIB_PONTUAL_ID] ?? 0) + (
-                                    monthlyValues[CONTRATOS_TRAB_ASSESSORIA_ID] ?? 0) + (
-                                    monthlyValues[CONTRATOS_TRAB_CONSULTORIA_ID] ?? 0) :
-                                    null;
+                                    // For "Total de Contratos", compute monthly value (Online + Offline)
+                                    const totalContratosMonthly = isTotalContratos
+                                      ? (originValues.online.monthly ?? 0) + (originValues.offline.monthly ?? 0)
+                                      : null;
+                                    const totalContratosAccumulated = isTotalContratos
+                                      ? (originValues.online.accumulated ?? 0) + (originValues.offline.accumulated ?? 0)
+                                      : 0;
 
                                     // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
                                     const isMRR = metric.id === MRR_METRIC_ID;
@@ -2106,7 +2098,7 @@ const Index = () => {
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
                                     const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isMetasIndutoras ? metasIndutorasValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
-                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosMonthly ?? 0 : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isMetasIndutoras ? metasIndutorasValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isMetasIndutoras ? metasIndutorasValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
@@ -2125,9 +2117,9 @@ const Index = () => {
                                       else if (metric.id === HEADCOUNT_TREINAMENTO_ID) cardMonthlyTarget = tt.headcount;
                                     }
 
-                                    // For Total de Contratos, compute target dynamically from component metrics
+                                    // For Total de Contratos, compute target dynamically from Online + Offline cards
                                     if (isTotalContratos && selectedMonth && monthlyTargets) {
-                                      const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
+                                      const componentIds = [CONTRATOS_ONLINE_ID, CONTRATOS_OFFLINE_ID];
                                       cardMonthlyTarget = componentIds.reduce((sum, id) => {
                                         const mt = monthlyTargets.find(t => t.metric_id === id && t.month === selectedMonth && t.year === selectedYear);
                                         return sum + (mt?.target_value ?? 0);
