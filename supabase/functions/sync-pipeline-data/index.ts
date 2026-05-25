@@ -316,28 +316,30 @@ Deno.serve(async (req) => {
         const originAllIds = allCardIdsByOrigin[origin] || new Set();
         const bucket = newStageBucket();
 
-        // Passage-based counting (matching Operacional)
-        const pLeads = countPassages(STAGE_TARGETS.leads, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        // Passage-based counting (matching Operacional) — usada para reuniões/propostas/contratos
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
-        bucket.leads = pLeads.count;
+
+        // Leads = cards cadastrados (criados) no mês, excluindo prospects e geladeira
+        const leadsCards = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
+        bucket.leads = leadsCards.length;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
         bucket.contratos = pContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
-        // New leads = cards created in this month (excluding prospects and geladeira)
-        bucket.new_leads = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).length;
+        // New leads = mesma definição (cards criados no mês excluindo prospects/geladeira)
+        bucket.new_leads = leadsCards.length;
 
         // Store card names
         if (!cardNames[ms]) cardNames[ms] = {};
         if (!cardNames[ms][origin]) cardNames[ms][origin] = {};
-        cardNames[ms][origin]["leads"] = pLeads.names;
+        cardNames[ms][origin]["leads"] = leadsCards.map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["reunioes"] = pReunioes.names;
         cardNames[ms][origin]["propostas"] = pPropostas.names;
         cardNames[ms][origin]["contratos"] = pContratos.names;
         cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
-        cardNames[ms][origin]["new_leads"] = originMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id)).map((c: any) => c.title ?? c.id);
+        cardNames[ms][origin]["new_leads"] = leadsCards.map((c: any) => c.title ?? c.id);
 
         // Deduplicated valor_gerado
         bucket.valor_gerado = deduplicatedValorGerado(pContratos.cards);
@@ -401,11 +403,11 @@ Deno.serve(async (req) => {
           const areaMonthCards = byOriginAreaMonthCards[origin]?.[area] || [];
           const areaAllIds = allCardIdsByOriginArea[origin]?.[area] || new Set();
           const b = newAreaBucket();
-          const paLeads = countPassages(STAGE_TARGETS.leads, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const areaLeadsCards = areaMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
-          b.leads = paLeads.count;
+          b.leads = areaLeadsCards.length;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
           b.contratos = paContratos.count;
@@ -417,7 +419,7 @@ Deno.serve(async (req) => {
           if (!cardNamesByArea[ms]) cardNamesByArea[ms] = {};
           if (!cardNamesByArea[ms][origin]) cardNamesByArea[ms][origin] = {};
           if (!cardNamesByArea[ms][origin][area]) cardNamesByArea[ms][origin][area] = {};
-          cardNamesByArea[ms][origin][area]["leads"] = paLeads.names;
+          cardNamesByArea[ms][origin][area]["leads"] = areaLeadsCards.map((c: any) => c.title ?? c.id);
           cardNamesByArea[ms][origin][area]["reunioes"] = paReunioes.names;
           cardNamesByArea[ms][origin][area]["propostas"] = paPropostas.names;
           cardNamesByArea[ms][origin][area]["contratos"] = paContratos.names;
@@ -438,11 +440,11 @@ Deno.serve(async (req) => {
             const tagMonthCards = byOriginAreaTagMonthCards[origin]?.[area]?.[tag] || [];
             const tagAllIds = allCardIdsByOriginAreaTag[origin]?.[area]?.[tag] || new Set();
             const b = ensureAreaTagBucket(byAreaTag, ms, origin, area, tag);
-            const ptLeads = countPassages(STAGE_TARGETS.leads, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const tagLeadsCards = tagMonthCards.filter((c: any) => !["prospects", "geladeira"].includes(c.stage_id));
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
-            b.leads = ptLeads.count;
+            b.leads = tagLeadsCards.length;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
             b.contratos = ptContratos.count;
@@ -452,7 +454,7 @@ Deno.serve(async (req) => {
             if (!cardNamesByAreaTag[ms][origin]) cardNamesByAreaTag[ms][origin] = {};
             if (!cardNamesByAreaTag[ms][origin][area]) cardNamesByAreaTag[ms][origin][area] = {};
             if (!cardNamesByAreaTag[ms][origin][area][tag]) cardNamesByAreaTag[ms][origin][area][tag] = {};
-            cardNamesByAreaTag[ms][origin][area][tag]["leads"] = ptLeads.names;
+            cardNamesByAreaTag[ms][origin][area][tag]["leads"] = tagLeadsCards.map((c: any) => c.title ?? c.id);
             cardNamesByAreaTag[ms][origin][area][tag]["reunioes"] = ptReunioes.names;
             cardNamesByAreaTag[ms][origin][area][tag]["propostas"] = ptPropostas.names;
             cardNamesByAreaTag[ms][origin][area][tag]["contratos"] = ptContratos.names;
