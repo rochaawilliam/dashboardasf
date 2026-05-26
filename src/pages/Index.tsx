@@ -1891,7 +1891,6 @@ const Index = () => {
                                     const computedAccumulated = (metric as any)._computedAccumulated;
 
                                     let dynamicMetric = metric;
-                                    const currentMonth = selectedMonth ?? new Date().getMonth() + 1;
 
                                     // Compute "Total de Contratos" = Novos Contratos Online + Offline ASF
                                     const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
