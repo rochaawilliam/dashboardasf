@@ -1037,15 +1037,10 @@ Deno.serve(async (req) => {
       return { count: uniqueCards.size, names: namesList };
     }
 
-    // Contratos in Dashboard = snapshot count (cards currently sitting in contratos)
+    // Contratos in Dashboard = snapshot count (cards currently in contratos), deduplicated
     function computeContratosSnapshot(filteredCards: any[]): { count: number; names: string[] } {
-      const namesList: string[] = [];
-      for (const c of filteredCards) {
-        if (c.stage_id === "contratos" && !c.ghost_of) {
-          namesList.push(c.title ?? c.id);
-        }
-      }
-      return { count: namesList.length, names: namesList };
+      const u = uniqueContratos(filteredCards);
+      return { count: u.count, names: u.names };
     }
 
     interface DashboardMonthData {
