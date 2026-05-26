@@ -80,7 +80,7 @@ function CommissionCard({
   commission 
 }: { 
   title: string;
-  icon: any;
+  icon: LucideIcon;
   achieved: number;
   target: number;
   unit: string;
@@ -184,26 +184,6 @@ export function CommissionTab({
   const { data: dbSubcategories } = useSubcategories();
   const { data: dbAssignments } = useSubcategoryAssignments();
   const { data: pipelineData } = usePipelineData(selectedYear);
-
-  // Fixed monthly revenue targets (without Patenteia)
-  const RECEITA_MONTHLY_TARGETS: Record<number, number> = {
-    1: 78000, 2: 81000, 3: 91600, 4: 124000, 5: 136200, 6: 194000,
-    7: 168000, 8: 184700, 9: 202800, 10: 234700, 11: 234700, 12: 301800,
-  };
-
-  // Receita Total = soma das receitas (Emp + Trab + Trib + Outras) - mesma fórmula do card do dashboard
-  const RECEITA_IDS = [
-    "b3291022-409f-4679-bddc-bc687f3d9d68", // RECEITA_EMP_ASSESSORIA
-    "560bece4-6e53-46be-add1-fa6dfdbdaaf7", // RECEITA_EMP_CONSULTORIA
-    "de3186d7-1b20-41e2-8fd9-9fef114096bb", // RECEITA_EMP_PONTUAL
-    "be1fcc4f-c1b8-476a-b330-e2b8675ae458", // RECEITA_TRAB_ASSESSORIA
-    "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1", // RECEITA_TRAB_CONSULTORIA
-    "f1fd7525-963f-401e-a1e1-7b449f022bbd", // RECEITA_TRAB_PONTUAL
-    "b829cf12-3f66-4a0c-8753-70260a9645d8", // RECEITA_TRIB_ASSESSORIA
-    "847ce517-c118-46c9-9012-c69dfa5474d9", // RECEITA_TRIB_CONSULTORIA
-    "6122d0fc-e606-4020-afab-45658e063158", // RECEITA_TRIB_PONTUAL
-    "c0a1fe29-7d31-424c-9f86-6766981dcd82", // OUTRAS_RECEITAS
-  ];
 
   const receitaData = useMemo(() => {
     const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
