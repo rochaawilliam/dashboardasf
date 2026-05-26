@@ -206,12 +206,16 @@ Deno.serve(async (req) => {
       contratos: ["contratos"],
     };
 
-    // ─── Deduplication helpers (matches Pipeline Vision Board) ───
-    // Same deal can appear as multiple cards (siblings per area, or moved between months).
-    // Dedup key: link_group → normalized title → id.
+    // ─── Deduplication helpers ───
+    // Same deal pode aparecer como vários cards (transições de etapa, ghosts, ou cards
+    // irmãos por área). IMPORTANTE: contratos que legitimamente atravessam mais de uma
+    // área (ex.: Expomix, Pelf Cred — empresarial + trabalhista) DEVEM contar uma vez
+    // POR área. Por isso a chave de dedupe inclui practice_area: colapsamos só os
+    // duplicados verdadeiros dentro da mesma área.
     function dedupKey(c: any): string {
-      if (c.link_group) return `lg:${c.link_group}`;
-      if (c.title) return `t:${String(c.title).toLowerCase().trim()}`;
+      const area = c.practice_area || "outros";
+      if (c.link_group) return `lg:${c.link_group}|${area}`;
+      if (c.title) return `t:${String(c.title).toLowerCase().trim()}|${area}`;
       return `id:${c.id}`;
     }
     function dedupCards(arr: any[]): any[] {
