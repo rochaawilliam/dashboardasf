@@ -1,13 +1,33 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Target, FileText, Trophy, TrendingUp } from "lucide-react";
+import { DollarSign, FileText, Trophy, TrendingUp, type LucideIcon } from "lucide-react";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { organizeMetricsBySubcategory } from "@/utils/metricOrganizer";
 import { useSubcategories, useSubcategoryAssignments } from "@/hooks/useSubcategories";
 import { getRefMonthYear } from "@/utils/dateUtils";
 import { formatNumber } from "@/utils/formatters";
 import { usePipelineData } from "@/hooks/usePipelineData";
+
+const RECEITA_MONTHLY_TARGETS: Record<number, number> = {
+  1: 78000, 2: 81000, 3: 91600, 4: 124000, 5: 136200, 6: 194000,
+  7: 168000, 8: 184700, 9: 202800, 10: 234700, 11: 234700, 12: 301800,
+};
+
+const RECEITA_IDS = [
+  "b3291022-409f-4679-bddc-bc687f3d9d68", // RECEITA_EMP_ASSESSORIA
+  "560bece4-6e53-46be-add1-fa6dfdbdaaf7", // RECEITA_EMP_CONSULTORIA
+  "de3186d7-1b20-41e2-8fd9-9fef114096bb", // RECEITA_EMP_PONTUAL
+  "be1fcc4f-c1b8-476a-b330-e2b8675ae458", // RECEITA_TRAB_ASSESSORIA
+  "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1", // RECEITA_TRAB_CONSULTORIA
+  "f1fd7525-963f-401e-a1e1-7b449f022bbd", // RECEITA_TRAB_PONTUAL
+  "b829cf12-3f66-4a0c-8753-70260a9645d8", // RECEITA_TRIB_ASSESSORIA
+  "847ce517-c118-46c9-9012-c69dfa5474d9", // RECEITA_TRIB_CONSULTORIA
+  "6122d0fc-e606-4020-afab-45658e063158", // RECEITA_TRIB_PONTUAL
+  "c0a1fe29-7d31-424c-9f86-6766981dcd82", // OUTRAS_RECEITAS
+];
+
+const RECEITA_ID_SET = new Set(RECEITA_IDS);
 
 interface CommissionTabProps {
   metrics: Metric[];
@@ -60,7 +80,7 @@ function CommissionCard({
   commission 
 }: { 
   title: string;
-  icon: any;
+  icon: LucideIcon;
   achieved: number;
   target: number;
   unit: string;
@@ -165,29 +185,21 @@ export function CommissionTab({
   const { data: dbAssignments } = useSubcategoryAssignments();
   const { data: pipelineData } = usePipelineData(selectedYear);
 
-  // Fixed monthly revenue targets (without Patenteia)
-  const RECEITA_MONTHLY_TARGETS: Record<number, number> = {
-    1: 78000, 2: 81000, 3: 91600, 4: 124000, 5: 136200, 6: 194000,
-    7: 168000, 8: 184700, 9: 202800, 10: 234700, 11: 234700, 12: 301800,
-  };
-
-  // Receita Total = soma das receitas (Emp + Trab + Trib + Outras) - mesma fórmula do card do dashboard
-  const RECEITA_IDS = [
-    "b3291022-409f-4679-bddc-bc687f3d9d68", // RECEITA_EMP_ASSESSORIA
-    "560bece4-6e53-46be-add1-fa6dfdbdaaf7", // RECEITA_EMP_CONSULTORIA
-    "de3186d7-1b20-41e2-8fd9-9fef114096bb", // RECEITA_EMP_PONTUAL
-    "be1fcc4f-c1b8-476a-b330-e2b8675ae458", // RECEITA_TRAB_ASSESSORIA
-    "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1", // RECEITA_TRAB_CONSULTORIA
-    "f1fd7525-963f-401e-a1e1-7b449f022bbd", // RECEITA_TRAB_PONTUAL
-    "b829cf12-3f66-4a0c-8753-70260a9645d8", // RECEITA_TRIB_ASSESSORIA
-    "847ce517-c118-46c9-9012-c69dfa5474d9", // RECEITA_TRIB_CONSULTORIA
-    "6122d0fc-e606-4020-afab-45658e063158", // RECEITA_TRIB_PONTUAL
-    "c0a1fe29-7d31-424c-9f86-6766981dcd82", // OUTRAS_RECEITAS
-  ];
-
   const receitaData = useMemo(() => {
     const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
-    const achieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
+    const financeAchieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
+    const pipelineAchieved = (() => {
+      if (!pipelineData) return 0;
+
+      if (selectedMonth !== null) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const monthData = pipelineData.months?.[ms];
+        return (monthData?.offline?.valor_gerado ?? 0) + (monthData?.online?.valor_gerado ?? 0);
+      }
+
+      return (pipelineData.totals?.offline?.valor_gerado ?? 0) + (pipelineData.totals?.online?.valor_gerado ?? 0);
+    })();
+    const achieved = financeAchieved > 0 ? financeAchieved : pipelineAchieved;
 
     let target = 0;
     if (selectedMonth !== null) {
@@ -197,7 +209,7 @@ export function CommissionTab({
     }
 
     return { achieved, target };
-  }, [monthlyValues, accumulatedValues, selectedMonth]);
+  }, [monthlyValues, accumulatedValues, pipelineData, selectedMonth, selectedYear]);
 
   // Compute Total Contratos using the "Total de Contratos" card value and monthly targets
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
@@ -276,7 +288,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Receita Total = mesma do card do dashboard (soma de todas as receitas). Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
+        * Receita Total = soma das receitas financeiras; quando não houver lançamento financeiro no mês, usa Valor Gerado Online + Offline do Pipeline ASF. Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
       </p>
 
       {/* Total Commission */}
