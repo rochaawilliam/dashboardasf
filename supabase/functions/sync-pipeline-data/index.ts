@@ -409,7 +409,7 @@ Deno.serve(async (req) => {
           });
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
-          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const paContratos = uniqueContratos(areaMonthCards);
           b.leads = areaLeadsCards.length;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
