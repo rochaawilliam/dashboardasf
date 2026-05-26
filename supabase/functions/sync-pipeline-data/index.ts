@@ -450,7 +450,7 @@ Deno.serve(async (req) => {
             });
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
-            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const ptContratos = uniqueContratos(tagMonthCards);
             b.leads = tagLeadsCards.length;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
