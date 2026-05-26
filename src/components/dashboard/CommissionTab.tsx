@@ -187,7 +187,19 @@ export function CommissionTab({
 
   const receitaData = useMemo(() => {
     const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
-    const achieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
+    const financeAchieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
+    const pipelineAchieved = (() => {
+      if (!pipelineData) return 0;
+
+      if (selectedMonth !== null) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        const monthData = pipelineData.months?.[ms];
+        return (monthData?.offline?.valor_gerado ?? 0) + (monthData?.online?.valor_gerado ?? 0);
+      }
+
+      return (pipelineData.totals?.offline?.valor_gerado ?? 0) + (pipelineData.totals?.online?.valor_gerado ?? 0);
+    })();
+    const achieved = financeAchieved > 0 ? financeAchieved : pipelineAchieved;
 
     let target = 0;
     if (selectedMonth !== null) {
@@ -197,7 +209,7 @@ export function CommissionTab({
     }
 
     return { achieved, target };
-  }, [monthlyValues, accumulatedValues, selectedMonth]);
+  }, [monthlyValues, accumulatedValues, pipelineData, selectedMonth, selectedYear]);
 
   // Compute Total Contratos using the "Total de Contratos" card value and monthly targets
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
@@ -276,7 +288,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Receita Total = mesma do card do dashboard (soma de todas as receitas). Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
+        * Receita Total = soma das receitas financeiras; quando não houver lançamento financeiro no mês, usa Valor Gerado Online + Offline do Pipeline ASF. Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
       </p>
 
       {/* Total Commission */}
