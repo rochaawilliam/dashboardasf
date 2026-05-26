@@ -1906,24 +1906,6 @@ const Index = () => {
 
                                     if (isTotalContratos) {
                                       dynamicMetric = { ...dynamicMetric, current_value: totalContratosAccumulated };
-
-                                      // Dynamic target: sum of monthly targets from origin cards
-                                      const componentIds = [CONTRATOS_ONLINE_ID, CONTRATOS_OFFLINE_ID];
-                                      if (monthlyTargets) {
-                                        if (selectedMonth !== null) {
-                                          const sumTarget = componentIds.reduce((sum, id) => {
-                                            const mt = monthlyTargets.find(t => t.metric_id === id && t.month === currentMonth && t.year === selectedYear);
-                                            return sum + (mt?.target_value ?? 0);
-                                          }, 0);
-                                          dynamicMetric = { ...dynamicMetric, target_value: sumTarget * 12 };
-                                        } else {
-                                          const sumTarget = componentIds.reduce((sum, id) => {
-                                            const mts = monthlyTargets.filter(t => t.metric_id === id && t.year === selectedYear);
-                                            return sum + mts.reduce((s, t) => s + t.target_value, 0);
-                                          }, 0);
-                                          dynamicMetric = { ...dynamicMetric, target_value: sumTarget };
-                                        }
-                                      }
                                     }
 
                                     // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
@@ -2137,15 +2119,6 @@ const Index = () => {
                                       else if (metric.id === TAXA_CERTIFICACAO_ID) cardMonthlyTarget = tt.certificationRate;
                                       else if (metric.id === TEMPO_MEDIO_CASA_ID) cardMonthlyTarget = tt.avgTenureMonths;
                                       else if (metric.id === HEADCOUNT_TREINAMENTO_ID) cardMonthlyTarget = tt.headcount;
-                                    }
-
-                                    // For Total de Contratos, compute target dynamically from Online + Offline cards
-                                    if (isTotalContratos && selectedMonth && monthlyTargets) {
-                                      const componentIds = [CONTRATOS_ONLINE_ID, CONTRATOS_OFFLINE_ID];
-                                      cardMonthlyTarget = componentIds.reduce((sum, id) => {
-                                        const mt = monthlyTargets.find(t => t.metric_id === id && t.month === selectedMonth && t.year === selectedYear);
-                                        return sum + (mt?.target_value ?? 0);
-                                      }, 0);
                                     }
 
                                     return (
