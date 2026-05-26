@@ -193,11 +193,12 @@ export function CommissionTab({
 
       if (selectedMonth !== null) {
         const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
-        const monthData = pipelineData.months?.[ms];
-        return (monthData?.offline?.valor_gerado ?? 0) + (monthData?.online?.valor_gerado ?? 0);
+        const dbo = pipelineData.dashboardByOrigin?.[ms];
+        return (dbo?.offline?.valor_gerado ?? 0) + (dbo?.online?.valor_gerado ?? 0);
       }
 
-      return (pipelineData.totals?.offline?.valor_gerado ?? 0) + (pipelineData.totals?.online?.valor_gerado ?? 0);
+      const dbo = pipelineData.dashboardTotalsByOrigin;
+      return (dbo?.offline?.valor_gerado ?? 0) + (dbo?.online?.valor_gerado ?? 0);
     })();
     const achieved = financeAchieved > 0 ? financeAchieved : pipelineAchieved;
 
