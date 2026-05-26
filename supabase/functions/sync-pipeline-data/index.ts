@@ -206,17 +206,33 @@ Deno.serve(async (req) => {
       contratos: ["contratos"],
     };
 
-    // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
-    function deduplicatedValorGerado(contractCards: any[]): number {
+    // ─── Deduplication helpers (matches Pipeline Vision Board) ───
+    // Same deal can appear as multiple cards (siblings per area, or moved between months).
+    // Dedup key: link_group → normalized title → id.
+    function dedupKey(c: any): string {
+      if (c.link_group) return `lg:${c.link_group}`;
+      if (c.title) return `t:${String(c.title).toLowerCase().trim()}`;
+      return `id:${c.id}`;
+    }
+    function dedupCards(arr: any[]): any[] {
       const seen = new Set<string>();
-      let total = 0;
-      for (const c of contractCards) {
-        const key = c.link_group ?? c.title ?? c.id;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        total += c.contract_value || 0;
+      const out: any[] = [];
+      for (const c of arr) {
+        const k = dedupKey(c);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(c);
       }
-      return total;
+      return out;
+    }
+    function deduplicatedValorGerado(contractCards: any[]): number {
+      return dedupCards(contractCards).reduce((s, c) => s + (c.contract_value || 0), 0);
+    }
+    // Snapshot of unique deals currently in "contratos" for a set of cards.
+    function uniqueContratos(filteredCards: any[]): { count: number; names: string[]; cards: any[] } {
+      const inContratos = filteredCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of);
+      const uniq = dedupCards(inContratos);
+      return { count: uniq.length, names: uniq.map((c) => c.title ?? c.id), cards: uniq };
     }
 
     // Build card ID sets from ALL cards (not just month-created) for history passage checks
@@ -288,9 +304,15 @@ Deno.serve(async (req) => {
         const originAllIds = allCardIdsByOrigin[origin] || new Set();
         const bucket = newStageBucket();
 
-        // Passage-based counting (matching Operacional) — usada para reuniões/propostas/contratos
+        // Passage-based counting (matching Operacional) — usada para reuniões/propostas
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        // Contratos = SNAPSHOT por `month` field (mesma lógica do Pipeline Vision Board),
+        // deduplicado por link_group ?? título. Isso evita contar Expomix 3x quando o mesmo
+        // deal tem múltiplas passagens, e inclui contratos como JAVAILI que foram criados
+        // diretamente no estágio "contratos" ou movidos em outro mês mas pertencem a este.
+        const uContratos = uniqueContratos(originMonthCards);
+        // Mantemos pContratos só para métrica de close-time (precisa do moved_at)
         const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
 
         // Leads = cards cadastrados (created_at) DENTRO do mês, excluindo prospects/geladeira.
@@ -303,7 +325,7 @@ Deno.serve(async (req) => {
         bucket.leads = leadsCards.length;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
-        bucket.contratos = pContratos.count;
+        bucket.contratos = uContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
         // New leads = mesma definição (cards criados no mês excluindo prospects/geladeira)
         bucket.new_leads = leadsCards.length;
@@ -314,19 +336,19 @@ Deno.serve(async (req) => {
         cardNames[ms][origin]["leads"] = leadsCards.map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["reunioes"] = pReunioes.names;
         cardNames[ms][origin]["propostas"] = pPropostas.names;
-        cardNames[ms][origin]["contratos"] = pContratos.names;
+        cardNames[ms][origin]["contratos"] = uContratos.names;
         cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["new_leads"] = leadsCards.map((c: any) => c.title ?? c.id);
 
-        // Deduplicated valor_gerado
-        bucket.valor_gerado = deduplicatedValorGerado(pContratos.cards);
+        // Deduplicated valor_gerado (dos contratos snapshot)
+        bucket.valor_gerado = deduplicatedValorGerado(uContratos.cards);
 
         if (bucket.leads > 0 || bucket.reunioes > 0 || bucket.propostas > 0 || bucket.contratos > 0 || bucket.prospects > 0 || bucket.new_leads > 0) {
           if (!result[ms]) result[ms] = {};
           result[ms][origin] = bucket;
         }
 
-        // Close time calculation
+        // Close time calculation (usa passages — precisa do moved_at)
         for (const card of pContratos.cards) {
           const entries = historyByCard[card.id];
           if (entries) {
@@ -387,7 +409,7 @@ Deno.serve(async (req) => {
           });
           const paReunioes = countPassages(STAGE_TARGETS.reunioes, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
           const paPropostas = countPassages(STAGE_TARGETS.propostas, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
-          const paContratos = countPassages(STAGE_TARGETS.contratos, areaMonthCards, areaAllIds, rangeStart, rangeEnd, ms);
+          const paContratos = uniqueContratos(areaMonthCards);
           b.leads = areaLeadsCards.length;
           b.reunioes = paReunioes.count;
           b.propostas = paPropostas.count;
@@ -428,7 +450,7 @@ Deno.serve(async (req) => {
             });
             const ptReunioes = countPassages(STAGE_TARGETS.reunioes, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
             const ptPropostas = countPassages(STAGE_TARGETS.propostas, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
-            const ptContratos = countPassages(STAGE_TARGETS.contratos, tagMonthCards, tagAllIds, rangeStart, rangeEnd, ms);
+            const ptContratos = uniqueContratos(tagMonthCards);
             b.leads = tagLeadsCards.length;
             b.reunioes = ptReunioes.count;
             b.propostas = ptPropostas.count;
@@ -1015,15 +1037,10 @@ Deno.serve(async (req) => {
       return { count: uniqueCards.size, names: namesList };
     }
 
-    // Contratos in Dashboard = snapshot count (cards currently sitting in contratos)
+    // Contratos in Dashboard = snapshot count (cards currently in contratos), deduplicated
     function computeContratosSnapshot(filteredCards: any[]): { count: number; names: string[] } {
-      const namesList: string[] = [];
-      for (const c of filteredCards) {
-        if (c.stage_id === "contratos" && !c.ghost_of) {
-          namesList.push(c.title ?? c.id);
-        }
-      }
-      return { count: namesList.length, names: namesList };
+      const u = uniqueContratos(filteredCards);
+      return { count: u.count, names: u.names };
     }
 
     interface DashboardMonthData {
@@ -1146,8 +1163,9 @@ Deno.serve(async (req) => {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
-        const oValorGerado = deduplicatedValorGerado(originCards.filter((c: any) => c.stage_id === "contratos" && c.contract_value));
+        const oContratosSnap = uniqueContratos(originCards);
+        const oContratos = oContratosSnap.count;
+        const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
         dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
       }
@@ -1216,8 +1234,9 @@ Deno.serve(async (req) => {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
-        const oValorGerado = deduplicatedValorGerado(originCards.filter((c: any) => c.stage_id === "contratos" && c.contract_value));
+        const oContratosSnap = uniqueContratos(originCards);
+        const oContratos = oContratosSnap.count;
+        const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
       }
     }
