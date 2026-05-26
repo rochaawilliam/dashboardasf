@@ -206,17 +206,33 @@ Deno.serve(async (req) => {
       contratos: ["contratos"],
     };
 
-    // ─── Deduplication for valor_gerado (matches Pipeline Vision Board) ───
-    function deduplicatedValorGerado(contractCards: any[]): number {
+    // ─── Deduplication helpers (matches Pipeline Vision Board) ───
+    // Same deal can appear as multiple cards (siblings per area, or moved between months).
+    // Dedup key: link_group → normalized title → id.
+    function dedupKey(c: any): string {
+      if (c.link_group) return `lg:${c.link_group}`;
+      if (c.title) return `t:${String(c.title).toLowerCase().trim()}`;
+      return `id:${c.id}`;
+    }
+    function dedupCards(arr: any[]): any[] {
       const seen = new Set<string>();
-      let total = 0;
-      for (const c of contractCards) {
-        const key = c.link_group ?? c.title ?? c.id;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        total += c.contract_value || 0;
+      const out: any[] = [];
+      for (const c of arr) {
+        const k = dedupKey(c);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(c);
       }
-      return total;
+      return out;
+    }
+    function deduplicatedValorGerado(contractCards: any[]): number {
+      return dedupCards(contractCards).reduce((s, c) => s + (c.contract_value || 0), 0);
+    }
+    // Snapshot of unique deals currently in "contratos" for a set of cards.
+    function uniqueContratos(filteredCards: any[]): { count: number; names: string[]; cards: any[] } {
+      const inContratos = filteredCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of);
+      const uniq = dedupCards(inContratos);
+      return { count: uniq.length, names: uniq.map((c) => c.title ?? c.id), cards: uniq };
     }
 
     // Build card ID sets from ALL cards (not just month-created) for history passage checks
