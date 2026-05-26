@@ -2181,8 +2181,8 @@ const Index = () => {
                   monthlyTargets={monthlyTargets}
                   selectedMonth={selectedMonth}
                   selectedYear={selectedYear}
-                  monthlyValues={monthlyValues}
-                  accumulatedValues={accumulatedValues} />
+                  monthlyValues={mergedMonthlyValues}
+                  accumulatedValues={mergedAccumulatedValues} />
 
                   </TabsContent>
               }
