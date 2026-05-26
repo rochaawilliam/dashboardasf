@@ -276,7 +276,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Receita Total e Total de Contratos = soma dos cards Valor Gerado e Novos Contratos (Online + Offline) do Pipeline ASF.
+        * Receita Total = mesma do card do dashboard (soma de todas as receitas). Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
       </p>
 
       {/* Total Commission */}
