@@ -205,9 +205,6 @@ export function CommissionTab({
   const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
 
   const contratosData = useMemo(() => {
-    const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
-    const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
-
     // Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF
     let achieved = 0;
     if (pipelineData) {
@@ -222,19 +219,14 @@ export function CommissionTab({
       }
     }
 
-    // Dynamic target: sum of monthly targets from component metrics
-    const componentIds = [CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID, CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID, CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID];
+    // Target from the "Total de Contratos" metric's own monthly targets
     let target = 0;
     if (selectedMonth !== null && monthlyTargets) {
-      target = componentIds.reduce((sum, id) => {
-        const mt = monthlyTargets.find(t => t.metric_id === id && t.month === selectedMonth && t.year === selectedYear);
-        return sum + (mt?.target_value ?? 0);
-      }, 0);
+      const mt = monthlyTargets.find(t => t.metric_id === TOTAL_CONTRATOS_ID && t.month === selectedMonth && t.year === selectedYear);
+      target = mt?.target_value ?? 0;
     } else {
-      target = componentIds.reduce((sum, id) => {
-        const mts = (monthlyTargets || []).filter(t => t.metric_id === id && t.year === selectedYear);
-        return sum + mts.reduce((s, t) => s + t.target_value, 0);
-      }, 0);
+      const mts = (monthlyTargets || []).filter(t => t.metric_id === TOTAL_CONTRATOS_ID && t.year === selectedYear);
+      target = mts.reduce((s, t) => s + t.target_value, 0);
     }
 
     return { achieved, target };
