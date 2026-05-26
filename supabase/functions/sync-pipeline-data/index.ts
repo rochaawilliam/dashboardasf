@@ -1163,8 +1163,9 @@ Deno.serve(async (req) => {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
-        const oContratos = originCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of).length;
-        const oValorGerado = deduplicatedValorGerado(originCards.filter((c: any) => c.stage_id === "contratos" && c.contract_value));
+        const oContratosSnap = uniqueContratos(originCards);
+        const oContratos = oContratosSnap.count;
+        const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
         dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
       }
