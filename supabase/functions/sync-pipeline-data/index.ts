@@ -304,9 +304,15 @@ Deno.serve(async (req) => {
         const originAllIds = allCardIdsByOrigin[origin] || new Set();
         const bucket = newStageBucket();
 
-        // Passage-based counting (matching Operacional) — usada para reuniões/propostas/contratos
+        // Passage-based counting (matching Operacional) — usada para reuniões/propostas
         const pReunioes = countPassages(STAGE_TARGETS.reunioes, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
         const pPropostas = countPassages(STAGE_TARGETS.propostas, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
+        // Contratos = SNAPSHOT por `month` field (mesma lógica do Pipeline Vision Board),
+        // deduplicado por link_group ?? título. Isso evita contar Expomix 3x quando o mesmo
+        // deal tem múltiplas passagens, e inclui contratos como JAVAILI que foram criados
+        // diretamente no estágio "contratos" ou movidos em outro mês mas pertencem a este.
+        const uContratos = uniqueContratos(originMonthCards);
+        // Mantemos pContratos só para métrica de close-time (precisa do moved_at)
         const pContratos = countPassages(STAGE_TARGETS.contratos, originMonthCards, originAllIds, rangeStart, rangeEnd, ms);
 
         // Leads = cards cadastrados (created_at) DENTRO do mês, excluindo prospects/geladeira.
@@ -319,7 +325,7 @@ Deno.serve(async (req) => {
         bucket.leads = leadsCards.length;
         bucket.reunioes = pReunioes.count;
         bucket.propostas = pPropostas.count;
-        bucket.contratos = pContratos.count;
+        bucket.contratos = uContratos.count;
         bucket.prospects = originMonthCards.filter((c: any) => c.stage_id === "prospects").length;
         // New leads = mesma definição (cards criados no mês excluindo prospects/geladeira)
         bucket.new_leads = leadsCards.length;
@@ -330,19 +336,19 @@ Deno.serve(async (req) => {
         cardNames[ms][origin]["leads"] = leadsCards.map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["reunioes"] = pReunioes.names;
         cardNames[ms][origin]["propostas"] = pPropostas.names;
-        cardNames[ms][origin]["contratos"] = pContratos.names;
+        cardNames[ms][origin]["contratos"] = uContratos.names;
         cardNames[ms][origin]["prospects"] = originMonthCards.filter((c: any) => c.stage_id === "prospects").map((c: any) => c.title ?? c.id);
         cardNames[ms][origin]["new_leads"] = leadsCards.map((c: any) => c.title ?? c.id);
 
-        // Deduplicated valor_gerado
-        bucket.valor_gerado = deduplicatedValorGerado(pContratos.cards);
+        // Deduplicated valor_gerado (dos contratos snapshot)
+        bucket.valor_gerado = deduplicatedValorGerado(uContratos.cards);
 
         if (bucket.leads > 0 || bucket.reunioes > 0 || bucket.propostas > 0 || bucket.contratos > 0 || bucket.prospects > 0 || bucket.new_leads > 0) {
           if (!result[ms]) result[ms] = {};
           result[ms][origin] = bucket;
         }
 
-        // Close time calculation
+        // Close time calculation (usa passages — precisa do moved_at)
         for (const card of pContratos.cards) {
           const entries = historyByCard[card.id];
           if (entries) {
