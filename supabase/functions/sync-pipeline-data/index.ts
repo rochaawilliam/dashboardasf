@@ -1245,29 +1245,104 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Build response payload
+    const payload: any = {
+      months: result,
+      totals,
+      byArea,
+      totalsByArea,
+      byAreaTag,
+      totalsByAreaTag,
+      year,
+      avgCloseDays,
+      avgCloseDaysByMonth,
+      operational: operationalByMonth,
+      operationalTotals,
+      onboarding,
+      training,
+      cardNames,
+      cardNamesByArea,
+      cardNamesByAreaTag,
+      dashboard: dashboardByMonth,
+      dashboardTotals,
+      dashboardByOrigin: dashboardByOriginMonth,
+      dashboardTotalsByOrigin,
+    };
+
+    // ---------- Month snapshot overlay (freeze closed months) ----------
+    const skipSnapshots = req.headers.get("x-skip-snapshots") === "1" || url.searchParams.get("skip_snapshots") === "1";
+    if (!skipSnapshots) {
+      try {
+        const SB_URL = Deno.env.get("SUPABASE_URL");
+        const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY");
+        if (SB_URL && SB_KEY) {
+          const sb = createClient(SB_URL, SB_KEY);
+          let q = sb.from("month_snapshots").select("year,month,payload").eq("source", "pipeline").eq("year", year);
+          if (month) q = q.eq("month", month);
+          const { data: snaps } = await q;
+          if (snaps && snaps.length) {
+            for (const s of snaps) {
+              const ms = `${s.year}-${String(s.month).padStart(2, "0")}`;
+              const sp: any = s.payload || {};
+              if (sp.months !== undefined) payload.months[ms] = sp.months;
+              if (sp.dashboard !== undefined) payload.dashboard[ms] = sp.dashboard;
+              if (sp.dashboardByOrigin !== undefined) payload.dashboardByOrigin[ms] = sp.dashboardByOrigin;
+              if (sp.avgCloseDays !== undefined) payload.avgCloseDaysByMonth[ms] = sp.avgCloseDays;
+              if (sp.operational !== undefined) payload.operational[ms] = sp.operational;
+              if (sp.cardNames !== undefined) payload.cardNames[ms] = sp.cardNames;
+              if (sp.byArea) {
+                for (const a of Object.keys(sp.byArea)) {
+                  payload.byArea[a] = payload.byArea[a] || {};
+                  payload.byArea[a][ms] = sp.byArea[a];
+                }
+              }
+              if (sp.byAreaTag) {
+                for (const a of Object.keys(sp.byAreaTag)) {
+                  payload.byAreaTag[a] = payload.byAreaTag[a] || {};
+                  for (const t of Object.keys(sp.byAreaTag[a])) {
+                    payload.byAreaTag[a][t] = payload.byAreaTag[a][t] || {};
+                    payload.byAreaTag[a][t][ms] = sp.byAreaTag[a][t];
+                  }
+                }
+              }
+              if (sp.cardNamesByArea) {
+                for (const a of Object.keys(sp.cardNamesByArea)) {
+                  payload.cardNamesByArea[a] = payload.cardNamesByArea[a] || {};
+                  payload.cardNamesByArea[a][ms] = sp.cardNamesByArea[a];
+                }
+              }
+              if (sp.cardNamesByAreaTag) {
+                for (const a of Object.keys(sp.cardNamesByAreaTag)) {
+                  payload.cardNamesByAreaTag[a] = payload.cardNamesByAreaTag[a] || {};
+                  for (const t of Object.keys(sp.cardNamesByAreaTag[a])) {
+                    payload.cardNamesByAreaTag[a][t] = payload.cardNamesByAreaTag[a][t] || {};
+                    payload.cardNamesByAreaTag[a][t][ms] = sp.cardNamesByAreaTag[a][t];
+                  }
+                }
+              }
+              if (sp.training && payload.training) {
+                if (sp.training.byMonth !== undefined) {
+                  payload.training.byMonth = payload.training.byMonth || {};
+                  payload.training.byMonth[ms] = sp.training.byMonth;
+                }
+                if (sp.training.byCollaboratorMonth) {
+                  payload.training.byCollaboratorMonth = payload.training.byCollaboratorMonth || {};
+                  for (const c of Object.keys(sp.training.byCollaboratorMonth)) {
+                    payload.training.byCollaboratorMonth[c] = payload.training.byCollaboratorMonth[c] || {};
+                    payload.training.byCollaboratorMonth[c][ms] = sp.training.byCollaboratorMonth[c];
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Snapshot overlay failed:", e);
+      }
+    }
+
     return new Response(
-      JSON.stringify({
-        months: result,
-        totals,
-        byArea,
-        totalsByArea,
-        byAreaTag,
-        totalsByAreaTag,
-        year,
-        avgCloseDays,
-        avgCloseDaysByMonth,
-        operational: operationalByMonth,
-        operationalTotals,
-        onboarding,
-        training,
-        cardNames,
-        cardNamesByArea,
-        cardNamesByAreaTag,
-        dashboard: dashboardByMonth,
-        dashboardTotals,
-        dashboardByOrigin: dashboardByOriginMonth,
-        dashboardTotalsByOrigin,
-      }),
+      JSON.stringify(payload),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
