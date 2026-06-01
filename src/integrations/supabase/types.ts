@@ -211,6 +211,45 @@ export type Database = {
         }
         Relationships: []
       }
+      month_snapshots: {
+        Row: {
+          auto_closed: boolean
+          closed_at: string
+          closed_by: string | null
+          created_at: string
+          id: string
+          month: number
+          payload: Json
+          source: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          auto_closed?: boolean
+          closed_at?: string
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          month: number
+          payload: Json
+          source: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          auto_closed?: boolean
+          closed_at?: string
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          month?: number
+          payload?: Json
+          source?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       monthly_targets: {
         Row: {
           created_at: string
