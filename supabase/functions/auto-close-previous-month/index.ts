@@ -5,7 +5,7 @@ const corsHeaders = {
 };
 
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
-const SB_ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SB_SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
