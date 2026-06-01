@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { UserSettingsContent } from "@/components/dashboard/UserSettingsContent";
 import { AdminUsersPanel } from "@/components/dashboard/AdminUsersPanel";
+import { MonthClosurePanel } from "@/components/dashboard/MonthClosurePanel";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 
 export default function Profile() {
