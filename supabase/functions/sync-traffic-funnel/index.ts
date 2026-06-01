@@ -1,4 +1,5 @@
 import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqr_x36mGLJC8-2aTAPPD0opl3txAiAnEmjwtJJI5f5jEy70XVdeAPhgl85HlJMg/pub?gid=1235459084&single=true&output=csv";
