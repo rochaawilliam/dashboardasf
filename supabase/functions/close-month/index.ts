@@ -102,10 +102,13 @@ Deno.serve(async (req) => {
       return jsonResp({ error: "Invalid year/month" }, 400);
     }
 
-    // Auth: must be admin unless auto (cron) with service role token
+    // Auth: must be admin unless auto (cron) with service role bearer
     let userId: string | null = null;
-    if (!auto) {
-      const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization") || "";
+    if (auto) {
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      if (token !== SB_SERVICE) return jsonResp({ error: "Unauthorized" }, 401);
+    } else {
       if (!authHeader) return jsonResp({ error: "Unauthorized" }, 401);
       const userClient = createClient(SB_URL, SB_ANON, {
         global: { headers: { Authorization: authHeader } },
