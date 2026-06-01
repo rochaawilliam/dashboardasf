@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.create-user]
 verify_jwt = false
+
+[functions.close-month]
+verify_jwt = false
+
+[functions.auto-close-previous-month]
+verify_jwt = false
