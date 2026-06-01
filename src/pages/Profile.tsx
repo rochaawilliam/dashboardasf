@@ -318,8 +318,9 @@ export default function Profile() {
 
           {/* Admin Tab */}
           {isAdmin && (
-            <TabsContent value="admin">
+            <TabsContent value="admin" className="space-y-6">
               <AdminUsersPanel />
+              <MonthClosurePanel />
             </TabsContent>
           )}
         </Tabs>
