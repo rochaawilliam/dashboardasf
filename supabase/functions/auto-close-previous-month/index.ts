@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
     const res = await fetch(`${SB_URL}/functions/v1/close-month`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${SB_ANON}`,
-        apikey: SB_ANON,
+        Authorization: `Bearer ${SB_SERVICE}`,
+        apikey: SB_SERVICE,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ auto: true, year: y, month: m, action: "close" }),
