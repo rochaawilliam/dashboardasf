@@ -130,9 +130,20 @@ Deno.serve(async (req) => {
     }
 
     // Close: snapshot live data per source
-    const results: Record<string, { ok: boolean; error?: string }> = {};
+    const results: Record<string, { ok: boolean; skipped?: boolean; error?: string }> = {};
     for (const source of sources) {
       try {
+        if (auto) {
+          const { data: existing } = await admin
+            .from("month_snapshots")
+            .select("id")
+            .match({ source, year, month })
+            .maybeSingle();
+          if (existing) {
+            results[source] = { ok: true, skipped: true };
+            continue;
+          }
+        }
         const payload =
           source === "pipeline"
             ? await snapshotPipelineMonth(year, month)
