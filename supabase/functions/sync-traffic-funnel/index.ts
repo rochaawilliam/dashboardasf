@@ -173,6 +173,43 @@ Deno.serve(async (req) => {
 
     const data = parseCSV(csv, year);
 
+    // Overlay closed-month snapshots
+    const skipSnapshots = req.headers.get("x-skip-snapshots") === "1" || url.searchParams.get("skip_snapshots") === "1";
+    if (!skipSnapshots) {
+      try {
+        const SB_URL = Deno.env.get("SUPABASE_URL");
+        const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY");
+        if (SB_URL && SB_KEY) {
+          const sb = createClient(SB_URL, SB_KEY);
+          const { data: snaps } = await sb
+            .from("month_snapshots")
+            .select("year,month,payload")
+            .eq("source", "traffic_funnel")
+            .eq("year", year);
+          if (snaps && snaps.length) {
+            for (const s of snaps) {
+              const ms = `${s.year}-${String(s.month).padStart(2, "0")}`;
+              const sp: any = s.payload || {};
+              if (sp.months !== undefined) data.months[ms] = sp.months;
+            }
+            // Recompute totals from (possibly frozen) monthly slices
+            const t = { valor_investido: 0, impressoes: 0, alcance: 0, cliques_saida: 0, conversas_iniciadas: 0, custo_por_conversa: 0 };
+            for (const m of Object.values(data.months)) {
+              t.valor_investido += m.valor_investido;
+              t.impressoes += m.impressoes;
+              t.alcance += m.alcance;
+              t.cliques_saida += m.cliques_saida;
+              t.conversas_iniciadas += m.conversas_iniciadas;
+            }
+            t.custo_por_conversa = t.conversas_iniciadas > 0 ? t.valor_investido / t.conversas_iniciadas : 0;
+            data.totals = t;
+          }
+        }
+      } catch (e) {
+        console.error("Traffic snapshot overlay failed:", e);
+      }
+    }
+
     return new Response(JSON.stringify(data), { headers, status: 200 });
   } catch (err) {
     console.error("sync-traffic-funnel error:", err);
