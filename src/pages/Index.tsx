@@ -58,6 +58,7 @@ import {
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import { usePipelineData } from "@/hooks/usePipelineData";
 import { useTrafficFunnelData } from "@/hooks/useTrafficFunnelData";
+import { useFinancialCashflowData } from "@/hooks/useFinancialCashflowData";
 import {
   useMetrics,
   useMetricHistory,
