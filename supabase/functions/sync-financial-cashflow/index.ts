@@ -161,8 +161,12 @@ function parseSheet(
     }
   }
 
-  // Receita Operacional = TOTAL DE RECEBIMENTOS − (Aportes + Reembolsos + Estornos + Patenteia)
-  const receb = Math.max(0, total_recebimentos - nao_operacional_total);
+  // Receita realizada:
+  // - Meses passados (mode "total"): usar o Total da linha Boleto (valor consolidado do mês)
+  // - Mês vigente (mode "sum"): TOTAL DE RECEBIMENTOS − não-operacionais até o dia atual
+  const receb = mode === "total"
+    ? boleto_total
+    : Math.max(0, total_recebimentos - nao_operacional_total);
   const lucratividade_pct = receb > 0
     ? Math.round(((receb - total_pagamentos) / receb) * 10000) / 100
     : 0;
