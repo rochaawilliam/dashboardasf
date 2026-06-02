@@ -1092,12 +1092,13 @@ const Index = () => {
         : 0;
     }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
+  }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
       ...accumulatedValues,
       ...pipelineAccumulatedValues,
+      ...cashflowAccumulatedValues,
     };
     // Auto-calculate ROI accumulated
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
