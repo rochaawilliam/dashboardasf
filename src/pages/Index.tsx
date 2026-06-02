@@ -163,6 +163,9 @@ const Index = () => {
   // Traffic Funnel (Google Sheets) data
   const { data: trafficFunnelData } = useTrafficFunnelData(selectedYear);
 
+  // Financial Cashflow (Google Sheets per-month) data
+  const { data: cashflowData } = useFinancialCashflowData(selectedYear);
+
   // Ritual completions data
   const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
 
