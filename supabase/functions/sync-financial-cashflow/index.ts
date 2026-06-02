@@ -76,19 +76,44 @@ function isNaoOperacional(label: string): boolean {
   return NAO_OPERACIONAL_PATTERNS.some((re) => re.test(l));
 }
 
-// Soma colunas 1..dayLimit (cada coluna = 1 dia do mês). dayLimit=31 cobre o mês inteiro.
-function sumDays(cols: string[], dayLimit: number): number {
+// Extrai o valor de uma linha conforme o modo:
+// - mode "total": usa a coluna Total (col[daysInMonth+1]); fallback p/ última célula numérica
+// - mode "sum": soma as colunas 1..dayLimit (cada coluna = 1 dia)
+// - mode "none": retorna 0 (mês futuro)
+function extractValue(
+  cols: string[],
+  mode: "total" | "sum" | "none",
+  daysInMonth: number,
+  dayLimit: number,
+): number {
+  if (mode === "none") return 0;
+  if (mode === "total") {
+    const totalIdx = daysInMonth + 1;
+    let cell = (cols[totalIdx] || "").trim();
+    if (!cell || cell.startsWith("#")) {
+      for (let i = cols.length - 1; i >= 1; i--) {
+        const v = (cols[i] || "").trim();
+        if (v && !v.startsWith("#")) { cell = v; break; }
+      }
+    }
+    return parseBRNumber(cell);
+  }
   let s = 0;
-  const max = Math.min(dayLimit, cols.length - 1);
+  const max = Math.min(dayLimit, daysInMonth, cols.length - 1);
   for (let i = 1; i <= max; i++) {
     const v = (cols[i] || "").trim();
-    if (!v || v.startsWith("#")) continue; // ignora #REF!, #DIV/0!, etc
+    if (!v || v.startsWith("#")) continue;
     s += parseBRNumber(v);
   }
   return s;
 }
 
-function parseSheet(csv: string, dayLimit: number): CashflowMonthData {
+function parseSheet(
+  csv: string,
+  mode: "total" | "sum" | "none",
+  daysInMonth: number,
+  dayLimit: number,
+): CashflowMonthData {
   const lines = csv.split("\n");
   let nao_operacional_total = 0;
   let total_recebimentos = 0;
@@ -108,23 +133,23 @@ function parseSheet(csv: string, dayLimit: number): CashflowMonthData {
     if (labelUpper.startsWith("OUTROS DADOS")) { section = "outros"; continue; }
 
     if (labelUpper === "TOTAL DE RECEBIMENTOS") {
-      total_recebimentos = sumDays(cols, dayLimit);
+      total_recebimentos = extractValue(cols, mode, daysInMonth, dayLimit);
       section = "header";
       continue;
     }
     if (labelUpper === "TOTAL DE PAGAMENTOS") {
-      total_pagamentos = sumDays(cols, dayLimit);
+      total_pagamentos = extractValue(cols, mode, daysInMonth, dayLimit);
       section = "header";
       continue;
     }
 
     if (section === "recebimentos") {
       if (label && isNaoOperacional(label)) {
-        nao_operacional_total += sumDays(cols, dayLimit);
+        nao_operacional_total += extractValue(cols, mode, daysInMonth, dayLimit);
       }
     } else if (section === "pagamentos") {
       if (isFolhaLabel(label)) {
-        folha_total += sumDays(cols, dayLimit);
+        folha_total += extractValue(cols, mode, daysInMonth, dayLimit);
       }
     }
   }
@@ -148,19 +173,30 @@ function parseSheet(csv: string, dayLimit: number): CashflowMonthData {
   };
 }
 
-// Dia-limite por mês: futuro => 0, vigente => dia atual (BR), passado => último dia do mês.
-// Importante: a planilha usa col[1..N] = dias 1..N e col[N+1] = Total — então NUNCA somar além de N.
-function dayLimitFor(year: number, month: number): number {
+// Decide o modo:
+// - futuro: "none"
+// - mês vigente: "sum" até hoje (planilha mistura realizado e projetado, então somamos só os dias já realizados)
+// - mês passado: "total" (valor final da coluna Total)
+function modeFor(year: number, month: number): {
+  mode: "total" | "sum" | "none";
+  daysInMonth: number;
+  dayLimit: number;
+} {
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const now = new Date();
   const br = new Date(now.getTime() - 3 * 60 * 60 * 1000);
   const ty = br.getUTCFullYear();
   const tm = br.getUTCMonth() + 1;
   const td = br.getUTCDate();
-  if (year > ty || (year === ty && month > tm)) return 0;
-  if (year === ty && month === tm) return Math.min(td, daysInMonth);
-  return daysInMonth;
+  if (year > ty || (year === ty && month > tm)) {
+    return { mode: "none", daysInMonth, dayLimit: 0 };
+  }
+  if (year === ty && month === tm) {
+    return { mode: "sum", daysInMonth, dayLimit: Math.min(td, daysInMonth) };
+  }
+  return { mode: "total", daysInMonth, dayLimit: daysInMonth };
 }
+
 
 
 
