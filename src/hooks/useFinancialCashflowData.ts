@@ -5,8 +5,10 @@ export interface CashflowMonthData {
   total_recebimentos: number;
   total_pagamentos: number;
   folha_total: number;
+  custo_fixo_total: number;
   lucratividade_pct: number;
   folha_sobre_receita_pct: number;
+  custo_fixo_sobre_receita_pct: number;
   boleto_total: number;
 }
 
