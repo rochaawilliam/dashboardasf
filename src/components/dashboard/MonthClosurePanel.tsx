@@ -67,6 +67,7 @@ export function MonthClosurePanel() {
       await qc.invalidateQueries({ queryKey: ["month_snapshots"] });
       await qc.invalidateQueries({ queryKey: ["pipeline-data"] });
       await qc.invalidateQueries({ queryKey: ["traffic-funnel"] });
+      await qc.invalidateQueries({ queryKey: ["financial-cashflow"] });
     } catch (e: any) {
       toast.error(`Falha: ${e?.message ?? "erro desconhecido"}`);
     } finally {
