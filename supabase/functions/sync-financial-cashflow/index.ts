@@ -228,7 +228,8 @@ Deno.serve(async (req) => {
           const res = await fetch(src.csv_url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const csv = await res.text();
-          const parsed = parseSheet(csv, dayLimitFor(src.year, src.month));
+          const { mode, daysInMonth, dayLimit } = modeFor(src.year, src.month);
+          const parsed = parseSheet(csv, mode, daysInMonth, dayLimit);
           result.months[ms] = parsed;
           // best-effort timestamp update
           await sb
