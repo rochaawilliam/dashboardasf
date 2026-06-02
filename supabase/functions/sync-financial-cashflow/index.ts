@@ -121,6 +121,7 @@ function parseSheet(
   let total_recebimentos = 0;
   let total_pagamentos = 0;
   let folha_total = 0;
+  let boleto_total = 0; // sempre lido da coluna Total da linha Boleto — usado como previsto
 
   let section: "header" | "recebimentos" | "pagamentos" | "outros" = "header";
 
@@ -146,6 +147,10 @@ function parseSheet(
     }
 
     if (section === "recebimentos") {
+      // Boleto: sempre pegar o Total do mês inteiro (previsto)
+      if (labelUpper === "BOLETO") {
+        boleto_total = extractValue(cols, "total", daysInMonth, dayLimit);
+      }
       if (label && isNaoOperacional(label)) {
         nao_operacional_total += extractValue(cols, mode, daysInMonth, dayLimit);
       }
@@ -172,8 +177,10 @@ function parseSheet(
     folha_total,
     lucratividade_pct,
     folha_sobre_receita_pct,
+    boleto_total,
   };
 }
+
 
 // Decide o modo:
 // - futuro: "none"
