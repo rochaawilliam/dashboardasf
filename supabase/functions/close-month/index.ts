@@ -161,7 +161,9 @@ Deno.serve(async (req) => {
         const payload =
           source === "pipeline"
             ? await snapshotPipelineMonth(year, month)
-            : await snapshotTrafficMonth(year, month);
+            : source === "traffic_funnel"
+              ? await snapshotTrafficMonth(year, month)
+              : await snapshotCashflowMonth(year, month);
         const { error } = await admin
           .from("month_snapshots")
           .upsert(
