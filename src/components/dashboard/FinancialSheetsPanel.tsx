@@ -151,7 +151,7 @@ export function FinancialSheetsPanel() {
         </CardTitle>
         <CardDescription>
           Cole a URL CSV publicada da aba de cada mês. Os cards do Financeiro (Receita Total,
-          Lucratividade e Folha sobre Receita) passam a vir direto da planilha. Para publicar:
+          Lucratividade, Folha sobre Receita e Custo Fixo sobre Receita) passam a vir direto da planilha. Para publicar:
           no Google Sheets vá em <strong>Arquivo → Compartilhar → Publicar na web</strong>,
           selecione a aba do mês e o formato <strong>CSV</strong>.
         </CardDescription>
