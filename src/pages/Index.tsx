@@ -1057,7 +1057,7 @@ const Index = () => {
         }
       });
       const months = Object.values(lucratMonthly);
-      if (months.length > 0) {
+      if (months.length > 0 && cashflowMonthlyValues[LUCRATIVIDADE_ANUAL_ID] === undefined) {
         merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
       }
     }
@@ -1128,7 +1128,7 @@ const Index = () => {
         }
       });
       const months = Object.values(lucratMonthly);
-      if (months.length > 0) {
+      if (months.length > 0 && cashflowAccumulatedValues[LUCRATIVIDADE_ANUAL_ID] === undefined) {
         merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
       }
     }
