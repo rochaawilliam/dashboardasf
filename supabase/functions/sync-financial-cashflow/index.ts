@@ -148,18 +148,20 @@ function parseSheet(csv: string, dayLimit: number): CashflowMonthData {
   };
 }
 
-// Dia-limite por mês: futuro => 0, vigente => dia atual (BR), passado => 31
+// Dia-limite por mês: futuro => 0, vigente => dia atual (BR), passado => último dia do mês.
+// Importante: a planilha usa col[1..N] = dias 1..N e col[N+1] = Total — então NUNCA somar além de N.
 function dayLimitFor(year: number, month: number): number {
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const now = new Date();
-  // Brasil = UTC-3
   const br = new Date(now.getTime() - 3 * 60 * 60 * 1000);
   const ty = br.getUTCFullYear();
   const tm = br.getUTCMonth() + 1;
   const td = br.getUTCDate();
   if (year > ty || (year === ty && month > tm)) return 0;
-  if (year === ty && month === tm) return td;
-  return 31;
+  if (year === ty && month === tm) return Math.min(td, daysInMonth);
+  return daysInMonth;
 }
+
 
 
 Deno.serve(async (req) => {
