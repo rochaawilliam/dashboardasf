@@ -1067,6 +1067,8 @@ Deno.serve(async (req) => {
     const dashboardByMonth: Record<string, DashboardMonthData> = {};
     // Dashboard leads/prospects/contratos/valor_gerado by origin per month
     const dashboardByOriginMonth: Record<string, Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }>> = {};
+    // Dashboard leads/contratos by origin + practice_area per month (cumulative, snapshot-style)
+    const dashboardByOriginAreaMonth: Record<string, Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>>> = {};
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
