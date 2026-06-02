@@ -114,9 +114,11 @@ export interface PipelineData {
   dashboardTotals?: DashboardMonthData;
   dashboardByOrigin?: Record<string, Record<string, { leads: number; prospects: number; contratos: number; valor_gerado?: number }>>;
   dashboardTotalsByOrigin?: Record<string, { leads: number; prospects: number; contratos: number; valor_gerado?: number }>;
+  dashboardByOriginArea?: Record<string, Record<string, Record<string, { leads: number; contratos: number; valor_gerado?: number }>>>;
+  dashboardTotalsByOriginArea?: Record<string, Record<string, { leads: number; contratos: number; valor_gerado?: number }>>;
 }
 
-const CACHE_KEY = "pipeline-data-cache-v2";
+const CACHE_KEY = "pipeline-data-cache-v3";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 function getCachedPipeline(year: number, month?: number | null): PipelineData | null {

@@ -1067,6 +1067,8 @@ Deno.serve(async (req) => {
     const dashboardByMonth: Record<string, DashboardMonthData> = {};
     // Dashboard leads/prospects/contratos/valor_gerado by origin per month
     const dashboardByOriginMonth: Record<string, Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }>> = {};
+    // Dashboard leads/contratos by origin + practice_area per month (cumulative, snapshot-style)
+    const dashboardByOriginAreaMonth: Record<string, Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>>> = {};
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
@@ -1163,6 +1165,7 @@ Deno.serve(async (req) => {
 
       // Dashboard leads/contratos by origin
       dashboardByOriginMonth[ms] = {};
+      dashboardByOriginAreaMonth[ms] = {};
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
         const oLeads = computeCumulative(originCards, "leads");
@@ -1170,8 +1173,23 @@ Deno.serve(async (req) => {
         const oContratosSnap = uniqueContratos(originCards);
         const oContratos = oContratosSnap.count;
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
-        dashboardByOriginMonth[ms] = dashboardByOriginMonth[ms] || {};
         dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
+
+        // By area (cumulative, snapshot-style — Dashboard panel)
+        dashboardByOriginAreaMonth[ms][origin] = {};
+        const areasInOrigin = new Set<string>();
+        for (const c of originCards) areasInOrigin.add(c.practice_area || "outros");
+        for (const area of areasInOrigin) {
+          const areaCards = originCards.filter((c: any) => (c.practice_area || "outros") === area);
+          const aLeads = computeCumulative(areaCards, "leads");
+          const aContratosSnap = uniqueContratos(areaCards);
+          const aValorGerado = deduplicatedValorGerado(aContratosSnap.cards.filter((c: any) => c.contract_value));
+          dashboardByOriginAreaMonth[ms][origin][area] = {
+            leads: aLeads.count,
+            contratos: aContratosSnap.count,
+            valor_gerado: aValorGerado,
+          };
+        }
       }
     }
 
@@ -1232,6 +1250,7 @@ Deno.serve(async (req) => {
 
     // Dashboard totals by origin
     const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }> = {};
+    const dashboardTotalsByOriginArea: Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>> = {};
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
       for (const origin of ["online", "offline"]) {
@@ -1242,6 +1261,21 @@ Deno.serve(async (req) => {
         const oContratos = oContratosSnap.count;
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
+
+        dashboardTotalsByOriginArea[origin] = {};
+        const areasInOrigin = new Set<string>();
+        for (const c of originCards) areasInOrigin.add(c.practice_area || "outros");
+        for (const area of areasInOrigin) {
+          const areaCards = originCards.filter((c: any) => (c.practice_area || "outros") === area);
+          const aLeads = computeCumulative(areaCards, "leads");
+          const aContratosSnap = uniqueContratos(areaCards);
+          const aValorGerado = deduplicatedValorGerado(aContratosSnap.cards.filter((c: any) => c.contract_value));
+          dashboardTotalsByOriginArea[origin][area] = {
+            leads: aLeads.count,
+            contratos: aContratosSnap.count,
+            valor_gerado: aValorGerado,
+          };
+        }
       }
     }
 
@@ -1267,6 +1301,8 @@ Deno.serve(async (req) => {
       dashboardTotals,
       dashboardByOrigin: dashboardByOriginMonth,
       dashboardTotalsByOrigin,
+      dashboardByOriginArea: dashboardByOriginAreaMonth,
+      dashboardTotalsByOriginArea,
     };
 
     // ---------- Month snapshot overlay (freeze closed months) ----------
@@ -1287,6 +1323,10 @@ Deno.serve(async (req) => {
               if (sp.months !== undefined) payload.months[ms] = sp.months;
               if (sp.dashboard !== undefined) payload.dashboard[ms] = sp.dashboard;
               if (sp.dashboardByOrigin !== undefined) payload.dashboardByOrigin[ms] = sp.dashboardByOrigin;
+              if (sp.dashboardByOriginArea !== undefined) {
+                payload.dashboardByOriginArea = payload.dashboardByOriginArea || {};
+                payload.dashboardByOriginArea[ms] = sp.dashboardByOriginArea;
+              }
               if (sp.avgCloseDays !== undefined) payload.avgCloseDaysByMonth[ms] = sp.avgCloseDays;
               if (sp.operational !== undefined) payload.operational[ms] = sp.operational;
               if (sp.cardNames !== undefined) payload.cardNames[ms] = sp.cardNames;
