@@ -6,8 +6,10 @@ export interface CashflowMonthData {
   total_recebimentos: number;
   total_pagamentos: number;
   folha_total: number;
+  custo_fixo_total: number;
   lucratividade_pct: number; // (receb - pagam) / receb * 100
   folha_sobre_receita_pct: number;
+  custo_fixo_sobre_receita_pct: number;
   boleto_total: number; // Total do mês (linha Boleto, coluna Total) — usado como previsto
 }
 
@@ -172,8 +174,12 @@ function parseSheet(
   const lucratividade_pct = receb > 0
     ? Math.round(((receb - total_pagamentos) / receb) * 10000) / 100
     : 0;
+  const custo_fixo_total = Math.max(0, total_pagamentos - folha_total);
   const folha_sobre_receita_pct = receb > 0
     ? Math.round((folha_total / receb) * 10000) / 100
+    : 0;
+  const custo_fixo_sobre_receita_pct = receb > 0
+    ? Math.round((custo_fixo_total / receb) * 10000) / 100
     : 0;
 
   return {
@@ -181,8 +187,10 @@ function parseSheet(
     total_recebimentos,
     total_pagamentos,
     folha_total,
+    custo_fixo_total,
     lucratividade_pct,
     folha_sobre_receita_pct,
+    custo_fixo_sobre_receita_pct,
     boleto_total,
   };
 }
