@@ -9,7 +9,7 @@ const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SB_SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const SOURCES = ["pipeline", "traffic_funnel"] as const;
+const SOURCES = ["pipeline", "traffic_funnel", "financial_cashflow"] as const;
 type Source = (typeof SOURCES)[number];
 
 function jsonResp(body: unknown, status = 200) {
