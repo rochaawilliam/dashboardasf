@@ -63,6 +63,8 @@ export type Database = {
         Row: {
           created_at: string
           csv_url: string
+          forecast_locked_at: string | null
+          forecast_locked_value: number | null
           id: string
           last_synced_at: string | null
           month: number
@@ -72,6 +74,8 @@ export type Database = {
         Insert: {
           created_at?: string
           csv_url: string
+          forecast_locked_at?: string | null
+          forecast_locked_value?: number | null
           id?: string
           last_synced_at?: string | null
           month: number
@@ -81,6 +85,8 @@ export type Database = {
         Update: {
           created_at?: string
           csv_url?: string
+          forecast_locked_at?: string | null
+          forecast_locked_value?: number | null
           id?: string
           last_synced_at?: string | null
           month?: number
