@@ -7,7 +7,9 @@ export interface CashflowMonthData {
   folha_total: number;
   lucratividade_pct: number;
   folha_sobre_receita_pct: number;
+  boleto_total: number;
 }
+
 
 export interface CashflowData {
   months: Record<string, CashflowMonthData>;
