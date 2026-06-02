@@ -5,8 +5,10 @@ export interface CashflowMonthData {
   total_recebimentos: number;
   total_pagamentos: number;
   folha_total: number;
+  custo_fixo_total: number;
   lucratividade_pct: number;
   folha_sobre_receita_pct: number;
+  custo_fixo_sobre_receita_pct: number;
   boleto_total: number;
 }
 
@@ -17,7 +19,7 @@ export interface CashflowData {
   errors: Record<string, string>;
 }
 
-const CACHE_KEY = "financial-cashflow-cache";
+const CACHE_KEY = "financial-cashflow-cache-v2";
 const CACHE_TTL = 10 * 60 * 1000;
 
 function getCached(year: number): CashflowData | null {

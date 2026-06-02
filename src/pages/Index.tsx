@@ -394,6 +394,7 @@ const Index = () => {
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
   const RECEITA_TOTAL_MENSAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
+  const CUSTO_FIXO_SOBRE_RECEITA_ID = "0e52dcd3-7a81-413f-ad00-e54be82c9dc8";
 
   // ROI metric IDs
   const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
@@ -990,12 +991,22 @@ const Index = () => {
     const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
     const m = cashflowData.months[ms];
     if (!m) return values;
+    const monthsThroughSelected = Object.entries(cashflowData.months)
+      .filter(([key, monthData]) => Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
+      .map(([, monthData]) => monthData.lucratividade_pct);
     values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
-    values[LUCRATIVIDADE_ANUAL_ID] = m.lucratividade_pct;
+    if (monthsThroughSelected.length > 0) {
+      values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
+    }
     values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
+    values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
+      m.recebimentos_dinheiro_pix > 0
+        ? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100
+        : 0
+    );
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
 
   // Cashflow accumulated across the year
   const cashflowAccumulatedValues = useMemo(() => {
@@ -1004,11 +1015,13 @@ const Index = () => {
     let receitaSum = 0;
     const lucratValues: number[] = [];
     const folhaValues: number[] = [];
+    const custoFixoValues: number[] = [];
     for (const m of Object.values(cashflowData.months)) {
       receitaSum += m.recebimentos_dinheiro_pix;
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
+        custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
       }
     }
     if (receitaSum > 0) values[RECEITA_TOTAL_MENSAL_ID] = receitaSum;
@@ -1021,8 +1034,12 @@ const Index = () => {
       values[FOLHA_SOBRE_RECEITA_ID] =
         Math.round((folhaValues.reduce((a, b) => a + b, 0) / folhaValues.length) * 100) / 100;
     }
+    if (custoFixoValues.length > 0) {
+      values[CUSTO_FIXO_SOBRE_RECEITA_ID] =
+        Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
+    }
     return values;
-  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
 
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
@@ -2036,18 +2053,25 @@ const Index = () => {
 
                                        // For each month BEFORE currentMonthRef (exclude current month)
                                        for (let mo = 1; mo < currentMonthRef; mo++) {
-                                         let monthRealizado = 0;
+                                          const cashflowKey = `${selectedYear}-${String(mo).padStart(2, "0")}`;
+                                          const sheetRealizado = cashflowData?.months?.[cashflowKey]?.recebimentos_dinheiro_pix;
+                                          let monthRealizado = sheetRealizado ?? 0;
                                          let monthMeta = 0;
-                                         allRevenueMetrics.forEach((rm) => {
-                                           historyData?.forEach((h: any) => {
-                                             const ref = getRefMonthYear(h.period_type, h.recorded_at);
-                                             if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
-                                               monthRealizado += h.value;
-                                             }
-                                           });
-                                           const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
-                                           monthMeta += mt?.target_value ?? 0;
-                                         });
+                                          if (sheetRealizado === undefined) {
+                                            allRevenueMetrics.forEach((rm) => {
+                                              historyData?.forEach((h: any) => {
+                                                const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                                if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
+                                                  monthRealizado += h.value;
+                                                }
+                                              });
+                                            });
+                                          }
+                                          const receitaTarget = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear)?.target_value;
+                                          monthMeta = receitaTarget ?? allRevenueMetrics.reduce((sum, rm) => {
+                                            const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
+                                            return sum + (mt?.target_value ?? 0);
+                                          }, 0);
                                          resultadoPrevisto += monthMeta;
                                          resultadoRealizado += monthRealizado;
                                        }
@@ -2058,21 +2082,25 @@ const Index = () => {
                                        const metaAnual = receitaTotalMetric?.target_value || 2218000;
 
                                        if (selectedMonth !== null) {
-                                         // Monthly: realizado do mês / meta do mês
-                                         let monthRealizado = 0;
-                                         allRevenueMetrics.forEach((rm) => {
-                                           historyData?.forEach((h: any) => {
-                                             const ref = getRefMonthYear(h.period_type, h.recorded_at);
-                                             if (ref.year === selectedYear && ref.month === selectedMonth && h.metric_id === rm.id) {
-                                               monthRealizado += h.value;
-                                             }
-                                           });
-                                         });
+                                          // Monthly: realizado do mês / meta do mês
+                                          const sheetRealizado = cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID];
+                                          let monthRealizado = sheetRealizado ?? 0;
+                                          if (sheetRealizado === undefined) {
+                                            allRevenueMetrics.forEach((rm) => {
+                                              historyData?.forEach((h: any) => {
+                                                const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                                if (ref.year === selectedYear && ref.month === selectedMonth && h.metric_id === rm.id) {
+                                                  monthRealizado += h.value;
+                                                }
+                                              });
+                                            });
+                                          }
                                          const metaMes = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0;
                                          eficienciaReceitaValue = metaMes > 0 ? monthRealizado / metaMes * 100 : 0;
                                        } else {
                                          // Annual: realizado acumulado / meta acumulada (soma das metas mensais até agora)
-                                         const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                          const receitaAcumulada = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID] ??
+                                            allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
                                          let metaAcumulada = 0;
                                          for (let mo = 1; mo < currentMonthRef; mo++) {
                                            const mt = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear);
