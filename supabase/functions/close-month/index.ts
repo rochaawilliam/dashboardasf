@@ -36,6 +36,7 @@ async function snapshotPipelineMonth(year: number, month: number) {
     months: p.months?.[ms],
     dashboard: p.dashboard?.[ms],
     dashboardByOrigin: p.dashboardByOrigin?.[ms],
+    dashboardByOriginArea: p.dashboardByOriginArea?.[ms],
     avgCloseDays: p.avgCloseDaysByMonth?.[ms],
     operational: p.operational?.[ms],
     cardNames: p.cardNames?.[ms],
