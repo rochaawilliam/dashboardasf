@@ -19,7 +19,7 @@ export interface CashflowData {
   errors: Record<string, string>;
 }
 
-const CACHE_KEY = "financial-cashflow-cache";
+const CACHE_KEY = "financial-cashflow-cache-v2";
 const CACHE_TTL = 10 * 60 * 1000;
 
 function getCached(year: number): CashflowData | null {
