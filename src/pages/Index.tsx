@@ -143,7 +143,7 @@ const Index = () => {
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("experiencia_cliente");
-  const [showFinancialValues, setShowFinancialValues] = useState(false);
+  const [showFinancialValues, setShowFinancialValues] = useState(true);
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
@@ -992,9 +992,10 @@ const Index = () => {
     if (!m) return values;
     values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
+    values[LUCRATIVIDADE_ANUAL_ID] = m.lucratividade_pct;
     values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
 
   // Cashflow accumulated across the year
   const cashflowAccumulatedValues = useMemo(() => {
@@ -1056,7 +1057,7 @@ const Index = () => {
         }
       });
       const months = Object.values(lucratMonthly);
-      if (months.length > 0) {
+      if (months.length > 0 && cashflowMonthlyValues[LUCRATIVIDADE_ANUAL_ID] === undefined) {
         merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
       }
     }
@@ -1127,7 +1128,7 @@ const Index = () => {
         }
       });
       const months = Object.values(lucratMonthly);
-      if (months.length > 0) {
+      if (months.length > 0 && cashflowAccumulatedValues[LUCRATIVIDADE_ANUAL_ID] === undefined) {
         merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
       }
     }
@@ -1895,8 +1896,10 @@ const Index = () => {
                             filter((s) => revenueSubcats.includes(s.name)).
                             flatMap((s) => s.metrics);
 
-                            const computedMonthly = revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                            const computedAccumulated = revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                            const computedMonthly = cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID] ??
+                              revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
+                            const computedAccumulated = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID] ??
+                              revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
 
                             return {
                               ...metric,
@@ -2110,10 +2113,12 @@ const Index = () => {
                                       revSumAccumulated = sumComponents(RECEITA_TRIB_COMPONENTS, accumulatedValues);
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTotalAnual) {
-                                      // Receita Total = Receita Emp + Trab + Trib + Outras Receitas
+                                      // Receita Total = planilha de Fluxo de Caixa quando disponível; senão, soma manual das receitas
                                       const allRevIds = [...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID];
-                                      revSumMonthly = selectedMonth !== null ? sumComponents(allRevIds, monthlyValues) : null;
-                                      revSumAccumulated = sumComponents(allRevIds, accumulatedValues);
+                                      const sheetMonthlyValue = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID] : undefined;
+                                      const sheetAccumulatedValue = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID];
+                                      revSumMonthly = selectedMonth !== null ? sheetMonthlyValue ?? sumComponents(allRevIds, monthlyValues) : null;
+                                      revSumAccumulated = sheetAccumulatedValue ?? sumComponents(allRevIds, accumulatedValues);
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
 
