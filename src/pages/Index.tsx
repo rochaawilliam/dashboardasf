@@ -143,7 +143,7 @@ const Index = () => {
   });
   const [savingMetricId, setSavingMetricId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<MetricCategory | "comissao" | "comissao_sdr">("experiencia_cliente");
-  const [showFinancialValues, setShowFinancialValues] = useState(false);
+  const [showFinancialValues, setShowFinancialValues] = useState(true);
   const isCommissionUser = user?.email === COMMISSION_USER_EMAIL;
   const isSDRUser = SDR_ALLOWED_EMAILS.includes(user?.email ?? "");
   const [drilldownMetric, setDrilldownMetric] = useState<typeof adjustedMetrics[number] | null>(null);
@@ -2110,10 +2110,12 @@ const Index = () => {
                                       revSumAccumulated = sumComponents(RECEITA_TRIB_COMPONENTS, accumulatedValues);
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTotalAnual) {
-                                      // Receita Total = Receita Emp + Trab + Trib + Outras Receitas
+                                      // Receita Total = planilha de Fluxo de Caixa quando disponível; senão, soma manual das receitas
                                       const allRevIds = [...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID];
-                                      revSumMonthly = selectedMonth !== null ? sumComponents(allRevIds, monthlyValues) : null;
-                                      revSumAccumulated = sumComponents(allRevIds, accumulatedValues);
+                                      const sheetMonthlyValue = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID] : undefined;
+                                      const sheetAccumulatedValue = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID];
+                                      revSumMonthly = selectedMonth !== null ? sheetMonthlyValue ?? sumComponents(allRevIds, monthlyValues) : null;
+                                      revSumAccumulated = sheetAccumulatedValue ?? sumComponents(allRevIds, accumulatedValues);
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
 
