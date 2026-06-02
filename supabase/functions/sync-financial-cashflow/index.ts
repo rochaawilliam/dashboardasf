@@ -162,11 +162,13 @@ function parseSheet(
   }
 
   // Receita realizada:
-  // - Meses passados (mode "total"): usar o Total da linha Boleto (valor consolidado do mês)
-  // - Mês vigente (mode "sum"): TOTAL DE RECEBIMENTOS − não-operacionais até o dia atual
+  // - Meses passados: usar Total da linha Boleto (consolidado). Se não houver linha Boleto,
+  //   usar TOTAL DE RECEBIMENTOS − não-operacionais como fallback.
+  // - Mês vigente: TOTAL DE RECEBIMENTOS − não-operacionais até o dia atual
+  const operacional = Math.max(0, total_recebimentos - nao_operacional_total);
   const receb = mode === "total"
-    ? boleto_total
-    : Math.max(0, total_recebimentos - nao_operacional_total);
+    ? (boleto_total > 0 ? boleto_total : operacional)
+    : operacional;
   const lucratividade_pct = receb > 0
     ? Math.round(((receb - total_pagamentos) / receb) * 10000) / 100
     : 0;
