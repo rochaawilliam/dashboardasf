@@ -1191,7 +1191,7 @@ const Index = () => {
       }
     }
     return merged;
-  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear, ritualCompletions]);
+  }, [accumulatedValues, pipelineAccumulatedValues, cashflowAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
   // Build card names mapping: metric ID → string[] of lead names from pipeline
   const pipelineCardNames = useMemo(() => {
