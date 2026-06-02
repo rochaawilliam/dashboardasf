@@ -58,6 +58,7 @@ import {
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import { usePipelineData } from "@/hooks/usePipelineData";
 import { useTrafficFunnelData } from "@/hooks/useTrafficFunnelData";
+import { useFinancialCashflowData } from "@/hooks/useFinancialCashflowData";
 import {
   useMetrics,
   useMetricHistory,
@@ -161,6 +162,9 @@ const Index = () => {
 
   // Traffic Funnel (Google Sheets) data
   const { data: trafficFunnelData } = useTrafficFunnelData(selectedYear);
+
+  // Financial Cashflow (Google Sheets per-month) data
+  const { data: cashflowData } = useFinancialCashflowData(selectedYear);
 
   // Ritual completions data
   const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
@@ -388,6 +392,8 @@ const Index = () => {
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
+  const RECEITA_TOTAL_MENSAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
+  const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
 
   // ROI metric IDs
   const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
@@ -977,10 +983,51 @@ const Index = () => {
     return info;
   }, [pipelineData, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP]);
 
+  // Cashflow (Google Sheets Financeiro) → monthly values for selected month
+  const cashflowMonthlyValues = useMemo(() => {
+    const values: Record<string, number> = {};
+    if (!cashflowData?.months || !selectedMonth) return values;
+    const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+    const m = cashflowData.months[ms];
+    if (!m) return values;
+    values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
+    values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
+    values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
+    return values;
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+
+  // Cashflow accumulated across the year
+  const cashflowAccumulatedValues = useMemo(() => {
+    const values: Record<string, number> = {};
+    if (!cashflowData?.months) return values;
+    let receitaSum = 0;
+    const lucratValues: number[] = [];
+    const folhaValues: number[] = [];
+    for (const m of Object.values(cashflowData.months)) {
+      receitaSum += m.recebimentos_dinheiro_pix;
+      if (m.recebimentos_dinheiro_pix > 0) {
+        lucratValues.push(m.lucratividade_pct);
+        folhaValues.push(m.folha_sobre_receita_pct);
+      }
+    }
+    if (receitaSum > 0) values[RECEITA_TOTAL_MENSAL_ID] = receitaSum;
+    if (lucratValues.length > 0) {
+      values[LUCRATIVIDADE_MENSAL_ID] =
+        Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
+      values[LUCRATIVIDADE_ANUAL_ID] = values[LUCRATIVIDADE_MENSAL_ID];
+    }
+    if (folhaValues.length > 0) {
+      values[FOLHA_SOBRE_RECEITA_ID] =
+        Math.round((folhaValues.reduce((a, b) => a + b, 0) / folhaValues.length) * 100) / 100;
+    }
+    return values;
+  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
       ...monthlyValues,
       ...pipelineMonthlyValues,
+      ...cashflowMonthlyValues,
     };
     // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
@@ -1045,12 +1092,13 @@ const Index = () => {
         : 0;
     }
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
+  }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
       ...accumulatedValues,
       ...pipelineAccumulatedValues,
+      ...cashflowAccumulatedValues,
     };
     // Auto-calculate ROI accumulated
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
@@ -1143,7 +1191,7 @@ const Index = () => {
       }
     }
     return merged;
-  }, [accumulatedValues, pipelineAccumulatedValues, historyData, selectedYear, ritualCompletions]);
+  }, [accumulatedValues, pipelineAccumulatedValues, cashflowAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
   // Build card names mapping: metric ID → string[] of lead names from pipeline
   const pipelineCardNames = useMemo(() => {
@@ -1284,7 +1332,6 @@ const Index = () => {
   // Computed revenue cards
   const RESULTADO_ACUMULADO_ID = "8a4ed9b7-7e8b-45ff-a957-3818181a83f6";
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
-  const RECEITA_TOTAL_MENSAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
 
   // Computed revenue sum cards
   const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";

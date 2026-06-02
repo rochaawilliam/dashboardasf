@@ -9,7 +9,7 @@ const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SB_SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const SOURCES = ["pipeline", "traffic_funnel"] as const;
+const SOURCES = ["pipeline", "traffic_funnel", "financial_cashflow"] as const;
 type Source = (typeof SOURCES)[number];
 
 function jsonResp(body: unknown, status = 200) {
@@ -85,6 +85,17 @@ async function snapshotTrafficMonth(year: number, month: number) {
   return { months: p.months?.[ms] ?? null };
 }
 
+async function snapshotCashflowMonth(year: number, month: number) {
+  const url = `${SB_URL}/functions/v1/sync-financial-cashflow?year=${year}&skip_snapshots=1`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${SB_ANON}`, apikey: SB_ANON, "x-skip-snapshots": "1" },
+  });
+  if (!res.ok) throw new Error(`sync-financial-cashflow failed: ${res.status}`);
+  const p: any = await res.json();
+  const ms = `${year}-${String(month).padStart(2, "0")}`;
+  return { months: p.months?.[ms] ?? null };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -150,7 +161,9 @@ Deno.serve(async (req) => {
         const payload =
           source === "pipeline"
             ? await snapshotPipelineMonth(year, month)
-            : await snapshotTrafficMonth(year, month);
+            : source === "traffic_funnel"
+              ? await snapshotTrafficMonth(year, month)
+              : await snapshotCashflowMonth(year, month);
         const { error } = await admin
           .from("month_snapshots")
           .upsert(

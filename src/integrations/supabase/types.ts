@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_sheet_sources: {
+        Row: {
+          created_at: string
+          csv_url: string
+          id: string
+          last_synced_at: string | null
+          month: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          csv_url: string
+          id?: string
+          last_synced_at?: string | null
+          month: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          csv_url?: string
+          id?: string
+          last_synced_at?: string | null
+          month?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       metric_history: {
         Row: {
           comment: string | null

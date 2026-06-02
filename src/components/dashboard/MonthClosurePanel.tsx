@@ -11,6 +11,7 @@ import { Loader2, Lock, LockOpen, CalendarCheck, RefreshCw } from "lucide-react"
 const SOURCE_LABELS: Record<string, string> = {
   pipeline: "Pipeline (Crescimento + Comissão)",
   traffic_funnel: "Tráfego (Funil Online)",
+  financial_cashflow: "Financeiro (Fluxo de Caixa)",
 };
 
 const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
@@ -66,6 +67,7 @@ export function MonthClosurePanel() {
       await qc.invalidateQueries({ queryKey: ["month_snapshots"] });
       await qc.invalidateQueries({ queryKey: ["pipeline-data"] });
       await qc.invalidateQueries({ queryKey: ["traffic-funnel"] });
+      await qc.invalidateQueries({ queryKey: ["financial-cashflow"] });
     } catch (e: any) {
       toast.error(`Falha: ${e?.message ?? "erro desconhecido"}`);
     } finally {

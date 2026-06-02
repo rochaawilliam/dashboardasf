@@ -28,6 +28,7 @@ import {
 import { UserSettingsContent } from "@/components/dashboard/UserSettingsContent";
 import { AdminUsersPanel } from "@/components/dashboard/AdminUsersPanel";
 import { MonthClosurePanel } from "@/components/dashboard/MonthClosurePanel";
+import { FinancialSheetsPanel } from "@/components/dashboard/FinancialSheetsPanel";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 
 export default function Profile() {
@@ -322,6 +323,7 @@ export default function Profile() {
             <TabsContent value="admin" className="space-y-6">
               <AdminUsersPanel />
               <MonthClosurePanel />
+              <FinancialSheetsPanel />
             </TabsContent>
           )}
         </Tabs>
