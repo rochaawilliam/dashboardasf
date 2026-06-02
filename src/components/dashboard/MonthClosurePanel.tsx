@@ -11,6 +11,7 @@ import { Loader2, Lock, LockOpen, CalendarCheck, RefreshCw } from "lucide-react"
 const SOURCE_LABELS: Record<string, string> = {
   pipeline: "Pipeline (Crescimento + Comissão)",
   traffic_funnel: "Tráfego (Funil Online)",
+  financial_cashflow: "Financeiro (Fluxo de Caixa)",
 };
 
 const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
