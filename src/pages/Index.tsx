@@ -992,9 +992,10 @@ const Index = () => {
     if (!m) return values;
     values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
+    values[LUCRATIVIDADE_ANUAL_ID] = m.lucratividade_pct;
     values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
 
   // Cashflow accumulated across the year
   const cashflowAccumulatedValues = useMemo(() => {
@@ -1895,8 +1896,10 @@ const Index = () => {
                             filter((s) => revenueSubcats.includes(s.name)).
                             flatMap((s) => s.metrics);
 
-                            const computedMonthly = revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                            const computedAccumulated = revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                            const computedMonthly = cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID] ??
+                              revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
+                            const computedAccumulated = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID] ??
+                              revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
 
                             return {
                               ...metric,
