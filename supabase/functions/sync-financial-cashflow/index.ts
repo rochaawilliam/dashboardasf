@@ -63,10 +63,22 @@ function isFolhaLabel(label: string): boolean {
   return FOLHA_PATTERNS.some((re) => re.test(l));
 }
 
+// Linhas de RECEBIMENTOS que NÃO são operacionais (não compõem a Receita Operacional)
+const NAO_OPERACIONAL_PATTERNS = [
+  /^aporte/i,
+  /^reembolso/i,
+  /^estorno/i,
+  /patenteia/i,
+];
+
+function isNaoOperacional(label: string): boolean {
+  const l = label.trim();
+  return NAO_OPERACIONAL_PATTERNS.some((re) => re.test(l));
+}
+
 function parseSheet(csv: string): CashflowMonthData {
   const lines = csv.split("\n").map((l) => l.trim());
-  let receb_dinheiro = 0;
-  let receb_pix = 0;
+  let nao_operacional_total = 0;
   let total_recebimentos = 0;
   let total_pagamentos = 0;
   let folha_total = 0;
@@ -78,7 +90,7 @@ function parseSheet(csv: string): CashflowMonthData {
     const cols = parseCSVLine(raw);
     const label = (cols[0] || "").trim();
     const labelUpper = label.toUpperCase();
-    // Total is the LAST non-empty column (usually rightmost). We pick the last cell with a value.
+    // Total is the LAST non-empty column (usually rightmost).
     let totalCell = "";
     for (let i = cols.length - 1; i >= 1; i--) {
       const v = (cols[i] || "").trim();
@@ -92,22 +104,13 @@ function parseSheet(csv: string): CashflowMonthData {
       }
     }
 
-    if (labelUpper === "RECEBIMENTOS") {
-      section = "recebimentos";
-      continue;
-    }
-    if (labelUpper === "PAGAMENTOS") {
-      section = "pagamentos";
-      continue;
-    }
-    if (labelUpper.startsWith("OUTROS DADOS")) {
-      section = "outros";
-      continue;
-    }
+    if (labelUpper === "RECEBIMENTOS") { section = "recebimentos"; continue; }
+    if (labelUpper === "PAGAMENTOS")   { section = "pagamentos";   continue; }
+    if (labelUpper.startsWith("OUTROS DADOS")) { section = "outros"; continue; }
 
     if (labelUpper === "TOTAL DE RECEBIMENTOS") {
       total_recebimentos = parseBRNumber(totalCell);
-      section = "header"; // entre seções
+      section = "header";
       continue;
     }
     if (labelUpper === "TOTAL DE PAGAMENTOS") {
@@ -117,10 +120,8 @@ function parseSheet(csv: string): CashflowMonthData {
     }
 
     if (section === "recebimentos") {
-      if (/^dinheiro/i.test(label)) {
-        receb_dinheiro = parseBRNumber(totalCell);
-      } else if (/^pix/i.test(label)) {
-        receb_pix = parseBRNumber(totalCell);
+      if (label && isNaoOperacional(label)) {
+        nao_operacional_total += parseBRNumber(totalCell);
       }
     } else if (section === "pagamentos") {
       if (isFolhaLabel(label)) {
@@ -129,7 +130,8 @@ function parseSheet(csv: string): CashflowMonthData {
     }
   }
 
-  const receb = receb_dinheiro + receb_pix;
+  // Receita Operacional = TOTAL DE RECEBIMENTOS − (Aportes + Reembolsos + Estornos + Patenteia)
+  const receb = Math.max(0, total_recebimentos - nao_operacional_total);
   const lucratividade_pct = receb > 0
     ? Math.round(((receb - total_pagamentos) / receb) * 10000) / 100
     : 0;
@@ -138,7 +140,7 @@ function parseSheet(csv: string): CashflowMonthData {
     : 0;
 
   return {
-    recebimentos_dinheiro_pix: receb,
+    recebimentos_dinheiro_pix: receb, // nome mantido p/ compat — agora representa Receita Operacional
     total_recebimentos,
     total_pagamentos,
     folha_total,
