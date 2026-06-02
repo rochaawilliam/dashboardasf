@@ -323,6 +323,7 @@ export default function Profile() {
             <TabsContent value="admin" className="space-y-6">
               <AdminUsersPanel />
               <MonthClosurePanel />
+              <FinancialSheetsPanel />
             </TabsContent>
           )}
         </Tabs>
