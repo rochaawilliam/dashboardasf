@@ -76,8 +76,45 @@ function isNaoOperacional(label: string): boolean {
   return NAO_OPERACIONAL_PATTERNS.some((re) => re.test(l));
 }
 
-function parseSheet(csv: string): CashflowMonthData {
-  const lines = csv.split("\n").map((l) => l.trim());
+// Extrai o valor de uma linha conforme o modo:
+// - mode "total": usa a coluna Total (col[daysInMonth+1]); fallback p/ última célula numérica
+// - mode "sum": soma as colunas 1..dayLimit (cada coluna = 1 dia)
+// - mode "none": retorna 0 (mês futuro)
+function extractValue(
+  cols: string[],
+  mode: "total" | "sum" | "none",
+  daysInMonth: number,
+  dayLimit: number,
+): number {
+  if (mode === "none") return 0;
+  if (mode === "total") {
+    const totalIdx = daysInMonth + 1;
+    let cell = (cols[totalIdx] || "").trim();
+    if (!cell || cell.startsWith("#")) {
+      for (let i = cols.length - 1; i >= 1; i--) {
+        const v = (cols[i] || "").trim();
+        if (v && !v.startsWith("#")) { cell = v; break; }
+      }
+    }
+    return parseBRNumber(cell);
+  }
+  let s = 0;
+  const max = Math.min(dayLimit, daysInMonth, cols.length - 1);
+  for (let i = 1; i <= max; i++) {
+    const v = (cols[i] || "").trim();
+    if (!v || v.startsWith("#")) continue;
+    s += parseBRNumber(v);
+  }
+  return s;
+}
+
+function parseSheet(
+  csv: string,
+  mode: "total" | "sum" | "none",
+  daysInMonth: number,
+  dayLimit: number,
+): CashflowMonthData {
+  const lines = csv.split("\n");
   let nao_operacional_total = 0;
   let total_recebimentos = 0;
   let total_pagamentos = 0;
@@ -86,46 +123,33 @@ function parseSheet(csv: string): CashflowMonthData {
   let section: "header" | "recebimentos" | "pagamentos" | "outros" = "header";
 
   for (const raw of lines) {
-    if (!raw) continue;
+    if (!raw.trim()) continue;
     const cols = parseCSVLine(raw);
     const label = (cols[0] || "").trim();
     const labelUpper = label.toUpperCase();
-    // Total is the LAST non-empty column (usually rightmost).
-    let totalCell = "";
-    for (let i = cols.length - 1; i >= 1; i--) {
-      const v = (cols[i] || "").trim();
-      if (v && v !== "0" && v !== "R$ 0,00" && v !== '"R$ 0,00"') {
-        totalCell = v;
-        break;
-      }
-      if (v) {
-        totalCell = v;
-        break;
-      }
-    }
 
     if (labelUpper === "RECEBIMENTOS") { section = "recebimentos"; continue; }
     if (labelUpper === "PAGAMENTOS")   { section = "pagamentos";   continue; }
     if (labelUpper.startsWith("OUTROS DADOS")) { section = "outros"; continue; }
 
     if (labelUpper === "TOTAL DE RECEBIMENTOS") {
-      total_recebimentos = parseBRNumber(totalCell);
+      total_recebimentos = extractValue(cols, mode, daysInMonth, dayLimit);
       section = "header";
       continue;
     }
     if (labelUpper === "TOTAL DE PAGAMENTOS") {
-      total_pagamentos = parseBRNumber(totalCell);
+      total_pagamentos = extractValue(cols, mode, daysInMonth, dayLimit);
       section = "header";
       continue;
     }
 
     if (section === "recebimentos") {
       if (label && isNaoOperacional(label)) {
-        nao_operacional_total += parseBRNumber(totalCell);
+        nao_operacional_total += extractValue(cols, mode, daysInMonth, dayLimit);
       }
     } else if (section === "pagamentos") {
       if (isFolhaLabel(label)) {
-        folha_total += parseBRNumber(totalCell);
+        folha_total += extractValue(cols, mode, daysInMonth, dayLimit);
       }
     }
   }
@@ -140,7 +164,7 @@ function parseSheet(csv: string): CashflowMonthData {
     : 0;
 
   return {
-    recebimentos_dinheiro_pix: receb, // nome mantido p/ compat — agora representa Receita Operacional
+    recebimentos_dinheiro_pix: receb,
     total_recebimentos,
     total_pagamentos,
     folha_total,
@@ -148,6 +172,33 @@ function parseSheet(csv: string): CashflowMonthData {
     folha_sobre_receita_pct,
   };
 }
+
+// Decide o modo:
+// - futuro: "none"
+// - mês vigente: "sum" até hoje (planilha mistura realizado e projetado, então somamos só os dias já realizados)
+// - mês passado: "total" (valor final da coluna Total)
+function modeFor(year: number, month: number): {
+  mode: "total" | "sum" | "none";
+  daysInMonth: number;
+  dayLimit: number;
+} {
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const now = new Date();
+  const br = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+  const ty = br.getUTCFullYear();
+  const tm = br.getUTCMonth() + 1;
+  const td = br.getUTCDate();
+  if (year > ty || (year === ty && month > tm)) {
+    return { mode: "none", daysInMonth, dayLimit: 0 };
+  }
+  if (year === ty && month === tm) {
+    return { mode: "sum", daysInMonth, dayLimit: Math.min(td, daysInMonth) };
+  }
+  return { mode: "total", daysInMonth, dayLimit: daysInMonth };
+}
+
+
+
 
 Deno.serve(async (req) => {
   const cors = handleCorsOptions(req);
@@ -177,7 +228,8 @@ Deno.serve(async (req) => {
           const res = await fetch(src.csv_url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const csv = await res.text();
-          const parsed = parseSheet(csv);
+          const { mode, daysInMonth, dayLimit } = modeFor(src.year, src.month);
+          const parsed = parseSheet(csv, mode, daysInMonth, dayLimit);
           result.months[ms] = parsed;
           // best-effort timestamp update
           await sb
