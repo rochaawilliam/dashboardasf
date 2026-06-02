@@ -1323,6 +1323,10 @@ Deno.serve(async (req) => {
               if (sp.months !== undefined) payload.months[ms] = sp.months;
               if (sp.dashboard !== undefined) payload.dashboard[ms] = sp.dashboard;
               if (sp.dashboardByOrigin !== undefined) payload.dashboardByOrigin[ms] = sp.dashboardByOrigin;
+              if (sp.dashboardByOriginArea !== undefined) {
+                payload.dashboardByOriginArea = payload.dashboardByOriginArea || {};
+                payload.dashboardByOriginArea[ms] = sp.dashboardByOriginArea;
+              }
               if (sp.avgCloseDays !== undefined) payload.avgCloseDaysByMonth[ms] = sp.avgCloseDays;
               if (sp.operational !== undefined) payload.operational[ms] = sp.operational;
               if (sp.cardNames !== undefined) payload.cardNames[ms] = sp.cardNames;
