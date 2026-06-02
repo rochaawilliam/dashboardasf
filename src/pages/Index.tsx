@@ -394,6 +394,7 @@ const Index = () => {
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
   const RECEITA_TOTAL_MENSAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
+  const CUSTO_FIXO_SOBRE_RECEITA_ID = "0e52dcd3-7a81-413f-ad00-e54be82c9dc8";
 
   // ROI metric IDs
   const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
@@ -994,8 +995,13 @@ const Index = () => {
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
     values[LUCRATIVIDADE_ANUAL_ID] = m.lucratividade_pct;
     values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
+    values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
+      m.recebimentos_dinheiro_pix > 0
+        ? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100
+        : 0
+    );
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
 
   // Cashflow accumulated across the year
   const cashflowAccumulatedValues = useMemo(() => {
@@ -1004,11 +1010,13 @@ const Index = () => {
     let receitaSum = 0;
     const lucratValues: number[] = [];
     const folhaValues: number[] = [];
+    const custoFixoValues: number[] = [];
     for (const m of Object.values(cashflowData.months)) {
       receitaSum += m.recebimentos_dinheiro_pix;
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
+        custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
       }
     }
     if (receitaSum > 0) values[RECEITA_TOTAL_MENSAL_ID] = receitaSum;
@@ -1021,8 +1029,12 @@ const Index = () => {
       values[FOLHA_SOBRE_RECEITA_ID] =
         Math.round((folhaValues.reduce((a, b) => a + b, 0) / folhaValues.length) * 100) / 100;
     }
+    if (custoFixoValues.length > 0) {
+      values[CUSTO_FIXO_SOBRE_RECEITA_ID] =
+        Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
+    }
     return values;
-  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
 
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
