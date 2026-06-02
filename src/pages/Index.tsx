@@ -982,10 +982,51 @@ const Index = () => {
     return info;
   }, [pipelineData, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP]);
 
+  // Cashflow (Google Sheets Financeiro) → monthly values for selected month
+  const cashflowMonthlyValues = useMemo(() => {
+    const values: Record<string, number> = {};
+    if (!cashflowData?.months || !selectedMonth) return values;
+    const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+    const m = cashflowData.months[ms];
+    if (!m) return values;
+    values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
+    values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
+    values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
+    return values;
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+
+  // Cashflow accumulated across the year
+  const cashflowAccumulatedValues = useMemo(() => {
+    const values: Record<string, number> = {};
+    if (!cashflowData?.months) return values;
+    let receitaSum = 0;
+    const lucratValues: number[] = [];
+    const folhaValues: number[] = [];
+    for (const m of Object.values(cashflowData.months)) {
+      receitaSum += m.recebimentos_dinheiro_pix;
+      if (m.recebimentos_dinheiro_pix > 0) {
+        lucratValues.push(m.lucratividade_pct);
+        folhaValues.push(m.folha_sobre_receita_pct);
+      }
+    }
+    if (receitaSum > 0) values[RECEITA_TOTAL_MENSAL_ID] = receitaSum;
+    if (lucratValues.length > 0) {
+      values[LUCRATIVIDADE_MENSAL_ID] =
+        Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
+      values[LUCRATIVIDADE_ANUAL_ID] = values[LUCRATIVIDADE_MENSAL_ID];
+    }
+    if (folhaValues.length > 0) {
+      values[FOLHA_SOBRE_RECEITA_ID] =
+        Math.round((folhaValues.reduce((a, b) => a + b, 0) / folhaValues.length) * 100) / 100;
+    }
+    return values;
+  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
       ...monthlyValues,
       ...pipelineMonthlyValues,
+      ...cashflowMonthlyValues,
     };
     // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
