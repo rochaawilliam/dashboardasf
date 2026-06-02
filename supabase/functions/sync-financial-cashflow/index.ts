@@ -8,7 +8,9 @@ export interface CashflowMonthData {
   folha_total: number;
   lucratividade_pct: number; // (receb - pagam) / receb * 100
   folha_sobre_receita_pct: number;
+  boleto_total: number; // Total do mês (linha Boleto, coluna Total) — usado como previsto
 }
+
 
 export interface CashflowResponse {
   months: Record<string, CashflowMonthData>;
