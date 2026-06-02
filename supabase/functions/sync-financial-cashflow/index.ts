@@ -238,11 +238,17 @@ Deno.serve(async (req) => {
 
     const { data: sources, error: srcErr } = await sb
       .from("financial_sheet_sources")
-      .select("year,month,csv_url")
+      .select("year,month,csv_url,forecast_locked_value,forecast_locked_at")
       .eq("year", year);
     if (srcErr) throw srcErr;
 
     const result: CashflowResponse = { months: {}, year, errors: {} };
+
+    // Hoje (horário Brasil) — usado para travar o previsto a partir do dia 5
+    const nowBR = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const todayY = nowBR.getUTCFullYear();
+    const todayM = nowBR.getUTCMonth() + 1;
+    const todayD = nowBR.getUTCDate();
 
     await Promise.all(
       (sources ?? []).map(async (src: any) => {
@@ -253,11 +259,30 @@ Deno.serve(async (req) => {
           const csv = await res.text();
           const { mode, daysInMonth, dayLimit } = modeFor(src.year, src.month);
           const parsed = parseSheet(csv, mode, daysInMonth, dayLimit);
+
+          // Trava do previsto (boleto_total):
+          // - Mês vigente, a partir do dia 5: se ainda não há valor travado, captura agora.
+          //   Se já existe valor travado, reutiliza (não muda mais durante o mês).
+          // - Meses passados: trava o valor final na primeira leitura.
+          // - Mês futuro: não trava.
+          const isCurrent = src.year === todayY && src.month === todayM;
+          const isPast = src.year < todayY || (src.year === todayY && src.month < todayM);
+          const updates: Record<string, unknown> = { last_synced_at: new Date().toISOString() };
+
+          if (src.forecast_locked_value != null) {
+            parsed.boleto_total = Number(src.forecast_locked_value);
+          } else if (isPast && parsed.boleto_total > 0) {
+            updates.forecast_locked_value = parsed.boleto_total;
+            updates.forecast_locked_at = new Date().toISOString();
+          } else if (isCurrent && todayD >= 5 && parsed.boleto_total > 0) {
+            updates.forecast_locked_value = parsed.boleto_total;
+            updates.forecast_locked_at = new Date().toISOString();
+          }
+
           result.months[ms] = parsed;
-          // best-effort timestamp update
           await sb
             .from("financial_sheet_sources")
-            .update({ last_synced_at: new Date().toISOString() })
+            .update(updates)
             .eq("year", src.year)
             .eq("month", src.month);
         } catch (e) {
