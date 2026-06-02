@@ -2048,18 +2048,25 @@ const Index = () => {
 
                                        // For each month BEFORE currentMonthRef (exclude current month)
                                        for (let mo = 1; mo < currentMonthRef; mo++) {
-                                         let monthRealizado = 0;
+                                          const cashflowKey = `${selectedYear}-${String(mo).padStart(2, "0")}`;
+                                          const sheetRealizado = cashflowData?.months?.[cashflowKey]?.recebimentos_dinheiro_pix;
+                                          let monthRealizado = sheetRealizado ?? 0;
                                          let monthMeta = 0;
-                                         allRevenueMetrics.forEach((rm) => {
-                                           historyData?.forEach((h: any) => {
-                                             const ref = getRefMonthYear(h.period_type, h.recorded_at);
-                                             if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
-                                               monthRealizado += h.value;
-                                             }
-                                           });
-                                           const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
-                                           monthMeta += mt?.target_value ?? 0;
-                                         });
+                                          if (sheetRealizado === undefined) {
+                                            allRevenueMetrics.forEach((rm) => {
+                                              historyData?.forEach((h: any) => {
+                                                const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                                if (ref.year === selectedYear && ref.month === mo && h.metric_id === rm.id) {
+                                                  monthRealizado += h.value;
+                                                }
+                                              });
+                                            });
+                                          }
+                                          const receitaTarget = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear)?.target_value;
+                                          monthMeta = receitaTarget ?? allRevenueMetrics.reduce((sum, rm) => {
+                                            const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
+                                            return sum + (mt?.target_value ?? 0);
+                                          }, 0);
                                          resultadoPrevisto += monthMeta;
                                          resultadoRealizado += monthRealizado;
                                        }
@@ -2070,21 +2077,25 @@ const Index = () => {
                                        const metaAnual = receitaTotalMetric?.target_value || 2218000;
 
                                        if (selectedMonth !== null) {
-                                         // Monthly: realizado do mês / meta do mês
-                                         let monthRealizado = 0;
-                                         allRevenueMetrics.forEach((rm) => {
-                                           historyData?.forEach((h: any) => {
-                                             const ref = getRefMonthYear(h.period_type, h.recorded_at);
-                                             if (ref.year === selectedYear && ref.month === selectedMonth && h.metric_id === rm.id) {
-                                               monthRealizado += h.value;
-                                             }
-                                           });
-                                         });
+                                          // Monthly: realizado do mês / meta do mês
+                                          const sheetRealizado = cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID];
+                                          let monthRealizado = sheetRealizado ?? 0;
+                                          if (sheetRealizado === undefined) {
+                                            allRevenueMetrics.forEach((rm) => {
+                                              historyData?.forEach((h: any) => {
+                                                const ref = getRefMonthYear(h.period_type, h.recorded_at);
+                                                if (ref.year === selectedYear && ref.month === selectedMonth && h.metric_id === rm.id) {
+                                                  monthRealizado += h.value;
+                                                }
+                                              });
+                                            });
+                                          }
                                          const metaMes = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0;
                                          eficienciaReceitaValue = metaMes > 0 ? monthRealizado / metaMes * 100 : 0;
                                        } else {
                                          // Annual: realizado acumulado / meta acumulada (soma das metas mensais até agora)
-                                         const receitaAcumulada = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                                          const receitaAcumulada = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID] ??
+                                            allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
                                          let metaAcumulada = 0;
                                          for (let mo = 1; mo < currentMonthRef; mo++) {
                                            const mt = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear);
