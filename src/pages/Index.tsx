@@ -991,9 +991,14 @@ const Index = () => {
     const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
     const m = cashflowData.months[ms];
     if (!m) return values;
+    const monthsThroughSelected = Object.entries(cashflowData.months)
+      .filter(([key, monthData]) => Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
+      .map(([, monthData]) => monthData.lucratividade_pct);
     values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
-    values[LUCRATIVIDADE_ANUAL_ID] = m.lucratividade_pct;
+    if (monthsThroughSelected.length > 0) {
+      values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
+    }
     values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
     values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
       m.recebimentos_dinheiro_pix > 0
