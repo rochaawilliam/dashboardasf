@@ -614,10 +614,10 @@ const Index = () => {
         values[LEADS_OFF_TRIB] = dboArea.offline["tributario"]?.leads ?? 0;
       }
     }
-    // Novos Leads = same as Leads no Funil (Dashboard cumulative by origin)
-    const dboNL = ms ? pipelineData.dashboardByOrigin?.[ms] : pipelineData.dashboardTotalsByOrigin;
-    if (dboNL?.online) values[NOVOS_LEADS_ONLINE] = dboNL.online.leads;
-    if (dboNL?.offline) values[NOVOS_LEADS_OFFLINE] = dboNL.offline.leads;
+    // Novos Leads = Pipeline Dashboard "Novos Leads" (cards criados no período no funil), por origem
+    const novosOA = ms ? pipelineData.novosByOriginArea?.[ms] : pipelineData.novosTotalsByOriginArea;
+    if (novosOA?.online) values[NOVOS_LEADS_ONLINE] = novosOA.online.total;
+    if (novosOA?.offline) values[NOVOS_LEADS_OFFLINE] = novosOA.offline.total;
 
     // Traffic Funnel data (Google Sheets)
     if (trafficFunnelData) {
