@@ -1344,6 +1344,8 @@ Deno.serve(async (req) => {
       dashboardTotalsByOrigin,
       dashboardByOriginArea: dashboardByOriginAreaMonth,
       dashboardTotalsByOriginArea,
+      novosByOriginArea: novosByOriginAreaMonth,
+      novosTotalsByOriginArea,
     };
 
     // ---------- Month snapshot overlay (freeze closed months) ----------
