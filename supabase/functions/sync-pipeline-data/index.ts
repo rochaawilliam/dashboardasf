@@ -1066,9 +1066,12 @@ Deno.serve(async (req) => {
 
     const dashboardByMonth: Record<string, DashboardMonthData> = {};
     // Dashboard leads/prospects/contratos/valor_gerado by origin per month
+    // `leads` = Pipeline Dashboard "Leads no Funil" (stage NOT in prospects/geladeira), includes ghosts
     const dashboardByOriginMonth: Record<string, Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }>> = {};
-    // Dashboard leads/contratos by origin + practice_area per month (cumulative, snapshot-style)
+    // Same `leads` semantics, split by practice_area
     const dashboardByOriginAreaMonth: Record<string, Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>>> = {};
+    // Pipeline Dashboard "Novos Leads" (!ghost_of && created_at month === ms && stage NOT in prospects/geladeira), by origin × area
+    const novosByOriginAreaMonth: Record<string, Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }>> = {};
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
@@ -1163,33 +1166,54 @@ Deno.serve(async (req) => {
         tarefasRealizadas: creations + comments + moves,
       };
 
-      // Dashboard leads/contratos by origin
+      // Dashboard leads/contratos by origin — matches Pipeline Dashboard "Leads no Funil" + "Novos Leads"
       dashboardByOriginMonth[ms] = {};
       dashboardByOriginAreaMonth[ms] = {};
+      novosByOriginAreaMonth[ms] = {} as any;
+
+      // Novos: cards NOT ghosts, created_at month === ms, stage NOT in prospects/geladeira
+      const novosAll = cards.filter((c: any) =>
+        !c.ghost_of &&
+        (c.created_at || "").slice(0, 7) === ms &&
+        c.stage_id !== "prospects" &&
+        c.stage_id !== "geladeira"
+      );
+
       for (const origin of ["online", "offline"]) {
         const originCards = monthFilteredCards.filter((c: any) => (c.lead_origin || "offline") === origin);
-        const oLeads = computeCumulative(originCards, "leads");
+        // Funil = stage NOT in prospects/geladeira (includes ghosts)
+        const funilOriginCards = originCards.filter((c: any) => c.stage_id !== "prospects" && c.stage_id !== "geladeira");
+        const oFunilLeads = funilOriginCards.length;
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
         const oContratosSnap = uniqueContratos(originCards);
         const oContratos = oContratosSnap.count;
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
-        dashboardByOriginMonth[ms][origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
+        dashboardByOriginMonth[ms][origin] = { leads: oFunilLeads, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
 
-        // By area (cumulative, snapshot-style — Dashboard panel)
+        // By area (funil definition)
         dashboardByOriginAreaMonth[ms][origin] = {};
         const areasInOrigin = new Set<string>();
         for (const c of originCards) areasInOrigin.add(c.practice_area || "outros");
         for (const area of areasInOrigin) {
-          const areaCards = originCards.filter((c: any) => (c.practice_area || "outros") === area);
-          const aLeads = computeCumulative(areaCards, "leads");
-          const aContratosSnap = uniqueContratos(areaCards);
+          const areaFunilCards = funilOriginCards.filter((c: any) => (c.practice_area || "outros") === area);
+          const areaAllOrigin = originCards.filter((c: any) => (c.practice_area || "outros") === area);
+          const aContratosSnap = uniqueContratos(areaAllOrigin);
           const aValorGerado = deduplicatedValorGerado(aContratosSnap.cards.filter((c: any) => c.contract_value));
           dashboardByOriginAreaMonth[ms][origin][area] = {
-            leads: aLeads.count,
+            leads: areaFunilCards.length,
             contratos: aContratosSnap.count,
             valor_gerado: aValorGerado,
           };
         }
+
+        // Novos by area
+        const novosOrigin = novosAll.filter((c: any) => (c.lead_origin || "offline") === origin);
+        novosByOriginAreaMonth[ms][origin] = {
+          empresarial: novosOrigin.filter((c: any) => c.practice_area === "empresarial").length,
+          trabalhista: novosOrigin.filter((c: any) => c.practice_area === "trabalhista").length,
+          tributario: novosOrigin.filter((c: any) => c.practice_area === "tributario").length,
+          total: novosOrigin.length,
+        };
       }
     }
 
@@ -1248,34 +1272,51 @@ Deno.serve(async (req) => {
       dashboardTotals.tarefasRealizadas = totalTarefas;
     }
 
-    // Dashboard totals by origin
+    // Dashboard totals by origin (Pipeline Dashboard "Leads no Funil" definition)
     const dashboardTotalsByOrigin: Record<string, { leads: number; prospects: number; contratos: number; valor_gerado: number }> = {};
     const dashboardTotalsByOriginArea: Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>> = {};
+    const novosTotalsByOriginArea: Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }> = {} as any;
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
+      // Novos: !ghost && created_at month in range && stage NOT in prospects/geladeira
+      const novosAllY = cards.filter((c: any) =>
+        !c.ghost_of &&
+        monthStrings.includes((c.created_at || "").slice(0, 7)) &&
+        c.stage_id !== "prospects" &&
+        c.stage_id !== "geladeira"
+      );
       for (const origin of ["online", "offline"]) {
         const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
-        const oLeads = computeCumulative(originCards, "leads");
+        const funilOriginCards = originCards.filter((c: any) => c.stage_id !== "prospects" && c.stage_id !== "geladeira");
+        const oFunilLeads = funilOriginCards.length;
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
         const oContratosSnap = uniqueContratos(originCards);
         const oContratos = oContratosSnap.count;
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
-        dashboardTotalsByOrigin[origin] = { leads: oLeads.count, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
+        dashboardTotalsByOrigin[origin] = { leads: oFunilLeads, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
 
         dashboardTotalsByOriginArea[origin] = {};
         const areasInOrigin = new Set<string>();
         for (const c of originCards) areasInOrigin.add(c.practice_area || "outros");
         for (const area of areasInOrigin) {
-          const areaCards = originCards.filter((c: any) => (c.practice_area || "outros") === area);
-          const aLeads = computeCumulative(areaCards, "leads");
-          const aContratosSnap = uniqueContratos(areaCards);
+          const areaFunil = funilOriginCards.filter((c: any) => (c.practice_area || "outros") === area);
+          const areaAllOrigin = originCards.filter((c: any) => (c.practice_area || "outros") === area);
+          const aContratosSnap = uniqueContratos(areaAllOrigin);
           const aValorGerado = deduplicatedValorGerado(aContratosSnap.cards.filter((c: any) => c.contract_value));
           dashboardTotalsByOriginArea[origin][area] = {
-            leads: aLeads.count,
+            leads: areaFunil.length,
             contratos: aContratosSnap.count,
             valor_gerado: aValorGerado,
           };
         }
+
+        const novosOrigin = novosAllY.filter((c: any) => (c.lead_origin || "offline") === origin);
+        novosTotalsByOriginArea[origin] = {
+          empresarial: novosOrigin.filter((c: any) => c.practice_area === "empresarial").length,
+          trabalhista: novosOrigin.filter((c: any) => c.practice_area === "trabalhista").length,
+          tributario: novosOrigin.filter((c: any) => c.practice_area === "tributario").length,
+          total: novosOrigin.length,
+        };
       }
     }
 
@@ -1303,6 +1344,8 @@ Deno.serve(async (req) => {
       dashboardTotalsByOrigin,
       dashboardByOriginArea: dashboardByOriginAreaMonth,
       dashboardTotalsByOriginArea,
+      novosByOriginArea: novosByOriginAreaMonth,
+      novosTotalsByOriginArea,
     };
 
     // ---------- Month snapshot overlay (freeze closed months) ----------
@@ -1326,6 +1369,10 @@ Deno.serve(async (req) => {
               if (sp.dashboardByOriginArea !== undefined) {
                 payload.dashboardByOriginArea = payload.dashboardByOriginArea || {};
                 payload.dashboardByOriginArea[ms] = sp.dashboardByOriginArea;
+              }
+              if (sp.novosByOriginArea !== undefined) {
+                payload.novosByOriginArea = payload.novosByOriginArea || {};
+                payload.novosByOriginArea[ms] = sp.novosByOriginArea;
               }
               if (sp.avgCloseDays !== undefined) payload.avgCloseDaysByMonth[ms] = sp.avgCloseDays;
               if (sp.operational !== undefined) payload.operational[ms] = sp.operational;

@@ -614,10 +614,10 @@ const Index = () => {
         values[LEADS_OFF_TRIB] = dboArea.offline["tributario"]?.leads ?? 0;
       }
     }
-    // Novos Leads = same as Leads no Funil (Dashboard cumulative by origin)
-    const dboNL = ms ? pipelineData.dashboardByOrigin?.[ms] : pipelineData.dashboardTotalsByOrigin;
-    if (dboNL?.online) values[NOVOS_LEADS_ONLINE] = dboNL.online.leads;
-    if (dboNL?.offline) values[NOVOS_LEADS_OFFLINE] = dboNL.offline.leads;
+    // Novos Leads = Pipeline Dashboard "Novos Leads" (cards criados no período no funil), por origem
+    const novosOA = ms ? pipelineData.novosByOriginArea?.[ms] : pipelineData.novosTotalsByOriginArea;
+    if (novosOA?.online) values[NOVOS_LEADS_ONLINE] = novosOA.online.total;
+    if (novosOA?.offline) values[NOVOS_LEADS_OFFLINE] = novosOA.offline.total;
 
     // Traffic Funnel data (Google Sheets)
     if (trafficFunnelData) {
@@ -764,8 +764,9 @@ const Index = () => {
       values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = dboArea.offline["trabalhista"]?.leads ?? 0;
       values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = dboArea.offline["tributario"]?.leads ?? 0;
     }
-    if (dbo?.online) values["e1f2a3b4-1111-4eee-ffff-111111111111"] = dbo.online.leads;
-    if (dbo?.offline) values["e1f2a3b4-2222-4eee-ffff-222222222222"] = dbo.offline.leads;
+    const novosOAT = pipelineData.novosTotalsByOriginArea;
+    if (novosOAT?.online) values["e1f2a3b4-1111-4eee-ffff-111111111111"] = novosOAT.online.total;
+    if (novosOAT?.offline) values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
 
     // Traffic Funnel accumulated totals
     if (trafficFunnelData?.totals) {
