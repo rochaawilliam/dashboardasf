@@ -1,0 +1,1 @@
+DELETE FROM public.month_snapshots WHERE source='pipeline' AND year=2026 AND month=5;
