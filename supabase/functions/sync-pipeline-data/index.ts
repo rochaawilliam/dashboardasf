@@ -1318,16 +1318,31 @@ Deno.serve(async (req) => {
     const novosTotalsByOriginArea: Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }> = {} as any;
     {
       const allMonthCards = cards.filter((c: any) => monthStrings.includes(c.month));
-      // Novos: !ghost && created_at month in range && stage NOT in prospects/geladeira
-      const novosAllY = cards.filter((c: any) =>
-        !c.ghost_of &&
-        monthStrings.includes((c.created_at || "").slice(0, 7)) &&
-        c.stage_id !== "prospects" &&
-        c.stage_id !== "geladeira"
-      );
+      // Range = primeiro mês até fim do último mês
+      const sortedMs = [...monthStrings].sort();
+      const [y0, m0] = sortedMs[0].split("-").map(Number);
+      const [yN, mN] = sortedMs[sortedMs.length - 1].split("-").map(Number);
+      const rangeStart = new Date(y0, m0 - 1, 1);
+      const rangeEnd = new Date(yN, mN, 1);
+
+      // Novos: !ghost && created_at in range && stage NOT in prospects/geladeira
+      const novosAllY = cards.filter((c: any) => {
+        if (c.ghost_of) return false;
+        if (!isFunnelStage(c.stage_id)) return false;
+        const d = new Date(c.created_at);
+        return d >= rangeStart && d < rangeEnd;
+      });
+
+      // Leads no Funil (VB): esteve no funil em algum momento do range
+      const funilAllY = cards.filter((c: any) => !c.ghost_of && wasInFunnelDuringPeriod(c, rangeStart, rangeEnd));
+
       for (const origin of ["online", "offline"]) {
-        const originCards = allMonthCards.filter((c: any) => (c.lead_origin || "offline") === origin);
-        const funilOriginCards = originCards.filter((c: any) => c.stage_id !== "prospects" && c.stage_id !== "geladeira");
+        const isOriginMatch = origin === "online"
+          ? (c: any) => c.lead_origin === "online"
+          : (c: any) => c.lead_origin !== "online";
+
+        const originCards = allMonthCards.filter(isOriginMatch);
+        const funilOriginCards = funilAllY.filter(isOriginMatch);
         const oFunilLeads = funilOriginCards.length;
         const oProspects = originCards.filter((c: any) => c.stage_id === "prospects").length;
         const oContratosSnap = uniqueContratos(originCards);
@@ -1338,6 +1353,7 @@ Deno.serve(async (req) => {
         dashboardTotalsByOriginArea[origin] = {};
         const areasInOrigin = new Set<string>();
         for (const c of originCards) areasInOrigin.add(c.practice_area || "outros");
+        for (const c of funilOriginCards) areasInOrigin.add(c.practice_area || "outros");
         for (const area of areasInOrigin) {
           const areaFunil = funilOriginCards.filter((c: any) => (c.practice_area || "outros") === area);
           const areaAllOrigin = originCards.filter((c: any) => (c.practice_area || "outros") === area);
@@ -1350,7 +1366,7 @@ Deno.serve(async (req) => {
           };
         }
 
-        const novosOrigin = novosAllY.filter((c: any) => (c.lead_origin || "offline") === origin);
+        const novosOrigin = novosAllY.filter(isOriginMatch);
         novosTotalsByOriginArea[origin] = {
           empresarial: novosOrigin.filter((c: any) => c.practice_area === "empresarial").length,
           trabalhista: novosOrigin.filter((c: any) => c.practice_area === "trabalhista").length,
