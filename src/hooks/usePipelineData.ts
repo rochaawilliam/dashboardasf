@@ -120,7 +120,7 @@ export interface PipelineData {
   novosTotalsByOriginArea?: Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }>;
 }
 
-const CACHE_KEY = "pipeline-data-cache-v4";
+const CACHE_KEY = "pipeline-data-cache-v5";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 function getCachedPipeline(year: number, month?: number | null): PipelineData | null {
