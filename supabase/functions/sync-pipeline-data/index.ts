@@ -157,6 +157,35 @@ Deno.serve(async (req) => {
     const cardById = new Map<string, any>();
     for (const c of cards) cardById.set(c.id, c);
 
+    // ─── "Leads no Funil" (Pipeline Vision Board definition) ───
+    // Cards (não-ghosts) que estiveram em alguma etapa do funil (≠ prospects/geladeira)
+    // em qualquer instante DENTRO do período — inclui cards criados antes do período
+    // e cards migrados para fora depois.
+    const isFunnelStage = (s: string) => s !== "prospects" && s !== "geladeira";
+    function wasInFunnelDuringPeriod(card: any, periodStart: Date, periodEnd: Date): boolean {
+      const createdAt = new Date(card.created_at);
+      if (createdAt >= periodEnd) return false;
+      const hist = (historyByCard[card.id] || []).slice()
+        .sort((a, b) => new Date(a.moved_at).getTime() - new Date(b.moved_at).getTime());
+      const events: { at: Date; stage: string }[] = hist.map((h) => ({
+        at: new Date(h.moved_at),
+        stage: h.to_stage,
+      }));
+      if (events.length === 0) events.push({ at: createdAt, stage: card.stage_id });
+      if (events[0].at > createdAt) events.unshift({ at: createdAt, stage: events[0].stage });
+      let stageAtStart = events[0].stage;
+      for (const e of events) {
+        if (e.at <= periodStart) stageAtStart = e.stage;
+        else break;
+      }
+      if (createdAt < periodStart && isFunnelStage(stageAtStart)) return true;
+      for (const e of events) {
+        if (e.at >= periodStart && e.at < periodEnd && isFunnelStage(e.stage)) return true;
+      }
+      if (createdAt >= periodStart && createdAt < periodEnd && isFunnelStage(events[0].stage)) return true;
+      return false;
+    }
+
     // ─── Passage-based counting ───
     // Regra: conta CADA movimentação (passage) para qualquer stage em targetStages
     // cujo moved_at caia dentro do mês. Sem dedupe por card ou link_group — cada
