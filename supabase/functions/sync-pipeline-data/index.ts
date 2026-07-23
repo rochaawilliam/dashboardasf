@@ -241,12 +241,13 @@ Deno.serve(async (req) => {
     // área (ex.: Expomix, Pelf Cred — empresarial + trabalhista) DEVEM contar uma vez
     // POR área. Por isso a chave de dedupe inclui practice_area: colapsamos só os
     // duplicados verdadeiros dentro da mesma área.
-    // Dedupe globalmente por deal (link_group ou título). NÃO incluímos practice_area
-    // aqui porque, em escopos de origem/total, um mesmo contrato de múltiplas áreas
-    // (ex.: Expomix — empresarial + trabalhista) seria contado 2x, duplicando
-    // "Contratos" e "Valor Gerado" no card offline. Em escopos já filtrados por área
-    // (byArea / byAreaTag), sobra apenas 1 card por área, então este dedupe global
-    // continua a contar 1 por área — o desejado.
+    // Espelho do Pipeline Vision Board:
+    // - CONTAGEM de contratos = raw (todos os cards em stage "contratos", sem ghosts).
+    //   Contratos multi-área (Expomix, Pelf Cred) contam 1 vez por área, exatamente
+    //   como o Pipeline exibe.
+    // - VALOR GERADO = deduplicado por (link_group ?? title), regra idêntica ao
+    //   `totalContractValue` do Dashboard do Pipeline — evita somar o valor 2x
+    //   quando o mesmo contrato está em duas áreas.
     function dedupKey(c: any): string {
       if (c.link_group) return `lg:${c.link_group}`;
       if (c.title) return `t:${String(c.title).toLowerCase().trim()}`;
@@ -266,11 +267,12 @@ Deno.serve(async (req) => {
     function deduplicatedValorGerado(contractCards: any[]): number {
       return dedupCards(contractCards).reduce((s, c) => s + (c.contract_value || 0), 0);
     }
-    // Snapshot of unique deals currently in "contratos" for a set of cards.
+    // Snapshot of deals currently in "contratos" for a set of cards.
+    // count = raw (Pipeline Vision Board rule); `cards` mantém todos para o
+    // cálculo de valor (que dedupa internamente).
     function uniqueContratos(filteredCards: any[]): { count: number; names: string[]; cards: any[] } {
       const inContratos = filteredCards.filter((c: any) => c.stage_id === "contratos" && !c.ghost_of);
-      const uniq = dedupCards(inContratos);
-      return { count: uniq.length, names: uniq.map((c) => c.title ?? c.id), cards: uniq };
+      return { count: inContratos.length, names: inContratos.map((c) => c.title ?? c.id), cards: inContratos };
     }
 
     // Build card ID sets from ALL cards (not just month-created) for history passage checks
