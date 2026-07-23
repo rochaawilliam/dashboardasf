@@ -601,23 +601,20 @@ const Index = () => {
     const LEADS_OFF_EMP = "86714c67-bf73-452a-aad3-2be1691c33ac";
     const LEADS_OFF_TRAB = "371dd70d-7c46-4488-b7ad-80ded893af5d";
     const LEADS_OFF_TRIB = "57ca6f08-7bb6-4697-87fe-8ac33161285c";
-    const dboArea = ms ? pipelineData.dashboardByOriginArea?.[ms] : pipelineData.dashboardTotalsByOriginArea;
-    if (dboArea) {
-      if (dboArea.online) {
-        values[LEADS_ON_EMP] = dboArea.online["empresarial"]?.leads ?? 0;
-        values[LEADS_ON_TRAB] = dboArea.online["trabalhista"]?.leads ?? 0;
-        values[LEADS_ON_TRIB] = dboArea.online["tributario"]?.leads ?? 0;
-      }
-      if (dboArea.offline) {
-        values[LEADS_OFF_EMP] = dboArea.offline["empresarial"]?.leads ?? 0;
-        values[LEADS_OFF_TRAB] = dboArea.offline["trabalhista"]?.leads ?? 0;
-        values[LEADS_OFF_TRIB] = dboArea.offline["tributario"]?.leads ?? 0;
-      }
-    }
-    // Novos Leads = Pipeline Dashboard "Novos Leads" (cards criados no período no funil), por origem
     const novosOA = ms ? pipelineData.novosByOriginArea?.[ms] : pipelineData.novosTotalsByOriginArea;
-    if (novosOA?.online) values[NOVOS_LEADS_ONLINE] = novosOA.online.total;
-    if (novosOA?.offline) values[NOVOS_LEADS_OFFLINE] = novosOA.offline.total;
+    if (novosOA?.online) {
+      values[LEADS_ON_EMP] = novosOA.online.empresarial ?? 0;
+      values[LEADS_ON_TRAB] = novosOA.online.trabalhista ?? 0;
+      values[LEADS_ON_TRIB] = novosOA.online.tributario ?? 0;
+      values[NOVOS_LEADS_ONLINE] = novosOA.online.total;
+    }
+    if (novosOA?.offline) {
+      values[LEADS_OFF_EMP] = novosOA.offline.empresarial ?? 0;
+      values[LEADS_OFF_TRAB] = novosOA.offline.trabalhista ?? 0;
+      values[LEADS_OFF_TRIB] = novosOA.offline.tributario ?? 0;
+      values[NOVOS_LEADS_OFFLINE] = novosOA.offline.total;
+    }
+
 
     // Traffic Funnel data (Google Sheets)
     if (trafficFunnelData) {
@@ -752,21 +749,21 @@ const Index = () => {
       values[VALOR_GERADO_OFFLINE_ID] = dbo.offline.valor_gerado ?? values[VALOR_GERADO_OFFLINE_ID] ?? 0;
     }
 
-    // Accumulated Leads On/Off by area + Novos Leads from Dashboard cumulative totals
-    const dboArea = pipelineData.dashboardTotalsByOriginArea;
-    if (dboArea?.online) {
-      values["c1d2e3f4-1111-4ccc-dddd-111111111111"] = dboArea.online["empresarial"]?.leads ?? 0;
-      values["c1d2e3f4-2222-4ccc-dddd-222222222222"] = dboArea.online["trabalhista"]?.leads ?? 0;
-      values["c1d2e3f4-3333-4ccc-dddd-333333333333"] = dboArea.online["tributario"]?.leads ?? 0;
-    }
-    if (dboArea?.offline) {
-      values["86714c67-bf73-452a-aad3-2be1691c33ac"] = dboArea.offline["empresarial"]?.leads ?? 0;
-      values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = dboArea.offline["trabalhista"]?.leads ?? 0;
-      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = dboArea.offline["tributario"]?.leads ?? 0;
-    }
+    // Accumulated Leads On/Off by area + Novos Leads from Novos Leads (dashboard) totals
     const novosOAT = pipelineData.novosTotalsByOriginArea;
-    if (novosOAT?.online) values["e1f2a3b4-1111-4eee-ffff-111111111111"] = novosOAT.online.total;
-    if (novosOAT?.offline) values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
+    if (novosOAT?.online) {
+      values["c1d2e3f4-1111-4ccc-dddd-111111111111"] = novosOAT.online.empresarial ?? 0;
+      values["c1d2e3f4-2222-4ccc-dddd-222222222222"] = novosOAT.online.trabalhista ?? 0;
+      values["c1d2e3f4-3333-4ccc-dddd-333333333333"] = novosOAT.online.tributario ?? 0;
+      values["e1f2a3b4-1111-4eee-ffff-111111111111"] = novosOAT.online.total;
+    }
+    if (novosOAT?.offline) {
+      values["86714c67-bf73-452a-aad3-2be1691c33ac"] = novosOAT.offline.empresarial ?? 0;
+      values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = novosOAT.offline.trabalhista ?? 0;
+      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = novosOAT.offline.tributario ?? 0;
+      values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
+    }
+
 
     // Traffic Funnel accumulated totals
     if (trafficFunnelData?.totals) {
