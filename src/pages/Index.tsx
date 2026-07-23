@@ -357,6 +357,11 @@ const Index = () => {
     "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5": { origin: "_all", area: "empresarial", tag: "pontual", key: "contratos" },
     "0ffeaffb-ab3c-4371-be5b-172f57160ec4": { origin: "_all", area: "trabalhista", tag: "pontual", key: "contratos" },
     "95280373-3e3b-4596-b2c4-ce8e01ee1b2c": { origin: "_all", area: "tributario", tag: "pontual", key: "contratos" },
+    // Novos Contratos by area - Contencioso (tag = contencioso)
+    "d1c0d1c0-cc01-4bbb-bbbb-000000000001": { origin: "_all", area: "empresarial", tag: "contencioso", key: "contratos" },
+    "d1c0d1c0-cc01-4bbb-bbbb-000000000002": { origin: "_all", area: "trabalhista", tag: "contencioso", key: "contratos" },
+    "d1c0d1c0-cc01-4bbb-bbbb-000000000003": { origin: "_all", area: "tributario", tag: "contencioso", key: "contratos" },
+    "d1c0d1c0-cc01-4bbb-bbbb-000000000004": { origin: "_all", area: "ambiental", tag: "contencioso", key: "contratos" },
   };
 
   // Crescimento Comercial rates from pipeline
