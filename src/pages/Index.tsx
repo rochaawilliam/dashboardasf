@@ -749,21 +749,21 @@ const Index = () => {
       values[VALOR_GERADO_OFFLINE_ID] = dbo.offline.valor_gerado ?? values[VALOR_GERADO_OFFLINE_ID] ?? 0;
     }
 
-    // Accumulated Leads On/Off by area + Novos Leads from Dashboard cumulative totals
-    const dboArea = pipelineData.dashboardTotalsByOriginArea;
-    if (dboArea?.online) {
-      values["c1d2e3f4-1111-4ccc-dddd-111111111111"] = dboArea.online["empresarial"]?.leads ?? 0;
-      values["c1d2e3f4-2222-4ccc-dddd-222222222222"] = dboArea.online["trabalhista"]?.leads ?? 0;
-      values["c1d2e3f4-3333-4ccc-dddd-333333333333"] = dboArea.online["tributario"]?.leads ?? 0;
-    }
-    if (dboArea?.offline) {
-      values["86714c67-bf73-452a-aad3-2be1691c33ac"] = dboArea.offline["empresarial"]?.leads ?? 0;
-      values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = dboArea.offline["trabalhista"]?.leads ?? 0;
-      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = dboArea.offline["tributario"]?.leads ?? 0;
-    }
+    // Accumulated Leads On/Off by area + Novos Leads from Novos Leads (dashboard) totals
     const novosOAT = pipelineData.novosTotalsByOriginArea;
-    if (novosOAT?.online) values["e1f2a3b4-1111-4eee-ffff-111111111111"] = novosOAT.online.total;
-    if (novosOAT?.offline) values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
+    if (novosOAT?.online) {
+      values["c1d2e3f4-1111-4ccc-dddd-111111111111"] = novosOAT.online.empresarial ?? 0;
+      values["c1d2e3f4-2222-4ccc-dddd-222222222222"] = novosOAT.online.trabalhista ?? 0;
+      values["c1d2e3f4-3333-4ccc-dddd-333333333333"] = novosOAT.online.tributario ?? 0;
+      values["e1f2a3b4-1111-4eee-ffff-111111111111"] = novosOAT.online.total;
+    }
+    if (novosOAT?.offline) {
+      values["86714c67-bf73-452a-aad3-2be1691c33ac"] = novosOAT.offline.empresarial ?? 0;
+      values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = novosOAT.offline.trabalhista ?? 0;
+      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = novosOAT.offline.total;
+      values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
+    }
+
 
     // Traffic Funnel accumulated totals
     if (trafficFunnelData?.totals) {
