@@ -241,10 +241,15 @@ Deno.serve(async (req) => {
     // área (ex.: Expomix, Pelf Cred — empresarial + trabalhista) DEVEM contar uma vez
     // POR área. Por isso a chave de dedupe inclui practice_area: colapsamos só os
     // duplicados verdadeiros dentro da mesma área.
+    // Dedupe globalmente por deal (link_group ou título). NÃO incluímos practice_area
+    // aqui porque, em escopos de origem/total, um mesmo contrato de múltiplas áreas
+    // (ex.: Expomix — empresarial + trabalhista) seria contado 2x, duplicando
+    // "Contratos" e "Valor Gerado" no card offline. Em escopos já filtrados por área
+    // (byArea / byAreaTag), sobra apenas 1 card por área, então este dedupe global
+    // continua a contar 1 por área — o desejado.
     function dedupKey(c: any): string {
-      const area = c.practice_area || "outros";
-      if (c.link_group) return `lg:${c.link_group}|${area}`;
-      if (c.title) return `t:${String(c.title).toLowerCase().trim()}|${area}`;
+      if (c.link_group) return `lg:${c.link_group}`;
+      if (c.title) return `t:${String(c.title).toLowerCase().trim()}`;
       return `id:${c.id}`;
     }
     function dedupCards(arr: any[]): any[] {
