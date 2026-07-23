@@ -760,7 +760,7 @@ const Index = () => {
     if (novosOAT?.offline) {
       values["86714c67-bf73-452a-aad3-2be1691c33ac"] = novosOAT.offline.empresarial ?? 0;
       values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = novosOAT.offline.trabalhista ?? 0;
-      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = novosOAT.offline.total;
+      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = novosOAT.offline.tributario ?? 0;
       values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
     }
 
