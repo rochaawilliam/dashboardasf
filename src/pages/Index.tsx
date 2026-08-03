@@ -1062,6 +1062,7 @@ const Index = () => {
     const folhaValues: number[] = [];
     const custoFixoValues: number[] = [];
     for (const m of Object.values(cashflowData.months)) {
+      if (!m) continue;
       receitaSum += m.recebimentos_dinheiro_pix;
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
