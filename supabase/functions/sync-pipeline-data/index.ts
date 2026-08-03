@@ -141,7 +141,7 @@ async function checkPipelineAccess(client: any): Promise<AccessCheckResult> {
 
   await Promise.all(
     REQUIRED_TABLES.map(async (table) => {
-      const { error } = await client.from(table).select("*", { count: "exact", head: true }).limit(1);
+      const { error } = await client.from(table).select("*").limit(1);
       if (!error) {
         tables[table] = { ok: true };
         return;
