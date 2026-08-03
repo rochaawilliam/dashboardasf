@@ -197,11 +197,31 @@ Deno.serve(async (req) => {
     const year = parseInt(url.searchParams.get("year") || new Date().getFullYear().toString());
     const month = url.searchParams.get("month") ? parseInt(url.searchParams.get("month")!) : null;
 
-    const pipeline = makeExternalClient(PIPELINE_URL, PIPELINE_ANON_KEY, "PIPELINE_SERVICE_KEY");
+    let pipeline = makeExternalClient(PIPELINE_URL, PIPELINE_ANON_KEY, "PIPELINE_SERVICE_KEY");
 
     // Validação automática de RLS/permissões antes de puxar qualquer dado.
-    const access = await checkPipelineAccess(pipeline);
+    let access = await checkPipelineAccess(pipeline);
+
+    // Se a chave de serviço configurada for inválida, tenta novamente com a chave pública.
+    if (
+      !access.ok &&
+      access.usingServiceKey &&
+      Object.values(access.tables).some((t) => t.reason === "invalid_key")
+    ) {
+      console.warn("[access-check] PIPELINE_SERVICE_KEY inválida — tentando chave pública");
+      const anonClient = makeExternalClient(PIPELINE_URL, PIPELINE_ANON_KEY, "__none__");
+      const anonAccess = await checkPipelineAccess(anonClient);
+      anonAccess.usingServiceKey = false;
+      if (anonAccess.ok) {
+        pipeline = anonClient;
+        access = anonAccess;
+      } else {
+        access = { ...anonAccess, usingServiceKey: true };
+      }
+    }
+
     const checkOnly = url.searchParams.get("check") === "1";
+
 
     if (checkOnly) {
       return new Response(JSON.stringify(access.ok ? { ok: true, ...access } : accessErrorPayload(access)), {
