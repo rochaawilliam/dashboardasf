@@ -166,6 +166,19 @@ export function usePipelineData(year: number, month?: number | null) {
         },
       });
 
+      if (response.status === 503) {
+        const info = await response.json().catch(() => null);
+        if (info?.error === "pipeline_access_denied") {
+          console.error("[Pipeline] Acesso negado às tabelas:", info.blockedTables, info.fix?.sql);
+          // Mantém o último cache válido em vez de zerar os cards
+          const cached = getCachedPipeline(year, month);
+          if (cached) return cached;
+          throw new Error(
+            `Sem permissão de leitura no Pipeline (${(info.blockedTables ?? []).join(", ")})`
+          );
+        }
+      }
+
       if (!response.ok) {
         throw new Error(`Pipeline fetch failed: ${response.status}`);
       }
@@ -173,6 +186,7 @@ export function usePipelineData(year: number, month?: number | null) {
       const data = (await response.json()) as PipelineData;
       setCachedPipeline(year, month, data);
       return data;
+
     },
     placeholderData: () => getCachedPipeline(year, month) ?? undefined,
     staleTime: 5 * 60 * 1000,
