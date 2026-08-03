@@ -1037,7 +1037,7 @@ const Index = () => {
     const m = cashflowData.months[ms];
     if (!m) return values;
     const monthsThroughSelected = Object.entries(cashflowData.months)
-      .filter(([key, monthData]) => Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
+      .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
     values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
@@ -1062,6 +1062,7 @@ const Index = () => {
     const folhaValues: number[] = [];
     const custoFixoValues: number[] = [];
     for (const m of Object.values(cashflowData.months)) {
+      if (!m) continue;
       receitaSum += m.recebimentos_dinheiro_pix;
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
