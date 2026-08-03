@@ -17,12 +17,26 @@ function makeExternalClient(url: string, fallbackKey: string, secretEnvName: str
   const key = secret && secret.length > 0 ? secret : fallbackKey;
   const isOpaque = key.startsWith("sb_secret_") || key.startsWith("sb_publishable_");
 
+  const fetchWithoutOpaqueBearer: typeof fetch = async (input, init = {}) => {
+    const headers = new Headers(init.headers);
+    headers.set("apikey", key);
+
+    // Supabase secret/publishable keys are opaque API keys, not JWTs. The SDK
+    // normally mirrors its key into Authorization; remove only that generated
+    // value so PostgREST derives the role from the apikey header correctly.
+    if (isOpaque && headers.get("Authorization") === `Bearer ${key}`) {
+      headers.delete("Authorization");
+    }
+
+    return fetch(input, { ...init, headers });
+  };
+
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       headers: isOpaque ? { apikey: key } : { apikey: key, Authorization: `Bearer ${key}` },
+      fetch: fetchWithoutOpaqueBearer,
     },
-    ...(isOpaque ? { accessToken: async () => key } : {}),
   } as Record<string, unknown>);
 }
 
@@ -170,7 +184,7 @@ async function checkPipelineAccess(client: any): Promise<AccessCheckResult> {
 
 function accessErrorPayload(check: AccessCheckResult) {
   const grantSql = REQUIRED_TABLES.map(
-    (t) => `GRANT SELECT ON public.${t} TO anon, authenticated;`
+    (t) => `GRANT SELECT ON public.${t} TO service_role;`
   ).join("\n");
   return {
     error: "pipeline_access_denied",
@@ -182,7 +196,7 @@ function accessErrorPayload(check: AccessCheckResult) {
     fix: {
       project: "Pipeline Vision Board",
       sql: grantSql,
-      note: "Também confirme uma policy de RLS de SELECT permitindo leitura nessas tabelas.",
+      note: "A chave de serviço ignora RLS; não é necessário criar policy pública nem liberar anon.",
     },
   };
 }
