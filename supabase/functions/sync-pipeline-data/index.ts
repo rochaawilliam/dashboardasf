@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     const year = parseInt(url.searchParams.get("year") || new Date().getFullYear().toString());
     const month = url.searchParams.get("month") ? parseInt(url.searchParams.get("month")!) : null;
 
-    const pipeline = createClient(PIPELINE_URL, PIPELINE_ANON_KEY);
+    const pipeline = makeExternalClient(PIPELINE_URL, PIPELINE_ANON_KEY, "PIPELINE_SERVICE_KEY");
 
     const ASF_COMPANY_ID = "4a994724-d8ad-4bd7-8b63-73203f249556";
 
@@ -725,7 +725,7 @@ Deno.serve(async (req) => {
     // ─── Onboarding Compass Metrics ─────────────────────────────
     let onboarding = null;
     try {
-      const onb = createClient(ONBOARDING_URL, ONBOARDING_ANON_KEY);
+      const onb = makeExternalClient(ONBOARDING_URL, ONBOARDING_ANON_KEY, "ONBOARDING_SERVICE_KEY");
       const [clientsRes, stepsRes] = await Promise.all([
         onb.from("onboarding_clients").select("id, entry_date, created_at"),
         onb.from("onboarding_steps").select("client_id, status, completed_date, planned_date"),
