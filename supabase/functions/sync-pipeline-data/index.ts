@@ -6,6 +6,27 @@ const PIPELINE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const ONBOARDING_URL = "https://ttbwpcmlhssmzsgyppho.supabase.co";
 const ONBOARDING_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YndwY21saHNzbXpzZ3lwcGhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MTg5NTcsImV4cCI6MjA4NjM5NDk1N30.SZ3iHlhAbCuZgR_P7N65CPj2hxF4yMw47GYYDk-rnrk";
 
+/**
+ * Creates a Supabase client for an external project.
+ * Prefers a service/secret key (env) over the public anon key so the sync keeps
+ * working even if the source project revokes public (anon) read grants.
+ * Opaque `sb_secret_*` keys must travel in the `apikey` header only.
+ */
+function makeExternalClient(url: string, fallbackKey: string, secretEnvName: string) {
+  const secret = Deno.env.get(secretEnvName)?.trim();
+  const key = secret && secret.length > 0 ? secret : fallbackKey;
+  const isOpaque = key.startsWith("sb_secret_") || key.startsWith("sb_publishable_");
+
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      headers: isOpaque ? { apikey: key } : { apikey: key, Authorization: `Bearer ${key}` },
+    },
+    ...(isOpaque ? { accessToken: async () => key } : {}),
+  } as Record<string, unknown>);
+}
+
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
