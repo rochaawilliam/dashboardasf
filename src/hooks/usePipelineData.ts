@@ -123,13 +123,13 @@ export interface PipelineData {
 const CACHE_KEY = "pipeline-data-cache-v5";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-function getCachedPipeline(year: number, month?: number | null): PipelineData | null {
+function getCachedPipeline(year: number, month?: number | null, allowExpired = false): PipelineData | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const { data, timestamp, cacheYear, cacheMonth } = JSON.parse(raw);
     if (cacheYear !== year || cacheMonth !== (month ?? null)) return null;
-    if (Date.now() - timestamp > CACHE_TTL) return null;
+    if (!allowExpired && Date.now() - timestamp > CACHE_TTL) return null;
     return data as PipelineData;
   } catch {
     return null;
@@ -169,13 +169,12 @@ export function usePipelineData(year: number, month?: number | null) {
       if (response.status === 503) {
         const info = await response.json().catch(() => null);
         if (info?.error === "pipeline_access_denied") {
-          console.error("[Pipeline] Acesso negado às tabelas:", info.blockedTables, info.fix?.sql);
-          // Mantém o último cache válido em vez de zerar os cards
-          const cached = getCachedPipeline(year, month);
+          console.warn("[Pipeline] Acesso temporariamente indisponível:", info.blockedTables);
+          // Em indisponibilidade externa, cache expirado ainda é melhor que
+          // zerar os cards ou interromper a renderização do dashboard.
+          const cached = getCachedPipeline(year, month, true);
           if (cached) return cached;
-          throw new Error(
-            `Sem permissão de leitura no Pipeline (${(info.blockedTables ?? []).join(", ")})`
-          );
+          return null;
         }
       }
 
@@ -193,6 +192,6 @@ export function usePipelineData(year: number, month?: number | null) {
     refetchInterval: 10 * 60 * 1000, // auto-refresh every 10 minutes
     refetchOnWindowFocus: "always",   // refresh on tab/page focus
     refetchOnMount: "always",         // refresh on page load
-    retry: 2,
+    retry: 1,
   });
 }

@@ -17,12 +17,26 @@ function makeExternalClient(url: string, fallbackKey: string, secretEnvName: str
   const key = secret && secret.length > 0 ? secret : fallbackKey;
   const isOpaque = key.startsWith("sb_secret_") || key.startsWith("sb_publishable_");
 
+  const fetchWithoutOpaqueBearer: typeof fetch = async (input, init = {}) => {
+    const headers = new Headers(init.headers);
+    headers.set("apikey", key);
+
+    // Supabase secret/publishable keys are opaque API keys, not JWTs. The SDK
+    // normally mirrors its key into Authorization; remove only that generated
+    // value so PostgREST derives the role from the apikey header correctly.
+    if (isOpaque && headers.get("Authorization") === `Bearer ${key}`) {
+      headers.delete("Authorization");
+    }
+
+    return fetch(input, { ...init, headers });
+  };
+
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       headers: isOpaque ? { apikey: key } : { apikey: key, Authorization: `Bearer ${key}` },
+      fetch: fetchWithoutOpaqueBearer,
     },
-    ...(isOpaque ? { accessToken: async () => key } : {}),
   } as Record<string, unknown>);
 }
 
