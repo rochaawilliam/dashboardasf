@@ -121,6 +121,69 @@ async function fetchAll(
   return results;
 }
 
+const REQUIRED_TABLES = ["pipeline_cards", "card_stage_history", "card_comments"] as const;
+
+interface AccessCheckResult {
+  ok: boolean;
+  usingServiceKey: boolean;
+  tables: Record<string, { ok: boolean; code?: string; message?: string; reason?: string }>;
+  blocked: string[];
+}
+
+/**
+ * Preflight: verifica se o SELECT (GRANT + RLS) está liberado nas tabelas do
+ * projeto Pipeline antes de puxar os dados. Evita "sincronizar" zeros silenciosos.
+ */
+async function checkPipelineAccess(client: any): Promise<AccessCheckResult> {
+  const usingServiceKey = !!Deno.env.get("PIPELINE_SERVICE_KEY")?.trim();
+  const tables: AccessCheckResult["tables"] = {};
+  const blocked: string[] = [];
+
+  await Promise.all(
+    REQUIRED_TABLES.map(async (table) => {
+      const { error } = await client.from(table).select("*", { count: "exact", head: true }).limit(1);
+      if (!error) {
+        tables[table] = { ok: true };
+        return;
+      }
+      const code = (error as any).code ?? "";
+      const message = error.message ?? String(error);
+      const reason =
+        code === "42501" || /permission denied/i.test(message)
+          ? "grant_missing"
+          : /invalid api key|jwt|unauthorized/i.test(message)
+            ? "invalid_key"
+            : /does not exist|relation/i.test(message)
+              ? "table_missing"
+              : "unknown";
+      tables[table] = { ok: false, code, message, reason };
+      blocked.push(table);
+      console.error(`[access-check] ${table} bloqueado (${reason}): ${message}`);
+    })
+  );
+
+  return { ok: blocked.length === 0, usingServiceKey, tables, blocked };
+}
+
+function accessErrorPayload(check: AccessCheckResult) {
+  const grantSql = REQUIRED_TABLES.map(
+    (t) => `GRANT SELECT ON public.${t} TO anon, authenticated;`
+  ).join("\n");
+  return {
+    error: "pipeline_access_denied",
+    message:
+      "Sem permissão de leitura nas tabelas do Pipeline Vision Board. A sincronização foi abortada para não gravar valores zerados.",
+    usingServiceKey: check.usingServiceKey,
+    blockedTables: check.blocked,
+    tables: check.tables,
+    fix: {
+      project: "Pipeline Vision Board",
+      sql: grantSql,
+      note: "Também confirme uma policy de RLS de SELECT permitindo leitura nessas tabelas.",
+    },
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -133,7 +196,26 @@ Deno.serve(async (req) => {
 
     const pipeline = makeExternalClient(PIPELINE_URL, PIPELINE_ANON_KEY, "PIPELINE_SERVICE_KEY");
 
+    // Validação automática de RLS/permissões antes de puxar qualquer dado.
+    const access = await checkPipelineAccess(pipeline);
+    const checkOnly = url.searchParams.get("check") === "1";
+
+    if (checkOnly) {
+      return new Response(JSON.stringify(access.ok ? { ok: true, ...access } : accessErrorPayload(access)), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!access.ok) {
+      return new Response(JSON.stringify(accessErrorPayload(access)), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const ASF_COMPANY_ID = "4a994724-d8ad-4bd7-8b63-73203f249556";
+
 
     let monthStrings: string[];
     if (month) {
