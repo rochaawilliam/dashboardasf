@@ -147,7 +147,10 @@ async function checkPipelineAccess(client: any): Promise<AccessCheckResult> {
         return;
       }
       const code = (error as any).code ?? "";
-      const message = error.message ?? String(error);
+      const raw = [error.message, (error as any).hint, (error as any).details]
+        .filter(Boolean)
+        .join(" | ");
+      const message = raw || JSON.stringify(error) || "erro desconhecido";
       const reason =
         code === "42501" || /permission denied/i.test(message)
           ? "grant_missing"
