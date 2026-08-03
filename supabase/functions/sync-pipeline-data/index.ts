@@ -184,7 +184,7 @@ async function checkPipelineAccess(client: any): Promise<AccessCheckResult> {
 
 function accessErrorPayload(check: AccessCheckResult) {
   const grantSql = REQUIRED_TABLES.map(
-    (t) => `GRANT SELECT ON public.${t} TO anon, authenticated;`
+    (t) => `GRANT SELECT ON public.${t} TO service_role;`
   ).join("\n");
   return {
     error: "pipeline_access_denied",
@@ -196,7 +196,7 @@ function accessErrorPayload(check: AccessCheckResult) {
     fix: {
       project: "Pipeline Vision Board",
       sql: grantSql,
-      note: "Também confirme uma policy de RLS de SELECT permitindo leitura nessas tabelas.",
+      note: "A chave de serviço ignora RLS; não é necessário criar policy pública nem liberar anon.",
     },
   };
 }
