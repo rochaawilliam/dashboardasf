@@ -1981,38 +1981,38 @@ const Index = () => {
                                   const gerM = Number(totalMonthly[geradoId] ?? 0);
                                   const invA = Number(totalAccumulated[investId] ?? 0);
                                   const gerA = Number(totalAccumulated[geradoId] ?? 0);
+                                  const roas = (ger: number, inv: number) =>
+                                    inv > 0 ? Math.round((ger / inv) * 10000) / 100 : ger > 0 ? 100 : 0;
                                   totalMetrics.push({
                                     ...geradoMetric,
                                     id: roasId,
                                     name: "ROAS Total",
                                     unit: "%",
                                     target_value: 0,
-                                    current_value: invA > 0 ? (gerA / invA) * 100 : 0,
+                                    current_value: roas(gerA, invA),
                                   });
                                   if (totalMonthly[investId] != null || totalMonthly[geradoId] != null) {
-                                    totalMonthly[roasId] = invM > 0 ? (gerM / invM) * 100 : 0;
+                                    totalMonthly[roasId] = roas(gerM, invM);
                                   }
-                                  totalAccumulated[roasId] = invA > 0 ? (gerA / invA) * 100 : 0;
-                                  const invTargets: Record<number, number> = {};
-                                  const gerTargets: Record<number, number> = {};
-                                  totalTargets.forEach((t: any) => {
-                                    if (t.metric_id === investId) invTargets[t.month] = Number(t.target_value ?? 0);
-                                    if (t.metric_id === geradoId) gerTargets[t.month] = Number(t.target_value ?? 0);
+                                  totalAccumulated[roasId] = roas(gerA, invA);
+                                  // Target = average of ROAS Online / ROAS Offline monthly targets
+                                  const roasTargets: Record<number, number[]> = {};
+                                  (funnelTargets as any[]).forEach((t: any) => {
+                                    if (t.year !== selectedYear) return;
+                                    if (t.metric_id !== ROI_ONLINE_ID && t.metric_id !== ROI_OFFLINE_ID) return;
+                                    (roasTargets[t.month] ??= []).push(Number(t.target_value ?? 0));
                                   });
-                                  Object.keys(gerTargets).forEach((m) => {
-                                    const month = Number(m);
-                                    const inv = invTargets[month] ?? 0;
-                                    if (inv > 0) {
-                                      totalTargets.push({
-                                        id: `${roasId}-${month}`,
-                                        metric_id: roasId,
-                                        year: selectedYear,
-                                        month,
-                                        target_value: (gerTargets[month] / inv) * 100,
-                                      });
-                                    }
+                                  Object.entries(roasTargets).forEach(([m, vals]) => {
+                                    totalTargets.push({
+                                      id: `${roasId}-${m}`,
+                                      metric_id: roasId,
+                                      year: selectedYear,
+                                      month: Number(m),
+                                      target_value: vals.reduce((a, b) => a + b, 0) / vals.length,
+                                    });
                                   });
                                 }
+
                               }
 
 
