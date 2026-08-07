@@ -1874,8 +1874,71 @@ const Index = () => {
                               VALOR_INVESTIDO_ONLINE_ID, IMPRESSOES_ASF_ID, ALCANCE_ASF_ID, CONVERSAS_INICIADAS_ID,
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
+                              // Build a consolidated "Funil Total" from the online + offline stages
+                              const TOTAL_STAGES: { label: string; online?: string; offline?: string }[] = [
+                                { label: "Empresas Prospectadas", offline: "Prospects Offline" },
+                                { label: "Novos Leads", online: "Novos Leads Online", offline: "Novos Leads Offline" },
+                                { label: "Leads no Funil", online: "Leads no Funil Online", offline: "Leads no Funil Offline" },
+                                { label: "MQL", online: "MQL Online" },
+                                { label: "SQL", online: "SQL Online", offline: "SQL Offline" },
+                                { label: "Reuniões", online: "Reuniões Online ASF", offline: "Reuniões Offline" },
+                                { label: "Propostas", online: "Propostas Online ASF", offline: "Propostas Offline" },
+                                { label: "Contratos", online: "Novos Contratos On-line ASF", offline: "Novos Contratos Off-line ASF" },
+                                { label: "Valor Gerado", online: "Valor Gerado Online", offline: "Valor Gerado Offline" },
+                              ];
+                              const byName: Record<string, any> = {};
+                              [...(funnelOnline?.metrics ?? []), ...(funnelOffline?.metrics ?? [])].forEach((m: any) => {
+                                byName[m.name] = m;
+                              });
+
+                              const totalMetrics: any[] = [];
+                              const totalMonthly: Record<string, number> = {};
+                              const totalAccumulated: Record<string, number> = {};
+                              const totalTargets: any[] = [];
+
+                              TOTAL_STAGES.forEach((stage, idx) => {
+                                const sources = [stage.online, stage.offline]
+                                  .map((n) => (n ? byName[n] : undefined))
+                                  .filter(Boolean) as any[];
+                                if (sources.length === 0) return;
+                                const id = `total-funnel-${idx}`;
+                                totalMetrics.push({
+                                  ...sources[0],
+                                  id,
+                                  name: stage.label,
+                                  target_value: sources.reduce((s, m) => s + Number(m.target_value ?? 0), 0),
+                                  current_value: sources.reduce((s, m) => s + Number(m.current_value ?? 0), 0),
+                                });
+                                const monthlySum = sources.reduce(
+                                  (s, m) => s + Number(mergedMonthlyValues[m.id] ?? 0),
+                                  0
+                                );
+                                const hasMonthly = sources.some((m) => mergedMonthlyValues[m.id] != null);
+                                if (hasMonthly) totalMonthly[id] = monthlySum;
+                                totalAccumulated[id] = sources.reduce(
+                                  (s, m) => s + Number(mergedAccumulatedValues[m.id] ?? 0),
+                                  0
+                                );
+                                // aggregate monthly targets for every month of the year
+                                const sums: Record<number, number> = {};
+                                (monthlyTargets ?? []).forEach((t: any) => {
+                                  if (t.year !== selectedYear) return;
+                                  if (!sources.some((m) => m.id === t.metric_id)) return;
+                                  sums[t.month] = (sums[t.month] ?? 0) + Number(t.target_value ?? 0);
+                                });
+                                Object.entries(sums).forEach(([month, value]) => {
+                                  totalTargets.push({
+                                    id: `${id}-${month}`,
+                                    metric_id: id,
+                                    year: selectedYear,
+                                    month: Number(month),
+                                    target_value: value,
+                                  });
+                                });
+                              });
+
                               return (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
                                   {funnelOnline && funnelOnline.metrics.length > 0 && (
                                     <SalesFunnel
                                       title="Funil Online"
@@ -1910,11 +1973,26 @@ const Index = () => {
                                       pipelineCardNames={pipelineCardNames}
                                     />
                                   )}
+                                  {totalMetrics.length > 0 && (
+                                    <SalesFunnel
+                                      title="Funil Total"
+                                      icon={Layers}
+                                      metrics={totalMetrics}
+                                      monthlyValues={totalMonthly}
+                                      accumulatedValues={totalAccumulated}
+                                      selectedMonth={selectedMonth}
+                                      selectedYear={selectedYear}
+                                      monthlyTargets={totalTargets}
+                                      colorScheme="emerald"
+                                      pipelineMetricIds={new Set(totalMetrics.map((m) => m.id))}
+                                    />
+                                  )}
                                 </div>
                               );
                             }
                             return null;
                           })()}
+
 
                           {organizedSubcategories.filter(s => s.name !== "Funil Online" && s.name !== "Funil Offline").map((subcat) => {
                         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
