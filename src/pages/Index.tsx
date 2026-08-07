@@ -51,7 +51,8 @@ import {
   Eye,
   EyeOff,
   Globe,
-  Building2 } from
+  Building2,
+  Layers } from
 "lucide-react";
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import { usePipelineData } from "@/hooks/usePipelineData";
