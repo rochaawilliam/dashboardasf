@@ -118,6 +118,8 @@ export interface PipelineData {
   dashboardTotalsByOriginArea?: Record<string, Record<string, { leads: number; contratos: number; valor_gerado?: number }>>;
   novosByOriginArea?: Record<string, Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }>>;
   novosTotalsByOriginArea?: Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }>;
+  qualificacaoByOrigin?: Record<string, Record<string, { mql: number; sql: number }>>;
+  qualificacaoTotalsByOrigin?: Record<string, { mql: number; sql: number }>;
 }
 
 const CACHE_KEY = "pipeline-data-cache-v5";
