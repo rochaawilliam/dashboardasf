@@ -1575,6 +1575,10 @@ Deno.serve(async (req) => {
       novosTotalsByOriginArea,
       qualificacaoByOrigin: qualificacaoByOriginMonth,
       qualificacaoTotalsByOrigin,
+      leadScoresDebug: {
+        count: leadScores.length,
+        classes: Array.from(new Set(leadScores.map((l: any) => l.classificacao))),
+      },
     };
 
     // ---------- Month snapshot overlay (freeze closed months) ----------
