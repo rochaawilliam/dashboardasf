@@ -619,6 +619,19 @@ const Index = () => {
       values[NOVOS_LEADS_OFFLINE] = novosOA.offline.total;
     }
 
+    // MQL / SQL vindos do lead scoring do Pipeline Vision Board
+    const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
+    const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
+    const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
+    const qual = ms ? pipelineData.qualificacaoByOrigin?.[ms] : pipelineData.qualificacaoTotalsByOrigin;
+    if (qual?.online) {
+      values[MQL_ONLINE_ID] = qual.online.mql ?? 0;
+      values[SQL_ONLINE_ID] = qual.online.sql ?? 0;
+    }
+    if (qual?.offline) {
+      values[SQL_OFFLINE_ID] = qual.offline.sql ?? 0;
+    }
+
 
     // Traffic Funnel data (Google Sheets)
     if (trafficFunnelData) {
