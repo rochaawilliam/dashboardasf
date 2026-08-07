@@ -1256,6 +1256,11 @@ Deno.serve(async (req) => {
     const dashboardByOriginAreaMonth: Record<string, Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>>> = {};
     // Pipeline Dashboard "Novos Leads" (!ghost_of && created_at month === ms && stage NOT in prospects/geladeira), by origin × area
     const novosByOriginAreaMonth: Record<string, Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }>> = {};
+    // Lead scoring (MQL/SQL) direto do Pipeline Vision Board, por origem
+    const qualificacaoByOriginMonth: Record<string, Record<string, { mql: number; sql: number }>> = {};
+    const qualificacaoTotalsByOrigin: Record<string, { mql: number; sql: number }> = {};
+    const countClass = (list: any[], cls: string) =>
+      list.filter((c: any) => classByCard.get(c.id) === cls).length;
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
