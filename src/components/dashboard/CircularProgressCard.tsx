@@ -9,6 +9,7 @@ import {
 "@/components/ui/tooltip";
 import { useUpdateMetric } from "@/hooks/useMetrics";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
+import { getRefMonthYear } from "@/utils/dateUtils";
 
 interface CircularProgressCardProps {
   metric: Metric;
@@ -227,8 +228,32 @@ export function CircularProgressCard({
   specificMonthlyTarget.target_value :
   isNonAccumulative ? metric.target_value : metric.target_value / 12;
 
-  const displayValue = isMonthSelected ? monthlyValue ?? 0 : accumulatedValue;
-  const targetForProgress = isMonthSelected ? monthlyTarget : metric.target_value;
+  // Annual target = sum of monthly targets (average for percentage / non-accumulative metrics)
+  const annualTarget = React.useMemo(() => {
+    const rows = monthlyTargets.filter((mt) => mt.metric_id === metric.id && mt.year === selectedYear);
+    if (rows.length === 0) return metric.target_value;
+    const sum = rows.reduce((s, t) => s + Number(t.target_value || 0), 0);
+    return isNonAccumulative ? sum / rows.length : sum;
+  }, [monthlyTargets, metric.id, metric.target_value, selectedYear, isNonAccumulative]);
+
+  // Annual realized value: sum of months, or average of months for percentage metrics
+  const annualValue = React.useMemo(() => {
+    if (!isNonAccumulative) return accumulatedValue;
+    const byMonth: Record<number, number> = {};
+    (historyData || []).forEach((h: any) => {
+      if (h.metric_id !== metric.id) return;
+      if (h.source === "forecast") return;
+      const ref = getRefMonthYear(h.period_type, h.recorded_at);
+      if (ref.year !== selectedYear) return;
+      byMonth[ref.month] = (byMonth[ref.month] || 0) + Number(h.value || 0);
+    });
+    const months = Object.values(byMonth);
+    if (months.length === 0) return accumulatedValue;
+    return months.reduce((s, v) => s + v, 0) / months.length;
+  }, [isNonAccumulative, historyData, metric.id, selectedYear, accumulatedValue]);
+
+  const displayValue = isMonthSelected ? monthlyValue ?? 0 : annualValue;
+  const targetForProgress = isMonthSelected ? monthlyTarget : annualTarget;
 
   const status = getStatus(displayValue, targetForProgress, isInverse);
   const rawProgress = isInverse ?
@@ -396,7 +421,7 @@ export function CircularProgressCard({
               {hideValues ? "••••••" :
               isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
-              formatMetricValue(metric.target_value, metric.unit, metric.name)}
+              formatMetricValue(annualTarget, metric.unit, metric.name)}
             </p>
           </div>
           )}
@@ -454,7 +479,7 @@ export function CircularProgressCard({
           {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && !hideAnnualTarget && (
             <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
               <span>Meta anual:</span>
-              <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+              <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(annualTarget, metric.unit, metric.name)}</span>
             </div>
           )}
           {/* Description / projection info */}

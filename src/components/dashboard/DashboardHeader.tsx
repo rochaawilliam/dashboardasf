@@ -1,5 +1,11 @@
-import { LogIn } from "lucide-react";
+import { LogIn, User, Settings, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -73,26 +79,50 @@ export function DashboardHeader({
           )}
 
           {user ? (
-            <Link to="/profile" className="flex items-center gap-2.5">
-              <Avatar className={cn("border border-border/50", isMobile ? "h-9 w-9" : "h-11 w-11 lg:h-[60px] lg:w-[60px]")}>
-                <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-xs" : "text-sm lg:text-base")}>
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              {!isMobile && (
-                <div className="flex flex-col min-w-0">
-                  <span className="text-sm lg:text-base font-medium text-foreground max-w-[150px] truncate">
-                    {displayName}
-                  </span>
-                  {profile?.job_title && (
-                    <span className="text-[10px] lg:text-[11px] text-muted-foreground max-w-[150px] truncate leading-tight">
-                      {profile.job_title}
-                    </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2.5 outline-none" aria-label="Menu do usuário">
+                  <Avatar className={cn("border border-border/50", isMobile ? "h-9 w-9" : "h-11 w-11 lg:h-[60px] lg:w-[60px]")}>
+                    <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
+                    <AvatarFallback className={cn("font-semibold bg-primary/10 text-primary", isMobile ? "text-xs" : "text-sm lg:text-base")}>
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!isMobile && (
+                    <div className="flex flex-col min-w-0 text-left">
+                      <span className="text-sm lg:text-base font-medium text-foreground max-w-[150px] truncate">
+                        {displayName}
+                      </span>
+                      {profile?.job_title && (
+                        <span className="text-[10px] lg:text-[11px] text-muted-foreground max-w-[150px] truncate leading-tight">
+                          {profile.job_title}
+                        </span>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            </Link>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 bg-popover z-50">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Minha Conta
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile?tab=activity" className="cursor-pointer">
+                    <Activity className="mr-2 h-4 w-4" />
+                    Atividades
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile?tab=settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Configurações
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link to="/login">
               <Button variant="default" className={cn(isMobile ? "h-9 px-2.5 gap-1" : "h-11 px-4 gap-1.5")} title="Entrar">

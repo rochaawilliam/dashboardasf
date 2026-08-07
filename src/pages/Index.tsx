@@ -16,8 +16,6 @@ import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { TrainingDashboard as TrainingDashboardComponent } from "@/components/dashboard/TrainingDashboard";
-import { FilterBar } from "@/components/dashboard/FilterBar";
-import { DataEntrySection } from "@/components/dashboard/DataEntrySection";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
@@ -1639,28 +1637,8 @@ const Index = () => {
           )}
         </div>
         
-        {/* Data Entry Section - only for authenticated users */}
-        {user && metrics &&
-        <div data-tour="data-entry">
-            <DataEntrySection
-            metrics={metrics}
-            trainingHours={trainingHours}
-            filters={filters}
-            onFiltersChange={setFilters}
-            onPrint={handlePrint} />
-
-          </div>
-        }
         
-        {/* Filters for unauthenticated users */}
-        {!user &&
-        <div data-tour="filters">
-          <FilterBar
-            filters={filters}
-            onFiltersChange={setFilters}
-            onPrint={handlePrint} />
-        </div>
-        }
+
         
         {/* Month Selector */}
         <div data-tour="month-selector">
