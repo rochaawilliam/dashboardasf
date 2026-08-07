@@ -44,11 +44,15 @@ export function SalesFunnel({
 
   const headerColors = colorScheme === "blue"
     ? "from-blue-500/20 to-blue-600/10 border-blue-500/30"
-    : "from-amber-500/20 to-amber-600/10 border-amber-500/30";
+    : colorScheme === "amber"
+    ? "from-amber-500/20 to-amber-600/10 border-amber-500/30"
+    : "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30";
 
   const iconColors = colorScheme === "blue"
     ? "text-blue-400"
-    : "text-amber-400";
+    : colorScheme === "amber"
+    ? "text-amber-400"
+    : "text-emerald-400";
 
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
