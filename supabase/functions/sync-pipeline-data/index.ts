@@ -1516,6 +1516,10 @@ Deno.serve(async (req) => {
         const oContratos = oContratosSnap.count;
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardTotalsByOrigin[origin] = { leads: oFunilLeads, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
+        qualificacaoTotalsByOrigin[origin] = {
+          mql: countClass(originCards, "MQL"),
+          sql: countClass(originCards, "SQL"),
+        };
 
         dashboardTotalsByOriginArea[origin] = {};
         const areasInOrigin = new Set<string>();
