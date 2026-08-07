@@ -1389,6 +1389,13 @@ Deno.serve(async (req) => {
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardByOriginMonth[ms][origin] = { leads: oFunilLeads, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
 
+        // MQL/SQL (lead scoring do Pipeline) — cards do mês, por origem
+        if (!qualificacaoByOriginMonth[ms]) qualificacaoByOriginMonth[ms] = {};
+        qualificacaoByOriginMonth[ms][origin] = {
+          mql: countClass(originCards, "MQL"),
+          sql: countClass(originCards, "SQL"),
+        };
+
         // By area (funil VB definition for leads; contratos snapshot from monthFilteredCards)
         dashboardByOriginAreaMonth[ms][origin] = {};
         const areasInOrigin = new Set<string>();
