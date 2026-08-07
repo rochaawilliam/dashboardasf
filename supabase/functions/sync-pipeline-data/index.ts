@@ -264,13 +264,21 @@ Deno.serve(async (req) => {
     }
 
     // Fetch ALL company cards (no month filter) — Operacional uses created_at, not month field
-    const [allCards, stageHistory, cardComments] = await Promise.all([
+    const [allCards, stageHistory, cardComments, leadScores] = await Promise.all([
       fetchAll(pipeline, "pipeline_cards",
         "id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at, ghost_of, link_group, title",
         (q: any) => q.eq("company_id", ASF_COMPANY_ID)),
       fetchAll(pipeline, "card_stage_history", "card_id, from_stage, to_stage, moved_at"),
       fetchAll(pipeline, "card_comments", "card_id, created_at"),
+      fetchAll(pipeline, "lead_scores", "card_id, classificacao"),
     ]);
+
+    // Lead scoring (MQL/SQL) vindo direto do Pipeline Vision Board
+    const classByCard = new Map<string, string>();
+    for (const ls of leadScores) {
+      if (ls?.card_id && ls?.classificacao) classByCard.set(ls.card_id, String(ls.classificacao));
+    }
+
 
     // Blocklist: cards removidos do Pipeline mas que ainda aparecem por inconsistência.
     // Filtramos por título (case-insensitive, substring) — afeta contagens, valor_gerado e tooltips.
