@@ -1875,7 +1875,23 @@ const Index = () => {
                               VALOR_INVESTIDO_ONLINE_ID, IMPRESSOES_ASF_ID, ALCANCE_ASF_ID, CONVERSAS_INICIADAS_ID,
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
+                              // Valor Gerado targets derive from Receita Total Mensal (20% online / 80% offline)
+                              const VG_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
+                              const VG_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
+                              const funnelTargets = [
+                                ...(monthlyTargets ?? []).filter(
+                                  (t: any) => t.metric_id !== VG_ONLINE_ID && t.metric_id !== VG_OFFLINE_ID
+                                ),
+                                ...(monthlyTargets ?? [])
+                                  .filter((t: any) => t.metric_id === RECEITA_TOTAL_MENSAL_ID)
+                                  .flatMap((t: any) => [
+                                    { ...t, id: `${t.id}-vg-on`, metric_id: VG_ONLINE_ID, target_value: Number(t.target_value ?? 0) * 0.2 },
+                                    { ...t, id: `${t.id}-vg-off`, metric_id: VG_OFFLINE_ID, target_value: Number(t.target_value ?? 0) * 0.8 },
+                                  ]),
+                              ];
+
                               // Build a consolidated "Funil Total" from the online + offline stages
+
                               const TOTAL_STAGES: { label: string; online?: string; offline?: string }[] = [
                                 { label: "Empresas Prospectadas", offline: "Prospects Offline" },
                                 { label: "Novos Leads", online: "Novos Leads Online", offline: "Novos Leads Offline" },
@@ -1922,7 +1938,7 @@ const Index = () => {
                                 );
                                 // aggregate monthly targets for every month of the year
                                 const sums: Record<number, number> = {};
-                                (monthlyTargets ?? []).forEach((t: any) => {
+                                (funnelTargets).forEach((t: any) => {
                                   if (t.year !== selectedYear) return;
                                   if (!sources.some((m) => m.id === t.metric_id)) return;
                                   sums[t.month] = (sums[t.month] ?? 0) + Number(t.target_value ?? 0);
@@ -1950,7 +1966,7 @@ const Index = () => {
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
-                                      monthlyTargets={monthlyTargets}
+                                      monthlyTargets={funnelTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="blue"
                                       pipelineMetricIds={pipelineIds}
@@ -1967,7 +1983,7 @@ const Index = () => {
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
-                                      monthlyTargets={monthlyTargets}
+                                      monthlyTargets={funnelTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="amber"
                                       pipelineMetricIds={pipelineIds}
