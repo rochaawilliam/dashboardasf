@@ -16,8 +16,6 @@ import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { TrainingDashboard as TrainingDashboardComponent } from "@/components/dashboard/TrainingDashboard";
-import { FilterBar } from "@/components/dashboard/FilterBar";
-import { DataEntrySection } from "@/components/dashboard/DataEntrySection";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
