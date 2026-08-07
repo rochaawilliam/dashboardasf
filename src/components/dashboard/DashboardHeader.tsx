@@ -1,5 +1,11 @@
-import { LogIn } from "lucide-react";
+import { LogIn, User, Settings, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
