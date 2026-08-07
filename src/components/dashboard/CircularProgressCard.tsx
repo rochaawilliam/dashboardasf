@@ -9,6 +9,7 @@ import {
 "@/components/ui/tooltip";
 import { useUpdateMetric } from "@/hooks/useMetrics";
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
+import { getRefMonthYear } from "@/utils/dateUtils";
 
 interface CircularProgressCardProps {
   metric: Metric;
