@@ -1969,6 +1969,54 @@ const Index = () => {
                                 });
                               });
 
+                              // ROAS Total = (Valor Gerado Total / Valor Investido Total) * 100
+                              {
+                                const investId = "total-funnel-0";
+                                const geradoId = `total-funnel-${TOTAL_STAGES.length - 1}`;
+                                const investMetric = totalMetrics.find((m) => m.id === investId);
+                                const geradoMetric = totalMetrics.find((m) => m.id === geradoId);
+                                if (investMetric && geradoMetric) {
+                                  const roasId = "total-funnel-roas";
+                                  const invM = Number(totalMonthly[investId] ?? 0);
+                                  const gerM = Number(totalMonthly[geradoId] ?? 0);
+                                  const invA = Number(totalAccumulated[investId] ?? 0);
+                                  const gerA = Number(totalAccumulated[geradoId] ?? 0);
+                                  totalMetrics.push({
+                                    ...geradoMetric,
+                                    id: roasId,
+                                    name: "ROAS Total",
+                                    unit: "%",
+                                    target_value: 0,
+                                    current_value: invA > 0 ? (gerA / invA) * 100 : 0,
+                                  });
+                                  if (totalMonthly[investId] != null || totalMonthly[geradoId] != null) {
+                                    totalMonthly[roasId] = invM > 0 ? (gerM / invM) * 100 : 0;
+                                  }
+                                  totalAccumulated[roasId] = invA > 0 ? (gerA / invA) * 100 : 0;
+                                  const invTargets: Record<number, number> = {};
+                                  const gerTargets: Record<number, number> = {};
+                                  totalTargets.forEach((t: any) => {
+                                    if (t.metric_id === investId) invTargets[t.month] = Number(t.target_value ?? 0);
+                                    if (t.metric_id === geradoId) gerTargets[t.month] = Number(t.target_value ?? 0);
+                                  });
+                                  Object.keys(gerTargets).forEach((m) => {
+                                    const month = Number(m);
+                                    const inv = invTargets[month] ?? 0;
+                                    if (inv > 0) {
+                                      totalTargets.push({
+                                        id: `${roasId}-${month}`,
+                                        metric_id: roasId,
+                                        year: selectedYear,
+                                        month,
+                                        target_value: (gerTargets[month] / inv) * 100,
+                                      });
+                                    }
+                                  });
+                                }
+                              }
+
+
+
                               return (
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
                                   {funnelOnline && funnelOnline.metrics.length > 0 && (
