@@ -1938,7 +1938,7 @@ const Index = () => {
                                 );
                                 // aggregate monthly targets for every month of the year
                                 const sums: Record<number, number> = {};
-                                (monthlyTargets ?? []).forEach((t: any) => {
+                                (funnelTargets).forEach((t: any) => {
                                   if (t.year !== selectedYear) return;
                                   if (!sources.some((m) => m.id === t.metric_id)) return;
                                   sums[t.month] = (sums[t.month] ?? 0) + Number(t.target_value ?? 0);
@@ -1966,7 +1966,7 @@ const Index = () => {
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
-                                      monthlyTargets={monthlyTargets}
+                                      monthlyTargets={funnelTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="blue"
                                       pipelineMetricIds={pipelineIds}
@@ -1983,7 +1983,7 @@ const Index = () => {
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       historyData={historyData}
-                                      monthlyTargets={monthlyTargets}
+                                      monthlyTargets={funnelTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="amber"
                                       pipelineMetricIds={pipelineIds}
