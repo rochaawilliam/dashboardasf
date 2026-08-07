@@ -1906,6 +1906,7 @@ const Index = () => {
                               // Build a consolidated "Funil Total" from the online + offline stages
 
                               const TOTAL_STAGES: { label: string; online?: string; offline?: string }[] = [
+                                { label: "Valor Investido Total", online: "Valor Investido ASF", offline: "Valor Investido Offline" },
                                 { label: "Empresas Prospectadas", offline: "Prospects Offline" },
                                 { label: "Novos Leads", online: "Novos Leads Online", offline: "Novos Leads Offline" },
                                 { label: "Leads no Funil", online: "Leads no Funil Online", offline: "Leads no Funil Offline" },
@@ -1914,8 +1915,9 @@ const Index = () => {
                                 { label: "Reuniões", online: "Reuniões Online ASF", offline: "Reuniões Offline" },
                                 { label: "Propostas", online: "Propostas Online ASF", offline: "Propostas Offline" },
                                 { label: "Contratos", online: "Novos Contratos On-line ASF", offline: "Novos Contratos Off-line ASF" },
-                                { label: "Valor Gerado", online: "Valor Gerado Online", offline: "Valor Gerado Offline" },
+                                { label: "Valor Gerado Total", online: "Valor Gerado Online", offline: "Valor Gerado Offline" },
                               ];
+
                               const byName: Record<string, any> = {};
                               [...(funnelOnline?.metrics ?? []), ...(funnelOffline?.metrics ?? [])].forEach((m: any) => {
                                 byName[m.name] = m;
