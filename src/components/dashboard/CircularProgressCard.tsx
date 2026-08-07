@@ -421,7 +421,7 @@ export function CircularProgressCard({
               {hideValues ? "••••••" :
               isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
-              formatMetricValue(metric.target_value, metric.unit, metric.name)}
+              formatMetricValue(annualTarget, metric.unit, metric.name)}
             </p>
           </div>
           )}
@@ -479,7 +479,7 @@ export function CircularProgressCard({
           {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && !hideAnnualTarget && (
             <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
               <span>Meta anual:</span>
-              <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
+              <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(annualTarget, metric.unit, metric.name)}</span>
             </div>
           )}
           {/* Description / projection info */}
