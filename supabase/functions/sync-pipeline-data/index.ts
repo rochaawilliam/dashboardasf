@@ -264,13 +264,21 @@ Deno.serve(async (req) => {
     }
 
     // Fetch ALL company cards (no month filter) — Operacional uses created_at, not month field
-    const [allCards, stageHistory, cardComments] = await Promise.all([
+    const [allCards, stageHistory, cardComments, leadScores] = await Promise.all([
       fetchAll(pipeline, "pipeline_cards",
         "id, stage_id, lead_origin, contract_value, month, practice_area, tag, created_at, ghost_of, link_group, title",
         (q: any) => q.eq("company_id", ASF_COMPANY_ID)),
       fetchAll(pipeline, "card_stage_history", "card_id, from_stage, to_stage, moved_at"),
       fetchAll(pipeline, "card_comments", "card_id, created_at"),
+      fetchAll(pipeline, "lead_scores", "card_id, classificacao"),
     ]);
+
+    // Lead scoring (MQL/SQL) vindo direto do Pipeline Vision Board
+    const classByCard = new Map<string, string>();
+    for (const ls of leadScores) {
+      if (ls?.card_id && ls?.classificacao) classByCard.set(ls.card_id, String(ls.classificacao));
+    }
+
 
     // Blocklist: cards removidos do Pipeline mas que ainda aparecem por inconsistência.
     // Filtramos por título (case-insensitive, substring) — afeta contagens, valor_gerado e tooltips.
@@ -1248,6 +1256,11 @@ Deno.serve(async (req) => {
     const dashboardByOriginAreaMonth: Record<string, Record<string, Record<string, { leads: number; contratos: number; valor_gerado: number }>>> = {};
     // Pipeline Dashboard "Novos Leads" (!ghost_of && created_at month === ms && stage NOT in prospects/geladeira), by origin × area
     const novosByOriginAreaMonth: Record<string, Record<string, { empresarial: number; trabalhista: number; tributario: number; total: number }>> = {};
+    // Lead scoring (MQL/SQL) direto do Pipeline Vision Board, por origem
+    const qualificacaoByOriginMonth: Record<string, Record<string, { mql: number; sql: number }>> = {};
+    const qualificacaoTotalsByOrigin: Record<string, { mql: number; sql: number }> = {};
+    const countClass = (list: any[], cls: string) =>
+      list.filter((c: any) => classByCard.get(c.id) === cls).length;
 
     for (const ms of monthStrings) {
       // Dashboard uses `month` field filtering
@@ -1376,6 +1389,13 @@ Deno.serve(async (req) => {
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardByOriginMonth[ms][origin] = { leads: oFunilLeads, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
 
+        // MQL/SQL (lead scoring do Pipeline) — cards do mês, por origem
+        if (!qualificacaoByOriginMonth[ms]) qualificacaoByOriginMonth[ms] = {};
+        qualificacaoByOriginMonth[ms][origin] = {
+          mql: countClass(originCards, "MQL"),
+          sql: countClass(originCards, "SQL"),
+        };
+
         // By area (funil VB definition for leads; contratos snapshot from monthFilteredCards)
         dashboardByOriginAreaMonth[ms][origin] = {};
         const areasInOrigin = new Set<string>();
@@ -1496,6 +1516,10 @@ Deno.serve(async (req) => {
         const oContratos = oContratosSnap.count;
         const oValorGerado = deduplicatedValorGerado(oContratosSnap.cards.filter((c: any) => c.contract_value));
         dashboardTotalsByOrigin[origin] = { leads: oFunilLeads, prospects: oProspects, contratos: oContratos, valor_gerado: oValorGerado };
+        qualificacaoTotalsByOrigin[origin] = {
+          mql: countClass(originCards, "MQL"),
+          sql: countClass(originCards, "SQL"),
+        };
 
         dashboardTotalsByOriginArea[origin] = {};
         const areasInOrigin = new Set<string>();
@@ -1549,6 +1573,12 @@ Deno.serve(async (req) => {
       dashboardTotalsByOriginArea,
       novosByOriginArea: novosByOriginAreaMonth,
       novosTotalsByOriginArea,
+      qualificacaoByOrigin: qualificacaoByOriginMonth,
+      qualificacaoTotalsByOrigin,
+      leadScoresDebug: {
+        count: leadScores.length,
+        classes: Array.from(new Set(leadScores.map((l: any) => l.classificacao))),
+      },
     };
 
     // ---------- Month snapshot overlay (freeze closed months) ----------
