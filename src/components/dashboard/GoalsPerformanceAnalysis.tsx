@@ -188,6 +188,51 @@ function AnalysisText({ text }: { text: string }) {
   );
 }
 
+/** Recupera o valor de uma métrica a partir dos snapshots mensais congelados. */
+function snapshotValueFor(
+  metricName: string,
+  sources: Record<string, any> | undefined,
+): number | undefined {
+  if (!sources) return undefined;
+  const n = metricName.toLowerCase();
+
+  const pipeline = sources["pipeline"]?.months;
+  if (pipeline) {
+    const isOnline = /on-?line|\bon\b/.test(n);
+    const isOffline = /off-?line|\boff\b/.test(n);
+    const side = isOnline ? pipeline.online : isOffline ? pipeline.offline : null;
+    const both = (k: string) =>
+      Number(pipeline.online?.[k] ?? 0) + Number(pipeline.offline?.[k] ?? 0);
+    const pick = (k: string) => (side ? Number(side[k] ?? 0) : both(k));
+
+    if (n.includes("novos leads")) return pick("new_leads");
+    if (n.includes("leads no funil")) return pick("leads");
+    if (n.includes("reuni")) return pick("reunioes");
+    if (n.includes("proposta")) return pick("propostas");
+    if (n.includes("prospect")) return pick("prospects");
+    if (n.includes("valor gerado")) return pick("valor_gerado");
+    if (n.includes("novos contratos") && (isOnline || isOffline)) return pick("contratos");
+  }
+
+  const traffic = sources["traffic_funnel"]?.months;
+  if (traffic) {
+    if (n.includes("impress")) return Number(traffic.impressoes ?? 0);
+    if (n.includes("alcance")) return Number(traffic.alcance ?? 0);
+    if (n.includes("conversas")) return Number(traffic.conversas_iniciadas ?? 0);
+    if (n.includes("valor investido")) return Number(traffic.valor_investido ?? 0);
+  }
+
+  const fin = sources["financial_cashflow"]?.months;
+  if (fin) {
+    if (n.includes("receita total")) return Number(fin.boleto_total ?? fin.total_recebimentos ?? 0);
+    if (n.includes("lucratividade")) return Number(fin.lucratividade_pct ?? 0);
+    if (n.includes("folha sobre receita")) return Number(fin.folha_sobre_receita_pct ?? 0);
+    if (n.includes("custo fixo sobre receita")) return Number(fin.custo_fixo_sobre_receita_pct ?? 0);
+  }
+
+  return undefined;
+}
+
 const SHORT_MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 /** Histórico mensal de atingimento das metas indutoras da aba */
@@ -206,6 +251,20 @@ function GoalsTrendChart({
 }) {
   const metricIds = useMemo(() => metrics.map((m) => m.id).sort(), [metrics]);
   const [open, setOpen] = useState(false);
+
+  const { data: snapshots } = useQuery({
+    queryKey: ["goals-trend-snapshots", selectedYear],
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("month_snapshots")
+        .select("source, month, payload")
+        .eq("year", selectedYear);
+      if (error) throw error;
+      return (data ?? []) as { source: string; month: number; payload: any }[];
+    },
+  });
 
   const { data: history, isLoading } = useQuery({
     queryKey: ["goals-trend-history", selectedYear, metricIds],
@@ -228,6 +287,15 @@ function GoalsTrendChart({
       return rows;
     },
   });
+
+  const snapshotByMonth = useMemo(() => {
+    const map: Record<number, Record<string, any>> = {};
+    (snapshots ?? []).forEach((s) => {
+      if (!map[s.month]) map[s.month] = {};
+      map[s.month][s.source] = s.payload;
+    });
+    return map;
+  }, [snapshots]);
 
   const chartData = useMemo(() => {
     if (!history) return [];
@@ -259,8 +327,8 @@ function GoalsTrendChart({
           ? Number(metric.target_value)
           : Number(metric.target_value) / 12;
         if (!target || target <= 0) return;
-        const value = values[metric.id];
-        if (value === undefined) return;
+        const value = values[metric.id] ?? snapshotValueFor(metric.name, snapshotByMonth[m]);
+        if (value === undefined || value === null) return;
         const isInverse = metric.polarity === "lower_is_better";
         const raw = isInverse ? (value > 0 ? (target / value) * 100 : 100) : (value / target) * 100;
         progresses.push(Math.min(Math.max(0, raw), GAUGE_MAX));
@@ -274,7 +342,7 @@ function GoalsTrendChart({
       });
     }
     return result;
-  }, [history, metrics, monthlyTargets, selectedYear]);
+  }, [history, metrics, monthlyTargets, selectedYear, snapshotByMonth]);
 
   const withData = chartData.filter((d) => d.atingimento !== null);
 
@@ -396,6 +464,86 @@ function GoalsTrendChart({
   );
 }
 
+
+interface AlertItem { name: string; progress: number }
+
+function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] }) {
+  const [open, setOpen] = useState(false);
+  const total = below.length + above.length;
+  if (total === 0) return null;
+
+  return (
+    <div className="mt-3 rounded-lg border border-border/50 bg-card p-3">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between gap-2 text-left"
+      >
+        <div className="flex items-center gap-1.5">
+          <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
+          <AlertTriangle className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-semibold text-foreground">Alertas de desvio</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {below.length > 0 && (
+            <span className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] font-semibold text-destructive tabular-nums">
+              {below.length} abaixo de 85%
+            </span>
+          )}
+          {above.length > 0 && (
+            <span className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(210_90%_55%)] tabular-nums">
+              {above.length} acima de 100%
+            </span>
+          )}
+        </div>
+      </button>
+
+      {open && (
+        <div className="mt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {below.length > 0 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+                  <span className="text-[11px] font-semibold text-destructive">
+                    {below.length} {below.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {below.map((i) => (
+                    <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] text-destructive tabular-nums">
+                      {i.name} · {Math.round(i.progress)}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {above.length > 0 && (
+              <div className="rounded-lg border border-[hsl(210_90%_55%/0.4)] bg-[hsl(210_90%_55%/0.1)] p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ArrowUpCircle className="h-3.5 w-3.5 text-[hsl(210_90%_55%)]" />
+                  <span className="text-[11px] font-semibold text-[hsl(210_90%_55%)]">
+                    {above.length} {above.length === 1 ? "meta superada" : "metas superadas"} (acima de 100%)
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {above.map((i) => (
+                    <span
+                      key={i.name}
+                      className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] text-[hsl(210_90%_55%)] tabular-nums"
+                    >
+                      {i.name} · {Math.round(i.progress)}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 type AlertLevel = "critical" | "warning" | "onTarget" | "above";
 
@@ -596,54 +744,6 @@ export function GoalsPerformanceAnalysis({
         </div>
       </div>
 
-      {(belowRef.length > 0 || aboveTarget.length > 0) && (
-        <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-          {belowRef.length > 0 && (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
-                <span className="text-[11px] font-semibold text-destructive">
-                  {belowRef.length} {belowRef.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {belowRef.slice(0, 6).map((i) => (
-                  <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] text-destructive tabular-nums">
-                    {i.name} · {Math.round(i.progress)}%
-                  </span>
-                ))}
-                {belowRef.length > 6 && (
-                  <span className="text-[10px] text-destructive/80">+{belowRef.length - 6}</span>
-                )}
-              </div>
-            </div>
-          )}
-          {aboveTarget.length > 0 && (
-            <div className="rounded-lg border border-[hsl(210_90%_55%/0.4)] bg-[hsl(210_90%_55%/0.1)] p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <ArrowUpCircle className="h-3.5 w-3.5 text-[hsl(210_90%_55%)]" />
-                <span className="text-[11px] font-semibold text-[hsl(210_90%_55%)]">
-                  {aboveTarget.length} {aboveTarget.length === 1 ? "meta superada" : "metas superadas"} (acima de 100%)
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {aboveTarget.slice(0, 6).map((i) => (
-                  <span
-                    key={i.name}
-                    className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] text-[hsl(210_90%_55%)] tabular-nums"
-                  >
-                    {i.name} · {Math.round(i.progress)}%
-                  </span>
-                ))}
-                {aboveTarget.length > 6 && (
-                  <span className="text-[10px] text-[hsl(210_90%_55%)]/80">+{aboveTarget.length - 6}</span>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4 items-start">
         <div className="flex flex-col items-center">
           <GaugeChart value={computed.overall} />
@@ -709,6 +809,8 @@ export function GoalsPerformanceAnalysis({
         selectedYear={selectedYear}
         selectedMonth={selectedMonth}
       />
+
+      <AlertsPanel below={belowRef} above={aboveTarget} />
     </div>
 
   );
