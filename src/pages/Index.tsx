@@ -1873,6 +1873,18 @@ const Index = () => {
                             </div>
                           </div>
 
+                          <GoalsPerformanceAnalysis
+                            tabTitle={config.title}
+                            metrics={categoryMetrics}
+                            monthlyValues={mergedMonthlyValues}
+                            accumulatedValues={mergedAccumulatedValues}
+                            monthlyTargets={monthlyTargets}
+                            selectedMonth={selectedMonth}
+                            selectedYear={selectedYear}
+                          />
+
+
+
                       
                           {/* Render Funnel subcategories with special layout */}
                           {(() => {
