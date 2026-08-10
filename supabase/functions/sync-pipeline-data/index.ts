@@ -879,19 +879,51 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Avg onboarding days (completed clients only)
-      let avgOnboardingDays: number | null = null;
-      if (completedClientIds.length > 0) {
-        let totalDays = 0;
-        for (const cid of completedClientIds) {
-          const client = clients.find((c: any) => c.id === cid);
-          if (client) {
-            const entry = new Date(client.entry_date).getTime();
-            const now = Date.now();
-            totalDays += Math.floor((now - entry) / (1000 * 60 * 60 * 24));
+      // Avg onboarding days — mesma regra do Compass ("Indicadores do Mês → Tempo Médio"):
+      // concluído = entrada até a última etapa concluída; em andamento = entrada até hoje (parcial)
+      const nowMs = Date.now();
+      const durationOf = (client: any): number => {
+        const cs = stepsByClient.get(client.id) || [];
+        const done = cs.length > 0 && cs.every((s: any) => s.status === "Ok");
+        const entryMs = new Date(client.entry_date).getTime();
+        if (done) {
+          const dates = cs.filter((s: any) => s.completed_date).map((s: any) => new Date(s.completed_date).getTime());
+          if (dates.length > 0) {
+            return Math.max(0, Math.floor((Math.max(...dates) - entryMs) / 86400000));
           }
         }
-        avgOnboardingDays = Math.round(totalDays / completedClientIds.length);
+        return Math.max(0, Math.floor((nowMs - entryMs) / 86400000));
+      };
+
+      const allDurations = clients.map(durationOf);
+      const avgOnboardingDays = allDurations.length > 0
+        ? Math.round(allDurations.reduce((a: number, b: number) => a + b, 0) / allDurations.length)
+        : null;
+
+      // Métricas por mês de entrada do cliente
+      const onboardingByMonth: Record<string, { avgOnboardingDays: number | null; complianceRate: number | null; totalClients: number; completedClients: number; isPartial: boolean }> = {};
+      const clientsByMonth = new Map<string, any[]>();
+      for (const c of clients) {
+        const key = String(c.entry_date).substring(0, 7);
+        if (!clientsByMonth.has(key)) clientsByMonth.set(key, []);
+        clientsByMonth.get(key)!.push(c);
+      }
+      for (const [key, list] of clientsByMonth.entries()) {
+        const durations = list.map(durationOf);
+        const monthSteps = list.flatMap((c: any) => stepsByClient.get(c.id) || []);
+        const withDates = monthSteps.filter((s: any) => s.status === "Ok" && s.completed_date && s.planned_date);
+        const onTime = withDates.filter((s: any) => s.completed_date <= s.planned_date);
+        const doneCount = list.filter((c: any) => {
+          const cs = stepsByClient.get(c.id) || [];
+          return cs.length > 0 && cs.every((s: any) => s.status === "Ok");
+        }).length;
+        onboardingByMonth[key] = {
+          avgOnboardingDays: durations.length > 0 ? Math.round(durations.reduce((a: number, b: number) => a + b, 0) / durations.length) : null,
+          complianceRate: withDates.length > 0 ? Math.round((onTime.length / withDates.length) * 100) : null,
+          totalClients: list.length,
+          completedClients: doneCount,
+          isPartial: doneCount < list.length,
+        };
       }
 
       // Compliance rate: steps completed on time (date <= plannedDate)
@@ -916,6 +948,7 @@ Deno.serve(async (req) => {
         activeClients: clients.length - completedClientIds.length,
         completedClients: completedClientIds.length,
         overallCompletion,
+        byMonth: onboardingByMonth,
       };
     } catch (err) {
       console.error("Onboarding fetch error:", err);

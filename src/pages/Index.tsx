@@ -537,11 +537,14 @@ const Index = () => {
       }
     }
 
-    // Onboarding metrics (same values regardless of month - they're current state)
+    // Onboarding metrics — usa o mês selecionado (Indicadores do Mês do Compass)
     if (pipelineData.onboarding) {
       const ob = pipelineData.onboarding;
-      if (ob.avgOnboardingDays !== null) values[LEAD_TIME_ONBOARDING_ID] = ob.avgOnboardingDays;
-      if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
+      const obMonth = ms ? ob.byMonth?.[ms] : undefined;
+      const obDays = obMonth?.avgOnboardingDays ?? (ms ? null : ob.avgOnboardingDays);
+      const obCompliance = obMonth?.complianceRate ?? (ms ? null : ob.complianceRate);
+      if (obDays !== null && obDays !== undefined) values[LEAD_TIME_ONBOARDING_ID] = obDays;
+      if (obCompliance !== null && obCompliance !== undefined) values[TAXA_ONBOARDING_PRAZO_ID] = obCompliance;
     }
 
     // Training / Time ASF metrics
