@@ -739,10 +739,10 @@ export function GoalsPerformanceAnalysis({
             <Gauge className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <h4 className="text-sm sm:text-base font-semibold text-foreground leading-tight truncate" style={{ fontFamily: "'Roboto', sans-serif" }}>
+            <h4 className="text-base sm:text-lg font-semibold text-foreground leading-tight truncate" style={{ fontFamily: "'Roboto', sans-serif" }}>
               Análise de Desempenho — {tabTitle}
             </h4>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{periodLabel} · {computed.items.length} metas indutoras</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">{periodLabel} · {computed.items.length} metas indutoras</p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
