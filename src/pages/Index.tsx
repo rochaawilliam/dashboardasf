@@ -1734,7 +1734,32 @@ const Index = () => {
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
-                <div data-tour="category-tabs" className="flex items-stretch bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
+                <div
+                  data-tour="category-tabs"
+                  role="tablist"
+                  aria-label="Categorias do dashboard"
+                  aria-orientation="horizontal"
+                  onKeyDown={(e) => {
+                    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+                    const container = e.currentTarget;
+                    const tabsEls = Array.from(
+                      container.querySelectorAll<HTMLButtonElement>('button[role="tab"]:not([disabled])')
+                    );
+                    if (tabsEls.length === 0) return;
+                    const currentIndex = tabsEls.indexOf(document.activeElement as HTMLButtonElement);
+                    let nextIndex = currentIndex;
+                    if (e.key === "ArrowRight") nextIndex = (currentIndex + 1 + tabsEls.length) % tabsEls.length;
+                    else if (e.key === "ArrowLeft") nextIndex = (currentIndex - 1 + tabsEls.length) % tabsEls.length;
+                    else if (e.key === "Home") nextIndex = 0;
+                    else if (e.key === "End") nextIndex = tabsEls.length - 1;
+                    if (nextIndex < 0) nextIndex = 0;
+                    e.preventDefault();
+                    const next = tabsEls[nextIndex];
+                    next.focus();
+                    next.click();
+                  }}
+                  className="flex items-stretch bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
+
                   {/* Secret Commission Tab */}
                   {isCommissionUser &&
                 <button
