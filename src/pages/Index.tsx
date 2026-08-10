@@ -1918,6 +1918,25 @@ const Index = () => {
                                 { label: "Valor Gerado Total", online: "Valor Gerado Online", offline: "Valor Gerado Offline" },
                               ];
 
+                              // Canonical row order shared by the three funnels (for visual alignment)
+                              const ALIGNED_ROWS: { online?: string; offline?: string; total?: string }[] = [
+                                { online: "Valor Investido ASF", offline: "Valor Investido Offline", total: "Valor Investido Total" },
+                                { online: "Número de impressões ASF" },
+                                { online: "Número de alcance ASF" },
+                                { online: "Conversas Iniciadas pela IA" },
+                                { offline: "Prospects Offline", total: "Empresas Prospectadas" },
+                                { online: "Novos Leads Online", offline: "Novos Leads Offline", total: "Novos Leads" },
+                                { online: "Leads no Funil Online", offline: "Leads no Funil Offline", total: "Leads no Funil" },
+                                { online: "MQL Online", total: "MQL" },
+                                { online: "SQL Online", offline: "SQL Offline", total: "SQL" },
+                                { online: "Reuniões Online ASF", offline: "Reuniões Offline", total: "Reuniões" },
+                                { online: "Propostas Online ASF", offline: "Propostas Offline", total: "Propostas" },
+                                { online: "Novos Contratos On-line ASF", offline: "Novos Contratos Off-line ASF", total: "Contratos" },
+                                { online: "Valor Gerado Online", offline: "Valor Gerado Offline", total: "Valor Gerado Total" },
+                                { online: "ROAS Online", offline: "ROAS Offline", total: "ROAS Total" },
+                              ];
+
+
                               const byName: Record<string, any> = {};
                               [...(funnelOnline?.metrics ?? []), ...(funnelOffline?.metrics ?? [])].forEach((m: any) => {
                                 byName[m.name] = m;
@@ -2015,7 +2034,35 @@ const Index = () => {
 
                               }
 
+                              // ---- Align the three funnels row by row (invisible placeholders when missing)
+                              const onlineByName: Record<string, any> = {};
+                              (funnelOnline?.metrics ?? []).forEach((m: any) => { onlineByName[m.name] = m; });
+                              const offlineByName: Record<string, any> = {};
+                              (funnelOffline?.metrics ?? []).forEach((m: any) => { offlineByName[m.name] = m; });
+                              const totalByName: Record<string, any> = {};
+                              totalMetrics.forEach((m: any) => { totalByName[m.name] = m; });
 
+                              const alignedOnline: any[] = [];
+                              const alignedOffline: any[] = [];
+                              const alignedTotal: any[] = [];
+
+                              ALIGNED_ROWS.forEach((row, idx) => {
+                                const on = row.online ? onlineByName[row.online] : undefined;
+                                const off = row.offline ? offlineByName[row.offline] : undefined;
+                                const tot = row.total ? totalByName[row.total] : undefined;
+                                if (!on && !off && !tot) return;
+                                const template = on ?? off ?? tot;
+                                const ph = (key: string) => ({ ...template, id: `ph-${key}-${idx}`, __placeholder: true });
+                                alignedOnline.push(on ?? ph("on"));
+                                alignedOffline.push(off ?? ph("off"));
+                                alignedTotal.push(tot ?? ph("tot"));
+                              });
+
+                              // keep any metric not covered by the canonical rows at the end
+                              const covered = new Set(ALIGNED_ROWS.flatMap((r) => [r.online, r.offline, r.total].filter(Boolean) as string[]));
+                              (funnelOnline?.metrics ?? []).forEach((m: any) => { if (!covered.has(m.name)) alignedOnline.push(m); });
+                              (funnelOffline?.metrics ?? []).forEach((m: any) => { if (!covered.has(m.name)) alignedOffline.push(m); });
+                              totalMetrics.forEach((m: any) => { if (!covered.has(m.name)) alignedTotal.push(m); });
 
                               return (
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
@@ -2023,7 +2070,7 @@ const Index = () => {
                                     <SalesFunnel
                                       title="Funil Online"
                                       icon={Globe}
-                                      metrics={funnelOnline.metrics}
+                                      metrics={alignedOnline}
                                       monthlyValues={mergedMonthlyValues}
                                       accumulatedValues={mergedAccumulatedValues}
                                       selectedMonth={selectedMonth}
@@ -2040,7 +2087,7 @@ const Index = () => {
                                     <SalesFunnel
                                       title="Funil Offline"
                                       icon={Building2}
-                                      metrics={funnelOffline.metrics}
+                                      metrics={alignedOffline}
                                       monthlyValues={mergedMonthlyValues}
                                       accumulatedValues={mergedAccumulatedValues}
                                       selectedMonth={selectedMonth}
@@ -2057,14 +2104,14 @@ const Index = () => {
                                     <SalesFunnel
                                       title="Funil Total"
                                       icon={Layers}
-                                      metrics={totalMetrics}
+                                      metrics={alignedTotal}
                                       monthlyValues={totalMonthly}
                                       accumulatedValues={totalAccumulated}
                                       selectedMonth={selectedMonth}
                                       selectedYear={selectedYear}
                                       monthlyTargets={totalTargets}
                                       colorScheme="emerald"
-                                      pipelineMetricIds={new Set(totalMetrics.map((m) => m.id))}
+                                      pipelineMetricIds={new Set(alignedTotal.map((m) => m.id))}
                                     />
                                   )}
                                 </div>
