@@ -920,7 +920,7 @@ const Index = () => {
       const dashTma = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
       if (dashTma?.tmaDays !== null && dashTma?.tmaDays !== undefined) {
         info[TMA_ID] = {
-          source: "Dashboard (Pipeline Vision Board)",
+          source: "Dashboard",
           filter: "month",
           formula: "média(fechamento ou hoje − criação) em dias, agrupado por lead",
           calculation: `Média de ${fmt(dashTma.tmaDays)} dias no funil por lead.`,
