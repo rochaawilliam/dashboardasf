@@ -92,11 +92,15 @@ export function SalesFunnel({
           return (
             <React.Fragment key={metric.id}>
               {index > 0 && (
-                <div className={cn("flex justify-center py-0.5", (isPlaceholder || prevPlaceholder) && "invisible")}>
+                <div className={cn(
+                  "flex justify-center py-0.5",
+                  (isPlaceholder || prevPlaceholder) && "invisible hidden lg:flex"
+                )}>
                   <ArrowDown className="h-4 w-4 text-muted-foreground/40" />
                 </div>
               )}
-              <div className={cn(isPlaceholder && "invisible pointer-events-none")} aria-hidden={isPlaceholder}>
+              <div className={cn(isPlaceholder && "invisible pointer-events-none hidden lg:block")} aria-hidden={isPlaceholder}>
+
                 <CircularProgressCard
                   metric={{ ...metric, name: cleanName(metric.name) }}
                   monthlyValue={monthlyValue}
