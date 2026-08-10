@@ -1734,21 +1734,50 @@ const Index = () => {
 
               <Tabs value={activeTab === "comissao" ? "comissao" : activeTab === "comissao_sdr" ? "comissao_sdr" : activeTab} onValueChange={(v) => setActiveTab(v as MetricCategory | "comissao" | "comissao_sdr")} className="mb-3 sm:mb-4">
                 {/* Chrome-style tabs - full width */}
-                <div data-tour="category-tabs" className="flex items-stretch bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
+                <div
+                  data-tour="category-tabs"
+                  role="tablist"
+                  aria-label="Categorias do dashboard"
+                  aria-orientation="horizontal"
+                  onKeyDown={(e) => {
+                    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+                    const container = e.currentTarget;
+                    const tabsEls = Array.from(
+                      container.querySelectorAll<HTMLButtonElement>('button[role="tab"]:not([disabled])')
+                    );
+                    if (tabsEls.length === 0) return;
+                    const currentIndex = tabsEls.indexOf(document.activeElement as HTMLButtonElement);
+                    let nextIndex = currentIndex;
+                    if (e.key === "ArrowRight") nextIndex = (currentIndex + 1 + tabsEls.length) % tabsEls.length;
+                    else if (e.key === "ArrowLeft") nextIndex = (currentIndex - 1 + tabsEls.length) % tabsEls.length;
+                    else if (e.key === "Home") nextIndex = 0;
+                    else if (e.key === "End") nextIndex = tabsEls.length - 1;
+                    if (nextIndex < 0) nextIndex = 0;
+                    e.preventDefault();
+                    const next = tabsEls[nextIndex];
+                    next.focus();
+                    next.click();
+                  }}
+                  className="flex items-stretch bg-muted/30 rounded-t-xl pt-1 gap-0.5 px-0 py-0 overflow-hidden w-full">
+
                   {/* Secret Commission Tab */}
                   {isCommissionUser &&
                 <button
                   onClick={() => setActiveTab("comissao")}
+                  role="tab"
+                  aria-selected={activeTab === "comissao"}
+                  tabIndex={activeTab === "comissao" ? 0 : -1}
+                  aria-label="Head Growth"
                   className={cn(
-                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative",
-                    "text-[9px] sm:text-xs font-medium",
+                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative min-h-11",
+                    "text-[9px] sm:text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
                     activeTab === "comissao" ?
                     "bg-purple-600 text-white shadow-sm z-10" :
                     "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
                   )}
                   title="Head Growth">
 
-                      <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
                       <span className="hidden sm:inline truncate">Head Growth</span>
                     </button>
                 }
@@ -1756,18 +1785,23 @@ const Index = () => {
                   {isSDRUser &&
                 <button
                   onClick={() => setActiveTab("comissao_sdr")}
+                  role="tab"
+                  aria-selected={activeTab === "comissao_sdr"}
+                  tabIndex={activeTab === "comissao_sdr" ? 0 : -1}
+                  aria-label="Salário Variável SDR"
                   className={cn(
-                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative",
-                    "text-[9px] sm:text-xs font-medium",
+                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative min-h-11",
+                    "text-[9px] sm:text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
                     activeTab === "comissao_sdr" ?
                     "bg-green-600 text-white shadow-sm z-10" :
                     "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                   )}
                   title="Salário Variável SDR">
 
-                      <Target className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <Target className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
                       <span className="hidden sm:inline truncate">SDR</span>
                     </button>
+
                 }
                   {categoryOrder.map((category) => {
                   const config = categoryConfig[category];
@@ -1781,9 +1815,17 @@ const Index = () => {
                       key={category}
                       onClick={() => canAccess && setActiveTab(category)}
                       disabled={!canAccess}
+                      role="tab"
+                      aria-selected={isActive && canAccess}
+                      tabIndex={isActive && canAccess ? 0 : -1}
+                      aria-label={
+                        canAccess
+                          ? `${config.title} (${categoryMetricsCount} indicadores)`
+                          : `${config.title} — acesso restrito`
+                      }
                       className={cn(
-                        "flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 py-1.5 sm:py-2 px-0.5 sm:px-1.5 rounded-t-lg transition-all relative",
-                        "text-[8px] sm:text-[10px] font-medium",
+                        "flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 py-1.5 sm:py-2 px-0.5 sm:px-1.5 rounded-t-lg transition-all relative min-h-11",
+                        "text-[8px] sm:text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                         !canAccess && "opacity-50 cursor-not-allowed",
                         isActive && canAccess ?
                         "bg-primary text-primary-foreground shadow-sm z-10" :
@@ -1794,9 +1836,10 @@ const Index = () => {
                       title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : config.title}>
 
                         {!canAccess ?
-                      <Lock className="h-3 w-3 shrink-0" /> :
-                      <Icon className="h-3 w-3 shrink-0" />
+                      <Lock className="h-3 w-3 shrink-0" aria-hidden="true" /> :
+                      <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />
                       }
+
                     <span className="hidden md:inline truncate text-[10px] lg:text-xs">{config.shortTitle}</span>
                         <span className={cn(
                         "hidden md:inline text-[7px] px-1 py-0.5 rounded-full font-semibold",

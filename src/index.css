@@ -311,6 +311,15 @@
     min-height: 1.75rem;
   }
 
+  /* Keep keyboard focus clearly visible in the compact landscape chrome */
+  .landscape-compact :focus-visible,
+  [role="tablist"] :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 1px;
+    border-radius: 0.25rem;
+  }
+
+
   /* Give the scrollable content real estate */
   .metric-card {
     padding: 0.375rem;

@@ -74,20 +74,28 @@ export function SwipeableTabs<T extends string>({
       {children}
       
       {/* Swipe indicator dots */}
-      <div className="flex items-center justify-center gap-1.5 py-3 sm:hidden">
+      <div className="flex items-center justify-center gap-1.5 py-3 sm:hidden" role="group" aria-label="Navegar entre abas">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
+            aria-label={`Ir para a aba ${tab}`}
+            aria-current={activeTab === tab ? "true" : undefined}
             className={cn(
-              "w-2 h-2 rounded-full transition-all",
-              activeTab === tab 
-                ? "bg-primary w-4" 
-                : "bg-muted-foreground/30"
+              "h-11 flex items-center justify-center px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
             )}
-          />
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "block w-2 h-2 rounded-full transition-all",
+                activeTab === tab ? "bg-primary w-4" : "bg-muted-foreground/30"
+              )}
+            />
+          </button>
         ))}
       </div>
+
     </div>
   );
 }
