@@ -136,15 +136,33 @@ function renderInline(text: string) {
 
 function splitAnalysis(text: string) {
   const idx = text.search(/\*\*?\s*Checklist[^\n]*/i);
-  if (idx === -1) return { main: text, checklist: [] as string[] };
-  const main = text.slice(0, idx).trim();
-  const rest = text.slice(idx);
-  const checklist = rest
-    .split("\n")
-    .slice(1)
-    .map((l) => l.trim().replace(/^[-*•]\s*/, "").replace(/^\[\s*\]\s*/, ""))
-    .filter((l) => l.length > 0 && !/^\*\*/.test(l));
-  return { main, checklist };
+  let main = text;
+  let checklist: string[] = [];
+  if (idx !== -1) {
+    main = text.slice(0, idx).trim();
+    checklist = text
+      .slice(idx)
+      .split("\n")
+      .slice(1)
+      .map((l) => l.trim().replace(/^[-*•]\s*/, "").replace(/^\[\s*\]\s*/, ""))
+      .filter((l) => l.length > 0 && !/^\*\*/.test(l));
+  }
+
+  // Separa panorama geral dos pontos de melhoria
+  const impIdx = main.search(/^[#*\s]*\**\s*Pontos? de melhoria/im);
+  let panorama = main;
+  let improvements = "";
+  if (impIdx !== -1) {
+    panorama = main.slice(0, impIdx).trim();
+    improvements = main
+      .slice(impIdx)
+      .split("\n")
+      .slice(1)
+      .join("\n")
+      .trim();
+  }
+
+  return { main, panorama, improvements, checklist };
 }
 
 function ChecklistPanel({ items }: { items: string[] }) {
