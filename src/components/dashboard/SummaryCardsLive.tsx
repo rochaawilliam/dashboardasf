@@ -62,7 +62,7 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
               </div>
               <span
                 className={cn(
-                  "text-xs font-medium px-2 py-1 rounded-full",
+                  "text-xs font-semibold px-2 py-1 rounded-full",
                   item.changeType === "positive" && "bg-success/10 text-success",
                   item.changeType === "negative" && "bg-destructive/10 text-destructive",
                   item.changeType === "neutral" && "bg-muted text-muted-foreground"
@@ -72,8 +72,8 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
               </span>
             </div>
             <div className="mt-1.5 lg:mt-2.5">
-              <p className="text-sm sm:text-lg lg:text-xl font-bold text-foreground">{item.value}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{item.name}</p>
+              <p className="metric-value">{item.value}</p>
+              <p className="metric-sublabel normal-case mt-0.5 truncate">{item.name}</p>
             </div>
           </div>
         );
