@@ -770,59 +770,63 @@ export function GoalsPerformanceAnalysis({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-3 sm:gap-4 items-start">
+      <div className="space-y-3 sm:space-y-4">
+        {/* Velocímetro */}
         <div className="flex flex-col items-center">
           <GaugeChart value={computed.overall} />
-          <div className="mt-2 w-full space-y-1">
-            {highlights.map((h) => (
-              <div key={h.name} className="flex items-center justify-between gap-2 text-xs">
-                <span className="truncate text-muted-foreground">{h.name}</span>
-                <span
-                  className={cn(
-                    "font-semibold tabular-nums",
-                    STATUS_STYLES[statusOf(h.progress)].text,
-                  )}
-                >
-                  {Math.round(h.progress)}%
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
 
+        {/* Panorama geral abaixo do velocímetro */}
+        <div className="rounded-lg border border-border/50 bg-card p-3 sm:p-4">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-base font-semibold text-foreground">Panorama geral</span>
+          </div>
+          {loading && !analysis ? (
+            <div className="flex items-center gap-2 text-base text-muted-foreground py-4">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Analisando o desempenho das metas indutoras...
+            </div>
+          ) : error ? (
+            <p className="text-base text-destructive">{error}</p>
+          ) : analysis ? (
+            <AnalysisText text={splitAnalysis(analysis).panorama} />
+          ) : (
+            <p className="text-base text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
+          )}
+        </div>
+
+        {/* Duas colunas: pontos de melhoria | checklist */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
+          <div className="rounded-lg border border-border/50 bg-card p-3 sm:p-4 min-h-[140px]">
             <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span className="text-sm font-semibold text-foreground">Panorama e pontos de melhoria</span>
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <span className="text-base font-semibold text-foreground">Pontos de melhoria</span>
             </div>
             {loading && !analysis ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Analisando o desempenho das metas indutoras...
+              <div className="flex items-center gap-2 text-base text-muted-foreground py-6">
+                <Loader2 className="h-4 w-4 animate-spin" /> Levantando pontos de melhoria...
               </div>
-            ) : error ? (
-              <p className="text-sm text-destructive">{error}</p>
-            ) : analysis ? (
-              <AnalysisText text={splitAnalysis(analysis).main} />
+            ) : splitAnalysis(analysis).improvements ? (
+              <AnalysisText text={splitAnalysis(analysis).improvements} />
             ) : (
-              <p className="text-sm text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
+              <p className="text-base text-muted-foreground">Nenhum ponto de melhoria gerado ainda.</p>
             )}
           </div>
 
-          <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
+          <div className="rounded-lg border border-border/50 bg-card p-3 sm:p-4 min-h-[140px]">
             <div className="flex items-center gap-1.5 mb-2">
-              <ListChecks className="h-3.5 w-3.5 text-primary" />
-              <span className="text-sm font-semibold text-foreground">Checklist de ações corretivas</span>
+              <ListChecks className="h-4 w-4 text-primary" />
+              <span className="text-base font-semibold text-foreground">Checklist de ações corretivas</span>
             </div>
             {loading && !analysis ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando ações...
+              <div className="flex items-center gap-2 text-base text-muted-foreground py-6">
+                <Loader2 className="h-4 w-4 animate-spin" /> Gerando ações...
               </div>
             ) : splitAnalysis(analysis).checklist.length > 0 ? (
               <ChecklistPanel items={splitAnalysis(analysis).checklist} />
             ) : (
-              <p className="text-sm text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
+              <p className="text-base text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
             )}
           </div>
         </div>
