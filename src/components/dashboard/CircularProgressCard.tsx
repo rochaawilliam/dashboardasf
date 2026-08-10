@@ -382,27 +382,21 @@ export function CircularProgressCard({
           {resultadoData ? (
             <>
               <div>
-                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-                  Previsto
-                </p>
-                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                <p className="metric-sublabel">Previsto</p>
+                <p className="metric-target-value">
                   {hideValues ? "••••••" : formatMetricValue(resultadoData.previsto, metric.unit, metric.name)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-                  Realizado
-                </p>
-                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                <p className="metric-sublabel">Realizado</p>
+                <p className="metric-target-value">
                   {hideValues ? "••••••" : formatMetricValue(resultadoData.realizado, metric.unit, metric.name)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-                  Resultado
-                </p>
+                <p className="metric-sublabel">Resultado</p>
                 <p className={cn(
-                  "leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter",
+                  "metric-value",
                   resultadoData.resultado >= 0 ? "text-success" : "text-destructive"
                 )}>
                   {hideValues ? "••••••" : `${resultadoData.resultado >= 0 ? "+" : ""}${formatMetricValue(resultadoData.resultado, metric.unit, metric.name)}`}
