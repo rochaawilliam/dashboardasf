@@ -13,6 +13,7 @@ import { MetricCardMonthly } from "@/components/dashboard/MetricCardMonthly";
 import { CircularProgressCard } from "@/components/dashboard/CircularProgressCard";
 import { MetricDrilldownDialog } from "@/components/dashboard/MetricDrilldownDialog";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import { GoalsPerformanceAnalysis } from "@/components/dashboard/GoalsPerformanceAnalysis";
 import { SubcategoryHeader } from "@/components/dashboard/SubcategoryHeader";
 import { TrainingCardEditable } from "@/components/dashboard/TrainingCardEditable";
 import { TrainingDashboard as TrainingDashboardComponent } from "@/components/dashboard/TrainingDashboard";
@@ -1872,6 +1873,18 @@ const Index = () => {
                         }
                             </div>
                           </div>
+
+                          <GoalsPerformanceAnalysis
+                            tabTitle={config.title}
+                            metrics={categoryMetrics}
+                            monthlyValues={mergedMonthlyValues}
+                            accumulatedValues={mergedAccumulatedValues}
+                            monthlyTargets={monthlyTargets}
+                            selectedMonth={selectedMonth}
+                            selectedYear={selectedYear}
+                          />
+
+
 
                       
                           {/* Render Funnel subcategories with special layout */}
