@@ -76,11 +76,21 @@ function GaugeChart({ value, refPct = 100 }: { value: number; refPct?: number })
   const color =
     clamped > 100
       ? "hsl(210 90% 55%)"
-      : clamped >= 100
+      : clamped >= ref
       ? "hsl(var(--success))"
-      : clamped >= 85
+      : clamped >= warnRef
       ? "hsl(var(--warning))"
       : "hsl(var(--destructive))";
+
+  const refPos = polar(ref);
+  const refInner = {
+    x: cx + (r - stroke / 2 - 2) * Math.cos(Math.PI * (1 - ref / GAUGE_MAX)),
+    y: cy - (r - stroke / 2 - 2) * Math.sin(Math.PI * (1 - ref / GAUGE_MAX)),
+  };
+  const refOuter = {
+    x: cx + (r + stroke / 2 + 2) * Math.cos(Math.PI * (1 - ref / GAUGE_MAX)),
+    y: cy - (r + stroke / 2 + 2) * Math.sin(Math.PI * (1 - ref / GAUGE_MAX)),
+  };
 
   return (
     <div className="relative flex flex-col items-center w-full">
@@ -93,9 +103,9 @@ function GaugeChart({ value, refPct = 100 }: { value: number; refPct?: number })
       >
 
         {/* zones */}
-        <path d={arc(0, 60)} fill="none" stroke="hsl(var(--destructive) / 0.18)" strokeWidth={stroke} strokeLinecap="round" />
-        <path d={arc(60, 85)} fill="none" stroke="hsl(var(--warning) / 0.2)" strokeWidth={stroke} />
-        <path d={arc(85, 100)} fill="none" stroke="hsl(var(--success) / 0.2)" strokeWidth={stroke} />
+        <path d={arc(0, warnRef)} fill="none" stroke="hsl(var(--destructive) / 0.18)" strokeWidth={stroke} strokeLinecap="round" />
+        <path d={arc(warnRef, ref)} fill="none" stroke="hsl(var(--warning) / 0.2)" strokeWidth={stroke} />
+        <path d={arc(ref, 100)} fill="none" stroke="hsl(var(--success) / 0.2)" strokeWidth={stroke} />
         <path d={arc(100, GAUGE_MAX)} fill="none" stroke="hsl(210 90% 55% / 0.2)" strokeWidth={stroke} strokeLinecap="round" />
         {/* value arc */}
         {clamped > 0 && (
@@ -106,6 +116,17 @@ function GaugeChart({ value, refPct = 100 }: { value: number; refPct?: number })
             strokeWidth={stroke}
             strokeLinecap="round"
             style={{ transition: "all .6s ease" }}
+          />
+        )}
+        {/* pace reference marker */}
+        {ref < 100 && (
+          <line
+            x1={refInner.x}
+            y1={refInner.y}
+            x2={refOuter.x}
+            y2={refOuter.y}
+            stroke="hsl(var(--foreground) / 0.6)"
+            strokeWidth={2}
           />
         )}
         {/* needle */}
@@ -119,7 +140,11 @@ function GaugeChart({ value, refPct = 100 }: { value: number; refPct?: number })
           {Math.round(clamped)}%
         </div>
         <div className="text-xs uppercase tracking-wide text-muted-foreground">Metas indutoras</div>
+        <div className="text-xs text-muted-foreground">
+          Referência do período: {Math.round(ref)}%
+        </div>
       </div>
+
     </div>
   );
 }
