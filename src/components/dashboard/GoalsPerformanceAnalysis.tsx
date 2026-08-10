@@ -1,5 +1,17 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, Sparkles, RefreshCw, Loader2 } from "lucide-react";
+import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ReferenceLine,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,8 +60,8 @@ function GaugeChart({ value }: { value: number }) {
   const arc = (from: number, to: number) => {
     const a = polar(from);
     const b = polar(to);
-    const large = to - from > 50 ? 1 : 0;
-    return `M ${a.x} ${a.y} A ${r} ${r} 0 ${large} 1 ${b.x} ${b.y}`;
+    // O medidor cobre no máximo 180°, então nunca é um arco "grande".
+    return `M ${a.x} ${a.y} A ${r} ${r} 0 0 1 ${b.x} ${b.y}`;
   };
 
   const needleAngle = Math.PI * (1 - clamped / 100);
@@ -124,6 +136,201 @@ function AnalysisText({ text }: { text: string }) {
     </div>
   );
 }
+
+const SHORT_MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+/** Histórico mensal de atingimento das metas indutoras da aba */
+function GoalsTrendChart({
+  tabTitle,
+  metrics,
+  monthlyTargets,
+  selectedYear,
+  selectedMonth,
+}: {
+  tabTitle: string;
+  metrics: Metric[];
+  monthlyTargets: MonthlyTarget[];
+  selectedYear: number;
+  selectedMonth: number | null;
+}) {
+  const metricIds = useMemo(() => metrics.map((m) => m.id).sort(), [metrics]);
+
+  const { data: history, isLoading } = useQuery({
+    queryKey: ["goals-trend-history", selectedYear, metricIds],
+    enabled: metricIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const rows: { metric_id: string; value: number; recorded_at: string }[] = [];
+      const chunk = 80;
+      for (let i = 0; i < metricIds.length; i += chunk) {
+        const { data, error } = await supabase
+          .from("metric_history")
+          .select("metric_id, value, recorded_at")
+          .in("metric_id", metricIds.slice(i, i + chunk))
+          .gte("recorded_at", `${selectedYear}-01-01`)
+          .lte("recorded_at", `${selectedYear}-12-31`)
+          .order("recorded_at", { ascending: true });
+        if (error) throw error;
+        rows.push(...((data ?? []) as typeof rows));
+      }
+      return rows;
+    },
+  });
+
+  const chartData = useMemo(() => {
+    if (!history) return [];
+    // último lançamento de cada métrica dentro de cada mês
+    const byMonth: Record<number, Record<string, number>> = {};
+    history.forEach((row) => {
+      const month = Number(row.recorded_at.slice(5, 7));
+      if (!byMonth[month]) byMonth[month] = {};
+      byMonth[month][row.metric_id] = Number(row.value);
+    });
+
+    const today = new Date();
+    const lastMonth =
+      selectedYear < today.getFullYear() ? 12 : selectedYear > today.getFullYear() ? 0 : today.getMonth() + 1;
+
+    const result: { month: string; monthIndex: number; atingimento: number | null; metas: number }[] = [];
+    for (let m = 1; m <= lastMonth; m++) {
+      const values = byMonth[m] ?? {};
+      const progresses: number[] = [];
+      metrics.forEach((metric) => {
+        const nonAcc = isNonAccumulative(metric.name, metric.unit);
+        const specific = monthlyTargets.find(
+          (mt) => mt.metric_id === metric.id && mt.month === m && mt.year === selectedYear,
+        );
+        const target = specific
+          ? Number(specific.target_value)
+          : nonAcc
+          ? Number(metric.target_value)
+          : Number(metric.target_value) / 12;
+        if (!target || target <= 0) return;
+        const value = values[metric.id];
+        if (value === undefined) return;
+        const isInverse = metric.polarity === "lower_is_better";
+        const raw = isInverse ? (value > 0 ? (target / value) * 100 : 100) : (value / target) * 100;
+        progresses.push(Math.min(Math.max(0, raw), 100));
+      });
+
+      result.push({
+        month: SHORT_MONTHS[m - 1],
+        monthIndex: m,
+        atingimento: progresses.length ? Number((progresses.reduce((s, v) => s + v, 0) / progresses.length).toFixed(1)) : null,
+        metas: progresses.length,
+      });
+    }
+    return result;
+  }, [history, metrics, monthlyTargets, selectedYear]);
+
+  const withData = chartData.filter((d) => d.atingimento !== null);
+
+  return (
+    <div className="mt-3 rounded-lg border border-border/50 bg-card p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-semibold text-foreground">
+            Tendência do atingimento — {tabTitle} ({selectedYear})
+          </span>
+        </div>
+        {withData.length > 1 && (
+          <span className="text-[10px] text-muted-foreground tabular-nums">
+            {withData[withData.length - 1].atingimento! >= withData[withData.length - 2].atingimento! ? "▲" : "▼"}{" "}
+            {Math.abs(
+              withData[withData.length - 1].atingimento! - withData[withData.length - 2].atingimento!,
+            ).toFixed(1)}{" "}
+            p.p. vs. mês anterior
+          </span>
+        )}
+      </div>
+
+      {isLoading ? (
+        <div className="h-40 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Carregando histórico...
+        </div>
+      ) : withData.length === 0 ? (
+        <div className="h-40 flex items-center justify-center text-xs text-muted-foreground">
+          Ainda não há histórico mensal suficiente para esta aba.
+        </div>
+      ) : (
+        <div className="h-44">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: -14, bottom: 0 }}>
+              <defs>
+                <linearGradient id="goalsTrendFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis
+                domain={[0, 100]}
+                ticks={[0, 25, 50, 75, 100]}
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `${v}%`}
+              />
+              <ReferenceLine y={100} stroke="hsl(var(--success))" strokeDasharray="4 4" strokeOpacity={0.6} />
+              <ReferenceLine y={85} stroke="hsl(var(--warning))" strokeDasharray="4 4" strokeOpacity={0.5} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                  fontSize: "11px",
+                }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+                formatter={(value: number, _n, item: any) => [
+                  `${value?.toFixed(1)}% (${item?.payload?.metas} metas)`,
+                  "Atingimento",
+                ]}
+              />
+              <Area
+                type="monotone"
+                dataKey="atingimento"
+                stroke="none"
+                fill="url(#goalsTrendFill)"
+                connectNulls
+                isAnimationActive={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="atingimento"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                connectNulls
+                dot={(props: any) => {
+                  const { cx, cy, payload } = props;
+                  if (cy === null || payload.atingimento === null) return <g key={props.key} />;
+                  const v = payload.atingimento as number;
+                  const c = v >= 100 ? "hsl(var(--success))" : v >= 85 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
+                  const active = payload.monthIndex === selectedMonth;
+                  return (
+                    <circle
+                      key={props.key}
+                      cx={cx}
+                      cy={cy}
+                      r={active ? 5 : 3.5}
+                      fill={c}
+                      stroke="hsl(var(--card))"
+                      strokeWidth={active ? 2 : 1}
+                    />
+                  );
+                }}
+                isAnimationActive={false}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 export function GoalsPerformanceAnalysis({
   tabTitle,
@@ -301,6 +508,15 @@ export function GoalsPerformanceAnalysis({
           )}
         </div>
       </div>
+
+      <GoalsTrendChart
+        tabTitle={tabTitle}
+        metrics={metrics}
+        monthlyTargets={monthlyTargets}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+      />
     </div>
+
   );
 }
