@@ -20,3 +20,5 @@ verify_jwt = false
 
 [functions.sync-financial-cashflow]
 verify_jwt = false
+[functions.analyze-goals]
+verify_jwt = false
