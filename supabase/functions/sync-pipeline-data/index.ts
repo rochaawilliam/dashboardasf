@@ -1550,8 +1550,9 @@ Deno.serve(async (req) => {
         return d >= rangeStart && d < rangeEnd;
       });
 
-      // Leads no Funil (VB): esteve no funil em algum momento do range
-      const funilAllY = cards.filter((c: any) => !c.ghost_of && wasInFunnelDuringPeriod(c, rangeStart, rangeEnd));
+      // Leads no Funil (definição exata do Pipeline Vision Board): cards dos meses do range
+      // (campo `month`), não-ghost, cuja etapa ATUAL está no funil
+      const funilAllY = allMonthCards.filter((c: any) => !c.ghost_of && isFunnelStage(c.stage_id));
 
       for (const origin of ["online", "offline"]) {
         const isOriginMatch = origin === "online"
@@ -1592,8 +1593,9 @@ Deno.serve(async (req) => {
           empresarial: novosOrigin.filter((c: any) => c.practice_area === "empresarial").length,
           trabalhista: novosOrigin.filter((c: any) => c.practice_area === "trabalhista").length,
           tributario: novosOrigin.filter((c: any) => c.practice_area === "tributario").length,
+          ambiental: novosOrigin.filter((c: any) => c.practice_area === "ambiental").length,
           total: novosOrigin.length,
-        };
+        } as any;
       }
     }
 
