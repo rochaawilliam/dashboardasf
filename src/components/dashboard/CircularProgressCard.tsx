@@ -408,10 +408,10 @@ export function CircularProgressCard({
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+            <p className="metric-sublabel">
               {forceAnnualLabel ? "Meta Anual" : isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : hideAnnualTarget ? "Meta Mensal" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+            <p className="metric-target-value">
               {hideValues ? "••••••" :
               isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
@@ -423,10 +423,8 @@ export function CircularProgressCard({
           {/* Valor Previsto - middle (only when available and month selected) */}
           {isMonthSelected && forecastValue != null && (
           <div>
-            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-              Previsto
-            </p>
-            <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+            <p className="metric-sublabel">Previsto</p>
+            <p className="metric-target-value">
               {hideValues ? "••••••" : formatMetricValue(forecastValue, metric.unit, metric.name)}
             </p>
           </div>
@@ -434,16 +432,16 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+            <p className="metric-sublabel">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <div className="flex items-center gap-1">
-              <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+              <p className="metric-value">
                 {hideValues ? "••••••" : (
                   <>
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                     {getStageLabel(metric.name, displayValue) && (
-                      <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
+                      <span className="metric-target-value text-muted-foreground ml-1">
                         {getStageLabel(metric.name, displayValue)}
                       </span>
                     )}
