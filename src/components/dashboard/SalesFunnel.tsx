@@ -54,6 +54,15 @@ export function SalesFunnel({
     ? "text-amber-400"
     : "text-emerald-400";
 
+  const bodyColors = colorScheme === "blue"
+    ? "bg-blue-500/[0.07]"
+    : colorScheme === "amber"
+    ? "bg-amber-500/[0.07]"
+    : "bg-emerald-500/[0.07]";
+
+  const cleanName = (name: string) =>
+    name.replace(/\s*\bASF\b\s*/g, " ").replace(/\s{2,}/g, " ").trim();
+
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
       {/* Funnel Header */}
@@ -67,7 +76,7 @@ export function SalesFunnel({
       </div>
 
       {/* Funnel Steps */}
-      <div className="p-3 space-y-1">
+      <div className={cn("p-3 space-y-1", bodyColors)}>
         {metrics.map((metric, index) => {
           const isPlaceholder = (metric as any).__placeholder === true;
           const prevPlaceholder = index > 0 && (metrics[index - 1] as any).__placeholder === true;
@@ -88,7 +97,7 @@ export function SalesFunnel({
               )}
               <div className={cn(isPlaceholder && "invisible pointer-events-none")} aria-hidden={isPlaceholder}>
                 <CircularProgressCard
-                  metric={metric}
+                  metric={{ ...metric, name: cleanName(metric.name) }}
                   monthlyValue={monthlyValue}
                   isMonthSelected={selectedMonth !== null}
                   accumulatedValue={accumulated}
