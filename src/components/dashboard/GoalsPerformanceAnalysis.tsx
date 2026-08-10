@@ -82,7 +82,6 @@ function GaugeChart({ value, refPct = 100 }: { value: number; refPct?: number })
       ? "hsl(var(--warning))"
       : "hsl(var(--destructive))";
 
-  const refPos = polar(ref);
   const refInner = {
     x: cx + (r - stroke / 2 - 2) * Math.cos(Math.PI * (1 - ref / GAUGE_MAX)),
     y: cy - (r - stroke / 2 - 2) * Math.sin(Math.PI * (1 - ref / GAUGE_MAX)),
@@ -519,7 +518,7 @@ function GoalsTrendChart({
 
 interface AlertItem { name: string; progress: number }
 
-function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] }) {
+function AlertsPanel({ below, above, refLabel }: { below: AlertItem[]; above: AlertItem[]; refLabel: number }) {
   const [open, setOpen] = useState(false);
   const total = below.length + above.length;
   if (total === 0) return null;
@@ -539,7 +538,7 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
         <div className="flex items-center gap-1.5">
           {below.length > 0 && (
             <span className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-xs font-semibold text-destructive tabular-nums">
-              {below.length} abaixo de 85%
+              {below.length} abaixo de {refLabel}%
             </span>
           )}
           {above.length > 0 && (
@@ -558,7 +557,7 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
                 <div className="flex items-center gap-1.5 mb-1">
                   <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                   <span className="text-xs font-semibold text-destructive">
-                    {below.length} {below.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
+                    {below.length} {below.length === 1 ? "meta abaixo" : "metas abaixo"} da referência ({refLabel}%)
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
@@ -599,10 +598,10 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
 
 type AlertLevel = "critical" | "warning" | "onTarget" | "above";
 
-function statusOf(progress: number): AlertLevel {
+function statusOf(progress: number, ref = 100): AlertLevel {
   if (progress > 100) return "above";
-  if (progress >= 100) return "onTarget";
-  if (progress >= 85) return "warning";
+  if (progress >= ref) return "onTarget";
+  if (progress >= ref * 0.85) return "warning";
   return "critical";
 }
 
@@ -753,9 +752,13 @@ export function GoalsPerformanceAnalysis({
   if (computed.items.length === 0) return null;
 
   
-  const overallStatus = statusOf(computed.overall);
+  const paceRef = isCurrentMonth && dayOfMonth && daysInMonth
+    ? Math.max(1, Math.min(100, (dayOfMonth / daysInMonth) * 100))
+    : 100;
+  const alertThreshold = Math.round(paceRef * 0.85);
+  const overallStatus = statusOf(computed.overall, paceRef);
   const overallStyle = STATUS_STYLES[overallStatus];
-  const belowRef = computed.items.filter((i) => i.progress < 85).sort((a, b) => a.progress - b.progress);
+  const belowRef = computed.items.filter((i) => i.progress < paceRef * 0.85).sort((a, b) => a.progress - b.progress);
   const aboveTarget = computed.items.filter((i) => i.progress > 100).sort((a, b) => b.progress - a.progress);
 
   return (
@@ -801,7 +804,7 @@ export function GoalsPerformanceAnalysis({
         {/* Primeira coluna: velocímetro + Panorama geral */}
         <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex flex-col items-center rounded-lg border border-border/50 bg-card p-3 sm:p-4">
-            <GaugeChart value={computed.overall} />
+            <GaugeChart value={computed.overall} refPct={paceRef} />
           </div>
 
           <div className="rounded-lg border border-border/50 bg-card p-3 sm:p-4 flex-1">
@@ -867,7 +870,7 @@ export function GoalsPerformanceAnalysis({
         selectedMonth={selectedMonth}
       />
 
-      <AlertsPanel below={belowRef} above={aboveTarget} />
+      <AlertsPanel below={belowRef} above={aboveTarget} refLabel={alertThreshold} />
     </div>
 
   );
