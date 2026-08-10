@@ -241,14 +241,14 @@ export function MetricCardMonthly({
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
-          <span className="metric-label text-[9px] sm:text-[10px] lg:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <span className="metric-label line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
                     className={cn(
-                      "flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium transition-colors",
+                      "flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-semibold transition-colors",
                       isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
                       isNegativeTrend && "bg-primary/10 text-primary hover:bg-primary/20",
                       trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -259,8 +259,8 @@ export function MetricCardMonthly({
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-32 p-2" side="top">
-                  <div className="text-[10px]">
-                    <p className="font-medium">
+                  <div className="text-xs">
+                    <p className="font-semibold">
                       {trend === "up" && "Crescimento"}
                       {trend === "down" && "Queda"}
                       {trend === "stable" && "Estável"}
