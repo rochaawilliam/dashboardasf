@@ -116,7 +116,7 @@ function GaugeChart({ value }: { value: number }) {
         <div className="text-3xl font-bold" style={{ color, fontFamily: "'Roboto', sans-serif" }}>
           {Math.round(clamped)}%
         </div>
-        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Metas indutoras</div>
+        <div className="text-xs uppercase tracking-wide text-muted-foreground">Metas indutoras</div>
       </div>
     </div>
   );
@@ -166,7 +166,7 @@ function ChecklistPanel({ items }: { items: string[] }) {
           >
             {done[i] ? "✓" : ""}
           </span>
-          <span className={cn("text-xs leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
+          <span className={cn("text-sm leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
             {renderInline(item)}
           </span>
         </button>
@@ -178,7 +178,7 @@ function ChecklistPanel({ items }: { items: string[] }) {
 function AnalysisText({ text }: { text: string }) {
   const blocks = text.split("\n").filter((l) => l.trim().length > 0);
   return (
-    <div className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
+    <div className="space-y-1.5 text-sm leading-relaxed text-muted-foreground">
       {blocks.map((line, i) => {
         const trimmed = line.trim().replace(/^#+\s*/, "");
         if (/^[-*•]\s+/.test(trimmed)) {
@@ -363,12 +363,12 @@ function GoalsTrendChart({
         <div className="flex items-center gap-1.5">
           <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
           <TrendingUp className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-semibold text-foreground">
+          <span className="text-sm font-semibold text-foreground">
             Tendência do atingimento — {tabTitle} ({selectedYear})
           </span>
         </div>
         {withData.length > 1 && (
-          <span className="text-[10px] text-muted-foreground tabular-nums">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {withData[withData.length - 1].atingimento! >= withData[withData.length - 2].atingimento! ? "▲" : "▼"}{" "}
             {Math.abs(
               withData[withData.length - 1].atingimento! - withData[withData.length - 2].atingimento!,
@@ -379,11 +379,11 @@ function GoalsTrendChart({
       </button>
 
       {!open ? null : isLoading ? (
-        <div className="h-40 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+        <div className="h-40 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Carregando histórico...
         </div>
       ) : withData.length === 0 ? (
-        <div className="h-40 flex items-center justify-center text-xs text-muted-foreground">
+        <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
           Ainda não há histórico mensal suficiente para esta aba.
         </div>
       ) : (
@@ -489,16 +489,16 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
         <div className="flex items-center gap-1.5">
           <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
           <AlertTriangle className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Alertas de desvio</span>
+          <span className="text-sm font-semibold text-foreground">Alertas de desvio</span>
         </div>
         <div className="flex items-center gap-1.5">
           {below.length > 0 && (
-            <span className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] font-semibold text-destructive tabular-nums">
+            <span className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-xs font-semibold text-destructive tabular-nums">
               {below.length} abaixo de 85%
             </span>
           )}
           {above.length > 0 && (
-            <span className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(210_90%_55%)] tabular-nums">
+            <span className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-xs font-semibold text-[hsl(210_90%_55%)] tabular-nums">
               {above.length} acima de 100%
             </span>
           )}
@@ -512,13 +512,13 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
               <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2">
                 <div className="flex items-center gap-1.5 mb-1">
                   <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
-                  <span className="text-[11px] font-semibold text-destructive">
+                  <span className="text-xs font-semibold text-destructive">
                     {below.length} {below.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {below.map((i) => (
-                    <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] text-destructive tabular-nums">
+                    <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-xs text-destructive tabular-nums">
                       {i.name} · {Math.round(i.progress)}%
                     </span>
                   ))}
@@ -529,7 +529,7 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
               <div className="rounded-lg border border-[hsl(210_90%_55%/0.4)] bg-[hsl(210_90%_55%/0.1)] p-2">
                 <div className="flex items-center gap-1.5 mb-1">
                   <ArrowUpCircle className="h-3.5 w-3.5 text-[hsl(210_90%_55%)]" />
-                  <span className="text-[11px] font-semibold text-[hsl(210_90%_55%)]">
+                  <span className="text-xs font-semibold text-[hsl(210_90%_55%)]">
                     {above.length} {above.length === 1 ? "meta superada" : "metas superadas"} (acima de 100%)
                   </span>
                 </div>
@@ -537,7 +537,7 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
                   {above.map((i) => (
                     <span
                       key={i.name}
-                      className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] text-[hsl(210_90%_55%)] tabular-nums"
+                      className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-xs text-[hsl(210_90%_55%)] tabular-nums"
                     >
                       {i.name} · {Math.round(i.progress)}%
                     </span>
@@ -721,17 +721,17 @@ export function GoalsPerformanceAnalysis({
             <Gauge className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs sm:text-sm font-semibold text-foreground leading-tight truncate" style={{ fontFamily: "'Roboto', sans-serif" }}>
+            <h4 className="text-sm sm:text-base font-semibold text-foreground leading-tight truncate" style={{ fontFamily: "'Roboto', sans-serif" }}>
               Análise de Desempenho — {tabTitle}
             </h4>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{periodLabel} · {computed.items.length} metas indutoras</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{periodLabel} · {computed.items.length} metas indutoras</p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
 
           <span
             className={cn(
-              "hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+              "hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold",
               overallStyle.bg,
               overallStyle.border,
               overallStyle.text,
@@ -745,7 +745,7 @@ export function GoalsPerformanceAnalysis({
             </span>
             {overallStyle.label} · {Math.round(computed.overall)}%
           </span>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={fetchAnalysis} disabled={loading}>
+          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={fetchAnalysis} disabled={loading}>
           <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
           <span className="hidden sm:inline">Atualizar</span>
           </Button>
@@ -757,7 +757,7 @@ export function GoalsPerformanceAnalysis({
           <GaugeChart value={computed.overall} />
           <div className="mt-2 w-full space-y-1">
             {highlights.map((h) => (
-              <div key={h.name} className="flex items-center justify-between gap-2 text-[10px]">
+              <div key={h.name} className="flex items-center justify-between gap-2 text-xs">
                 <span className="truncate text-muted-foreground">{h.name}</span>
                 <span
                   className={cn(
@@ -776,35 +776,35 @@ export function GoalsPerformanceAnalysis({
           <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
             <div className="flex items-center gap-1.5 mb-2">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-semibold text-foreground">Panorama e pontos de melhoria</span>
+              <span className="text-sm font-semibold text-foreground">Panorama e pontos de melhoria</span>
             </div>
             {loading && !analysis ? (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 Analisando o desempenho das metas indutoras...
               </div>
             ) : error ? (
-              <p className="text-xs text-destructive">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             ) : analysis ? (
               <AnalysisText text={splitAnalysis(analysis).main} />
             ) : (
-              <p className="text-xs text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
+              <p className="text-sm text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
             )}
           </div>
 
           <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
             <div className="flex items-center gap-1.5 mb-2">
               <ListChecks className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-semibold text-foreground">Checklist de ações corretivas</span>
+              <span className="text-sm font-semibold text-foreground">Checklist de ações corretivas</span>
             </div>
             {loading && !analysis ? (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando ações...
               </div>
             ) : splitAnalysis(analysis).checklist.length > 0 ? (
               <ChecklistPanel items={splitAnalysis(analysis).checklist} />
             ) : (
-              <p className="text-xs text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
+              <p className="text-sm text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
             )}
           </div>
         </div>
