@@ -63,7 +63,7 @@ export function SalesFunnel({
       )}>
         <Icon className={cn("h-5 w-5", iconColors)} />
         <h3 className="font-semibold text-sm text-foreground">{title}</h3>
-        <span className="text-xs text-muted-foreground ml-auto">{metrics.length} etapas</span>
+        <span className="text-xs text-muted-foreground ml-auto">{metrics.filter((m: any) => !m.__placeholder).length} etapas</span>
       </div>
 
       {/* Funnel Steps */}
