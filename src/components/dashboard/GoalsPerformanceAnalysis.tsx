@@ -235,11 +235,17 @@ function GoalsTrendChart({
   }, [history, metrics, monthlyTargets, selectedYear]);
 
   const withData = chartData.filter((d) => d.atingimento !== null);
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="mt-3 rounded-lg border border-border/50 bg-card p-3">
-      <div className="flex items-center justify-between mb-2">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between gap-2 text-left"
+      >
         <div className="flex items-center gap-1.5">
+          <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
           <TrendingUp className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-semibold text-foreground">
             Tendência do atingimento — {tabTitle} ({selectedYear})
@@ -254,9 +260,9 @@ function GoalsTrendChart({
             p.p. vs. mês anterior
           </span>
         )}
-      </div>
+      </button>
 
-      {isLoading ? (
+      {!open ? null : isLoading ? (
         <div className="h-40 flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Carregando histórico...
         </div>
