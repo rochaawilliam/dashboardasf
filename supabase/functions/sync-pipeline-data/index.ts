@@ -1399,18 +1399,8 @@ Deno.serve(async (req) => {
       }
       const tmeAvg = tmeValues.length > 0 ? Math.round(tmeValues.reduce((a, b) => a + b, 0) / tmeValues.length) : null;
 
-      // TMA (days) - matching Dashboard computeTma
-      const tmaValues: number[] = [];
-      for (const c of monthFilteredCards) {
-        if (c.stage_id !== "contratos" && c.stage_id !== "geladeira") continue;
-        const created = new Date(c.created_at).getTime();
-        const arrival = (historyByCard[c.id] || [])
-          .filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira")
-          .map((h: any) => new Date(h.moved_at).getTime())
-          .sort((a: number, b: number) => a - b)[0];
-        if (arrival) tmaValues.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
-      }
-      const tmaAvg = tmaValues.length > 0 ? Math.round(tmaValues.reduce((a, b) => a + b, 0) / tmaValues.length) : null;
+      // TMA (days) — mesma regra do Pipeline Vision Board (inclui cards abertos)
+      const tmaAvg = computeTmaDays(monthFilteredCards, historyByCard);
 
       // Tarefas realizadas = creations + comments + moves in this month
       const [y, m] = ms.split("-").map(Number);
