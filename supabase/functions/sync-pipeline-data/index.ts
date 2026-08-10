@@ -900,8 +900,20 @@ Deno.serve(async (req) => {
         ? Math.round(allDurations.reduce((a: number, b: number) => a + b, 0) / allDurations.length)
         : null;
 
+      // Progresso do cliente (mesma regra do Compass): etapas "Ok" / total de etapas
+      const progressOf = (client: any): number | null => {
+        const cs = stepsByClient.get(client.id) || [];
+        if (cs.length === 0) return null;
+        return (cs.filter((s: any) => s.status === "Ok").length / cs.length) * 100;
+      };
+      const avgOf = (vals: (number | null)[]): number | null => {
+        const v = vals.filter((x): x is number => x !== null);
+        return v.length > 0 ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null;
+      };
+      const avgProgress = avgOf(clients.map(progressOf));
+
       // Métricas por mês de entrada do cliente
-      const onboardingByMonth: Record<string, { avgOnboardingDays: number | null; complianceRate: number | null; totalClients: number; completedClients: number; isPartial: boolean }> = {};
+      const onboardingByMonth: Record<string, { avgOnboardingDays: number | null; complianceRate: number | null; avgProgress: number | null; totalClients: number; completedClients: number; isPartial: boolean }> = {};
       const clientsByMonth = new Map<string, any[]>();
       for (const c of clients) {
         const key = String(c.entry_date).substring(0, 7);
