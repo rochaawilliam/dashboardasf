@@ -1537,11 +1537,6 @@ Deno.serve(async (req) => {
           const cands = [fc, fm].filter(Boolean) as number[];
           if (cands.length > 0) tmeVals.push(Math.max(0, Math.round((Math.min(...cands) - created) / (1000 * 60))));
         }
-        if (c.stage_id === "contratos" || c.stage_id === "geladeira") {
-          const created = new Date(c.created_at).getTime();
-          const arrival = (historyByCard[c.id] || []).filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira").map((h: any) => new Date(h.moved_at).getTime()).sort((a: number, b: number) => a - b)[0];
-          if (arrival) tmaVals.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
-        }
         if (c.stage_id === "contratos") {
           const entry = (historyByCard[c.id] || []).filter((h: any) => h.to_stage === "contratos").sort((a: any, b: any) => new Date(b.moved_at).getTime() - new Date(a.moved_at).getTime())[0];
           if (entry) { const d = Math.max(0, Math.floor((new Date(entry.moved_at).getTime() - new Date(c.created_at).getTime()) / (1000*60*60*24))); closeTotalY += d; closeNY++; }
