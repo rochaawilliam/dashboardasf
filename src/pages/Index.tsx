@@ -542,7 +542,8 @@ const Index = () => {
       const ob = pipelineData.onboarding;
       const obMonth = ms ? ob.byMonth?.[ms] : undefined;
       const obDays = obMonth?.avgOnboardingDays ?? (ms ? null : ob.avgOnboardingDays);
-      const obCompliance = obMonth?.avgProgress ?? (ms ? null : ob.avgProgress ?? null);
+      // Progresso Médio é acumulado (prazo atravessa meses) — sempre o valor geral
+      const obCompliance = ob.avgProgress ?? null;
       if (obDays !== null && obDays !== undefined) values[LEAD_TIME_ONBOARDING_ID] = obDays;
       if (obCompliance !== null && obCompliance !== undefined) values[TAXA_ONBOARDING_PRAZO_ID] = obCompliance;
     }
@@ -1034,8 +1035,8 @@ const Index = () => {
       }
       if (ob.avgProgress !== null && ob.avgProgress !== undefined) {
         info[TAXA_ONBOARDING_PRAZO_ID] = {
-          source: "Onboarding Compass",
-          filter: "clientes por mês de entrada",
+          source: "Operacional",
+          filter: "created_at",
           formula: "média(etapas concluídas ÷ etapas totais) por cliente × 100",
           calculation: `Progresso médio: ${fmt(ob.avgProgress)}%`,
         };
