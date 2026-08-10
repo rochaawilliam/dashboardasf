@@ -1035,8 +1035,8 @@ const Index = () => {
       }
       if (ob.avgProgress !== null && ob.avgProgress !== undefined) {
         info[TAXA_ONBOARDING_PRAZO_ID] = {
-          source: "Onboarding Compass",
-          filter: "clientes por mês de entrada",
+          source: "Operacional",
+          filter: "created_at",
           formula: "média(etapas concluídas ÷ etapas totais) por cliente × 100",
           calculation: `Progresso médio: ${fmt(ob.avgProgress)}%`,
         };
