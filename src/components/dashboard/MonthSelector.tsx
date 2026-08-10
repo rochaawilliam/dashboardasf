@@ -113,28 +113,30 @@ export function MonthSelector({
 
   // Desktop / mobile landscape: horizontal month buttons
   return (
-    <div className="landscape-compact mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden" lang="pt-BR">
+    <div className="landscape-compact mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden" lang="pt-BR" role="group" aria-label="Filtro de período">
       <div className="flex items-center gap-1.5 sm:gap-2">
 
-        <CalendarDays className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary shrink-0" />
+        <CalendarDays className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary shrink-0" aria-hidden="true" />
         
         {/* Year navigation */}
         <div className="flex items-center gap-0.5 bg-muted/50 rounded-md p-0.5 shrink-0">
-          <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6" onClick={() => onYearChange(selectedYear - 1)}>
-            <ChevronLeft className="h-3 w-3" />
+          <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6" aria-label={`Ano anterior (${selectedYear - 1})`} onClick={() => onYearChange(selectedYear - 1)}>
+            <ChevronLeft className="h-3 w-3" aria-hidden="true" />
           </Button>
-          <span className="text-[10px] sm:text-xs font-semibold w-8 text-center">{selectedYear}</span>
-          <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6" onClick={() => onYearChange(selectedYear + 1)}>
-            <ChevronRight className="h-3 w-3" />
+          <span className="text-[10px] sm:text-xs font-semibold w-8 text-center" aria-live="polite">{selectedYear}</span>
+          <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6" aria-label={`Próximo ano (${selectedYear + 1})`} onClick={() => onYearChange(selectedYear + 1)}>
+            <ChevronRight className="h-3 w-3" aria-hidden="true" />
           </Button>
         </div>
 
         {/* All Year + Month buttons */}
-        <div className="flex flex-1 gap-0.5 sm:gap-1" translate="no">
+        <div className="flex flex-1 gap-0.5 sm:gap-1" translate="no" role="group" aria-label="Selecionar mês">
             <Button
               variant={selectedMonth === null ? "default" : "outline"}
               size="sm"
               onClick={() => onMonthChange(null)}
+              aria-pressed={selectedMonth === null}
+              aria-label={`Todo o ano de ${selectedYear}`}
               className={cn(
                 "h-6 sm:h-7 text-[7px] sm:text-[10px] px-0 flex-1 min-w-0",
                 selectedMonth === null && "bg-primary text-primary-foreground"
@@ -155,6 +157,8 @@ export function MonthSelector({
                   variant={isSelected ? "default" : "outline"}
                   size="sm"
                   onClick={() => onMonthChange(month.value)}
+                  aria-pressed={isSelected}
+                  aria-label={`${month.fullLabel} de ${selectedYear}${hasData ? " — com lançamento" : isFuture ? " — futuro" : " — pendente"}`}
                   className={cn(
                     "h-6 sm:h-7 text-[7px] sm:text-[10px] px-0 flex-1 min-w-0",
                     isSelected && "bg-primary text-primary-foreground",
@@ -168,6 +172,7 @@ export function MonthSelector({
               );
             })}
           </div>
+
       </div>
       
       {/* Legend */}
