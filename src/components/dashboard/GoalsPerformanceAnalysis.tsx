@@ -196,7 +196,7 @@ function ChecklistPanel({ items }: { items: string[] }) {
 function AnalysisText({ text }: { text: string }) {
   const blocks = text.split("\n").filter((l) => l.trim().length > 0);
   return (
-    <div className="space-y-1.5 text-sm leading-relaxed text-muted-foreground">
+    <div className="space-y-2 text-base leading-relaxed text-muted-foreground">
       {blocks.map((line, i) => {
         const trimmed = line.trim().replace(/^#+\s*/, "");
         if (/^[-*•]\s+/.test(trimmed)) {
