@@ -331,7 +331,7 @@ export function MetricCardMonthly({
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
-                <div className="metric-sublabel mt-0.5">
+                <div className="metric-label mt-0.5">
                   {isMonthSelected ? "Lançado" : "Acumulado"}
                 </div>
               </div>
