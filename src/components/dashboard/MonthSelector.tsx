@@ -64,18 +64,18 @@ export function MonthSelector({
   // Mobile: year nav + month select dropdown
   if (isMobile) {
     return (
-      <div className="mb-2 p-1.5 bg-card rounded-lg border border-border print:hidden" lang="pt-BR" translate="no">
+      <div className="mb-2 p-1.5 bg-card rounded-lg border border-border print:hidden" lang="pt-BR" translate="no" role="group" aria-label="Filtro de período">
         <div className="flex items-center gap-1.5">
-          <CalendarDays className="h-3 w-3 text-primary shrink-0" />
+          <CalendarDays className="h-3 w-3 text-primary shrink-0" aria-hidden="true" />
           
           {/* Year navigation */}
           <div className="flex items-center gap-0.5 bg-muted/50 rounded-md p-0.5 shrink-0">
-            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onYearChange(selectedYear - 1)}>
-              <ChevronLeft className="h-3 w-3" />
+            <Button variant="ghost" size="icon" className="h-5 w-5" aria-label={`Ano anterior (${selectedYear - 1})`} onClick={() => onYearChange(selectedYear - 1)}>
+              <ChevronLeft className="h-3 w-3" aria-hidden="true" />
             </Button>
-            <span className="text-[10px] font-semibold w-8 text-center">{selectedYear}</span>
-            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onYearChange(selectedYear + 1)}>
-              <ChevronRight className="h-3 w-3" />
+            <span className="text-[10px] font-semibold w-8 text-center" aria-live="polite">{selectedYear}</span>
+            <Button variant="ghost" size="icon" className="h-5 w-5" aria-label={`Próximo ano (${selectedYear + 1})`} onClick={() => onYearChange(selectedYear + 1)}>
+              <ChevronRight className="h-3 w-3" aria-hidden="true" />
             </Button>
           </div>
 
@@ -84,9 +84,10 @@ export function MonthSelector({
             value={selectedMonth === null ? "all" : String(selectedMonth)}
             onValueChange={(v) => onMonthChange(v === "all" ? null : Number(v))}
           >
-            <SelectTrigger className="flex-1 h-7 text-[10px] bg-background">
+            <SelectTrigger className="flex-1 h-7 text-[10px] bg-background" aria-label="Selecionar mês">
               <SelectValue placeholder="Selecione o mês" />
             </SelectTrigger>
+
             <SelectContent className="bg-card border border-border z-50">
               <SelectItem value="all">Todo o Ano</SelectItem>
               {months.map((month) => {
