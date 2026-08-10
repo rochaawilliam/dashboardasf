@@ -2116,9 +2116,6 @@ const Index = () => {
                                   )}
                                 </div>
                               );
-
-                                </div>
-                              );
                             }
                             return null;
                           })()}
