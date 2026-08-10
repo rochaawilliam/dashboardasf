@@ -132,7 +132,7 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
       {isEditing ? (
         <div className="space-y-3 mb-3">
           <div>
-            <label className="text-xs text-muted-foreground">Valor Atual</label>
+            <label className="text-sm text-muted-foreground">Valor Atual</label>
             <Input
               type="number"
               step="0.01"
@@ -142,7 +142,7 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Meta</label>
+            <label className="text-sm text-muted-foreground">Meta</label>
             <Input
               type="number"
               step="0.01"
