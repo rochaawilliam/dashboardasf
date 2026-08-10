@@ -957,6 +957,7 @@ Deno.serve(async (req) => {
       onboarding = {
         avgOnboardingDays,
         complianceRate,
+        avgProgress,
         reschedulingRate,
         activeClients: clients.length - completedClientIds.length,
         completedClients: completedClientIds.length,
