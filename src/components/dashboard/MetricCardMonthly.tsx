@@ -362,7 +362,7 @@ export function MetricCardMonthly({
             
             {/* Annual target reference when month is selected */}
             {isMonthSelected && !isNonAccumulative && (
-              <div className="metric-sublabel mb-1 sm:mb-1.5 flex items-center gap-1">
+              <div className="metric-label mb-1 sm:mb-1.5 flex items-center gap-1">
                 <span>Meta anual:</span>
                 <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
               </div>
