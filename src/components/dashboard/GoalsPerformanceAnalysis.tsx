@@ -184,7 +184,7 @@ function ChecklistPanel({ items }: { items: string[] }) {
           >
             {done[i] ? "✓" : ""}
           </span>
-          <span className={cn("text-sm leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
+          <span className={cn("text-base leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
             {renderInline(item)}
           </span>
         </button>
