@@ -78,6 +78,43 @@ function newAreaBucket(): AreaBucket {
   return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0 };
 }
 
+/**
+ * TMA (dias) — idêntico ao Pipeline Vision Board (computeTma):
+ * dias no funil desde a criação até o fechamento (contratos/geladeira) ou até hoje
+ * para cards ainda abertos. Leads multi-área (mesmo link_group) contam uma vez.
+ */
+function computeTmaDays(
+  list: any[],
+  historyByCard: Record<string, { from_stage: string | null; to_stage: string; moved_at: string }[]>,
+): number | null {
+  const now = Date.now();
+  const groups = new Map<string, any[]>();
+  for (const c of list) {
+    if (c.ghost_of || c.stage_id === "prospects") continue;
+    const key = c.link_group ?? c.id;
+    const arr = groups.get(key) ?? [];
+    arr.push(c);
+    groups.set(key, arr);
+  }
+  const values: number[] = [];
+  groups.forEach((groupCards) => {
+    const created = Math.min(...groupCards.map((c: any) => new Date(c.created_at).getTime()));
+    const arrivals: number[] = [];
+    let closed = false;
+    for (const c of groupCards) {
+      if (c.stage_id === "contratos" || c.stage_id === "geladeira") closed = true;
+      for (const h of historyByCard[c.id] || []) {
+        if (h.to_stage === "contratos" || h.to_stage === "geladeira") arrivals.push(new Date(h.moved_at).getTime());
+      }
+    }
+    const end = closed && arrivals.length > 0 ? Math.min(...arrivals) : now;
+    values.push(Math.max(0, (end - created) / (1000 * 60 * 60 * 24)));
+  });
+  if (values.length === 0) return null;
+  return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10;
+}
+
+
 function ensureAreaTagBucket(
   obj: Record<string, Record<string, Record<string, Record<string, AreaBucket>>>>,
   month: string, origin: string, area: string, tag: string
