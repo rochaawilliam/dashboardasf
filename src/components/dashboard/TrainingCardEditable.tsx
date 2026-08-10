@@ -47,14 +47,14 @@ function TrainingItem({ item }: { item: TrainingHours }) {
         </Button>
       )}
       
-      <span className="text-xs font-medium text-muted-foreground block mb-1.5">
+      <span className="text-sm font-semibold text-muted-foreground block mb-1.5">
         {item.role}
       </span>
       
       {isEditing ? (
         <div className="space-y-2">
           <div>
-            <label className="text-xs text-muted-foreground">Atual</label>
+            <label className="text-sm text-muted-foreground">Atual</label>
             <Input
               type="number"
               step="0.5"
@@ -64,7 +64,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Meta</label>
+            <label className="text-sm text-muted-foreground">Meta</label>
             <Input
               type="number"
               step="0.5"
@@ -96,10 +96,10 @@ function TrainingItem({ item }: { item: TrainingHours }) {
       ) : (
         <>
           <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-foreground">
+            <span className="metric-value">
               {formatNumber(item.current_hours, 0)}
             </span>
-            <span className="text-xs text-muted-foreground">hrs</span>
+            <span className="metric-sublabel normal-case">hrs</span>
           </div>
           <div className="mt-2 progress-bar">
             <div
@@ -113,7 +113,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
           </div>
-          <span className="text-xs text-muted-foreground mt-1 block">
+          <span className="metric-sublabel normal-case mt-1 block">
             Meta: {formatNumber(item.target_hours, 0)}hrs
           </span>
         </>
