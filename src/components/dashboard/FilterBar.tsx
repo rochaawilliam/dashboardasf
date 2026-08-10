@@ -38,7 +38,7 @@ export function FilterBar({ filters, onFiltersChange, onPrint }: FilterBarProps)
           onFiltersChange({ ...filters, period: value })
         }
       >
-        <SelectTrigger className="flex-1 sm:w-[140px] sm:flex-none bg-background text-xs sm:text-sm h-8 sm:h-9">
+        <SelectTrigger aria-label="Filtrar por período" className="flex-1 sm:w-[140px] sm:flex-none bg-background text-xs sm:text-sm h-8 sm:h-9">
           <SelectValue placeholder="Período" />
         </SelectTrigger>
         <SelectContent className="bg-card border border-border z-50">
@@ -54,7 +54,7 @@ export function FilterBar({ filters, onFiltersChange, onPrint }: FilterBarProps)
           onFiltersChange({ ...filters, division: value })
         }
       >
-        <SelectTrigger className="flex-1 sm:w-[160px] sm:flex-none bg-background text-xs sm:text-sm h-8 sm:h-9">
+        <SelectTrigger aria-label="Filtrar por divisão" className="flex-1 sm:w-[160px] sm:flex-none bg-background text-xs sm:text-sm h-8 sm:h-9">
           <SelectValue placeholder="Divisão" />
         </SelectTrigger>
         <SelectContent className="bg-card border border-border z-50">
@@ -72,7 +72,7 @@ export function FilterBar({ filters, onFiltersChange, onPrint }: FilterBarProps)
         onClick={onPrint}
         className="gap-1.5 h-8 sm:h-9 w-full sm:w-auto text-xs"
       >
-        <Printer className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Printer className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
         <span>Imprimir / PDF</span>
       </Button>
     </div>
@@ -85,8 +85,10 @@ export function FilterBar({ filters, onFiltersChange, onPrint }: FilterBarProps)
           <Button
             variant="outline"
             size="sm"
+            aria-label={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
             className="w-full justify-between h-8 text-xs gap-1.5 bg-card border-border"
           >
+
             <div className="flex items-center gap-1.5">
               <Filter className="h-3 w-3" />
               <span>Filtros</span>
