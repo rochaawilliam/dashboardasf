@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp } from "lucide-react";
+import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { Metric, MonthlyTarget } from "@/hooks/useMetrics";
+import { getRefMonthYear } from "@/utils/dateUtils";
 
 const nonAccumulativeKeywords = [
   "Ticket Médio", "Margem", "Churn", "Custo Fixo", "Folha sobre Receita",
@@ -44,8 +45,10 @@ const MONTH_NAMES = [
 ];
 
 /** Semicircular gauge (velocímetro) */
+const GAUGE_MAX = 120;
+
 function GaugeChart({ value }: { value: number }) {
-  const clamped = Math.max(0, Math.min(100, value));
+  const clamped = Math.max(0, Math.min(GAUGE_MAX, value));
   const size = 220;
   const cx = size / 2;
   const cy = size / 2;
@@ -53,7 +56,7 @@ function GaugeChart({ value }: { value: number }) {
   const stroke = 16;
 
   const polar = (pct: number) => {
-    const angle = Math.PI * (1 - pct / 100);
+    const angle = Math.PI * (1 - pct / GAUGE_MAX);
     return { x: cx + r * Math.cos(angle), y: cy - r * Math.sin(angle) };
   };
 
@@ -64,12 +67,18 @@ function GaugeChart({ value }: { value: number }) {
     return `M ${a.x} ${a.y} A ${r} ${r} 0 0 1 ${b.x} ${b.y}`;
   };
 
-  const needleAngle = Math.PI * (1 - clamped / 100);
+  const needleAngle = Math.PI * (1 - clamped / GAUGE_MAX);
   const nx = cx + (r - 24) * Math.cos(needleAngle);
   const ny = cy - (r - 24) * Math.sin(needleAngle);
 
   const color =
-    clamped >= 100 ? "hsl(var(--success))" : clamped >= 85 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
+    clamped > 100
+      ? "hsl(210 90% 55%)"
+      : clamped >= 100
+      ? "hsl(var(--success))"
+      : clamped >= 85
+      ? "hsl(var(--warning))"
+      : "hsl(var(--destructive))";
 
   return (
     <div className="relative flex flex-col items-center">
@@ -77,7 +86,8 @@ function GaugeChart({ value }: { value: number }) {
         {/* zones */}
         <path d={arc(0, 60)} fill="none" stroke="hsl(var(--destructive) / 0.18)" strokeWidth={stroke} strokeLinecap="round" />
         <path d={arc(60, 85)} fill="none" stroke="hsl(var(--warning) / 0.2)" strokeWidth={stroke} />
-        <path d={arc(85, 100)} fill="none" stroke="hsl(var(--success) / 0.2)" strokeWidth={stroke} strokeLinecap="round" />
+        <path d={arc(85, 100)} fill="none" stroke="hsl(var(--success) / 0.2)" strokeWidth={stroke} />
+        <path d={arc(100, GAUGE_MAX)} fill="none" stroke="hsl(210 90% 55% / 0.2)" strokeWidth={stroke} strokeLinecap="round" />
         {/* value arc */}
         {clamped > 0 && (
           <path
@@ -93,7 +103,7 @@ function GaugeChart({ value }: { value: number }) {
         <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="hsl(var(--foreground))" strokeWidth={3} strokeLinecap="round" />
         <circle cx={cx} cy={cy} r={6} fill="hsl(var(--foreground))" />
         <text x={cx - r - 2} y={cy + 20} textAnchor="middle" className="fill-muted-foreground" fontSize="9">0%</text>
-        <text x={cx + r + 2} y={cy + 20} textAnchor="middle" className="fill-muted-foreground" fontSize="9">100%</text>
+        <text x={cx + r + 2} y={cy + 20} textAnchor="middle" className="fill-muted-foreground" fontSize="9">{GAUGE_MAX}%</text>
       </svg>
       <div className="-mt-6 text-center">
         <div className="text-3xl font-bold" style={{ color, fontFamily: "'Roboto', sans-serif" }}>
@@ -160,15 +170,15 @@ function GoalsTrendChart({
     enabled: metricIds.length > 0,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const rows: { metric_id: string; value: number; recorded_at: string }[] = [];
+      const rows: { metric_id: string; value: number; recorded_at: string; period_type: string }[] = [];
       const chunk = 80;
       for (let i = 0; i < metricIds.length; i += chunk) {
         const { data, error } = await supabase
           .from("metric_history")
-          .select("metric_id, value, recorded_at")
+          .select("metric_id, value, recorded_at, period_type")
           .in("metric_id", metricIds.slice(i, i + chunk))
-          .gte("recorded_at", `${selectedYear}-01-01`)
-          .lte("recorded_at", `${selectedYear}-12-31`)
+          .gte("recorded_at", `${selectedYear - 1}-12-01`)
+          .lte("recorded_at", `${selectedYear + 1}-01-31`)
           .order("recorded_at", { ascending: true });
         if (error) throw error;
         rows.push(...((data ?? []) as typeof rows));
@@ -182,7 +192,8 @@ function GoalsTrendChart({
     // último lançamento de cada métrica dentro de cada mês
     const byMonth: Record<number, Record<string, number>> = {};
     history.forEach((row) => {
-      const month = Number(row.recorded_at.slice(5, 7));
+      const { month, year } = getRefMonthYear(row.period_type, row.recorded_at);
+      if (year !== selectedYear) return;
       if (!byMonth[month]) byMonth[month] = {};
       byMonth[month][row.metric_id] = Number(row.value);
     });
@@ -210,7 +221,7 @@ function GoalsTrendChart({
         if (value === undefined) return;
         const isInverse = metric.polarity === "lower_is_better";
         const raw = isInverse ? (value > 0 ? (target / value) * 100 : 100) : (value / target) * 100;
-        progresses.push(Math.min(Math.max(0, raw), 100));
+        progresses.push(Math.min(Math.max(0, raw), GAUGE_MAX));
       });
 
       result.push({
@@ -266,8 +277,8 @@ function GoalsTrendChart({
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
               <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
               <YAxis
-                domain={[0, 100]}
-                ticks={[0, 25, 50, 75, 100]}
+                domain={[0, GAUGE_MAX]}
+                ticks={[0, 30, 60, 85, 100, GAUGE_MAX]}
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={10}
                 tickLine={false}
@@ -307,7 +318,14 @@ function GoalsTrendChart({
                   const { cx, cy, payload } = props;
                   if (cy === null || payload.atingimento === null) return <g key={props.key} />;
                   const v = payload.atingimento as number;
-                  const c = v >= 100 ? "hsl(var(--success))" : v >= 85 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
+                  const c =
+                    v > 100
+                      ? "hsl(210 90% 55%)"
+                      : v >= 100
+                      ? "hsl(var(--success))"
+                      : v >= 85
+                      ? "hsl(var(--warning))"
+                      : "hsl(var(--destructive))";
                   const active = payload.monthIndex === selectedMonth;
                   return (
                     <circle
@@ -395,7 +413,7 @@ export function GoalsPerformanceAnalysis({
     }[];
 
     const overall = items.length
-      ? items.reduce((s, i) => s + Math.min(i.progress, 100), 0) / items.length
+      ? items.reduce((s, i) => s + Math.min(i.progress, GAUGE_MAX), 0) / items.length
       : 0;
 
     return { items, overall };
