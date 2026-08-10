@@ -78,6 +78,43 @@ function newAreaBucket(): AreaBucket {
   return { leads: 0, reunioes: 0, propostas: 0, contratos: 0, valor_gerado: 0 };
 }
 
+/**
+ * TMA (dias) — idêntico ao Pipeline Vision Board (computeTma):
+ * dias no funil desde a criação até o fechamento (contratos/geladeira) ou até hoje
+ * para cards ainda abertos. Leads multi-área (mesmo link_group) contam uma vez.
+ */
+function computeTmaDays(
+  list: any[],
+  historyByCard: Record<string, { from_stage: string | null; to_stage: string; moved_at: string }[]>,
+): number | null {
+  const now = Date.now();
+  const groups = new Map<string, any[]>();
+  for (const c of list) {
+    if (c.ghost_of || c.stage_id === "prospects") continue;
+    const key = c.link_group ?? c.id;
+    const arr = groups.get(key) ?? [];
+    arr.push(c);
+    groups.set(key, arr);
+  }
+  const values: number[] = [];
+  groups.forEach((groupCards) => {
+    const created = Math.min(...groupCards.map((c: any) => new Date(c.created_at).getTime()));
+    const arrivals: number[] = [];
+    let closed = false;
+    for (const c of groupCards) {
+      if (c.stage_id === "contratos" || c.stage_id === "geladeira") closed = true;
+      for (const h of historyByCard[c.id] || []) {
+        if (h.to_stage === "contratos" || h.to_stage === "geladeira") arrivals.push(new Date(h.moved_at).getTime());
+      }
+    }
+    const end = closed && arrivals.length > 0 ? Math.min(...arrivals) : now;
+    values.push(Math.max(0, (end - created) / (1000 * 60 * 60 * 24)));
+  });
+  if (values.length === 0) return null;
+  return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10;
+}
+
+
 function ensureAreaTagBucket(
   obj: Record<string, Record<string, Record<string, Record<string, AreaBucket>>>>,
   month: string, origin: string, area: string, tag: string
@@ -1362,18 +1399,8 @@ Deno.serve(async (req) => {
       }
       const tmeAvg = tmeValues.length > 0 ? Math.round(tmeValues.reduce((a, b) => a + b, 0) / tmeValues.length) : null;
 
-      // TMA (days) - matching Dashboard computeTma
-      const tmaValues: number[] = [];
-      for (const c of monthFilteredCards) {
-        if (c.stage_id !== "contratos" && c.stage_id !== "geladeira") continue;
-        const created = new Date(c.created_at).getTime();
-        const arrival = (historyByCard[c.id] || [])
-          .filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira")
-          .map((h: any) => new Date(h.moved_at).getTime())
-          .sort((a: number, b: number) => a - b)[0];
-        if (arrival) tmaValues.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
-      }
-      const tmaAvg = tmaValues.length > 0 ? Math.round(tmaValues.reduce((a, b) => a + b, 0) / tmaValues.length) : null;
+      // TMA (days) — mesma regra do Pipeline Vision Board (inclui cards abertos)
+      const tmaAvg = computeTmaDays(monthFilteredCards, historyByCard);
 
       // Tarefas realizadas = creations + comments + moves in this month
       const [y, m] = ms.split("-").map(Number);
@@ -1500,7 +1527,7 @@ Deno.serve(async (req) => {
 
       // Totals TME/TMA/close
       const tmeVals: number[] = [];
-      const tmaVals: number[] = [];
+      const tmaTotal = computeTmaDays(allMonthCards, historyByCard);
       let closeTotalY = 0, closeNY = 0;
       for (const c of allMonthCards) {
         if (!c.ghost_of) {
@@ -1510,18 +1537,13 @@ Deno.serve(async (req) => {
           const cands = [fc, fm].filter(Boolean) as number[];
           if (cands.length > 0) tmeVals.push(Math.max(0, Math.round((Math.min(...cands) - created) / (1000 * 60))));
         }
-        if (c.stage_id === "contratos" || c.stage_id === "geladeira") {
-          const created = new Date(c.created_at).getTime();
-          const arrival = (historyByCard[c.id] || []).filter((h: any) => h.to_stage === "contratos" || h.to_stage === "geladeira").map((h: any) => new Date(h.moved_at).getTime()).sort((a: number, b: number) => a - b)[0];
-          if (arrival) tmaVals.push(Math.max(0, Math.round((arrival - created) / (1000 * 60 * 60 * 24))));
-        }
         if (c.stage_id === "contratos") {
           const entry = (historyByCard[c.id] || []).filter((h: any) => h.to_stage === "contratos").sort((a: any, b: any) => new Date(b.moved_at).getTime() - new Date(a.moved_at).getTime())[0];
           if (entry) { const d = Math.max(0, Math.floor((new Date(entry.moved_at).getTime() - new Date(c.created_at).getTime()) / (1000*60*60*24))); closeTotalY += d; closeNY++; }
         }
       }
       dashboardTotals.tmeMinutes = tmeVals.length > 0 ? Math.round(tmeVals.reduce((a, b) => a + b, 0) / tmeVals.length) : null;
-      dashboardTotals.tmaDays = tmaVals.length > 0 ? Math.round(tmaVals.reduce((a, b) => a + b, 0) / tmaVals.length) : null;
+      dashboardTotals.tmaDays = tmaTotal;
       dashboardTotals.avgCloseTimeDays = closeNY > 0 ? Math.round(closeTotalY / closeNY) : null;
       // Tarefas totals
       let totalTarefas = 0;

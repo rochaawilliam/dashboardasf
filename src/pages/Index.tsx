@@ -519,9 +519,14 @@ const Index = () => {
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
       values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
-      // TME (Operacional: minutos) and TMA (Operacional: days)
+      // TME (Operacional: minutos)
       values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
-      if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
+    }
+
+    // TMA (dias) — direto do Dashboard do Pipeline Vision Board
+    {
+      const dashTma = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+      if (dashTma?.tmaDays !== null && dashTma?.tmaDays !== undefined) values[TMA_ID] = dashTma.tmaDays;
     }
 
     // Fallback to Dashboard panel only if Operacional has no data for this period
@@ -735,7 +740,10 @@ const Index = () => {
       values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
       values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
-      if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
+    }
+    {
+      const dashTma = pipelineData.dashboardTotals;
+      if (dashTma?.tmaDays !== null && dashTma?.tmaDays !== undefined) values[TMA_ID] = dashTma.tmaDays;
     }
 
     // Onboarding accumulated
@@ -907,12 +915,15 @@ const Index = () => {
         formula: "média(primeiro_contato − criação) em minutos",
         calculation: `Média de ${fmt(Math.round(ops.avgFirstContactHours * 60))} min entre criação do lead e o primeiro atendimento.`,
       };
-      if (ops.avgHandlingDays !== null) {
+    }
+    {
+      const dashTma = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+      if (dashTma?.tmaDays !== null && dashTma?.tmaDays !== undefined) {
         info[TMA_ID] = {
-          source: "Operacional",
-          filter: "created_at",
-          formula: "média(última_atividade − criação) em dias",
-          calculation: `Média de ${fmt(ops.avgHandlingDays)} dias de tratativa por lead.`,
+          source: "Dashboard",
+          filter: "month",
+          formula: "média(fechamento ou hoje − criação) em dias, agrupado por lead",
+          calculation: `Média de ${fmt(dashTma.tmaDays)} dias no funil por lead.`,
         };
       }
     }
