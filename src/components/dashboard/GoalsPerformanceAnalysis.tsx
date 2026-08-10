@@ -752,7 +752,7 @@ export function GoalsPerformanceAnalysis({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-3 sm:gap-4 items-start">
         <div className="flex flex-col items-center">
           <GaugeChart value={computed.overall} />
           <div className="mt-2 w-full space-y-1">
