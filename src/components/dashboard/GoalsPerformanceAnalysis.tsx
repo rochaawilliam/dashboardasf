@@ -81,8 +81,15 @@ function GaugeChart({ value }: { value: number }) {
       : "hsl(var(--destructive))";
 
   return (
-    <div className="relative flex flex-col items-center">
-      <svg width={size} height={size / 2 + 26} viewBox={`0 0 ${size} ${size / 2 + 26}`} className="overflow-visible">
+    <div className="relative flex flex-col items-center w-full">
+      <svg
+        width="100%"
+        height={size / 2 + 26}
+        viewBox={`0 0 ${size} ${size / 2 + 26}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="max-w-[220px] w-full h-auto overflow-visible"
+      >
+
         {/* zones */}
         <path d={arc(0, 60)} fill="none" stroke="hsl(var(--destructive) / 0.18)" strokeWidth={stroke} strokeLinecap="round" />
         <path d={arc(60, 85)} fill="none" stroke="hsl(var(--warning) / 0.2)" strokeWidth={stroke} />
@@ -708,19 +715,20 @@ export function GoalsPerformanceAnalysis({
 
   return (
     <div className={cn("mb-3 rounded-xl border bg-muted/20 p-3 sm:p-4 transition-colors", overallStyle.border)}>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 text-primary">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center justify-center w-7 h-7 shrink-0 rounded-lg bg-primary/10 text-primary">
             <Gauge className="h-4 w-4" />
           </div>
-          <div>
-            <h4 className="text-sm font-semibold text-foreground leading-tight" style={{ fontFamily: "'Roboto', sans-serif" }}>
+          <div className="min-w-0">
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground leading-tight truncate" style={{ fontFamily: "'Roboto', sans-serif" }}>
               Análise de Desempenho — {tabTitle}
             </h4>
-            <p className="text-[10px] text-muted-foreground">{periodLabel} · {computed.items.length} metas indutoras monitoradas</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{periodLabel} · {computed.items.length} metas indutoras</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+
           <span
             className={cn(
               "hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
@@ -744,7 +752,7 @@ export function GoalsPerformanceAnalysis({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-3 sm:gap-4 items-start">
         <div className="flex flex-col items-center">
           <GaugeChart value={computed.overall} />
           <div className="mt-2 w-full space-y-1">
