@@ -127,6 +127,47 @@ function renderInline(text: string) {
   );
 }
 
+function splitAnalysis(text: string) {
+  const idx = text.search(/\*\*?\s*Checklist[^\n]*/i);
+  if (idx === -1) return { main: text, checklist: [] as string[] };
+  const main = text.slice(0, idx).trim();
+  const rest = text.slice(idx);
+  const checklist = rest
+    .split("\n")
+    .slice(1)
+    .map((l) => l.trim().replace(/^[-*•]\s*/, "").replace(/^\[\s*\]\s*/, ""))
+    .filter((l) => l.length > 0 && !/^\*\*/.test(l));
+  return { main, checklist };
+}
+
+function ChecklistPanel({ items }: { items: string[] }) {
+  const [done, setDone] = useState<Record<number, boolean>>({});
+  return (
+    <div className="space-y-1.5">
+      {items.map((item, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => setDone((d) => ({ ...d, [i]: !d[i] }))}
+          className="w-full flex items-start gap-2 text-left group"
+        >
+          <span
+            className={cn(
+              "mt-[2px] h-3.5 w-3.5 shrink-0 rounded border border-border flex items-center justify-center text-[9px] leading-none",
+              done[i] && "bg-primary border-primary text-primary-foreground",
+            )}
+          >
+            {done[i] ? "✓" : ""}
+          </span>
+          <span className={cn("text-xs leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
+            {renderInline(item)}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function AnalysisText({ text }: { text: string }) {
   const blocks = text.split("\n").filter((l) => l.trim().length > 0);
   return (
@@ -164,10 +205,11 @@ function GoalsTrendChart({
   selectedMonth: number | null;
 }) {
   const metricIds = useMemo(() => metrics.map((m) => m.id).sort(), [metrics]);
+  const [open, setOpen] = useState(false);
 
   const { data: history, isLoading } = useQuery({
     queryKey: ["goals-trend-history", selectedYear, metricIds],
-    enabled: metricIds.length > 0,
+    enabled: open && metricIds.length > 0,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const rows: { metric_id: string; value: number; recorded_at: string; period_type: string }[] = [];
@@ -235,7 +277,6 @@ function GoalsTrendChart({
   }, [history, metrics, monthlyTargets, selectedYear]);
 
   const withData = chartData.filter((d) => d.atingimento !== null);
-  const [open, setOpen] = useState(false);
 
   return (
     <div className="mt-3 rounded-lg border border-border/50 bg-card p-3">
@@ -513,23 +554,41 @@ export function GoalsPerformanceAnalysis({
           </div>
         </div>
 
-        <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-foreground">Panorama gerado por IA</span>
-          </div>
-          {loading && !analysis ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Analisando o desempenho das metas indutoras...
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold text-foreground">Panorama e pontos de melhoria</span>
             </div>
-          ) : error ? (
-            <p className="text-xs text-destructive">{error}</p>
-          ) : analysis ? (
-            <AnalysisText text={analysis} />
-          ) : (
-            <p className="text-xs text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
-          )}
+            {loading && !analysis ? (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Analisando o desempenho das metas indutoras...
+              </div>
+            ) : error ? (
+              <p className="text-xs text-destructive">{error}</p>
+            ) : analysis ? (
+              <AnalysisText text={splitAnalysis(analysis).main} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-border/50 bg-card p-3 min-h-[140px]">
+            <div className="flex items-center gap-1.5 mb-2">
+              <ListChecks className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold text-foreground">Checklist de ações corretivas</span>
+            </div>
+            {loading && !analysis ? (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando ações...
+              </div>
+            ) : splitAnalysis(analysis).checklist.length > 0 ? (
+              <ChecklistPanel items={splitAnalysis(analysis).checklist} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
+            )}
+          </div>
         </div>
       </div>
 
