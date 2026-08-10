@@ -1527,7 +1527,7 @@ Deno.serve(async (req) => {
 
       // Totals TME/TMA/close
       const tmeVals: number[] = [];
-      const tmaVals: number[] = [];
+      const tmaTotal = computeTmaDays(allMonthCards, historyByCard);
       let closeTotalY = 0, closeNY = 0;
       for (const c of allMonthCards) {
         if (!c.ghost_of) {
@@ -1543,7 +1543,7 @@ Deno.serve(async (req) => {
         }
       }
       dashboardTotals.tmeMinutes = tmeVals.length > 0 ? Math.round(tmeVals.reduce((a, b) => a + b, 0) / tmeVals.length) : null;
-      dashboardTotals.tmaDays = tmaVals.length > 0 ? Math.round(tmaVals.reduce((a, b) => a + b, 0) / tmaVals.length) : null;
+      dashboardTotals.tmaDays = tmaTotal;
       dashboardTotals.avgCloseTimeDays = closeNY > 0 ? Math.round(closeTotalY / closeNY) : null;
       // Tarefas totals
       let totalTarefas = 0;
