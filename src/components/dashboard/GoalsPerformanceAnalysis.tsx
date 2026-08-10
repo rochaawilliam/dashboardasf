@@ -725,7 +725,7 @@ export function GoalsPerformanceAnalysis({
 
   if (computed.items.length === 0) return null;
 
-  const highlights = [...computed.items].sort((a, b) => a.progress - b.progress).slice(0, 3);
+  
   const overallStatus = statusOf(computed.overall);
   const overallStyle = STATUS_STYLES[overallStatus];
   const belowRef = computed.items.filter((i) => i.progress < 85).sort((a, b) => a.progress - b.progress);
