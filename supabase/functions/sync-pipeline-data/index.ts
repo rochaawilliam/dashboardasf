@@ -932,6 +932,7 @@ Deno.serve(async (req) => {
         onboardingByMonth[key] = {
           avgOnboardingDays: durations.length > 0 ? Math.round(durations.reduce((a: number, b: number) => a + b, 0) / durations.length) : null,
           complianceRate: withDates.length > 0 ? Math.round((onTime.length / withDates.length) * 100) : null,
+          avgProgress: avgOf(list.map(progressOf)),
           totalClients: list.length,
           completedClients: doneCount,
           isPartial: doneCount < list.length,
