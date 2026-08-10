@@ -1,6 +1,8 @@
 import { useRef, useState, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsLandscapeMobile } from "@/hooks/use-orientation";
+
 
 interface SwipeableTabsProps<T extends string> {
   tabs: T[];
