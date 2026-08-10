@@ -1764,16 +1764,20 @@ const Index = () => {
                   {isCommissionUser &&
                 <button
                   onClick={() => setActiveTab("comissao")}
+                  role="tab"
+                  aria-selected={activeTab === "comissao"}
+                  tabIndex={activeTab === "comissao" ? 0 : -1}
+                  aria-label="Head Growth"
                   className={cn(
-                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative",
-                    "text-[9px] sm:text-xs font-medium",
+                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative min-h-11",
+                    "text-[9px] sm:text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
                     activeTab === "comissao" ?
                     "bg-purple-600 text-white shadow-sm z-10" :
                     "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
                   )}
                   title="Head Growth">
 
-                      <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
                       <span className="hidden sm:inline truncate">Head Growth</span>
                     </button>
                 }
@@ -1781,18 +1785,23 @@ const Index = () => {
                   {isSDRUser &&
                 <button
                   onClick={() => setActiveTab("comissao_sdr")}
+                  role="tab"
+                  aria-selected={activeTab === "comissao_sdr"}
+                  tabIndex={activeTab === "comissao_sdr" ? 0 : -1}
+                  aria-label="Salário Variável SDR"
                   className={cn(
-                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative",
-                    "text-[9px] sm:text-xs font-medium",
+                    "flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-t-lg transition-all relative min-h-11",
+                    "text-[9px] sm:text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
                     activeTab === "comissao_sdr" ?
                     "bg-green-600 text-white shadow-sm z-10" :
                     "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                   )}
                   title="Salário Variável SDR">
 
-                      <Target className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <Target className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
                       <span className="hidden sm:inline truncate">SDR</span>
                     </button>
+
                 }
                   {categoryOrder.map((category) => {
                   const config = categoryConfig[category];
