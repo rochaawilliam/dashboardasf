@@ -48,8 +48,8 @@ function GaugeChart({ value }: { value: number }) {
   const arc = (from: number, to: number) => {
     const a = polar(from);
     const b = polar(to);
-    const large = to - from > 50 ? 1 : 0;
-    return `M ${a.x} ${a.y} A ${r} ${r} 0 ${large} 1 ${b.x} ${b.y}`;
+    // O medidor cobre no máximo 180°, então nunca é um arco "grande".
+    return `M ${a.x} ${a.y} A ${r} ${r} 0 0 1 ${b.x} ${b.y}`;
   };
 
   const needleAngle = Math.PI * (1 - clamped / 100);
