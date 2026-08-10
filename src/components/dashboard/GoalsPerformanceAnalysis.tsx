@@ -47,7 +47,9 @@ const MONTH_NAMES = [
 /** Semicircular gauge (velocímetro) */
 const GAUGE_MAX = 120;
 
-function GaugeChart({ value }: { value: number }) {
+function GaugeChart({ value, refPct = 100 }: { value: number; refPct?: number }) {
+  const ref = Math.max(1, Math.min(100, refPct));
+  const warnRef = ref * 0.85;
   const clamped = Math.max(0, Math.min(GAUGE_MAX, value));
   const size = 220;
   const cx = size / 2;
