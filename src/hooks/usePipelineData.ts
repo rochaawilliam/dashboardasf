@@ -35,6 +35,13 @@ export interface OnboardingMetrics {
   activeClients: number;
   completedClients: number;
   overallCompletion: number;
+  byMonth?: Record<string, {
+    avgOnboardingDays: number | null;
+    complianceRate: number | null;
+    totalClients: number;
+    completedClients: number;
+    isPartial: boolean;
+  }>;
 }
 
 export interface TrainingCollaborator {
