@@ -500,7 +500,7 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
 
       {open && (
         <div className="mt-2">
-          <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {below.length > 0 && (
               <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2">
                 <div className="flex items-center gap-1.5 mb-1">
@@ -510,14 +510,11 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {below.slice(0, 6).map((i) => (
+                  {below.map((i) => (
                     <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] text-destructive tabular-nums">
                       {i.name} · {Math.round(i.progress)}%
                     </span>
                   ))}
-                  {below.length > 6 && (
-                    <span className="text-[10px] text-destructive/80">+{below.length - 6}</span>
-                  )}
                 </div>
               </div>
             )}
@@ -530,7 +527,7 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {above.slice(0, 6).map((i) => (
+                  {above.map((i) => (
                     <span
                       key={i.name}
                       className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] text-[hsl(210_90%_55%)] tabular-nums"
@@ -538,9 +535,6 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
                       {i.name} · {Math.round(i.progress)}%
                     </span>
                   ))}
-                  {above.length > 6 && (
-                    <span className="text-[10px] text-[hsl(210_90%_55%)]/80">+{above.length - 6}</span>
-                  )}
                 </div>
               </div>
             )}
