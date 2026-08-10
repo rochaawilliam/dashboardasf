@@ -325,13 +325,13 @@ export function MetricCardMonthly({
               {/* Current value - prominent */}
               <div className="flex-1 min-w-0">
                 {hasNoData ? (
-                  <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
+                  <span className="text-muted-foreground text-xs italic">Sem dados</span>
                 ) : (
-                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate tracking-tighter">
+                  <div className="metric-value text-primary truncate">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
-                <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
+                <div className="metric-sublabel mt-0.5">
                   {isMonthSelected ? "Lançado" : "Acumulado"}
                 </div>
               </div>
@@ -340,19 +340,19 @@ export function MetricCardMonthly({
               <div className="text-right shrink-0">
                 {isMonthSelected ? (
                   <>
-                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
+                     <div className="metric-target-value truncate">
                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
                     </div>
-                    <div className="text-[7px] sm:text-[8px] text-muted-foreground">
+                    <div className="metric-sublabel">
                       Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
+                    <div className="metric-target-value truncate">
                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
                     </div>
-                    <div className="text-[7px] sm:text-[8px] text-muted-foreground">
+                    <div className="metric-sublabel">
                       Meta {isNonAccumulative ? "" : "Anual"}
                     </div>
                   </>
@@ -362,7 +362,7 @@ export function MetricCardMonthly({
             
             {/* Annual target reference when month is selected */}
             {isMonthSelected && !isNonAccumulative && (
-              <div className="text-[7px] sm:text-[8px] text-muted-foreground mb-1 sm:mb-1.5 flex items-center gap-1">
+              <div className="metric-sublabel mb-1 sm:mb-1.5 flex items-center gap-1">
                 <span>Meta anual:</span>
                 <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
               </div>
@@ -380,7 +380,7 @@ export function MetricCardMonthly({
                 />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[9px] font-medium text-primary">
+                <span className="text-xs font-semibold text-primary">
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
               </div>
