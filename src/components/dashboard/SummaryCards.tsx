@@ -60,7 +60,7 @@ export function SummaryCards() {
             {item.change && (
               <span
                 className={cn(
-                  "text-xs font-semibold px-2 py-1 rounded-full",
+                  "text-xs font-medium px-2 py-1 rounded-full",
                   item.changeType === "positive" && "bg-success/10 text-success",
                   item.changeType === "negative" && "bg-destructive/10 text-destructive",
                   item.changeType === "neutral" && "bg-muted text-muted-foreground"
@@ -71,8 +71,8 @@ export function SummaryCards() {
             )}
           </div>
           <div className="mt-4">
-            <p className="metric-value">{item.value}</p>
-            <p className="metric-sublabel mt-1">{item.label}</p>
+            <p className="text-2xl font-bold text-foreground">{item.value}</p>
+            <p className="text-sm text-muted-foreground mt-1">{item.label}</p>
           </div>
         </div>
       ))}

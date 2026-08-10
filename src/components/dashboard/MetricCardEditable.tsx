@@ -132,7 +132,7 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
       {isEditing ? (
         <div className="space-y-3 mb-3">
           <div>
-            <label className="text-sm text-muted-foreground">Valor Atual</label>
+            <label className="text-xs text-muted-foreground">Valor Atual</label>
             <Input
               type="number"
               step="0.01"
@@ -142,7 +142,7 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
             />
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Meta</label>
+            <label className="text-xs text-muted-foreground">Meta</label>
             <Input
               type="number"
               step="0.01"
@@ -179,9 +179,9 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex justify-between text-sm text-muted-foreground">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span>0%</span>
-          <span className={cn("font-semibold", getStatusBg(status).split(" ")[1])}>
+          <span className={cn("font-medium", getStatusBg(status).split(" ")[1])}>
             {progress.toFixed(0)}%
           </span>
           <span>100%</span>
@@ -189,7 +189,7 @@ export function MetricCardEditable({ metric, showAlert = true }: MetricCardEdita
       </div>
       
       {metric.description && (
-        <p className="mt-3 text-sm text-muted-foreground">{metric.description}</p>
+        <p className="mt-3 text-xs text-muted-foreground">{metric.description}</p>
       )}
     </div>
   );

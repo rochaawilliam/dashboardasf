@@ -59,7 +59,7 @@ export function MetricCard({
       
       <div className="flex items-baseline gap-1 mb-3">
         <span className="metric-value">{value}</span>
-        <span className="metric-sublabel">{unit}</span>
+        <span className="text-lg font-medium text-muted-foreground">{unit}</span>
       </div>
 
       {progress !== undefined && (
@@ -70,7 +70,7 @@ export function MetricCard({
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
           </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>0%</span>
             <span>100%</span>
           </div>
@@ -78,7 +78,7 @@ export function MetricCard({
       )}
 
       {description && (
-        <p className="mt-3 text-sm text-muted-foreground">{description}</p>
+        <p className="mt-3 text-xs text-muted-foreground">{description}</p>
       )}
     </div>
   );
