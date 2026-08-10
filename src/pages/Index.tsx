@@ -1815,9 +1815,17 @@ const Index = () => {
                       key={category}
                       onClick={() => canAccess && setActiveTab(category)}
                       disabled={!canAccess}
+                      role="tab"
+                      aria-selected={isActive && canAccess}
+                      tabIndex={isActive && canAccess ? 0 : -1}
+                      aria-label={
+                        canAccess
+                          ? `${config.title} (${categoryMetricsCount} indicadores)`
+                          : `${config.title} — acesso restrito`
+                      }
                       className={cn(
-                        "flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 py-1.5 sm:py-2 px-0.5 sm:px-1.5 rounded-t-lg transition-all relative",
-                        "text-[8px] sm:text-[10px] font-medium",
+                        "flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 py-1.5 sm:py-2 px-0.5 sm:px-1.5 rounded-t-lg transition-all relative min-h-11",
+                        "text-[8px] sm:text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                         !canAccess && "opacity-50 cursor-not-allowed",
                         isActive && canAccess ?
                         "bg-primary text-primary-foreground shadow-sm z-10" :
@@ -1828,9 +1836,10 @@ const Index = () => {
                       title={!canAccess ? "Acesso restrito - Entre em contato com o administrador" : config.title}>
 
                         {!canAccess ?
-                      <Lock className="h-3 w-3 shrink-0" /> :
-                      <Icon className="h-3 w-3 shrink-0" />
+                      <Lock className="h-3 w-3 shrink-0" aria-hidden="true" /> :
+                      <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />
                       }
+
                     <span className="hidden md:inline truncate text-[10px] lg:text-xs">{config.shortTitle}</span>
                         <span className={cn(
                         "hidden md:inline text-[7px] px-1 py-0.5 rounded-full font-semibold",
