@@ -1,5 +1,17 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, Sparkles, RefreshCw, Loader2 } from "lucide-react";
+import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ReferenceLine,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
