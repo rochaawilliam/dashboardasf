@@ -76,7 +76,7 @@ export function SalesFunnel({
       </div>
 
       {/* Funnel Steps */}
-      <div className="p-3 space-y-1">
+      <div className={cn("p-3 space-y-1", bodyColors)}>
         {metrics.map((metric, index) => {
           const isPlaceholder = (metric as any).__placeholder === true;
           const prevPlaceholder = index > 0 && (metrics[index - 1] as any).__placeholder === true;
@@ -97,7 +97,7 @@ export function SalesFunnel({
               )}
               <div className={cn(isPlaceholder && "invisible pointer-events-none")} aria-hidden={isPlaceholder}>
                 <CircularProgressCard
-                  metric={metric}
+                  metric={{ ...metric, name: cleanName(metric.name) }}
                   monthlyValue={monthlyValue}
                   isMonthSelected={selectedMonth !== null}
                   accumulatedValue={accumulated}
