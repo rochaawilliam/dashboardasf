@@ -81,8 +81,15 @@ function GaugeChart({ value }: { value: number }) {
       : "hsl(var(--destructive))";
 
   return (
-    <div className="relative flex flex-col items-center">
-      <svg width={size} height={size / 2 + 26} viewBox={`0 0 ${size} ${size / 2 + 26}`} className="overflow-visible">
+    <div className="relative flex flex-col items-center w-full">
+      <svg
+        width="100%"
+        height={size / 2 + 26}
+        viewBox={`0 0 ${size} ${size / 2 + 26}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="max-w-[220px] w-full h-auto overflow-visible"
+      >
+
         {/* zones */}
         <path d={arc(0, 60)} fill="none" stroke="hsl(var(--destructive) / 0.18)" strokeWidth={stroke} strokeLinecap="round" />
         <path d={arc(60, 85)} fill="none" stroke="hsl(var(--warning) / 0.2)" strokeWidth={stroke} />
