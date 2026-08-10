@@ -188,6 +188,51 @@ function AnalysisText({ text }: { text: string }) {
   );
 }
 
+/** Recupera o valor de uma métrica a partir dos snapshots mensais congelados. */
+function snapshotValueFor(
+  metricName: string,
+  sources: Record<string, any> | undefined,
+): number | undefined {
+  if (!sources) return undefined;
+  const n = metricName.toLowerCase();
+
+  const pipeline = sources["pipeline"]?.months;
+  if (pipeline) {
+    const isOnline = /on-?line|\bon\b/.test(n);
+    const isOffline = /off-?line|\boff\b/.test(n);
+    const side = isOnline ? pipeline.online : isOffline ? pipeline.offline : null;
+    const both = (k: string) =>
+      Number(pipeline.online?.[k] ?? 0) + Number(pipeline.offline?.[k] ?? 0);
+    const pick = (k: string) => (side ? Number(side[k] ?? 0) : both(k));
+
+    if (n.includes("novos leads")) return pick("new_leads");
+    if (n.includes("leads no funil")) return pick("leads");
+    if (n.includes("reuni")) return pick("reunioes");
+    if (n.includes("proposta")) return pick("propostas");
+    if (n.includes("prospect")) return pick("prospects");
+    if (n.includes("valor gerado")) return pick("valor_gerado");
+    if (n.includes("novos contratos") && (isOnline || isOffline)) return pick("contratos");
+  }
+
+  const traffic = sources["traffic_funnel"]?.months;
+  if (traffic) {
+    if (n.includes("impress")) return Number(traffic.impressoes ?? 0);
+    if (n.includes("alcance")) return Number(traffic.alcance ?? 0);
+    if (n.includes("conversas")) return Number(traffic.conversas_iniciadas ?? 0);
+    if (n.includes("valor investido")) return Number(traffic.valor_investido ?? 0);
+  }
+
+  const fin = sources["financial_cashflow"]?.months;
+  if (fin) {
+    if (n.includes("receita total")) return Number(fin.boleto_total ?? fin.total_recebimentos ?? 0);
+    if (n.includes("lucratividade")) return Number(fin.lucratividade_pct ?? 0);
+    if (n.includes("folha sobre receita")) return Number(fin.folha_sobre_receita_pct ?? 0);
+    if (n.includes("custo fixo sobre receita")) return Number(fin.custo_fixo_sobre_receita_pct ?? 0);
+  }
+
+  return undefined;
+}
+
 const SHORT_MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 /** Histórico mensal de atingimento das metas indutoras da aba */
@@ -206,6 +251,20 @@ function GoalsTrendChart({
 }) {
   const metricIds = useMemo(() => metrics.map((m) => m.id).sort(), [metrics]);
   const [open, setOpen] = useState(false);
+
+  const { data: snapshots } = useQuery({
+    queryKey: ["goals-trend-snapshots", selectedYear],
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("month_snapshots")
+        .select("source, month, payload")
+        .eq("year", selectedYear);
+      if (error) throw error;
+      return (data ?? []) as { source: string; month: number; payload: any }[];
+    },
+  });
 
   const { data: history, isLoading } = useQuery({
     queryKey: ["goals-trend-history", selectedYear, metricIds],
@@ -228,6 +287,15 @@ function GoalsTrendChart({
       return rows;
     },
   });
+
+  const snapshotByMonth = useMemo(() => {
+    const map: Record<number, Record<string, any>> = {};
+    (snapshots ?? []).forEach((s) => {
+      if (!map[s.month]) map[s.month] = {};
+      map[s.month][s.source] = s.payload;
+    });
+    return map;
+  }, [snapshots]);
 
   const chartData = useMemo(() => {
     if (!history) return [];
@@ -259,8 +327,8 @@ function GoalsTrendChart({
           ? Number(metric.target_value)
           : Number(metric.target_value) / 12;
         if (!target || target <= 0) return;
-        const value = values[metric.id];
-        if (value === undefined) return;
+        const value = values[metric.id] ?? snapshotValueFor(metric.name, snapshotByMonth[m]);
+        if (value === undefined || value === null) return;
         const isInverse = metric.polarity === "lower_is_better";
         const raw = isInverse ? (value > 0 ? (target / value) * 100 : 100) : (value / target) * 100;
         progresses.push(Math.min(Math.max(0, raw), GAUGE_MAX));
@@ -274,7 +342,7 @@ function GoalsTrendChart({
       });
     }
     return result;
-  }, [history, metrics, monthlyTargets, selectedYear]);
+  }, [history, metrics, monthlyTargets, selectedYear, snapshotByMonth]);
 
   const withData = chartData.filter((d) => d.atingimento !== null);
 
