@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks } from "lucide-react";
+import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks, AlertTriangle, ArrowUpCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
@@ -397,6 +397,46 @@ function GoalsTrendChart({
 }
 
 
+type AlertLevel = "critical" | "warning" | "onTarget" | "above";
+
+function statusOf(progress: number): AlertLevel {
+  if (progress > 100) return "above";
+  if (progress >= 100) return "onTarget";
+  if (progress >= 85) return "warning";
+  return "critical";
+}
+
+const STATUS_STYLES: Record<AlertLevel, { label: string; text: string; bg: string; border: string; ring: string }> = {
+  critical: {
+    label: "Abaixo da referência",
+    text: "text-destructive",
+    bg: "bg-destructive/10",
+    border: "border-destructive/40",
+    ring: "bg-destructive",
+  },
+  warning: {
+    label: "Atenção",
+    text: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning/40",
+    ring: "bg-warning",
+  },
+  onTarget: {
+    label: "Na meta",
+    text: "text-success",
+    bg: "bg-success/10",
+    border: "border-success/40",
+    ring: "bg-success",
+  },
+  above: {
+    label: "Acima da meta",
+    text: "text-[hsl(210_90%_55%)]",
+    bg: "bg-[hsl(210_90%_55%/0.12)]",
+    border: "border-[hsl(210_90%_55%/0.4)]",
+    ring: "bg-[hsl(210_90%_55%)]",
+  },
+};
+
 export function GoalsPerformanceAnalysis({
   tabTitle,
   metrics,
@@ -513,9 +553,13 @@ export function GoalsPerformanceAnalysis({
   if (computed.items.length === 0) return null;
 
   const highlights = [...computed.items].sort((a, b) => a.progress - b.progress).slice(0, 3);
+  const overallStatus = statusOf(computed.overall);
+  const overallStyle = STATUS_STYLES[overallStatus];
+  const belowRef = computed.items.filter((i) => i.progress < 85).sort((a, b) => a.progress - b.progress);
+  const aboveTarget = computed.items.filter((i) => i.progress > 100).sort((a, b) => b.progress - a.progress);
 
   return (
-    <div className="mb-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:p-4">
+    <div className={cn("mb-3 rounded-xl border bg-muted/20 p-3 sm:p-4 transition-colors", overallStyle.border)}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 text-primary">
@@ -528,11 +572,77 @@ export function GoalsPerformanceAnalysis({
             <p className="text-[10px] text-muted-foreground">{periodLabel} · {computed.items.length} metas indutoras monitoradas</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={fetchAnalysis} disabled={loading}>
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+              overallStyle.bg,
+              overallStyle.border,
+              overallStyle.text,
+            )}
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              {overallStatus === "critical" && (
+                <span className={cn("absolute inline-flex h-full w-full rounded-full opacity-70 animate-ping", overallStyle.ring)} />
+              )}
+              <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", overallStyle.ring)} />
+            </span>
+            {overallStyle.label} · {Math.round(computed.overall)}%
+          </span>
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={fetchAnalysis} disabled={loading}>
           <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
           <span className="hidden sm:inline">Atualizar</span>
-        </Button>
+          </Button>
+        </div>
       </div>
+
+      {(belowRef.length > 0 || aboveTarget.length > 0) && (
+        <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+          {belowRef.length > 0 && (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2">
+              <div className="flex items-center gap-1.5 mb-1">
+                <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+                <span className="text-[11px] font-semibold text-destructive">
+                  {belowRef.length} {belowRef.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {belowRef.slice(0, 6).map((i) => (
+                  <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] text-destructive tabular-nums">
+                    {i.name} · {Math.round(i.progress)}%
+                  </span>
+                ))}
+                {belowRef.length > 6 && (
+                  <span className="text-[10px] text-destructive/80">+{belowRef.length - 6}</span>
+                )}
+              </div>
+            </div>
+          )}
+          {aboveTarget.length > 0 && (
+            <div className="rounded-lg border border-[hsl(210_90%_55%/0.4)] bg-[hsl(210_90%_55%/0.1)] p-2">
+              <div className="flex items-center gap-1.5 mb-1">
+                <ArrowUpCircle className="h-3.5 w-3.5 text-[hsl(210_90%_55%)]" />
+                <span className="text-[11px] font-semibold text-[hsl(210_90%_55%)]">
+                  {aboveTarget.length} {aboveTarget.length === 1 ? "meta superada" : "metas superadas"} (acima de 100%)
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {aboveTarget.slice(0, 6).map((i) => (
+                  <span
+                    key={i.name}
+                    className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] text-[hsl(210_90%_55%)] tabular-nums"
+                  >
+                    {i.name} · {Math.round(i.progress)}%
+                  </span>
+                ))}
+                {aboveTarget.length > 6 && (
+                  <span className="text-[10px] text-[hsl(210_90%_55%)]/80">+{aboveTarget.length - 6}</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4 items-start">
         <div className="flex flex-col items-center">
@@ -544,7 +654,7 @@ export function GoalsPerformanceAnalysis({
                 <span
                   className={cn(
                     "font-semibold tabular-nums",
-                    h.progress >= 100 ? "text-success" : h.progress >= 85 ? "text-warning" : "text-destructive",
+                    STATUS_STYLES[statusOf(h.progress)].text,
                   )}
                 >
                   {Math.round(h.progress)}%
