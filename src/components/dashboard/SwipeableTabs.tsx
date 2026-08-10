@@ -20,7 +20,9 @@ export function SwipeableTabs<T extends string>({
   className 
 }: SwipeableTabsProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
+  const isLandscapeMobile = useIsLandscapeMobile();
+  const isMobile = useIsMobile() || isLandscapeMobile;
+
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
