@@ -341,21 +341,21 @@ export function MetricCardMonthly({
                 {isMonthSelected ? (
                   <>
                      <div className="metric-target-value truncate">
-                      {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
-                    </div>
-                    <div className="metric-sublabel">
-                      Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="metric-target-value truncate">
-                      {formatMetricValue(metric.target_value, metric.unit, metric.name)}
-                    </div>
-                    <div className="metric-sublabel">
-                      Meta {isNonAccumulative ? "" : "Anual"}
-                    </div>
-                  </>
+                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
+                     </div>
+                     <div className="metric-label">
+                       Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
+                     </div>
+                   </>
+                 ) : (
+                   <>
+                     <div className="metric-target-value truncate">
+                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                     </div>
+                     <div className="metric-label">
+                       Meta {isNonAccumulative ? "" : "Anual"}
+                     </div>
+                   </>
                 )}
               </div>
             </div>
