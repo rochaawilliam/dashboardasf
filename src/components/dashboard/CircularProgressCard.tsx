@@ -176,10 +176,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
-        <span className="text-foreground leading-none font-sans text-center text-xl sm:text-xl lg:text-3xl font-bold tracking-tighter">
+        <span className="metric-value text-center">
           {hideValues ? "•••" : `${formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%`}
         </span>
-        <span className="text-muted-foreground mt-0 text-[9px] sm:text-[10px] lg:text-sm">
+        <span className="metric-sublabel mt-0">
           Meta
         </span>
       </div>
