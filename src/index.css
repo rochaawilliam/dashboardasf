@@ -209,19 +209,20 @@
     @apply grid gap-1.5 md:gap-2 lg:gap-2.5;
     grid-template-columns: 1fr;
   }
-  
+
   @media (min-width: 640px) {
     .dashboard-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  @media (min-width: 1024px) {
+  /* Tablets: 3 columns for denser visualization */
+  @media (min-width: 768px) {
     .dashboard-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
-  
+
   @media (min-width: 1280px) {
     .dashboard-grid {
       grid-template-columns: repeat(4, 1fr);
@@ -229,7 +230,7 @@
   }
 
   .metric-card {
-    @apply bg-card rounded-lg border border-border/50 p-1.5 sm:p-2 lg:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30 h-full flex flex-col overflow-hidden min-w-0;
+    @apply bg-card rounded-lg border border-border/50 p-1.5 sm:p-2 md:p-3 lg:p-4 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary/30 h-full flex flex-col overflow-hidden min-w-0;
   }
 
   .dark .metric-card {
@@ -237,12 +238,12 @@
   }
 
   .metric-value {
-    @apply text-base sm:text-lg lg:text-2xl font-semibold tracking-tighter text-foreground;
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl font-semibold tracking-tighter text-foreground;
     font-family: 'Roboto', sans-serif;
   }
 
   .metric-label {
-    @apply text-[10px] sm:text-[11px] lg:text-xs font-medium text-muted-foreground uppercase tracking-wider;
+    @apply text-[10px] sm:text-[11px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider;
   }
 
   .section-title {
