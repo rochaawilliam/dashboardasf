@@ -1918,6 +1918,25 @@ const Index = () => {
                                 { label: "Valor Gerado Total", online: "Valor Gerado Online", offline: "Valor Gerado Offline" },
                               ];
 
+                              // Canonical row order shared by the three funnels (for visual alignment)
+                              const ALIGNED_ROWS: { online?: string; offline?: string; total?: string }[] = [
+                                { online: "Valor Investido ASF", offline: "Valor Investido Offline", total: "Valor Investido Total" },
+                                { online: "Número de impressões ASF" },
+                                { online: "Número de alcance ASF" },
+                                { online: "Conversas Iniciadas pela IA" },
+                                { offline: "Prospects Offline", total: "Empresas Prospectadas" },
+                                { online: "Novos Leads Online", offline: "Novos Leads Offline", total: "Novos Leads" },
+                                { online: "Leads no Funil Online", offline: "Leads no Funil Offline", total: "Leads no Funil" },
+                                { online: "MQL Online", total: "MQL" },
+                                { online: "SQL Online", offline: "SQL Offline", total: "SQL" },
+                                { online: "Reuniões Online ASF", offline: "Reuniões Offline", total: "Reuniões" },
+                                { online: "Propostas Online ASF", offline: "Propostas Offline", total: "Propostas" },
+                                { online: "Novos Contratos On-line ASF", offline: "Novos Contratos Off-line ASF", total: "Contratos" },
+                                { online: "Valor Gerado Online", offline: "Valor Gerado Offline", total: "Valor Gerado Total" },
+                                { online: "ROAS Online", offline: "ROAS Offline", total: "ROAS Total" },
+                              ];
+
+
                               const byName: Record<string, any> = {};
                               [...(funnelOnline?.metrics ?? []), ...(funnelOffline?.metrics ?? [])].forEach((m: any) => {
                                 byName[m.name] = m;
