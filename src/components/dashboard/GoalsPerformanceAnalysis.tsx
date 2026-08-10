@@ -508,6 +508,15 @@ export function GoalsPerformanceAnalysis({
           )}
         </div>
       </div>
+
+      <GoalsTrendChart
+        tabTitle={tabTitle}
+        metrics={metrics}
+        monthlyTargets={monthlyTargets}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+      />
     </div>
+
   );
 }
