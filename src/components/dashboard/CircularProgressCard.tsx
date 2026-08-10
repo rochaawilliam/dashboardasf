@@ -277,13 +277,13 @@ export function CircularProgressCard({
 
       {/* Header with polarity toggle */}
       <div className="mb-0.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
-        <span className="metric-label text-base sm:text-lg lg:text-base font-semibold flex-1 leading-none">{metric.name}</span>
+        <span className="metric-label flex-1 leading-none">{metric.name}</span>
         {dataSourceBadge && (
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 className={cn(
-                  "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium leading-none border transition-colors",
+                  "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-semibold leading-none border transition-colors",
                   dataSourceBadge.source === "Operacional"
                     ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
                     : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
