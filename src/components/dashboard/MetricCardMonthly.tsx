@@ -292,17 +292,17 @@ export function MetricCardMonthly({
                 step="0.01"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="h-7 text-xs"
+                className="h-7 text-sm"
                 autoFocus
               />
-              {metric.unit !== "número" && <span className="text-[10px] text-muted-foreground">{metric.unit}</span>}
+              {metric.unit !== "número" && <span className="text-xs text-muted-foreground">{metric.unit}</span>}
             </div>
             <div className="flex gap-1">
               <Button
                 size="sm"
                 onClick={handleRequestSave}
                 disabled={isSaving}
-                className="flex-1 h-6 text-[10px]"
+                className="flex-1 h-6 text-xs"
               >
                 <Check className="h-3 w-3 mr-1" />
                 Salvar
