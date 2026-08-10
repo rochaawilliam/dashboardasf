@@ -2136,7 +2136,7 @@ const Index = () => {
                               totalMetrics.forEach((m: any) => { if (!covered.has(m.name)) alignedTotal.push(m); });
 
                               return (
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 mb-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 mb-4">
                                   {funnelOnline && funnelOnline.metrics.length > 0 && (
                                     <SalesFunnel
                                       title="Funil Online"
