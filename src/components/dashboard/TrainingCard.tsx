@@ -27,14 +27,14 @@ export function TrainingCard({ items }: TrainingCardProps) {
           
           return (
             <div key={item.role} className="bg-muted/50 rounded-lg p-4">
-              <span className="text-sm font-medium text-muted-foreground block mb-2">
+              <span className="text-sm font-semibold text-muted-foreground block mb-2">
                 {item.role}
               </span>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold text-foreground">
+                <span className="metric-value">
                   {item.hours.toString().padStart(2, "0")}
                 </span>
-                <span className="text-sm text-muted-foreground">hrs</span>
+                <span className="metric-sublabel">hrs</span>
               </div>
               <div className="mt-2 progress-bar">
                 <div
@@ -48,7 +48,7 @@ export function TrainingCard({ items }: TrainingCardProps) {
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 />
               </div>
-              <span className="text-xs text-muted-foreground mt-1 block">
+              <span className="metric-sublabel mt-1 block">
                 Meta: {item.target}hrs
               </span>
             </div>

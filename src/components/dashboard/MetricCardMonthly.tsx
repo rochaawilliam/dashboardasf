@@ -241,14 +241,14 @@ export function MetricCardMonthly({
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
-          <span className="metric-label text-[9px] sm:text-[10px] lg:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <span className="metric-label line-clamp-2 flex-1">{metric.name}</span>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
                     className={cn(
-                      "flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium transition-colors",
+                      "flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-semibold transition-colors",
                       isPositiveTrend && "bg-success/10 text-success hover:bg-success/20",
                       isNegativeTrend && "bg-primary/10 text-primary hover:bg-primary/20",
                       trend === "stable" && "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -259,8 +259,8 @@ export function MetricCardMonthly({
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-32 p-2" side="top">
-                  <div className="text-[10px]">
-                    <p className="font-medium">
+                  <div className="text-xs">
+                    <p className="font-semibold">
                       {trend === "up" && "Crescimento"}
                       {trend === "down" && "Queda"}
                       {trend === "stable" && "Estável"}
@@ -292,17 +292,17 @@ export function MetricCardMonthly({
                 step="0.01"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="h-7 text-xs"
+                className="h-7 text-sm"
                 autoFocus
               />
-              {metric.unit !== "número" && <span className="text-[10px] text-muted-foreground">{metric.unit}</span>}
+              {metric.unit !== "número" && <span className="text-xs text-muted-foreground">{metric.unit}</span>}
             </div>
             <div className="flex gap-1">
               <Button
                 size="sm"
                 onClick={handleRequestSave}
                 disabled={isSaving}
-                className="flex-1 h-6 text-[10px]"
+                className="flex-1 h-6 text-xs"
               >
                 <Check className="h-3 w-3 mr-1" />
                 Salvar
@@ -325,13 +325,13 @@ export function MetricCardMonthly({
               {/* Current value - prominent */}
               <div className="flex-1 min-w-0">
                 {hasNoData ? (
-                  <span className="text-muted-foreground text-[7px] sm:text-[8px] italic">Sem dados</span>
+                  <span className="text-muted-foreground text-xs italic">Sem dados</span>
                 ) : (
-                  <div className="text-[10px] sm:text-sm lg:text-lg font-bold leading-none text-primary truncate tracking-tighter">
+                  <div className="metric-value text-primary truncate">
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                   </div>
                 )}
-                <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
+                <div className="metric-label mt-0.5">
                   {isMonthSelected ? "Lançado" : "Acumulado"}
                 </div>
               </div>
@@ -340,29 +340,29 @@ export function MetricCardMonthly({
               <div className="text-right shrink-0">
                 {isMonthSelected ? (
                   <>
-                     <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
-                      {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
-                    </div>
-                    <div className="text-[7px] sm:text-[8px] text-muted-foreground">
-                      Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-[8px] sm:text-[11px] lg:text-xs font-semibold text-primary truncate tracking-tighter">
-                      {formatMetricValue(metric.target_value, metric.unit, metric.name)}
-                    </div>
-                    <div className="text-[7px] sm:text-[8px] text-muted-foreground">
-                      Meta {isNonAccumulative ? "" : "Anual"}
-                    </div>
-                  </>
+                     <div className="metric-target-value truncate">
+                       {formatMetricValue(monthlyTarget, metric.unit, metric.name)}
+                     </div>
+                     <div className="metric-label">
+                       Meta Mensal{specificMonthlyTarget ? "" : " ≈"}
+                     </div>
+                   </>
+                 ) : (
+                   <>
+                     <div className="metric-target-value truncate">
+                       {formatMetricValue(metric.target_value, metric.unit, metric.name)}
+                     </div>
+                     <div className="metric-label">
+                       Meta {isNonAccumulative ? "" : "Anual"}
+                     </div>
+                   </>
                 )}
               </div>
             </div>
             
             {/* Annual target reference when month is selected */}
             {isMonthSelected && !isNonAccumulative && (
-              <div className="text-[7px] sm:text-[8px] text-muted-foreground mb-1 sm:mb-1.5 flex items-center gap-1">
+              <div className="metric-label mb-1 sm:mb-1.5 flex items-center gap-1">
                 <span>Meta anual:</span>
                 <span className="font-medium">{formatMetricValue(metric.target_value, metric.unit, metric.name)}</span>
               </div>
@@ -380,7 +380,7 @@ export function MetricCardMonthly({
                 />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[9px] font-medium text-primary">
+                <span className="text-xs font-semibold text-primary">
                   {hasNoData ? "—" : `${formatNumber(progress, 0)}%`}
                 </span>
               </div>

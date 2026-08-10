@@ -176,10 +176,10 @@ function CircularProgress({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[2px] py-[2px] mx-[2px] my-[2px]">
-        <span className="text-foreground leading-none font-sans text-center text-xl sm:text-xl lg:text-3xl font-bold tracking-tighter">
+        <span className="metric-value text-center">
           {hideValues ? "•••" : `${formatNumber(animated ? Math.max(displayPct, 0) : 0, 0)}%`}
         </span>
-        <span className="text-muted-foreground mt-0 text-[9px] sm:text-[10px] lg:text-sm">
+        <span className="metric-sublabel mt-0">
           Meta
         </span>
       </div>
@@ -277,13 +277,13 @@ export function CircularProgressCard({
 
       {/* Header with polarity toggle */}
       <div className="mb-0.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
-        <span className="metric-label text-base sm:text-lg lg:text-base font-semibold flex-1 leading-none">{metric.name}</span>
+        <span className="metric-label flex-1 leading-none">{metric.name}</span>
         {dataSourceBadge && (
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 className={cn(
-                  "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium leading-none border transition-colors",
+                  "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-semibold leading-none border transition-colors",
                   dataSourceBadge.source === "Operacional"
                     ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
                     : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
@@ -382,27 +382,21 @@ export function CircularProgressCard({
           {resultadoData ? (
             <>
               <div>
-                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-                  Previsto
-                </p>
-                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                <p className="metric-label">Previsto</p>
+                <p className="metric-target-value">
                   {hideValues ? "••••••" : formatMetricValue(resultadoData.previsto, metric.unit, metric.name)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-                  Realizado
-                </p>
-                <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+                <p className="metric-label">Realizado</p>
+                <p className="metric-target-value">
                   {hideValues ? "••••••" : formatMetricValue(resultadoData.realizado, metric.unit, metric.name)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-                  Resultado
-                </p>
+                <p className="metric-label">Resultado</p>
                 <p className={cn(
-                  "leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter",
+                  "metric-value",
                   resultadoData.resultado >= 0 ? "text-success" : "text-destructive"
                 )}>
                   {hideValues ? "••••••" : `${resultadoData.resultado >= 0 ? "+" : ""}${formatMetricValue(resultadoData.resultado, metric.unit, metric.name)}`}
@@ -414,10 +408,10 @@ export function CircularProgressCard({
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+            <p className="metric-label">
               {forceAnnualLabel ? "Meta Anual" : isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : hideAnnualTarget ? "Meta Mensal" : "Meta Anual"}
             </p>
-            <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+            <p className="metric-target-value">
               {hideValues ? "••••••" :
               isMonthSelected ?
               formatMetricValue(monthlyTarget, metric.unit, metric.name) :
@@ -429,10 +423,8 @@ export function CircularProgressCard({
           {/* Valor Previsto - middle (only when available and month selected) */}
           {isMonthSelected && forecastValue != null && (
           <div>
-            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
-              Previsto
-            </p>
-            <p className="font-semibold text-foreground leading-none text-lg sm:text-2xl lg:text-2xl tracking-tighter">
+            <p className="metric-label">Previsto</p>
+            <p className="metric-target-value">
               {hideValues ? "••••••" : formatMetricValue(forecastValue, metric.unit, metric.name)}
             </p>
           </div>
@@ -440,16 +432,16 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
+            <p className="metric-label">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <div className="flex items-center gap-1">
-              <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+              <p className="metric-value">
                 {hideValues ? "••••••" : (
                   <>
                     {formatMetricValue(displayValue, metric.unit, metric.name)}
                     {getStageLabel(metric.name, displayValue) && (
-                      <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
+                      <span className="metric-target-value text-muted-foreground ml-1">
                         {getStageLabel(metric.name, displayValue)}
                       </span>
                     )}
@@ -477,14 +469,14 @@ export function CircularProgressCard({
           </div>
           {/* Annual target in footer when viewing a specific month */}
           {!hideTarget && isMonthSelected && !isNonAccumulative && !forceAnnualLabel && !hideAnnualTarget && (
-            <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-1 flex items-center gap-1">
+            <div className="metric-label mt-1 flex items-center gap-1">
               <span>Meta anual:</span>
               <span className="font-medium">{hideValues ? "••••••" : formatMetricValue(annualTarget, metric.unit, metric.name)}</span>
             </div>
           )}
           {/* Description / projection info */}
           {metric.description && (metric.description.startsWith("Projeção") || metric.description.startsWith("Meta anual")) && (
-            <p className="text-xs sm:text-sm lg:text-xs text-muted-foreground mt-0 font-medium">
+            <p className="text-xs text-muted-foreground mt-0 font-medium">
               📊 {metric.description}
             </p>
           )}
