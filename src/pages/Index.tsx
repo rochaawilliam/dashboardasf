@@ -519,8 +519,8 @@ const Index = () => {
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
       values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
-      // TME (Operacional: hours) and TMA (Operacional: days)
-      values[TME_SLA_ID] = ops.avgFirstContactHours;
+      // TME (Operacional: minutos) and TMA (Operacional: days)
+      values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
       if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
     }
 
@@ -734,7 +734,7 @@ const Index = () => {
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
       values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
-      values[TME_SLA_ID] = ops.avgFirstContactHours;
+      values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
       if (ops.avgHandlingDays !== null) values[TMA_ID] = ops.avgHandlingDays;
     }
 
@@ -899,13 +899,13 @@ const Index = () => {
       };
     }
 
-    // TME (Tempo Médio até Primeiro Contato) — horas
+    // TME (Tempo Médio até Primeiro Contato) — minutos
     if (ops) {
       info[TME_SLA_ID] = {
         source: "Operacional",
         filter: "created_at",
-        formula: "média(primeiro_contato − criação) em horas",
-        calculation: `Média de ${fmt(ops.avgFirstContactHours)} h entre criação do lead e o primeiro atendimento.`,
+        formula: "média(primeiro_contato − criação) em minutos",
+        calculation: `Média de ${fmt(Math.round(ops.avgFirstContactHours * 60))} min entre criação do lead e o primeiro atendimento.`,
       };
       if (ops.avgHandlingDays !== null) {
         info[TMA_ID] = {
