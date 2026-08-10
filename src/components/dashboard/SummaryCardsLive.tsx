@@ -73,7 +73,7 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
             </div>
             <div className="mt-1.5 lg:mt-2.5">
               <p className="metric-value">{item.value}</p>
-              <p className="metric-sublabel normal-case mt-0.5 truncate">{item.name}</p>
+              <p className="metric-sublabel mt-0.5 truncate">{item.name}</p>
             </div>
           </div>
         );

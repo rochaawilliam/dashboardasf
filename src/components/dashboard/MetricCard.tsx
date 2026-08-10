@@ -59,7 +59,7 @@ export function MetricCard({
       
       <div className="flex items-baseline gap-1 mb-3">
         <span className="metric-value">{value}</span>
-        <span className="metric-sublabel normal-case">{unit}</span>
+        <span className="metric-sublabel">{unit}</span>
       </div>
 
       {progress !== undefined && (

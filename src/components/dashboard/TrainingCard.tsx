@@ -34,7 +34,7 @@ export function TrainingCard({ items }: TrainingCardProps) {
                 <span className="metric-value">
                   {item.hours.toString().padStart(2, "0")}
                 </span>
-                <span className="metric-sublabel normal-case">hrs</span>
+                <span className="metric-sublabel">hrs</span>
               </div>
               <div className="mt-2 progress-bar">
                 <div
@@ -48,7 +48,7 @@ export function TrainingCard({ items }: TrainingCardProps) {
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 />
               </div>
-              <span className="metric-sublabel normal-case mt-1 block">
+              <span className="metric-sublabel mt-1 block">
                 Meta: {item.target}hrs
               </span>
             </div>

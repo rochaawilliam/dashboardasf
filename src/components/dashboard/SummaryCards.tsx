@@ -72,7 +72,7 @@ export function SummaryCards() {
           </div>
           <div className="mt-4">
             <p className="metric-value">{item.value}</p>
-            <p className="metric-sublabel normal-case mt-1">{item.label}</p>
+            <p className="metric-sublabel mt-1">{item.label}</p>
           </div>
         </div>
       ))}

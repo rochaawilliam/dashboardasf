@@ -99,7 +99,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
             <span className="metric-value">
               {formatNumber(item.current_hours, 0)}
             </span>
-            <span className="metric-sublabel normal-case">hrs</span>
+            <span className="metric-sublabel">hrs</span>
           </div>
           <div className="mt-2 progress-bar">
             <div
@@ -113,7 +113,7 @@ function TrainingItem({ item }: { item: TrainingHours }) {
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
           </div>
-          <span className="metric-sublabel normal-case mt-1 block">
+          <span className="metric-sublabel mt-1 block">
             Meta: {formatNumber(item.target_hours, 0)}hrs
           </span>
         </>
