@@ -47,10 +47,11 @@ Desempenho geral consolidado: ${Math.round(body.overall)}%.
 Métricas:
 ${lines || "Sem métricas com meta definida."}
 
-Escreva em português do Brasil, tom executivo e direto. Responda em markdown com exatamente duas seções:
+Escreva em português do Brasil, tom executivo e direto. Responda em markdown com exatamente três seções, nesta ordem e com estes títulos exatos:
 **Panorama** — 2 a 3 frases sobre a situação geral, considerando o ritmo esperado para o dia do mês.
-**Pontos de melhoria** — 3 a 4 bullets objetivos e acionáveis, citando as métricas mais críticas e o que fazer para bater a meta até o fim do mês.
-Máximo de 160 palavras no total. Não invente números que não estejam acima.`;
+**Pontos de melhoria** — 3 a 4 bullets objetivos, citando as métricas mais críticas.
+**Checklist de ações corretivas** — 4 a 6 bullets curtos no formato "- [ ] Ação ..." (imperativo e específico).
+Máximo de 220 palavras no total. Não invente números que não estejam acima.`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
