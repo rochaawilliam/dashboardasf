@@ -382,19 +382,19 @@ export function CircularProgressCard({
           {resultadoData ? (
             <>
               <div>
-                <p className="metric-sublabel">Previsto</p>
+                <p className="metric-label">Previsto</p>
                 <p className="metric-target-value">
                   {hideValues ? "••••••" : formatMetricValue(resultadoData.previsto, metric.unit, metric.name)}
                 </p>
               </div>
               <div>
-                <p className="metric-sublabel">Realizado</p>
+                <p className="metric-label">Realizado</p>
                 <p className="metric-target-value">
                   {hideValues ? "••••••" : formatMetricValue(resultadoData.realizado, metric.unit, metric.name)}
                 </p>
               </div>
               <div>
-                <p className="metric-sublabel">Resultado</p>
+                <p className="metric-label">Resultado</p>
                 <p className={cn(
                   "metric-value",
                   resultadoData.resultado >= 0 ? "text-success" : "text-destructive"
@@ -408,7 +408,7 @@ export function CircularProgressCard({
           {/* Target - top */}
           {!hideTarget && (
           <div>
-            <p className="metric-sublabel">
+            <p className="metric-label">
               {forceAnnualLabel ? "Meta Anual" : isMonthSelected ? `Meta ${selectedMonthName || "Mensal"}` : isNonAccumulative ? "Meta" : hideAnnualTarget ? "Meta Mensal" : "Meta Anual"}
             </p>
             <p className="metric-target-value">
@@ -423,7 +423,7 @@ export function CircularProgressCard({
           {/* Valor Previsto - middle (only when available and month selected) */}
           {isMonthSelected && forecastValue != null && (
           <div>
-            <p className="metric-sublabel">Previsto</p>
+            <p className="metric-label">Previsto</p>
             <p className="metric-target-value">
               {hideValues ? "••••••" : formatMetricValue(forecastValue, metric.unit, metric.name)}
             </p>
@@ -432,7 +432,7 @@ export function CircularProgressCard({
 
           {/* Realized - bottom */}
           <div>
-            <p className="metric-sublabel">
+            <p className="metric-label">
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <div className="flex items-center gap-1">
