@@ -501,36 +501,36 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
       {open && (
         <div className="mt-2">
           <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-            {belowRef.length > 0 && (
+            {below.length > 0 && (
               <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2">
                 <div className="flex items-center gap-1.5 mb-1">
                   <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                   <span className="text-[11px] font-semibold text-destructive">
-                    {belowRef.length} {belowRef.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
+                    {below.length} {below.length === 1 ? "meta abaixo" : "metas abaixo"} da referência (85%)
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {belowRef.slice(0, 6).map((i) => (
+                  {below.slice(0, 6).map((i) => (
                     <span key={i.name} className="rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] text-destructive tabular-nums">
                       {i.name} · {Math.round(i.progress)}%
                     </span>
                   ))}
-                  {belowRef.length > 6 && (
-                    <span className="text-[10px] text-destructive/80">+{belowRef.length - 6}</span>
+                  {below.length > 6 && (
+                    <span className="text-[10px] text-destructive/80">+{below.length - 6}</span>
                   )}
                 </div>
               </div>
             )}
-            {aboveTarget.length > 0 && (
+            {above.length > 0 && (
               <div className="rounded-lg border border-[hsl(210_90%_55%/0.4)] bg-[hsl(210_90%_55%/0.1)] p-2">
                 <div className="flex items-center gap-1.5 mb-1">
                   <ArrowUpCircle className="h-3.5 w-3.5 text-[hsl(210_90%_55%)]" />
                   <span className="text-[11px] font-semibold text-[hsl(210_90%_55%)]">
-                    {aboveTarget.length} {aboveTarget.length === 1 ? "meta superada" : "metas superadas"} (acima de 100%)
+                    {above.length} {above.length === 1 ? "meta superada" : "metas superadas"} (acima de 100%)
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {aboveTarget.slice(0, 6).map((i) => (
+                  {above.slice(0, 6).map((i) => (
                     <span
                       key={i.name}
                       className="rounded-full bg-[hsl(210_90%_55%/0.15)] px-1.5 py-0.5 text-[10px] text-[hsl(210_90%_55%)] tabular-nums"
@@ -538,8 +538,8 @@ function AlertsPanel({ below, above }: { below: AlertItem[]; above: AlertItem[] 
                       {i.name} · {Math.round(i.progress)}%
                     </span>
                   ))}
-                  {aboveTarget.length > 6 && (
-                    <span className="text-[10px] text-[hsl(210_90%_55%)]/80">+{aboveTarget.length - 6}</span>
+                  {above.length > 6 && (
+                    <span className="text-[10px] text-[hsl(210_90%_55%)]/80">+{above.length - 6}</span>
                   )}
                 </div>
               </div>
