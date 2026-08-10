@@ -67,16 +67,17 @@ export function SalesFunnel({
     <div className="rounded-xl border border-border/50 overflow-hidden">
       {/* Funnel Header */}
       <div className={cn(
-        "flex items-center gap-2 px-4 py-3 bg-gradient-to-r border-b",
+        "flex items-center gap-2 px-2.5 sm:px-4 py-2 sm:py-3 bg-gradient-to-r border-b",
         headerColors
       )}>
-        <Icon className={cn("h-5 w-5", iconColors)} />
-        <h3 className="font-semibold text-sm text-foreground">{title}</h3>
-        <span className="text-xs text-muted-foreground ml-auto">{metrics.filter((m: any) => !m.__placeholder).length} etapas</span>
+        <Icon className={cn("h-4 w-4 sm:h-5 sm:w-5 shrink-0", iconColors)} />
+        <h3 className="font-semibold text-xs sm:text-sm text-foreground truncate">{title}</h3>
+        <span className="text-[10px] sm:text-xs text-muted-foreground ml-auto shrink-0">{metrics.filter((m: any) => !m.__placeholder).length} etapas</span>
       </div>
 
       {/* Funnel Steps */}
-      <div className={cn("p-3 space-y-1", bodyColors)}>
+      <div className={cn("p-2 sm:p-3 space-y-1", bodyColors)}>
+
         {metrics.map((metric, index) => {
           const isPlaceholder = (metric as any).__placeholder === true;
           const prevPlaceholder = index > 0 && (metrics[index - 1] as any).__placeholder === true;
