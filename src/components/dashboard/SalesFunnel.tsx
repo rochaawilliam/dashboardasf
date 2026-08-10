@@ -54,6 +54,15 @@ export function SalesFunnel({
     ? "text-amber-400"
     : "text-emerald-400";
 
+  const bodyColors = colorScheme === "blue"
+    ? "bg-blue-500/[0.07]"
+    : colorScheme === "amber"
+    ? "bg-amber-500/[0.07]"
+    : "bg-emerald-500/[0.07]";
+
+  const cleanName = (name: string) =>
+    name.replace(/\s*\bASF\b\s*/g, " ").replace(/\s{2,}/g, " ").trim();
+
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
       {/* Funnel Header */}
