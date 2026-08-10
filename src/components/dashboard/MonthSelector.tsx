@@ -111,10 +111,11 @@ export function MonthSelector({
     );
   }
 
-  // Desktop: horizontal month buttons
+  // Desktop / mobile landscape: horizontal month buttons
   return (
-    <div className="mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden" lang="pt-BR">
+    <div className="landscape-compact mb-2 sm:mb-4 p-1.5 sm:p-3 bg-card rounded-lg border border-border print:hidden" lang="pt-BR">
       <div className="flex items-center gap-1.5 sm:gap-2">
+
         <CalendarDays className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary shrink-0" />
         
         {/* Year navigation */}
@@ -170,7 +171,8 @@ export function MonthSelector({
       </div>
       
       {/* Legend */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 text-[7px] sm:text-[10px] text-muted-foreground mt-1">
+      <div className="landscape-hide flex flex-wrap gap-2 sm:gap-3 text-[7px] sm:text-[10px] text-muted-foreground mt-1">
+
         <div className="flex items-center gap-0.5">
           <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded border border-success/50 bg-success/10" />
           <span>Com lançamento</span>

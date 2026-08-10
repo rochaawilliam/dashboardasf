@@ -283,3 +283,40 @@
     @apply text-primary;
   }
 }
+
+/* ===== Mobile landscape (short viewport) compaction ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Header: keep it slim so cards are visible without scrolling */
+  header.dashboard-header {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  header.dashboard-header img {
+    height: 2rem;
+  }
+  header.dashboard-header h1 {
+    font-size: 0.95rem;
+  }
+  .landscape-hide {
+    display: none !important;
+  }
+
+  /* Filters / month selector: single compact row, still tappable */
+  .landscape-compact {
+    margin-bottom: 0.375rem;
+    padding: 0.25rem 0.375rem;
+  }
+  .landscape-compact button {
+    min-height: 1.75rem;
+  }
+
+  /* Give the scrollable content real estate */
+  .metric-card {
+    padding: 0.375rem;
+  }
+  .section-title {
+    margin-bottom: 0.375rem;
+    font-size: 0.9rem;
+  }
+}

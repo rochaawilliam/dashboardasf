@@ -45,7 +45,7 @@ export function DashboardHeader({
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "";
 
   return (
-    <header className="mt-2 sm:mt-3 mb-2 sm:mb-4 lg:mb-5 pb-2 sm:pb-4 lg:pb-5 border-b border-border/30">
+    <header className="dashboard-header mt-2 sm:mt-3 mb-2 sm:mb-4 lg:mb-5 pb-2 sm:pb-4 lg:pb-5 border-b border-border/30">
       <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
         {mobileDrawer}
         
@@ -54,15 +54,16 @@ export function DashboardHeader({
           alt="ASF - Amaral & Souza Freitas - Advocacia de Negócios" 
           className="h-9 sm:h-12 lg:h-[60px] w-auto"
         />
-        <div className="h-8 sm:h-10 lg:h-12 w-px bg-border/50 hidden sm:block" />
+        <div className="h-8 sm:h-10 lg:h-12 w-px bg-border/50 hidden sm:block landscape-hide" />
         <div className="min-w-0 flex-1">
           <h1 className="text-sm sm:text-xl lg:text-[28px] font-semibold text-foreground tracking-tight truncate leading-tight">
             Dashboard Executivo Geral
           </h1>
-          <p className="text-muted-foreground text-[8px] sm:text-[10px] lg:text-xs uppercase tracking-wider mt-0.5 leading-tight">
+          <p className="text-muted-foreground text-[8px] sm:text-[10px] lg:text-xs uppercase tracking-wider mt-0.5 leading-tight landscape-hide">
             Desempenho tático e operacional • Administrativo, Crescimento e Jurídico
           </p>
         </div>
+
         
         {/* Right side: theme toggle + notifications + user avatar */}
         <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">

@@ -102,7 +102,8 @@ export function FilterBar({ filters, onFiltersChange, onPrint }: FilterBarProps)
   }
 
   return (
-    <div className="flex flex-row flex-wrap items-center gap-3 mb-4 p-3 bg-card rounded-lg border border-border print:hidden">
+    <div className="landscape-compact flex flex-row flex-wrap items-center gap-3 mb-4 p-3 bg-card rounded-lg border border-border print:hidden">
+
       <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <Filter className="h-4 w-4" />
         <span>Filtros:</span>
