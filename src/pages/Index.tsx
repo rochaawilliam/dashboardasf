@@ -542,7 +542,7 @@ const Index = () => {
       const ob = pipelineData.onboarding;
       const obMonth = ms ? ob.byMonth?.[ms] : undefined;
       const obDays = obMonth?.avgOnboardingDays ?? (ms ? null : ob.avgOnboardingDays);
-      const obCompliance = obMonth?.complianceRate ?? (ms ? null : ob.complianceRate);
+      const obCompliance = obMonth?.avgProgress ?? (ms ? null : ob.avgProgress ?? null);
       if (obDays !== null && obDays !== undefined) values[LEAD_TIME_ONBOARDING_ID] = obDays;
       if (obCompliance !== null && obCompliance !== undefined) values[TAXA_ONBOARDING_PRAZO_ID] = obCompliance;
     }
@@ -741,7 +741,7 @@ const Index = () => {
     if (pipelineData.onboarding) {
       const ob = pipelineData.onboarding;
       if (ob.avgOnboardingDays !== null) values[LEAD_TIME_ONBOARDING_ID] = ob.avgOnboardingDays;
-      if (ob.complianceRate !== null) values[TAXA_ONBOARDING_PRAZO_ID] = ob.complianceRate;
+      if (ob.avgProgress !== null && ob.avgProgress !== undefined) values[TAXA_ONBOARDING_PRAZO_ID] = ob.avgProgress;
     }
 
     // Training accumulated
@@ -1032,12 +1032,12 @@ const Index = () => {
           calculation: `Média de ${fmt(ob.avgOnboardingDays)} dias.`,
         };
       }
-      if (ob.complianceRate !== null) {
+      if (ob.avgProgress !== null && ob.avgProgress !== undefined) {
         info[TAXA_ONBOARDING_PRAZO_ID] = {
-          source: "Operacional",
-          filter: "created_at",
-          formula: "onboardings_no_prazo ÷ onboardings_totais × 100",
-          calculation: `Taxa: ${fmt(ob.complianceRate)}%`,
+          source: "Onboarding Compass",
+          filter: "clientes por mês de entrada",
+          formula: "média(etapas concluídas ÷ etapas totais) por cliente × 100",
+          calculation: `Progresso médio: ${fmt(ob.avgProgress)}%`,
         };
       }
     }

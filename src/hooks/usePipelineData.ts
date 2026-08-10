@@ -31,6 +31,7 @@ export interface OperationalMetrics {
 export interface OnboardingMetrics {
   avgOnboardingDays: number | null;
   complianceRate: number | null;
+  avgProgress?: number | null;
   reschedulingRate: number;
   activeClients: number;
   completedClients: number;
@@ -38,6 +39,7 @@ export interface OnboardingMetrics {
   byMonth?: Record<string, {
     avgOnboardingDays: number | null;
     complianceRate: number | null;
+    avgProgress?: number | null;
     totalClients: number;
     completedClients: number;
     isPartial: boolean;
