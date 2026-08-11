@@ -900,7 +900,11 @@ export function GoalsPerformanceAnalysis({
               <Loader2 className="h-4 w-4 animate-spin" /> Gerando ações...
             </div>
           ) : splitAnalysis(analysis).checklist.length > 0 ? (
-            <ChecklistPanel items={splitAnalysis(analysis).checklist} />
+            <ChecklistPanel
+              items={splitAnalysis(analysis).checklist}
+              context={`${tabTitle} — ${selectedMonth ? MONTH_NAMES[selectedMonth - 1] : "Anual"}/${selectedYear}`}
+            />
+
           ) : (
             <p className="text-base text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
           )}
