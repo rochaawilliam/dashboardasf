@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks, AlertTriangle, ArrowUpCircle } from "lucide-react";
+import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks, AlertTriangle, ArrowUpCircle, Send } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { Metric, MonthlyTarget } from "@/hooks/useMetrics";
