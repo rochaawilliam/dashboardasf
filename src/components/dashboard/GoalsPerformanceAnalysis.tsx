@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks, AlertTriangle, ArrowUpCircle } from "lucide-react";
+import { Gauge, Sparkles, RefreshCw, Loader2, TrendingUp, ChevronDown, ListChecks, AlertTriangle, ArrowUpCircle, Send } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { Metric, MonthlyTarget } from "@/hooks/useMetrics";
@@ -191,33 +192,77 @@ function splitAnalysis(text: string) {
   return { main, panorama, improvements, checklist };
 }
 
-function ChecklistPanel({ items }: { items: string[] }) {
+function ChecklistPanel({ items, context }: { items: string[]; context: string }) {
   const [done, setDone] = useState<Record<number, boolean>>({});
+  const [sending, setSending] = useState(false);
+
+  const pending = items.filter((_, i) => !done[i]);
+
+  const handleSend = async () => {
+    if (pending.length === 0) return;
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-tasks-to-pipeline", {
+        body: { tasks: pending.map((t) => ({ title: t })), context },
+      });
+      if (error) throw error;
+      const created = (data as any)?.created ?? 0;
+      const updated = (data as any)?.updated ?? 0;
+      toast({
+        title: "Tarefas enviadas ao Pipeline",
+        description: `${created} criada(s), ${updated} atualizada(s). Sem responsável definido — qualquer usuário pode assumir.`,
+      });
+    } catch (e: any) {
+      toast({
+        title: "Não foi possível enviar as tarefas",
+        description: e?.message ?? "Erro desconhecido ao integrar com o Pipeline.",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
-    <div className="space-y-1.5">
-      {items.map((item, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => setDone((d) => ({ ...d, [i]: !d[i] }))}
-          className="w-full flex items-start gap-2 text-left group"
-        >
-          <span
-            className={cn(
-              "mt-[2px] h-3.5 w-3.5 shrink-0 rounded border border-border flex items-center justify-center text-[9px] leading-none",
-              done[i] && "bg-primary border-primary text-primary-foreground",
-            )}
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        {items.map((item, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => setDone((d) => ({ ...d, [i]: !d[i] }))}
+            className="w-full flex items-start gap-2 text-left group"
           >
-            {done[i] ? "✓" : ""}
-          </span>
-          <span className={cn("text-base leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
-            {renderInline(item)}
-          </span>
-        </button>
-      ))}
+            <span
+              className={cn(
+                "mt-[2px] h-3.5 w-3.5 shrink-0 rounded border border-border flex items-center justify-center text-[9px] leading-none",
+                done[i] && "bg-primary border-primary text-primary-foreground",
+              )}
+            >
+              {done[i] ? "✓" : ""}
+            </span>
+            <span className={cn("text-base leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
+              {renderInline(item)}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="w-full gap-2"
+        onClick={handleSend}
+        disabled={sending || pending.length === 0}
+      >
+        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        Enviar tarefas para o Pipeline
+      </Button>
     </div>
   );
 }
+
 
 function AnalysisText({ text }: { text: string }) {
   const blocks = text.split("\n").filter((l) => l.trim().length > 0);
@@ -855,7 +900,11 @@ export function GoalsPerformanceAnalysis({
               <Loader2 className="h-4 w-4 animate-spin" /> Gerando ações...
             </div>
           ) : splitAnalysis(analysis).checklist.length > 0 ? (
-            <ChecklistPanel items={splitAnalysis(analysis).checklist} />
+            <ChecklistPanel
+              items={splitAnalysis(analysis).checklist}
+              context={`${tabTitle} — ${selectedMonth ? MONTH_NAMES[selectedMonth - 1] : "Anual"}/${selectedYear}`}
+            />
+
           ) : (
             <p className="text-base text-muted-foreground">Nenhuma ação corretiva gerada ainda.</p>
           )}
