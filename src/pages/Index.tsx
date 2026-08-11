@@ -494,8 +494,6 @@ const Index = () => {
     const opReunioes = getPassageTotal("reunioes");
     const opPropostas = getPassageTotal("propostas");
     const opContratos = getPassageTotal("contratos");
-    if (opLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(opReunioes / opLeads * 10000) / 100;
-    if (opReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(opPropostas / opReunioes * 10000) / 100;
     if (opLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(opContratos / opLeads * 10000) / 100;
 
     // Tempo Médio de Fechamento (passage-based, by created_at month bucket)
