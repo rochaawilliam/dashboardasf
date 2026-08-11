@@ -1912,9 +1912,9 @@ const Index = () => {
                             const pipelineIds = new Set([
                               ...Object.keys(PIPELINE_METRIC_MAP),
                               ...Object.keys(PIPELINE_AREA_MAP),
-                              TAXA_AGENDAMENTO_ID, TAXA_COMPARECIMENTO_ID, TAXA_CONVERSAO_ID,
+                              TAXA_CONVERSAO_ID,
                               TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
-                              MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID, TAXA_AVANCO_ID,
+                              MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID,
                               COMENTARIOS_LEAD_ID, TME_SLA_ID, TMA_ID,
                               VALOR_INVESTIDO_ONLINE_ID, IMPRESSOES_ASF_ID, ALCANCE_ASF_ID, CONVERSAS_INICIADAS_ID,
                             ]);
