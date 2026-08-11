@@ -1951,8 +1951,8 @@ const Index = () => {
                           <GoalsPerformanceAnalysis
                             tabTitle={config.title}
                             metrics={categoryMetrics}
-                            monthlyValues={mergedMonthlyValues}
-                            accumulatedValues={mergedAccumulatedValues}
+                            monthlyValues={analysisMonthlyValues}
+                            accumulatedValues={analysisAccumulatedValues}
                             monthlyTargets={monthlyTargets}
                             selectedMonth={selectedMonth}
                             selectedYear={selectedYear}
