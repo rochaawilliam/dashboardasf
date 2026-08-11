@@ -171,7 +171,15 @@ function splitAnalysis(text: string) {
       .slice(idx)
       .split("\n")
       .slice(1)
-      .map((l) => l.trim().replace(/^[-*•]\s*/, "").replace(/^\[\s*\]\s*/, ""))
+      .map((l) =>
+        l
+          .trim()
+          .replace(/^[-*•]\s*/, "")
+          .replace(/^\[\s*\]\s*/, "")
+          .replace(/^\*\*?\s*A[cç][aã]o\s*(?:\d+)?\s*[:).-]?\s*\*\*?/i, "")
+          .replace(/^A[cç][aã]o\s*(?:\d+)?\s*[:).-]?\s*/i, "")
+          .trim()
+      )
       .filter((l) => l.length > 0 && !/^\*\*/.test(l));
   }
 
