@@ -1544,6 +1544,22 @@ const Index = () => {
     });
   }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues, pipelineData]);
 
+  // Valores derivados (calculados só na renderização dos cards) para a Análise de Desempenho
+  const analysisMonthlyValues = useMemo(() => {
+    const totalContratosMonthly =
+      (pipelineMonthlyValues[CONTRATOS_ONLINE_ID] ?? originValues.online.monthly ?? 0) +
+      (pipelineMonthlyValues[CONTRATOS_OFFLINE_ID] ?? originValues.offline.monthly ?? 0);
+    return { ...mergedMonthlyValues, [TOTAL_CONTRATOS_ID]: totalContratosMonthly };
+  }, [mergedMonthlyValues, pipelineMonthlyValues, originValues]);
+
+  const analysisAccumulatedValues = useMemo(() => {
+    const totalContratosAccumulated =
+      (pipelineAccumulatedValues[CONTRATOS_ONLINE_ID] ?? originValues.online.accumulated ?? 0) +
+      (pipelineAccumulatedValues[CONTRATOS_OFFLINE_ID] ?? originValues.offline.accumulated ?? 0);
+    return { ...mergedAccumulatedValues, [TOTAL_CONTRATOS_ID]: totalContratosAccumulated };
+  }, [mergedAccumulatedValues, pipelineAccumulatedValues, originValues]);
+
+
   // Group metrics by category
   const groupedMetrics = useMemo(() => {
     return adjustedMetrics.reduce((acc, metric) => {
@@ -1935,8 +1951,8 @@ const Index = () => {
                           <GoalsPerformanceAnalysis
                             tabTitle={config.title}
                             metrics={categoryMetrics}
-                            monthlyValues={mergedMonthlyValues}
-                            accumulatedValues={mergedAccumulatedValues}
+                            monthlyValues={analysisMonthlyValues}
+                            accumulatedValues={analysisAccumulatedValues}
                             monthlyTargets={monthlyTargets}
                             selectedMonth={selectedMonth}
                             selectedYear={selectedYear}
