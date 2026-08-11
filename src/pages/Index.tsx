@@ -509,7 +509,6 @@ const Index = () => {
     if (ops) {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
-      values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
       // TME (Operacional: minutos)
       values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
