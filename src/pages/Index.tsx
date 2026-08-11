@@ -2410,28 +2410,6 @@ const Index = () => {
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
 
-                                    // Compute Metas Indutoras = % of Crescimento metrics meeting their target
-                                    let metasIndutorasValue = 0;
-                                    if (metric.id === METAS_INDUTORAS_ID) {
-                                      const crescimentoMetrics = groupedMetrics["experiencia_cliente"] || [];
-                                      let metWithTarget = 0;
-                                      let metGoal = 0;
-                                      crescimentoMetrics.forEach((cm) => {
-                                        if (cm.id === METAS_INDUTORAS_ID) return; // skip self
-                                        if (cm.target_value <= 0) return;
-                                        metWithTarget++;
-                                        const cmMonthly = mergedMonthlyValues[cm.id] ?? null;
-                                        const cmAccum = mergedAccumulatedValues[cm.id] ?? 0;
-                                        const cmValue = selectedMonth !== null ? (cmMonthly ?? 0) : cmAccum;
-                                        const cmTarget = selectedMonth !== null
-                                          ? (monthlyTargets?.find((t) => t.metric_id === cm.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? cm.target_value / 12)
-                                          : cm.target_value;
-                                        if (cmTarget > 0 && cmValue / cmTarget >= 1) metGoal++;
-                                      });
-                                      metasIndutorasValue = metWithTarget > 0 ? Math.round(metGoal / metWithTarget * 10000) / 100 : 0;
-                                      dynamicMetric = { ...dynamicMetric, current_value: metasIndutorasValue, target_value: 100 };
-                                    }
-
                                     const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === TAXA_AVANCO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
                                     const isMetasIndutoras = metric.id === METAS_INDUTORAS_ID;
