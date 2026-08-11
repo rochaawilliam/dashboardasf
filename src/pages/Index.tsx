@@ -520,16 +520,12 @@ const Index = () => {
       if (dashTma?.tmaDays !== null && dashTma?.tmaDays !== undefined) values[TMA_ID] = dashTma.tmaDays;
     }
 
-    // Fallback to Dashboard panel only if Operacional has no data for this period
-    if (values[TAXA_AGENDAMENTO_ID] === undefined || values[TAXA_CONVERSAO_ID] === undefined) {
+    // Fallback to Dashboard panel for conversion if Operacional has no data for this period
+    if (values[TAXA_CONVERSAO_ID] === undefined) {
       const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
-      if (dash) {
-        if (values[TAXA_AGENDAMENTO_ID] === undefined) values[TAXA_AGENDAMENTO_ID] = dash.taxaAgendamento;
-        if (values[TAXA_COMPARECIMENTO_ID] === undefined) values[TAXA_COMPARECIMENTO_ID] = dash.taxaComparecimento;
-        if (values[TAXA_CONVERSAO_ID] === undefined) values[TAXA_CONVERSAO_ID] = dash.conversao;
-        if (values[TEMPO_MEDIO_FECHAMENTO_ID] === undefined && dash.avgCloseTimeDays !== null) {
-          values[TEMPO_MEDIO_FECHAMENTO_ID] = dash.avgCloseTimeDays;
-        }
+      if (dash?.conversao !== undefined) values[TAXA_CONVERSAO_ID] = dash.conversao;
+      if (values[TEMPO_MEDIO_FECHAMENTO_ID] === undefined && dash?.avgCloseTimeDays !== null && dash?.avgCloseTimeDays !== undefined) {
+        values[TEMPO_MEDIO_FECHAMENTO_ID] = dash.avgCloseTimeDays;
       }
     }
 
