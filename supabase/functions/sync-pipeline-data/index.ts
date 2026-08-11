@@ -1324,8 +1324,6 @@ Deno.serve(async (req) => {
       prospects: number;
       valor_gerado: number;
       conversao: number;
-      taxaAgendamento: number;
-      taxaComparecimento: number;
       avgCloseTimeDays: number | null;
       tmeMinutes: number | null;
       tmaDays: number | null;
@@ -1363,8 +1361,6 @@ Deno.serve(async (req) => {
 
       // Conversão = contratos snapshot / leads cumulative * 100
       const conversao = leads.count > 0 ? Math.round((contratosSnap.count / leads.count) * 10000) / 100 : 0;
-      const taxaAgendamento = leads.count > 0 ? Math.round((reunioes.count / leads.count) * 10000) / 100 : 0;
-      const taxaComparecimento = reunioes.count > 0 ? Math.round((propostas.count / reunioes.count) * 10000) / 100 : 0;
 
       // Avg close time (matching Dashboard)
       const contratosCards = monthFilteredCards.filter((c: any) => c.stage_id === "contratos");
@@ -1421,8 +1417,6 @@ Deno.serve(async (req) => {
         prospects,
         valor_gerado: valorGerado,
         conversao,
-        taxaAgendamento,
-        taxaComparecimento,
         avgCloseTimeDays: closeN > 0 ? Math.round(closeTotal / closeN) : null,
         tmeMinutes: tmeAvg,
         tmaDays: tmaAvg,
@@ -1504,7 +1498,7 @@ Deno.serve(async (req) => {
     // Dashboard yearly totals
     const dashboardTotals: DashboardMonthData = {
       leads: 0, reunioes: 0, propostas: 0, r2: 0, contratos: 0, prospects: 0, valor_gerado: 0,
-      conversao: 0, taxaAgendamento: 0, taxaComparecimento: 0,
+      conversao: 0,
       avgCloseTimeDays: null, tmeMinutes: null, tmaDays: null, tarefasRealizadas: 0,
     };
     {
@@ -1522,8 +1516,6 @@ Deno.serve(async (req) => {
       dashboardTotals.prospects = allMonthCards.filter((c: any) => c.stage_id === "prospects").length;
       dashboardTotals.valor_gerado = deduplicatedValorGerado(allMonthCards.filter((c: any) => c.stage_id === "contratos"));
       dashboardTotals.conversao = tLeads.count > 0 ? Math.round((tContratos.count / tLeads.count) * 10000) / 100 : 0;
-      dashboardTotals.taxaAgendamento = tLeads.count > 0 ? Math.round((tReunioes.count / tLeads.count) * 10000) / 100 : 0;
-      dashboardTotals.taxaComparecimento = tReunioes.count > 0 ? Math.round((tPropostas.count / tReunioes.count) * 10000) / 100 : 0;
 
       // Totals TME/TMA/close
       const tmeVals: number[] = [];
