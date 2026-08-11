@@ -710,8 +710,6 @@ const Index = () => {
         totalContratos += originData.contratos ?? 0;
       }
     }
-    if (totalLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(totalReunioes / totalLeads * 10000) / 100;
-    if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
     if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
 
     // Tempo Médio accumulated
@@ -724,7 +722,6 @@ const Index = () => {
     if (ops) {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
-      values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
       values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
     }
