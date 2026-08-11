@@ -205,15 +205,32 @@ function splitAnalysis(text: string) {
 function ChecklistPanel({ items, context }: { items: string[]; context: string }) {
   const [done, setDone] = useState<Record<number, boolean>>({});
   const [sending, setSending] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Record<number, boolean>>({});
 
   const pending = items.filter((_, i) => !done[i]);
 
+  useEffect(() => {
+    if (!open) return;
+    const next: Record<number, boolean> = {};
+    items.forEach((_, i) => {
+      if (!done[i]) next[i] = true;
+    });
+    setSelected(next);
+  }, [open, items, done]);
+
+  const capitalizeFirst = (text: string) => {
+    if (!text) return text;
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  };
+
   const handleSend = async () => {
-    if (pending.length === 0) return;
+    const toSend = items.filter((_, i) => selected[i]);
+    if (toSend.length === 0) return;
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-tasks-to-pipeline", {
-        body: { tasks: pending.map((t) => ({ title: t })), context },
+        body: { tasks: toSend.map((t) => ({ title: t })), context },
       });
       if (error) throw error;
       const created = (data as any)?.created ?? 0;
@@ -222,6 +239,7 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
         title: "Tarefas enviadas ao Pipeline",
         description: `${created} criada(s), ${updated} atualizada(s). Sem responsável definido — qualquer usuário pode assumir.`,
       });
+      setOpen(false);
     } catch (e: any) {
       toast({
         title: "Não foi possível enviar as tarefas",
@@ -233,9 +251,11 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
     }
   };
 
+  const selectedCount = items.filter((_, i) => selected[i]).length;
+
   return (
-    <div className="space-y-3">
-      <div className="space-y-1.5">
+    <div className="flex flex-col h-full gap-3">
+      <div className="space-y-1.5 flex-1">
         {items.map((item, i) => (
           <button
             key={i}
@@ -252,7 +272,7 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
               {done[i] ? "✓" : ""}
             </span>
             <span className={cn("text-base leading-relaxed text-muted-foreground", done[i] && "line-through opacity-60")}>
-              {renderInline(item)}
+              {renderInline(capitalizeFirst(item))}
             </span>
           </button>
         ))}
@@ -261,14 +281,61 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
       <Button
         type="button"
         size="sm"
-        variant="outline"
-        className="w-full gap-2"
-        onClick={handleSend}
-        disabled={sending || pending.length === 0}
+        className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+        onClick={() => setOpen(true)}
+        disabled={pending.length === 0}
       >
-        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        <Send className="h-4 w-4" />
         Enviar tarefas para o Pipeline
       </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enviar ações para o Pipeline</DialogTitle>
+            <DialogDescription>
+              Selecione quais ações serão enviadas para a aba Tarefas do Pipeline Vision Board.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2 max-h-[60vh] overflow-y-auto">
+            {items.map((item, i) => (
+              <label
+                key={i}
+                className="flex items-start gap-2 rounded-md border border-border/50 p-2 cursor-pointer hover:bg-muted/30"
+              >
+                <Checkbox
+                  checked={!!selected[i]}
+                  onCheckedChange={(checked) =>
+                    setSelected((s) => ({ ...s, [i]: checked === true }))
+                  }
+                />
+                <span className="text-sm text-foreground leading-snug">
+                  {capitalizeFirst(item)}
+                </span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={sending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+              onClick={handleSend}
+              disabled={sending || selectedCount === 0}
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              Enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
