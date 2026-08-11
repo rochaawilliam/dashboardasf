@@ -254,7 +254,7 @@ Deno.serve(async (req) => {
       (sources ?? []).map(async (src: any) => {
         const ms = `${src.year}-${String(src.month).padStart(2, "0")}`;
         try {
-          const res = await fetch(src.csv_url);
+          const res = await fetch(src.csv_url, { signal: AbortSignal.timeout(15000) });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const csv = await res.text();
           const { mode, daysInMonth, dayLimit } = modeFor(src.year, src.month);
