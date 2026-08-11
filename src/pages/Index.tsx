@@ -365,21 +365,15 @@ const Index = () => {
   };
 
   // Crescimento Comercial rates from pipeline
-  const TAXA_AGENDAMENTO_ID = "a1b2c3d4-1111-4aaa-bbbb-111111111111";
-  const TAXA_COMPARECIMENTO_ID = "a1b2c3d4-2222-4aaa-bbbb-222222222222";
   const TAXA_CONVERSAO_ID = "a1b2c3d4-3333-4aaa-bbbb-333333333333";
   const TEMPO_MEDIO_FECHAMENTO_ID = "ab16383b-2125-4bec-b942-ae4466a8d069";
 
   // Operational metrics from Pipeline
   const MEDIA_ACOES_DIA_ID = "d1e2f3a4-1111-4ddd-eeee-111111111111";
   const TAXA_ACOMPANHAMENTO_ID = "d1e2f3a4-2222-4ddd-eeee-222222222222";
-  const TAXA_AVANCO_ID = "d1e2f3a4-3333-4ddd-eeee-333333333333";
   const COMENTARIOS_LEAD_ID = "d1e2f3a4-4444-4ddd-eeee-444444444444";
   const TME_SLA_ID = "d1e2f3a4-5555-4ddd-eeee-555555555555";
   const TMA_ID = "d1e2f3a4-6666-4ddd-eeee-666666666666";
-
-  // Metas Indutoras
-  const METAS_INDUTORAS_ID = "292f5034-c7ea-4e03-b53d-453622e671c7";
 
   // Onboarding metrics (Retenção e Lifetime)
   const LEAD_TIME_ONBOARDING_ID = "0fa037ef-7740-4670-a7e8-f2efe4753472";
@@ -500,8 +494,6 @@ const Index = () => {
     const opReunioes = getPassageTotal("reunioes");
     const opPropostas = getPassageTotal("propostas");
     const opContratos = getPassageTotal("contratos");
-    if (opLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(opReunioes / opLeads * 10000) / 100;
-    if (opReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(opPropostas / opReunioes * 10000) / 100;
     if (opLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(opContratos / opLeads * 10000) / 100;
 
     // Tempo Médio de Fechamento (passage-based, by created_at month bucket)
@@ -517,7 +509,6 @@ const Index = () => {
     if (ops) {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
-      values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
       // TME (Operacional: minutos)
       values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
@@ -529,16 +520,12 @@ const Index = () => {
       if (dashTma?.tmaDays !== null && dashTma?.tmaDays !== undefined) values[TMA_ID] = dashTma.tmaDays;
     }
 
-    // Fallback to Dashboard panel only if Operacional has no data for this period
-    if (values[TAXA_AGENDAMENTO_ID] === undefined || values[TAXA_CONVERSAO_ID] === undefined) {
+    // Fallback to Dashboard panel for conversion if Operacional has no data for this period
+    if (values[TAXA_CONVERSAO_ID] === undefined) {
       const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
-      if (dash) {
-        if (values[TAXA_AGENDAMENTO_ID] === undefined) values[TAXA_AGENDAMENTO_ID] = dash.taxaAgendamento;
-        if (values[TAXA_COMPARECIMENTO_ID] === undefined) values[TAXA_COMPARECIMENTO_ID] = dash.taxaComparecimento;
-        if (values[TAXA_CONVERSAO_ID] === undefined) values[TAXA_CONVERSAO_ID] = dash.conversao;
-        if (values[TEMPO_MEDIO_FECHAMENTO_ID] === undefined && dash.avgCloseTimeDays !== null) {
-          values[TEMPO_MEDIO_FECHAMENTO_ID] = dash.avgCloseTimeDays;
-        }
+      if (dash?.conversao !== undefined) values[TAXA_CONVERSAO_ID] = dash.conversao;
+      if (values[TEMPO_MEDIO_FECHAMENTO_ID] === undefined && dash?.avgCloseTimeDays !== null && dash?.avgCloseTimeDays !== undefined) {
+        values[TEMPO_MEDIO_FECHAMENTO_ID] = dash.avgCloseTimeDays;
       }
     }
 
@@ -723,8 +710,6 @@ const Index = () => {
         totalContratos += originData.contratos ?? 0;
       }
     }
-    if (totalLeads > 0) values[TAXA_AGENDAMENTO_ID] = Math.round(totalReunioes / totalLeads * 10000) / 100;
-    if (totalReunioes > 0) values[TAXA_COMPARECIMENTO_ID] = Math.round(totalPropostas / totalReunioes * 10000) / 100;
     if (totalLeads > 0) values[TAXA_CONVERSAO_ID] = Math.round(totalContratos / totalLeads * 10000) / 100;
 
     // Tempo Médio accumulated
@@ -737,7 +722,6 @@ const Index = () => {
     if (ops) {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
-      values[TAXA_AVANCO_ID] = ops.advanceRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
       values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
     }
@@ -838,40 +822,6 @@ const Index = () => {
       }
     }
 
-    // Taxa de Agendamento = Reuniões / Leads
-    if (opLeads > 0) {
-      info[TAXA_AGENDAMENTO_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "Reuniões ÷ Leads × 100",
-        calculation: `${fmtInt(opReunioes)} ÷ ${fmtInt(opLeads)} × 100 = ${fmt(opReunioes / opLeads * 100)}%`,
-      };
-    } else if (dash) {
-      info[TAXA_AGENDAMENTO_ID] = {
-        source: "Dashboard",
-        filter: "month",
-        formula: "Reuniões ÷ Leads × 100 (snapshot)",
-        calculation: `Resultado: ${fmt(dash.taxaAgendamento)}%`,
-      };
-    }
-
-    // Taxa de Comparecimento = Propostas / Reuniões
-    if (opReunioes > 0) {
-      info[TAXA_COMPARECIMENTO_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "Propostas ÷ Reuniões × 100",
-        calculation: `${fmtInt(opPropostas)} ÷ ${fmtInt(opReunioes)} × 100 = ${fmt(opPropostas / opReunioes * 100)}%`,
-      };
-    } else if (dash) {
-      info[TAXA_COMPARECIMENTO_ID] = {
-        source: "Dashboard",
-        filter: "month",
-        formula: "Propostas ÷ Reuniões × 100 (snapshot)",
-        calculation: `Resultado: ${fmt(dash.taxaComparecimento)}%`,
-      };
-    }
-
     // Taxa de Conversão = Contratos / Leads
     if (opLeads > 0) {
       info[TAXA_CONVERSAO_ID] = {
@@ -941,12 +891,6 @@ const Index = () => {
         filter: "created_at",
         formula: "leads_com_followup ÷ leads_totais × 100",
         calculation: `Taxa: ${fmt(ops.followUpRate)}%`,
-      };
-      info[TAXA_AVANCO_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "leads_avançados ÷ leads_totais × 100",
-        calculation: `Taxa: ${fmt(ops.advanceRate)}%`,
       };
       info[COMENTARIOS_LEAD_ID] = {
         source: "Operacional",
@@ -1968,9 +1912,9 @@ const Index = () => {
                             const pipelineIds = new Set([
                               ...Object.keys(PIPELINE_METRIC_MAP),
                               ...Object.keys(PIPELINE_AREA_MAP),
-                              TAXA_AGENDAMENTO_ID, TAXA_COMPARECIMENTO_ID, TAXA_CONVERSAO_ID,
+                              TAXA_CONVERSAO_ID,
                               TEMPO_MEDIO_FECHAMENTO_ID, ROI_ONLINE_ID, ROI_OFFLINE_ID,
-                              MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID, TAXA_AVANCO_ID,
+                              MEDIA_ACOES_DIA_ID, TAXA_ACOMPANHAMENTO_ID,
                               COMENTARIOS_LEAD_ID, TME_SLA_ID, TMA_ID,
                               VALOR_INVESTIDO_ONLINE_ID, IMPRESSOES_ASF_ID, ALCANCE_ASF_ID, CONVERSAS_INICIADAS_ID,
                             ]);
@@ -2466,38 +2410,15 @@ const Index = () => {
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
 
-                                    // Compute Metas Indutoras = % of Crescimento metrics meeting their target
-                                    let metasIndutorasValue = 0;
-                                    if (metric.id === METAS_INDUTORAS_ID) {
-                                      const crescimentoMetrics = groupedMetrics["experiencia_cliente"] || [];
-                                      let metWithTarget = 0;
-                                      let metGoal = 0;
-                                      crescimentoMetrics.forEach((cm) => {
-                                        if (cm.id === METAS_INDUTORAS_ID) return; // skip self
-                                        if (cm.target_value <= 0) return;
-                                        metWithTarget++;
-                                        const cmMonthly = mergedMonthlyValues[cm.id] ?? null;
-                                        const cmAccum = mergedAccumulatedValues[cm.id] ?? 0;
-                                        const cmValue = selectedMonth !== null ? (cmMonthly ?? 0) : cmAccum;
-                                        const cmTarget = selectedMonth !== null
-                                          ? (monthlyTargets?.find((t) => t.metric_id === cm.id && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? cm.target_value / 12)
-                                          : cm.target_value;
-                                        if (cmTarget > 0 && cmValue / cmTarget >= 1) metGoal++;
-                                      });
-                                      metasIndutorasValue = metWithTarget > 0 ? Math.round(metGoal / metWithTarget * 10000) / 100 : 0;
-                                      dynamicMetric = { ...dynamicMetric, current_value: metasIndutorasValue, target_value: 100 };
-                                    }
-
                                     const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
-                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_AGENDAMENTO_ID || metric.id === TAXA_COMPARECIMENTO_ID || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === TAXA_AVANCO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
-                                    const isMetasIndutoras = metric.id === METAS_INDUTORAS_ID;
+                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
                                     const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
-                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isMetasIndutoras || isTrainingComputed;
+                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isMetasIndutoras ? metasIndutorasValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
-                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isMetasIndutoras ? metasIndutorasValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
