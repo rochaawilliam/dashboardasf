@@ -94,8 +94,6 @@ export interface DashboardMonthData {
   prospects: number;
   valor_gerado: number;
   conversao: number;
-  taxaAgendamento: number;
-  taxaComparecimento: number;
   avgCloseTimeDays: number | null;
   tmeMinutes: number | null;
   tmaDays: number | null;
