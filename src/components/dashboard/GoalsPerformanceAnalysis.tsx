@@ -967,7 +967,7 @@ export function GoalsPerformanceAnalysis({
         </div>
 
         {/* Terceira coluna: checklist */}
-        <div className="rounded-lg border border-border/50 bg-card p-3 sm:p-4 min-h-[140px]">
+        <div className="flex flex-col rounded-lg border border-border/50 bg-card p-3 sm:p-4 min-h-[140px]">
           <div className="flex items-center gap-1.5 mb-2">
             <ListChecks className="h-4 w-4 text-primary" />
             <span className="text-base font-semibold text-foreground">Checklist de ações corretivas</span>
