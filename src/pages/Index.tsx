@@ -822,40 +822,6 @@ const Index = () => {
       }
     }
 
-    // Taxa de Agendamento = Reuniões / Leads
-    if (opLeads > 0) {
-      info[TAXA_AGENDAMENTO_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "Reuniões ÷ Leads × 100",
-        calculation: `${fmtInt(opReunioes)} ÷ ${fmtInt(opLeads)} × 100 = ${fmt(opReunioes / opLeads * 100)}%`,
-      };
-    } else if (dash) {
-      info[TAXA_AGENDAMENTO_ID] = {
-        source: "Dashboard",
-        filter: "month",
-        formula: "Reuniões ÷ Leads × 100 (snapshot)",
-        calculation: `Resultado: ${fmt(dash.taxaAgendamento)}%`,
-      };
-    }
-
-    // Taxa de Comparecimento = Propostas / Reuniões
-    if (opReunioes > 0) {
-      info[TAXA_COMPARECIMENTO_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "Propostas ÷ Reuniões × 100",
-        calculation: `${fmtInt(opPropostas)} ÷ ${fmtInt(opReunioes)} × 100 = ${fmt(opPropostas / opReunioes * 100)}%`,
-      };
-    } else if (dash) {
-      info[TAXA_COMPARECIMENTO_ID] = {
-        source: "Dashboard",
-        filter: "month",
-        formula: "Propostas ÷ Reuniões × 100 (snapshot)",
-        calculation: `Resultado: ${fmt(dash.taxaComparecimento)}%`,
-      };
-    }
-
     // Taxa de Conversão = Contratos / Leads
     if (opLeads > 0) {
       info[TAXA_CONVERSAO_ID] = {
@@ -925,12 +891,6 @@ const Index = () => {
         filter: "created_at",
         formula: "leads_com_followup ÷ leads_totais × 100",
         calculation: `Taxa: ${fmt(ops.followUpRate)}%`,
-      };
-      info[TAXA_AVANCO_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "leads_avançados ÷ leads_totais × 100",
-        calculation: `Taxa: ${fmt(ops.advanceRate)}%`,
       };
       info[COMENTARIOS_LEAD_ID] = {
         source: "Operacional",
