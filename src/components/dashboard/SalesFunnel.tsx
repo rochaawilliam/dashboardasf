@@ -148,34 +148,36 @@ export function SalesFunnel({
                       : onCardClick ? () => onCardClick(metric) : undefined
                   }
                   pipelineCardNames={pipelineCardNames?.[metric.id]}
-                >
-                  {(extra || conv) && (
-                    <div className="mt-1 space-y-1">
-                      {extra}
-                      {conv && (
-                        <div className="flex items-center justify-between gap-2 rounded-md border border-border/50 bg-background/40 px-2 py-1">
-                          <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                            Conversão {conv.from} →
-                          </span>
-                          <span className="text-[10px] sm:text-xs font-semibold shrink-0">
-                            <span className={cn(
-                              conv.rate == null
-                                ? "text-muted-foreground"
-                                : conv.rate >= conv.target
-                                ? "text-success"
-                                : conv.rate >= conv.target * 0.85
-                                ? "text-warning"
-                                : "text-destructive"
-                            )}>
-                              {conv.rate == null ? "—" : `${formatMetricValue(Math.round(conv.rate), "%", "")}`}
-                            </span>
-                            <span className="text-muted-foreground font-normal"> / meta {conv.target}%</span>
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CircularProgressCard>
+                  sideContent={
+                    (extra || conv) ? (
+                      <div className="space-y-1">
+                        {extra}
+                        {conv && (
+                          <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                            <p className="text-[9px] uppercase tracking-wide text-muted-foreground truncate">
+                              Conv. {conv.from}
+                            </p>
+                            <p className="text-xs font-semibold leading-tight">
+                              <span className={cn(
+                                conv.rate == null
+                                  ? "text-muted-foreground"
+                                  : conv.rate >= conv.target
+                                  ? "text-success"
+                                  : conv.rate >= conv.target * 0.85
+                                  ? "text-warning"
+                                  : "text-destructive"
+                              )}>
+                                {conv.rate == null ? "—" : `${formatMetricValue(Math.round(conv.rate), "%", "")}`}
+                              </span>
+                              <span className="text-muted-foreground font-normal"> / {conv.target}%</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : undefined
+                  }
+                />
+
               </div>
 
             </React.Fragment>
