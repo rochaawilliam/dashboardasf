@@ -302,27 +302,32 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
           <DialogHeader>
             <DialogTitle>Enviar ações para o Pipeline</DialogTitle>
             <DialogDescription>
-              Selecione quais ações serão enviadas para a aba Tarefas do Pipeline Vision Board.
+              Selecione e edite as ações antes de enviar para a aba Tarefas do Pipeline Vision Board.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2 max-h-[60vh] overflow-y-auto">
             {items.map((item, i) => (
-              <label
+              <div
                 key={i}
-                className="flex items-start gap-2 rounded-md border border-border/50 p-2 cursor-pointer hover:bg-muted/30"
+                className="flex items-start gap-2 rounded-md border border-border/50 p-2"
               >
                 <Checkbox
+                  className="mt-2"
                   checked={!!selected[i]}
                   onCheckedChange={(checked) =>
                     setSelected((s) => ({ ...s, [i]: checked === true }))
                   }
                 />
-                <span className="text-sm text-foreground leading-snug">
-                  {capitalizeFirst(item)}
-                </span>
-              </label>
+                <Textarea
+                  value={edited[i] ?? ""}
+                  onChange={(e) => setEdited((s) => ({ ...s, [i]: e.target.value }))}
+                  rows={2}
+                  className="text-sm min-h-[2.5rem] resize-y"
+                />
+              </div>
             ))}
           </div>
+
           <DialogFooter>
             <Button
               type="button"
