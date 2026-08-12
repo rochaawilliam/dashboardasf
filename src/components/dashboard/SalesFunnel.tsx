@@ -88,8 +88,16 @@ export function SalesFunnel({
     const fromValue = valueOf(fromMetric);
     const toValue = valueOf(metric);
     const rate = fromValue && fromValue > 0 ? ((toValue ?? 0) / fromValue) * 100 : null;
-    return { rate, target: rule.target, from: cleanName(rule.from) };
+    return {
+      rate,
+      target: rule.target,
+      from: cleanName(rule.from),
+      to: cleanName(metric.name),
+      fromValue,
+      toValue,
+    };
   };
+
 
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
