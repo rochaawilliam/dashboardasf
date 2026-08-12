@@ -2102,7 +2102,56 @@ const Index = () => {
                               (funnelOffline?.metrics ?? []).forEach((m: any) => { if (!covered.has(m.name)) alignedOffline.push(m); });
                               totalMetrics.forEach((m: any) => { if (!covered.has(m.name)) alignedTotal.push(m); });
 
+                              // ---- Stage conversion targets (funil ASF)
+                              const ONLINE_CONVERSIONS: Record<string, { from: string; target: number }> = {
+                                "MQL Online": { from: "Novos Leads Online", target: 40 },
+                                "SQL Online": { from: "MQL Online", target: 60 },
+                                "Reuniões Online ASF": { from: "SQL Online", target: 80 },
+                                "Propostas Online ASF": { from: "Reuniões Online ASF", target: 80 },
+                                "Novos Contratos On-line ASF": { from: "Propostas Online ASF", target: 35 },
+                              };
+                              const OFFLINE_CONVERSIONS: Record<string, { from: string; target: number }> = {
+                                "Reuniões Offline": { from: "Prospects Offline", target: 30 },
+                                "SQL Offline": { from: "Reuniões Offline", target: 80 },
+                                "Propostas Offline": { from: "SQL Offline", target: 85 },
+                                "Novos Contratos Off-line ASF": { from: "Propostas Offline", target: 40 },
+                              };
+                              const TOTAL_CONVERSIONS: Record<string, { from: string; target: number }> = {
+                                "MQL": { from: "Novos Leads", target: 40 },
+                                "SQL": { from: "MQL", target: 60 },
+                                "Reuniões": { from: "SQL", target: 80 },
+                                "Propostas": { from: "Reuniões", target: 80 },
+                                "Contratos": { from: "Propostas", target: 37 },
+                              };
+
+                              const conversasExtra = (() => {
+                                const impressoes = selectedMonth !== null
+                                  ? mergedMonthlyValues[IMPRESSOES_ASF_ID]
+                                  : mergedAccumulatedValues[IMPRESSOES_ASF_ID];
+                                const alcance = selectedMonth !== null
+                                  ? mergedMonthlyValues[ALCANCE_ASF_ID]
+                                  : mergedAccumulatedValues[ALCANCE_ASF_ID];
+                                return (
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1">
+                                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Impressões</p>
+                                      <p className="text-sm font-semibold text-foreground">
+                                        {formatNumber(Number(impressoes ?? 0), 0)}
+                                      </p>
+                                    </div>
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1">
+                                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Alcance</p>
+                                      <p className="text-sm font-semibold text-foreground">
+                                        {formatNumber(Number(alcance ?? 0), 0)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })();
+                              const onlineExtras = { [CONVERSAS_INICIADAS_ID]: conversasExtra };
+
                               return (
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 mb-4">
                                   {funnelOnline && funnelOnline.metrics.length > 0 && (
                                     <SalesFunnel
