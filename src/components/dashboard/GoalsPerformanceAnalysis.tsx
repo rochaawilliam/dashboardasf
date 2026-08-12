@@ -207,25 +207,32 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
   const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Record<number, boolean>>({});
+  const [edited, setEdited] = useState<Record<number, string>>({});
 
   const pending = items.filter((_, i) => !done[i]);
-
-  useEffect(() => {
-    if (!open) return;
-    const next: Record<number, boolean> = {};
-    items.forEach((_, i) => {
-      if (!done[i]) next[i] = true;
-    });
-    setSelected(next);
-  }, [open, items, done]);
 
   const capitalizeFirst = (text: string) => {
     if (!text) return text;
     return text.charAt(0).toUpperCase() + text.slice(1);
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const next: Record<number, boolean> = {};
+    const texts: Record<number, string> = {};
+    items.forEach((item, i) => {
+      if (!done[i]) next[i] = true;
+      texts[i] = capitalizeFirst(stripMarkdown(item));
+    });
+    setSelected(next);
+    setEdited(texts);
+  }, [open, items, done]);
+
   const handleSend = async () => {
-    const toSend = items.filter((_, i) => selected[i]);
+    const toSend = items
+      .map((item, i) => ({ i, text: (edited[i] ?? capitalizeFirst(stripMarkdown(item))).trim() }))
+      .filter(({ i, text }) => selected[i] && text.length > 0)
+      .map(({ text }) => text);
     if (toSend.length === 0) return;
     setSending(true);
     try {
@@ -252,6 +259,7 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
   };
 
   const selectedCount = items.filter((_, i) => selected[i]).length;
+
 
   return (
     <div className="flex flex-col h-full gap-3">
