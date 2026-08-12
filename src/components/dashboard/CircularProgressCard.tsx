@@ -272,7 +272,7 @@ export function CircularProgressCard({
 
   return (
     <div
-      className={cn("metric-card group relative p-2 sm:p-4 lg:p-4",
+      className={cn("metric-card group relative p-2 sm:p-4 lg:p-4 h-full flex flex-col",
 
       onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
@@ -363,7 +363,7 @@ export function CircularProgressCard({
       </div>
 
 
-      <div className="flex items-center gap-2 sm:gap-4 lg:gap-4">
+      <div className="flex-1 flex items-stretch gap-2 sm:gap-4 lg:gap-4">
         {/* Circular Progress - 1/3 */}
         {!hideTarget && (
         <div className="shrink-0 lg:w-1/3 flex items-center justify-center">
@@ -496,10 +496,11 @@ export function CircularProgressCard({
         </div>
 
         {sideContent && (
-          <div className="shrink-0 w-[38%] min-w-0 flex flex-col justify-center gap-1">
+          <div className="shrink-0 w-[40%] sm:w-[34%] lg:w-[32%] min-w-0 flex flex-col justify-center gap-1 border-l border-border/50 pl-2 sm:pl-3">
             {sideContent}
           </div>
         )}
+
       </div>
 
       {children && (

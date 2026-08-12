@@ -1,7 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue } from "@/utils/formatters";
-import { ArrowDown, Globe, Building2 } from "lucide-react";
+import { ArrowDown, Globe, Building2, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { CircularProgressCard } from "./CircularProgressCard";
 
@@ -88,8 +90,16 @@ export function SalesFunnel({
     const fromValue = valueOf(fromMetric);
     const toValue = valueOf(metric);
     const rate = fromValue && fromValue > 0 ? ((toValue ?? 0) / fromValue) * 100 : null;
-    return { rate, target: rule.target, from: cleanName(rule.from) };
+    return {
+      rate,
+      target: rule.target,
+      from: cleanName(rule.from),
+      to: cleanName(metric.name),
+      fromValue,
+      toValue,
+    };
   };
+
 
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
@@ -150,32 +160,61 @@ export function SalesFunnel({
                   pipelineCardNames={pipelineCardNames?.[metric.id]}
                   sideContent={
                     (extra || conv) ? (
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         {extra}
                         {conv && (
-                          <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
-                            <p className="text-[9px] uppercase tracking-wide text-muted-foreground truncate">
-                              Conv. {conv.from}
-                            </p>
-                            <p className="text-xs font-semibold leading-tight">
-                              <span className={cn(
-                                conv.rate == null
-                                  ? "text-muted-foreground"
-                                  : conv.rate >= conv.target
-                                  ? "text-success"
-                                  : conv.rate >= conv.target * 0.85
-                                  ? "text-warning"
-                                  : "text-destructive"
-                              )}>
-                                {conv.rate == null ? "—" : `${formatMetricValue(Math.round(conv.rate), "%", "")}`}
-                              </span>
-                              <span className="text-muted-foreground font-normal"> / {conv.target}%</span>
-                            </p>
-                          </div>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className="cursor-help space-y-1"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight flex items-center gap-1">
+                                  <span className="truncate">Conversão</span>
+                                  <Info className="h-2.5 w-2.5 shrink-0 opacity-70" />
+                                </p>
+                                <div>
+                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">Meta</p>
+                                  <p className="text-sm sm:text-lg font-semibold text-foreground leading-none tracking-tighter">
+                                    {conv.target}%
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">Realizado</p>
+                                  <p className={cn(
+                                    "text-base sm:text-xl font-extrabold leading-none tracking-tighter",
+                                    conv.rate == null
+                                      ? "text-muted-foreground"
+                                      : conv.rate >= conv.target
+                                      ? "text-success"
+                                      : conv.rate >= conv.target * 0.85
+                                      ? "text-warning"
+                                      : "text-destructive"
+                                  )}>
+                                    {conv.rate == null ? "—" : `${formatMetricValue(Math.round(conv.rate), "%", "")}`}
+                                  </p>
+                                </div>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs max-w-[280px]">
+                              <p className="font-semibold mb-1">Conversão {conv.from} → {conv.to}</p>
+                              <p className="text-popover-foreground/80">
+                                Fórmula: {conv.to} ÷ {conv.from} × 100
+                              </p>
+                              <p className="text-popover-foreground/80">
+                                Cálculo: {conv.toValue == null ? "—" : formatMetricValue(conv.toValue, "", "")} ÷ {conv.fromValue == null ? "—" : formatMetricValue(conv.fromValue, "", "")} ={" "}
+                                {conv.rate == null ? "—" : `${Math.round(conv.rate)}%`}
+                              </p>
+                              <p className="text-popover-foreground/80 mt-1">
+                                Meta da etapa: {conv.target}%
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         )}
                       </div>
                     ) : undefined
                   }
+
                 />
 
               </div>
