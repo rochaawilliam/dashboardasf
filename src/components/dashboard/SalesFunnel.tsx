@@ -70,6 +70,27 @@ export function SalesFunnel({
   const cleanName = (name: string) =>
     name.replace(/\s*\bASF\b\s*/g, " ").replace(/\s{2,}/g, " ").trim();
 
+  const valueOf = (m?: Metric) => {
+    if (!m) return null;
+    const v = selectedMonth !== null ? monthlyValues[m.id] : accumulatedValues[m.id];
+    return v == null ? null : Number(v);
+  };
+
+  const byName: Record<string, Metric> = {};
+  metrics.forEach((m: any) => {
+    if (!m.__placeholder) byName[m.name] = m;
+  });
+
+  const conversionFor = (metric: Metric) => {
+    const rule = conversionRules?.[metric.name];
+    if (!rule) return null;
+    const fromMetric = byName[rule.from];
+    const fromValue = valueOf(fromMetric);
+    const toValue = valueOf(metric);
+    const rate = fromValue && fromValue > 0 ? ((toValue ?? 0) / fromValue) * 100 : null;
+    return { rate, target: rule.target, from: cleanName(rule.from) };
+  };
+
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
       {/* Funnel Header */}
@@ -95,6 +116,8 @@ export function SalesFunnel({
                 (t) => t.metric_id === metric.id && t.month === selectedMonth && t.year === selectedYear
               )?.target_value ?? null
             : null;
+          const conv = isPlaceholder ? null : conversionFor(metric);
+          const extra = cardExtras?.[metric.id];
 
           return (
             <React.Fragment key={metric.id}>
@@ -125,8 +148,36 @@ export function SalesFunnel({
                       : onCardClick ? () => onCardClick(metric) : undefined
                   }
                   pipelineCardNames={pipelineCardNames?.[metric.id]}
-                />
+                >
+                  {(extra || conv) && (
+                    <div className="mt-1 space-y-1">
+                      {extra}
+                      {conv && (
+                        <div className="flex items-center justify-between gap-2 rounded-md border border-border/50 bg-background/40 px-2 py-1">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                            Conversão {conv.from} →
+                          </span>
+                          <span className="text-[10px] sm:text-xs font-semibold shrink-0">
+                            <span className={cn(
+                              conv.rate == null
+                                ? "text-muted-foreground"
+                                : conv.rate >= conv.target
+                                ? "text-success"
+                                : conv.rate >= conv.target * 0.85
+                                ? "text-warning"
+                                : "text-destructive"
+                            )}>
+                              {conv.rate == null ? "—" : `${formatMetricValue(Math.round(conv.rate), "%", "")}`}
+                            </span>
+                            <span className="text-muted-foreground font-normal"> / meta {conv.target}%</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CircularProgressCard>
               </div>
+
             </React.Fragment>
           );
         })}
