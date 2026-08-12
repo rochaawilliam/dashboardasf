@@ -34,6 +34,8 @@ interface CircularProgressCardProps {
     resultado: number;
   } | null;
   children?: React.ReactNode;
+  /** rendered as a compact second column beside the meta/realizado block */
+  sideContent?: React.ReactNode;
   pipelineCardNames?: string[];
   dataSourceBadge?: {
     source: "Operacional" | "Dashboard";
