@@ -208,6 +208,7 @@ export function CircularProgressCard({
   hideAnnualTarget = false,
   resultadoData,
   children,
+  sideContent,
   pipelineCardNames,
   dataSourceBadge,
 }: CircularProgressCardProps) {
