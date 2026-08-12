@@ -25,12 +25,40 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     })).sort((a, b) => a.name.localeCompare(b.name));
   }, [training.allCollaborators, training.topCollaborators]);
 
+  const roleGroups = useMemo(() => {
+    const source = training.allCollaborators ?? [];
+    const defs = [
+      { key: "Estagiários", target: 4, match: (n: string) => /estagi/.test(n) },
+      { key: "Associados", target: 6, match: (n: string) => /associad/.test(n) },
+      { key: "Lideranças", target: 6, match: (n: string) => /lider|líder|head|sócio|socio|coordena|gestor|diretor/.test(n) },
+    ];
+    const groups = [
+      { key: "Estagiários", target: 4, hours: [] as number[] },
+      { key: "Time", target: 5, hours: [] as number[] },
+      { key: "Associados", target: 6, hours: [] as number[] },
+      { key: "Lideranças", target: 6, hours: [] as number[] },
+    ];
+    source.forEach((c: any) => {
+      const nivel = String(c.nivel ?? "").toLowerCase();
+      const def = defs.find((d) => d.match(nivel));
+      const target = def?.key ?? "Time";
+      groups.find((g) => g.key === target)!.hours.push(Number(c.hours ?? 0));
+    });
+    return groups.map((g) => ({
+      key: g.key,
+      target: g.target,
+      count: g.hours.length,
+      avg: g.hours.length ? g.hours.reduce((a, b) => a + b, 0) / g.hours.length : 0,
+    }));
+  }, [training.allCollaborators]);
+
   const chartConfig = {
     totalHours: { label: "Horas Realizadas", color: "hsl(213, 57%, 51%)" },
     monthlyTarget: { label: "Meta Individual", color: "hsl(45, 93%, 47%)" },
   };
 
   if (chartData.length === 0) return null;
+
 
   // Alternating background colors for subdivision
   const bgColors = ["hsl(var(--muted) / 0.15)", "transparent"];
