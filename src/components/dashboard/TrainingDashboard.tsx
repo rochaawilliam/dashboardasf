@@ -65,6 +65,36 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
 
   return (
     <div className="space-y-4 mt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        {roleGroups.map((g) => {
+          const pct = g.target > 0 ? (g.avg / g.target) * 100 : 0;
+          return (
+            <Card key={g.key} className="bg-card border-border/50">
+              <CardContent className="p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{g.key}</p>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-bold text-foreground">
+                    {g.avg.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
+                  </span>
+                  <span className="text-sm text-muted-foreground">h médias</span>
+                </div>
+                <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={
+                      pct >= 100 ? "h-full bg-success" : pct >= 75 ? "h-full bg-warning" : "h-full bg-destructive"
+                    }
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
+                </div>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                  Meta mensal: {g.target}h · {g.count} pessoa{g.count === 1 ? "" : "s"}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
       <Card className="bg-card border-border/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-foreground">
