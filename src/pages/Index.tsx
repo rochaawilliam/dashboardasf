@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Users as UsersDropdown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { parseLocalDate, getRefMonthYear } from "@/utils/dateUtils";
+import { formatNumber } from "@/utils/formatters";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
