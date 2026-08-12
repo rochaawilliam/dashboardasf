@@ -2167,6 +2167,8 @@ const Index = () => {
                                       monthlyTargets={funnelTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="blue"
+                                      conversionRules={ONLINE_CONVERSIONS}
+                                      cardExtras={onlineExtras}
                                       pipelineMetricIds={pipelineIds}
                                       pipelineCardNames={pipelineCardNames}
                                     />
@@ -2184,6 +2186,7 @@ const Index = () => {
                                       monthlyTargets={funnelTargets}
                                       onCardClick={(metric) => setDrilldownMetric(metric)}
                                       colorScheme="amber"
+                                      conversionRules={OFFLINE_CONVERSIONS}
                                       pipelineMetricIds={pipelineIds}
                                       pipelineCardNames={pipelineCardNames}
                                     />
@@ -2199,6 +2202,7 @@ const Index = () => {
                                       selectedYear={selectedYear}
                                       monthlyTargets={totalTargets}
                                       colorScheme="emerald"
+                                      conversionRules={TOTAL_CONVERSIONS}
                                       pipelineMetricIds={new Set(alignedTotal.map((m) => m.id))}
                                     />
                                   )}
