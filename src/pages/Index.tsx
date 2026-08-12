@@ -749,35 +749,84 @@ const Index = () => {
       values[HEADCOUNT_TREINAMENTO_ID] = tr.trainedHeadcount ?? 0;
     }
 
-    // Override origin snapshot accumulated values with Dashboard origin totals
+    // ── Acumulado anual = SOMA dos meses (buckets disjuntos pelo campo `month`/`created_at`)
+    // Evita usar o snapshot anual (que só conta o estado ATUAL dos cards e subestima o acumulado).
     const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
     const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
-    const dbo = pipelineData.dashboardTotalsByOrigin;
-    if (dbo?.online) {
-      values["dc434066-4bd6-4c89-a22e-04ba5ea1dd9c"] = dbo.online.leads;
-      values[CONTRATOS_ONLINE_ID] = dbo.online.contratos ?? 0;
-      values[VALOR_GERADO_ONLINE_ID] = dbo.online.valor_gerado ?? values[VALOR_GERADO_ONLINE_ID] ?? 0;
-    }
-    if (dbo?.offline) {
-      values["b2c3d4e5-3333-4bbb-cccc-333333333333"] = dbo.offline.leads;
-      values[CONTRATOS_OFFLINE_ID] = dbo.offline.contratos ?? 0;
-      values[VALOR_GERADO_OFFLINE_ID] = dbo.offline.valor_gerado ?? values[VALOR_GERADO_OFFLINE_ID] ?? 0;
+    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
+    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
+
+    const sumMonths = <T,>(
+      byMonth: Record<string, T> | undefined,
+      pick: (m: T) => number | undefined
+    ): number | undefined => {
+      if (!byMonth) return undefined;
+      let sum = 0;
+      let found = false;
+      for (const [ms, data] of Object.entries(byMonth)) {
+        if (!ms.startsWith(`${selectedYear}-`) || !data) continue;
+        const v = pick(data);
+        if (v !== undefined && v !== null && !Number.isNaN(v)) { sum += v; found = true; }
+      }
+      return found ? sum : undefined;
+    };
+
+    const dboMonths = pipelineData.dashboardByOrigin;
+    const dboTotals = pipelineData.dashboardTotalsByOrigin;
+    const setAcc = (id: string, summed: number | undefined, fallback: number | undefined) => {
+      const v = summed ?? fallback;
+      if (v !== undefined) values[id] = v;
+    };
+    setAcc(LEADS_FUNIL_ONLINE_ID, sumMonths(dboMonths, (m: any) => m?.online?.leads), dboTotals?.online?.leads);
+    setAcc(CONTRATOS_ONLINE_ID, sumMonths(dboMonths, (m: any) => m?.online?.contratos), dboTotals?.online?.contratos ?? 0);
+    setAcc(VALOR_GERADO_ONLINE_ID, sumMonths(dboMonths, (m: any) => m?.online?.valor_gerado), dboTotals?.online?.valor_gerado);
+    setAcc(LEADS_FUNIL_OFFLINE_ID, sumMonths(dboMonths, (m: any) => m?.offline?.leads), dboTotals?.offline?.leads);
+    setAcc(CONTRATOS_OFFLINE_ID, sumMonths(dboMonths, (m: any) => m?.offline?.contratos), dboTotals?.offline?.contratos ?? 0);
+    setAcc(VALOR_GERADO_OFFLINE_ID, sumMonths(dboMonths, (m: any) => m?.offline?.valor_gerado), dboTotals?.offline?.valor_gerado);
+
+    // Leads por área (Dashboard, por origem + área)
+    const dboaMonths = pipelineData.dashboardByOriginArea;
+    const dboaTotals = pipelineData.dashboardTotalsByOriginArea;
+    for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      if (mapping.key !== "leads" || mapping.origin === "_all") continue;
+      const summed = sumMonths(dboaMonths, (m: any) => m?.[mapping.origin]?.[mapping.area]?.leads);
+      const fallback = (dboaTotals as any)?.[mapping.origin]?.[mapping.area]?.leads;
+      if (summed !== undefined || fallback !== undefined) values[metricId] = summed ?? fallback;
     }
 
-    // Accumulated Leads On/Off by area + Novos Leads from Novos Leads (dashboard) totals
+    // Novos Leads (created_at) por origem/área — soma dos meses
+    const novosMonths = pipelineData.novosByOriginArea;
     const novosOAT = pipelineData.novosTotalsByOriginArea;
-    if (novosOAT?.online) {
-      values["c1d2e3f4-1111-4ccc-dddd-111111111111"] = novosOAT.online.empresarial ?? 0;
-      values["c1d2e3f4-2222-4ccc-dddd-222222222222"] = novosOAT.online.trabalhista ?? 0;
-      values["c1d2e3f4-3333-4ccc-dddd-333333333333"] = novosOAT.online.tributario ?? 0;
-      values["e1f2a3b4-1111-4eee-ffff-111111111111"] = novosOAT.online.total;
+    const novosMap: Record<string, { origin: "online" | "offline"; field: string }> = {
+      "c1d2e3f4-1111-4ccc-dddd-111111111111": { origin: "online", field: "empresarial" },
+      "c1d2e3f4-2222-4ccc-dddd-222222222222": { origin: "online", field: "trabalhista" },
+      "c1d2e3f4-3333-4ccc-dddd-333333333333": { origin: "online", field: "tributario" },
+      "e1f2a3b4-1111-4eee-ffff-111111111111": { origin: "online", field: "total" },
+      "86714c67-bf73-452a-aad3-2be1691c33ac": { origin: "offline", field: "empresarial" },
+      "371dd70d-7c46-4488-b7ad-80ded893af5d": { origin: "offline", field: "trabalhista" },
+      "57ca6f08-7bb6-4697-87fe-8ac33161285c": { origin: "offline", field: "tributario" },
+      "e1f2a3b4-2222-4eee-ffff-222222222222": { origin: "offline", field: "total" },
+    };
+    for (const [metricId, { origin, field }] of Object.entries(novosMap)) {
+      const summed = sumMonths(novosMonths, (m: any) => m?.[origin]?.[field]);
+      const fallback = (novosOAT as any)?.[origin]?.[field];
+      if (summed !== undefined || fallback !== undefined) values[metricId] = summed ?? fallback ?? 0;
     }
-    if (novosOAT?.offline) {
-      values["86714c67-bf73-452a-aad3-2be1691c33ac"] = novosOAT.offline.empresarial ?? 0;
-      values["371dd70d-7c46-4488-b7ad-80ded893af5d"] = novosOAT.offline.trabalhista ?? 0;
-      values["57ca6f08-7bb6-4697-87fe-8ac33161285c"] = novosOAT.offline.tributario ?? 0;
-      values["e1f2a3b4-2222-4eee-ffff-222222222222"] = novosOAT.offline.total;
-    }
+
+    // MQL / SQL — soma dos meses
+    const qualMonths = pipelineData.qualificacaoByOrigin;
+    const qualTotals = pipelineData.qualificacaoTotalsByOrigin;
+    const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
+    const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
+    const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
+    setAcc(MQL_ONLINE_ID, sumMonths(qualMonths, (m: any) => m?.online?.mql), qualTotals?.online?.mql);
+    setAcc(SQL_ONLINE_ID, sumMonths(qualMonths, (m: any) => m?.online?.sql), qualTotals?.online?.sql);
+    setAcc(SQL_OFFLINE_ID, sumMonths(qualMonths, (m: any) => m?.offline?.sql), qualTotals?.offline?.sql);
+
+    // Prospects offline — soma dos meses
+    const PROSPECTS_OFFLINE_ID = "b2c3d4e5-2222-4bbb-cccc-222222222222";
+    setAcc(PROSPECTS_OFFLINE_ID, sumMonths(dboMonths, (m: any) => m?.offline?.prospects), dboTotals?.offline?.prospects);
+
 
 
     // Traffic Funnel accumulated totals
@@ -790,7 +839,7 @@ const Index = () => {
     }
 
     return values;
-  }, [pipelineData, trafficFunnelData]);
+  }, [pipelineData, trafficFunnelData, selectedYear]);
 
   // Map of metric IDs (rates & times in Crescimento) to the source panel & filter that supplied the value.
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.

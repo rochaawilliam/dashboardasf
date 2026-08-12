@@ -851,8 +851,17 @@ export function GoalsPerformanceAnalysis({
   const today = new Date();
   const isCurrentMonth =
     !!selectedMonth && selectedMonth === today.getMonth() + 1 && selectedYear === today.getFullYear();
+  const isCurrentYearAnnual = !selectedMonth && selectedYear === today.getFullYear();
   const daysInMonth = selectedMonth ? new Date(selectedYear, selectedMonth, 0).getDate() : undefined;
   const dayOfMonth = isCurrentMonth ? today.getDate() : daysInMonth;
+
+  // Referência proporcional ao período decorrido (mês corrente ou ano corrente)
+  const annualPace = (() => {
+    const start = new Date(selectedYear, 0, 1).getTime();
+    const end = new Date(selectedYear + 1, 0, 1).getTime();
+    return Math.max(1, Math.min(100, ((today.getTime() - start) / (end - start)) * 100));
+  })();
+
 
   const dailyKey = `exec-analysis|${tabTitle}|${periodLabel}|${new Date().toISOString().slice(0, 10)}`;
 
@@ -908,7 +917,10 @@ export function GoalsPerformanceAnalysis({
   
   const paceRef = isCurrentMonth && dayOfMonth && daysInMonth
     ? Math.max(1, Math.min(100, (dayOfMonth / daysInMonth) * 100))
+    : isCurrentYearAnnual
+    ? annualPace
     : 100;
+
   const alertThreshold = Math.round(paceRef * 0.85);
   const overallStatus = statusOf(computed.overall, paceRef);
   const overallStyle = STATUS_STYLES[overallStatus];
