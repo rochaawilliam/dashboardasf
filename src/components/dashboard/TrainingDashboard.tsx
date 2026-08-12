@@ -25,6 +25,33 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
     })).sort((a, b) => a.name.localeCompare(b.name));
   }, [training.allCollaborators, training.topCollaborators]);
 
+  const roleGroups = useMemo(() => {
+    const source = training.allCollaborators ?? [];
+    const defs = [
+      { key: "Estagiários", target: 4, match: (n: string) => /estagi/.test(n) },
+      { key: "Associados", target: 6, match: (n: string) => /associad/.test(n) },
+      { key: "Lideranças", target: 6, match: (n: string) => /lider|líder|head|sócio|socio|coordena|gestor|diretor/.test(n) },
+    ];
+    const groups = [
+      { key: "Estagiários", target: 4, hours: [] as number[] },
+      { key: "Time", target: 5, hours: [] as number[] },
+      { key: "Associados", target: 6, hours: [] as number[] },
+      { key: "Lideranças", target: 6, hours: [] as number[] },
+    ];
+    source.forEach((c: any) => {
+      const nivel = String(c.nivel ?? "").toLowerCase();
+      const def = defs.find((d) => d.match(nivel));
+      const target = def?.key ?? "Time";
+      groups.find((g) => g.key === target)!.hours.push(Number(c.hours ?? 0));
+    });
+    return groups.map((g) => ({
+      key: g.key,
+      target: g.target,
+      count: g.hours.length,
+      avg: g.hours.length ? g.hours.reduce((a, b) => a + b, 0) / g.hours.length : 0,
+    }));
+  }, [training.allCollaborators]);
+
   const chartConfig = {
     totalHours: { label: "Horas Realizadas", color: "hsl(213, 57%, 51%)" },
     monthlyTarget: { label: "Meta Individual", color: "hsl(45, 93%, 47%)" },
@@ -32,11 +59,42 @@ export function TrainingDashboard({ training, selectedMonth, selectedYear }: Tra
 
   if (chartData.length === 0) return null;
 
+
   // Alternating background colors for subdivision
   const bgColors = ["hsl(var(--muted) / 0.15)", "transparent"];
 
   return (
     <div className="space-y-4 mt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        {roleGroups.map((g) => {
+          const pct = g.target > 0 ? (g.avg / g.target) * 100 : 0;
+          return (
+            <Card key={g.key} className="bg-card border-border/50">
+              <CardContent className="p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{g.key}</p>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-bold text-foreground">
+                    {g.avg.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
+                  </span>
+                  <span className="text-sm text-muted-foreground">h médias</span>
+                </div>
+                <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={
+                      pct >= 100 ? "h-full bg-success" : pct >= 75 ? "h-full bg-warning" : "h-full bg-destructive"
+                    }
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
+                </div>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                  Meta mensal: {g.target}h · {g.count} pessoa{g.count === 1 ? "" : "s"}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
       <Card className="bg-card border-border/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-foreground">

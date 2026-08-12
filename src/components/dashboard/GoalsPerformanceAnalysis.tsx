@@ -15,6 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+
+function stripMarkdown(text: string): string {
+  return (text || "").replace(/\*\*/g, "").replace(/[*_`]/g, "").trim();
+}
+
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -207,25 +213,32 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
   const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Record<number, boolean>>({});
+  const [edited, setEdited] = useState<Record<number, string>>({});
 
   const pending = items.filter((_, i) => !done[i]);
-
-  useEffect(() => {
-    if (!open) return;
-    const next: Record<number, boolean> = {};
-    items.forEach((_, i) => {
-      if (!done[i]) next[i] = true;
-    });
-    setSelected(next);
-  }, [open, items, done]);
 
   const capitalizeFirst = (text: string) => {
     if (!text) return text;
     return text.charAt(0).toUpperCase() + text.slice(1);
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const next: Record<number, boolean> = {};
+    const texts: Record<number, string> = {};
+    items.forEach((item, i) => {
+      if (!done[i]) next[i] = true;
+      texts[i] = capitalizeFirst(stripMarkdown(item));
+    });
+    setSelected(next);
+    setEdited(texts);
+  }, [open, items, done]);
+
   const handleSend = async () => {
-    const toSend = items.filter((_, i) => selected[i]);
+    const toSend = items
+      .map((item, i) => ({ i, text: (edited[i] ?? capitalizeFirst(stripMarkdown(item))).trim() }))
+      .filter(({ i, text }) => selected[i] && text.length > 0)
+      .map(({ text }) => text);
     if (toSend.length === 0) return;
     setSending(true);
     try {
@@ -252,6 +265,7 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
   };
 
   const selectedCount = items.filter((_, i) => selected[i]).length;
+
 
   return (
     <div className="flex flex-col h-full gap-3">
@@ -294,27 +308,32 @@ function ChecklistPanel({ items, context }: { items: string[]; context: string }
           <DialogHeader>
             <DialogTitle>Enviar ações para o Pipeline</DialogTitle>
             <DialogDescription>
-              Selecione quais ações serão enviadas para a aba Tarefas do Pipeline Vision Board.
+              Selecione e edite as ações antes de enviar para a aba Tarefas do Pipeline Vision Board.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2 max-h-[60vh] overflow-y-auto">
             {items.map((item, i) => (
-              <label
+              <div
                 key={i}
-                className="flex items-start gap-2 rounded-md border border-border/50 p-2 cursor-pointer hover:bg-muted/30"
+                className="flex items-start gap-2 rounded-md border border-border/50 p-2"
               >
                 <Checkbox
+                  className="mt-2"
                   checked={!!selected[i]}
                   onCheckedChange={(checked) =>
                     setSelected((s) => ({ ...s, [i]: checked === true }))
                   }
                 />
-                <span className="text-sm text-foreground leading-snug">
-                  {capitalizeFirst(item)}
-                </span>
-              </label>
+                <Textarea
+                  value={edited[i] ?? ""}
+                  onChange={(e) => setEdited((s) => ({ ...s, [i]: e.target.value }))}
+                  rows={2}
+                  className="text-sm min-h-[2.5rem] resize-y"
+                />
+              </div>
             ))}
           </div>
+
           <DialogFooter>
             <Button
               type="button"
