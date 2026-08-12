@@ -1952,9 +1952,8 @@ const Index = () => {
                               // Canonical row order shared by the three funnels (for visual alignment)
                               const ALIGNED_ROWS: { online?: string; offline?: string; total?: string }[] = [
                                 { online: "Valor Investido ASF", offline: "Valor Investido Offline", total: "Valor Investido Total" },
-                                { online: "Número de impressões ASF" },
-                                { online: "Número de alcance ASF" },
-                                { online: "Conversas Iniciadas pela IA" },
+                                { online: "Conversas Iniciadas" },
+
                                 { offline: "Prospects Offline", total: "Empresas Prospectadas" },
                                 { online: "Novos Leads Online", offline: "Novos Leads Offline", total: "Novos Leads" },
                                 { online: "Leads no Funil Online", offline: "Leads no Funil Offline", total: "Leads no Funil" },
