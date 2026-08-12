@@ -1907,7 +1907,15 @@ const Index = () => {
                       
                           {/* Render Funnel subcategories with special layout */}
                           {(() => {
-                            const funnelOnline = organizedSubcategories.find(s => s.name === "Funil Online");
+                            const funnelOnlineRaw = organizedSubcategories.find(s => s.name === "Funil Online");
+                            const funnelOnline = funnelOnlineRaw
+                              ? {
+                                  ...funnelOnlineRaw,
+                                  metrics: funnelOnlineRaw.metrics.filter(
+                                    (m: any) => m.id !== IMPRESSOES_ASF_ID && m.id !== ALCANCE_ASF_ID
+                                  ),
+                                }
+                              : undefined;
                             const funnelOffline = organizedSubcategories.find(s => s.name === "Funil Offline");
                             const pipelineIds = new Set([
                               ...Object.keys(PIPELINE_METRIC_MAP),
