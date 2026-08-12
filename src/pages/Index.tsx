@@ -2133,20 +2133,21 @@ const Index = () => {
                                   ? mergedMonthlyValues[ALCANCE_ASF_ID]
                                   : mergedAccumulatedValues[ALCANCE_ASF_ID];
                                 return (
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1">
-                                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Impressões</p>
-                                      <p className="text-sm font-semibold text-foreground">
+                                  <div className="space-y-1">
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                                      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Impressões</p>
+                                      <p className="text-xs font-semibold text-foreground leading-tight">
                                         {formatNumber(Number(impressoes ?? 0), 0)}
                                       </p>
                                     </div>
-                                    <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1">
-                                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Alcance</p>
-                                      <p className="text-sm font-semibold text-foreground">
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                                      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Alcance</p>
+                                      <p className="text-xs font-semibold text-foreground leading-tight">
                                         {formatNumber(Number(alcance ?? 0), 0)}
                                       </p>
                                     </div>
                                   </div>
+
                                 );
                               })();
                               const onlineExtras = { [CONVERSAS_INICIADAS_ID]: conversasExtra };
