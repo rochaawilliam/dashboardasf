@@ -100,9 +100,18 @@ export function SalesFunnel({
     };
   };
 
+  /** escala de cores padronizada entre os três funis */
+  const rateTone = (rate: number | null, target: number) => {
+    if (rate == null) return "text-muted-foreground";
+    if (rate >= target) return "text-success";
+    if (rate >= target * 0.85) return "text-warning";
+    return "text-destructive";
+  };
+
+  const hasConversions = metrics.some((m: any) => !m.__placeholder && conversionRules?.[m.name]);
 
   return (
-    <div className="rounded-xl border border-border/50 overflow-hidden">
+    <div className="rounded-xl border border-border/50 overflow-hidden h-full flex flex-col">
       {/* Funnel Header */}
       <div className={cn(
         "flex items-center gap-2 px-2.5 sm:px-4 py-2 sm:py-3 bg-gradient-to-r border-b",
@@ -112,6 +121,23 @@ export function SalesFunnel({
         <h3 className="font-semibold text-xs sm:text-sm text-foreground truncate">{title}</h3>
         <span className="text-[10px] sm:text-xs text-muted-foreground ml-auto shrink-0">{metrics.filter((m: any) => !m.__placeholder).length} etapas</span>
       </div>
+
+      {/* Legenda da escala de conversão */}
+      {hasConversions && (
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 px-2.5 sm:px-4 py-1.5 border-b border-border/40 bg-muted/30">
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground">Conversão</span>
+          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" /> ≥ meta
+          </span>
+          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-warning" /> gap até 15%
+          </span>
+          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> gap maior
+          </span>
+        </div>
+      )}
+
 
       {/* Funnel Steps */}
       <div className={cn("p-2 sm:p-3 space-y-1", bodyColors)}>
