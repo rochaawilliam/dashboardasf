@@ -917,7 +917,10 @@ export function GoalsPerformanceAnalysis({
   
   const paceRef = isCurrentMonth && dayOfMonth && daysInMonth
     ? Math.max(1, Math.min(100, (dayOfMonth / daysInMonth) * 100))
+    : isCurrentYearAnnual
+    ? annualPace
     : 100;
+
   const alertThreshold = Math.round(paceRef * 0.85);
   const overallStatus = statusOf(computed.overall, paceRef);
   const overallStyle = STATUS_STYLES[overallStatus];
