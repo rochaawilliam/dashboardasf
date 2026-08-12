@@ -854,8 +854,19 @@ export function GoalsPerformanceAnalysis({
   const daysInMonth = selectedMonth ? new Date(selectedYear, selectedMonth, 0).getDate() : undefined;
   const dayOfMonth = isCurrentMonth ? today.getDate() : daysInMonth;
 
-  const fetchAnalysis = async () => {
+  const dailyKey = `exec-analysis|${tabTitle}|${periodLabel}|${new Date().toISOString().slice(0, 10)}`;
+
+  const fetchAnalysis = async (force = false) => {
     if (computed.items.length === 0) return;
+    if (!force) {
+      try {
+        const cached = localStorage.getItem(dailyKey);
+        if (cached) {
+          setAnalysis(cached);
+          return;
+        }
+      } catch {}
+    }
     setLoading(true);
     setError(null);
     try {
@@ -871,7 +882,9 @@ export function GoalsPerformanceAnalysis({
       });
       if (fnError) throw fnError;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setAnalysis((data as any)?.analysis ?? "");
+      const text = (data as any)?.analysis ?? "";
+      setAnalysis(text);
+      try { if (text) localStorage.setItem(dailyKey, text); } catch {}
     } catch (e: any) {
       setError("Não foi possível gerar a análise agora. Tente novamente em instantes.");
     } finally {
@@ -879,16 +892,16 @@ export function GoalsPerformanceAnalysis({
     }
   };
 
-  // auto-generate once per tab/period/data snapshot
+  // gera uma vez por dia por aba/período (reaproveita o texto salvo)
   useEffect(() => {
-    const key = `${tabTitle}|${periodLabel}|${Math.round(computed.overall)}|${computed.items.length}`;
-    if (key === lastKey.current) return;
+    if (dailyKey === lastKey.current) return;
     if (computed.items.length === 0) return;
-    lastKey.current = key;
+    lastKey.current = dailyKey;
     setAnalysis("");
     fetchAnalysis();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabTitle, periodLabel, computed.overall, computed.items.length]);
+  }, [dailyKey, computed.items.length]);
+
 
   if (computed.items.length === 0) return null;
 
@@ -911,7 +924,7 @@ export function GoalsPerformanceAnalysis({
           </div>
           <div className="min-w-0">
             <h4 className="text-base sm:text-lg font-semibold text-foreground leading-tight truncate" style={{ fontFamily: "'Roboto', sans-serif" }}>
-              Análise de Desempenho — {tabTitle}
+              Análise Executiva — {tabTitle}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground truncate">{periodLabel} · {computed.items.length} metas indutoras</p>
           </div>
@@ -934,7 +947,7 @@ export function GoalsPerformanceAnalysis({
             </span>
             {overallStyle.label} · {Math.round(computed.overall)}%
           </span>
-          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={fetchAnalysis} disabled={loading}>
+          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={() => fetchAnalysis(true)} disabled={loading}>
           <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
           <span className="hidden sm:inline">Atualizar</span>
           </Button>

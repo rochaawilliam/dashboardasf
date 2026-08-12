@@ -34,6 +34,8 @@ interface CircularProgressCardProps {
     resultado: number;
   } | null;
   children?: React.ReactNode;
+  /** rendered as a compact second column beside the meta/realizado block */
+  sideContent?: React.ReactNode;
   pipelineCardNames?: string[];
   dataSourceBadge?: {
     source: "Operacional" | "Dashboard";
@@ -206,6 +208,7 @@ export function CircularProgressCard({
   hideAnnualTarget = false,
   resultadoData,
   children,
+  sideContent,
   pipelineCardNames,
   dataSourceBadge,
 }: CircularProgressCardProps) {
@@ -491,6 +494,12 @@ export function CircularProgressCard({
             </>
           )}
         </div>
+
+        {sideContent && (
+          <div className="shrink-0 w-[38%] min-w-0 flex flex-col justify-center gap-1">
+            {sideContent}
+          </div>
+        )}
       </div>
 
       {children && (
