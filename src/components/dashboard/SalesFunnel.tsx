@@ -19,6 +19,10 @@ interface SalesFunnelProps {
   colorScheme: "blue" | "amber" | "emerald";
   pipelineMetricIds?: Set<string>;
   pipelineCardNames?: Record<string, string[]>;
+  /** stage conversion rules keyed by metric name: converts from another stage with a target % */
+  conversionRules?: Record<string, { from: string; target: number }>;
+  /** extra content rendered inside a card, keyed by metric id */
+  cardExtras?: Record<string, React.ReactNode>;
 }
 
 export function SalesFunnel({
@@ -35,7 +39,10 @@ export function SalesFunnel({
   colorScheme,
   pipelineMetricIds,
   pipelineCardNames,
+  conversionRules,
+  cardExtras,
 }: SalesFunnelProps) {
+
   const monthNames = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
     "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
