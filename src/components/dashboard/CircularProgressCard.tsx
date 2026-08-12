@@ -496,10 +496,11 @@ export function CircularProgressCard({
         </div>
 
         {sideContent && (
-          <div className="shrink-0 w-[38%] min-w-0 flex flex-col justify-center gap-1">
+          <div className="shrink-0 w-[40%] sm:w-[34%] lg:w-[32%] min-w-0 flex flex-col justify-center gap-1 border-l border-border/50 pl-2 sm:pl-3">
             {sideContent}
           </div>
         )}
+
       </div>
 
       {children && (
