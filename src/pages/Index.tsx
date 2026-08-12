@@ -839,7 +839,7 @@ const Index = () => {
     }
 
     return values;
-  }, [pipelineData, trafficFunnelData]);
+  }, [pipelineData, trafficFunnelData, selectedYear]);
 
   // Map of metric IDs (rates & times in Crescimento) to the source panel & filter that supplied the value.
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
