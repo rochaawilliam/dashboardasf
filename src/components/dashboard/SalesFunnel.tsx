@@ -100,9 +100,18 @@ export function SalesFunnel({
     };
   };
 
+  /** escala de cores padronizada entre os três funis */
+  const rateTone = (rate: number | null, target: number) => {
+    if (rate == null) return "text-muted-foreground";
+    if (rate >= target) return "text-success";
+    if (rate >= target * 0.85) return "text-warning";
+    return "text-destructive";
+  };
+
+  const hasConversions = metrics.some((m: any) => !m.__placeholder && conversionRules?.[m.name]);
 
   return (
-    <div className="rounded-xl border border-border/50 overflow-hidden">
+    <div className="rounded-xl border border-border/50 overflow-hidden h-full flex flex-col">
       {/* Funnel Header */}
       <div className={cn(
         "flex items-center gap-2 px-2.5 sm:px-4 py-2 sm:py-3 bg-gradient-to-r border-b",
@@ -112,6 +121,23 @@ export function SalesFunnel({
         <h3 className="font-semibold text-xs sm:text-sm text-foreground truncate">{title}</h3>
         <span className="text-[10px] sm:text-xs text-muted-foreground ml-auto shrink-0">{metrics.filter((m: any) => !m.__placeholder).length} etapas</span>
       </div>
+
+      {/* Legenda da escala de conversão */}
+      {hasConversions && (
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 px-2.5 sm:px-4 py-1.5 border-b border-border/40 bg-muted/30">
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground">Conversão</span>
+          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" /> ≥ meta
+          </span>
+          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-warning" /> gap até 15%
+          </span>
+          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> gap maior
+          </span>
+        </div>
+      )}
+
 
       {/* Funnel Steps */}
       <div className={cn("p-2 sm:p-3 space-y-1", bodyColors)}>
@@ -160,38 +186,43 @@ export function SalesFunnel({
                   pipelineCardNames={pipelineCardNames?.[metric.id]}
                   sideContent={
                     (extra || conv) ? (
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 min-w-0">
                         {extra}
                         {conv && (
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div
-                                className="cursor-help space-y-1"
+                                className="cursor-help space-y-1 min-w-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight flex items-center gap-1">
+                                <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight flex items-center gap-1 min-w-0">
                                   <span className="truncate">Conversão</span>
                                   <Info className="h-2.5 w-2.5 shrink-0 opacity-70" />
                                 </p>
-                                <div>
-                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">Meta</p>
-                                  <p className="text-sm sm:text-lg font-semibold text-foreground leading-none tracking-tighter">
+                                <div className="min-w-0">
+                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight truncate">Meta</p>
+                                  <p className="text-sm sm:text-base font-semibold text-foreground leading-none tracking-tighter truncate">
                                     {conv.target}%
                                   </p>
                                 </div>
-                                <div>
-                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">Realizado</p>
+                                <div className="min-w-0">
+                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight truncate">Realizado</p>
                                   <p className={cn(
-                                    "text-base sm:text-xl font-extrabold leading-none tracking-tighter",
-                                    conv.rate == null
-                                      ? "text-muted-foreground"
-                                      : conv.rate >= conv.target
-                                      ? "text-success"
-                                      : conv.rate >= conv.target * 0.85
-                                      ? "text-warning"
-                                      : "text-destructive"
+                                    "text-base sm:text-lg font-extrabold leading-none tracking-tighter truncate",
+                                    rateTone(conv.rate, conv.target)
                                   )}>
                                     {conv.rate == null ? "—" : `${formatMetricValue(Math.round(conv.rate), "%", "")}`}
+                                  </p>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground leading-tight truncate">Gap</p>
+                                  <p className={cn(
+                                    "text-xs sm:text-sm font-semibold leading-none tracking-tighter truncate",
+                                    rateTone(conv.rate, conv.target)
+                                  )}>
+                                    {conv.rate == null
+                                      ? "—"
+                                      : `${conv.rate - conv.target >= 0 ? "+" : ""}${Math.round(conv.rate - conv.target)} p.p.`}
                                   </p>
                                 </div>
                               </div>
@@ -206,7 +237,8 @@ export function SalesFunnel({
                                 {conv.rate == null ? "—" : `${Math.round(conv.rate)}%`}
                               </p>
                               <p className="text-popover-foreground/80 mt-1">
-                                Meta da etapa: {conv.target}%
+                                Meta da etapa: {conv.target}% · Gap:{" "}
+                                {conv.rate == null ? "—" : `${conv.rate - conv.target >= 0 ? "+" : ""}${Math.round(conv.rate - conv.target)} p.p.`}
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -214,6 +246,7 @@ export function SalesFunnel({
                       </div>
                     ) : undefined
                   }
+
 
                 />
 
