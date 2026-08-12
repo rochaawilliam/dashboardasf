@@ -1,7 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatMetricValue } from "@/utils/formatters";
-import { ArrowDown, Globe, Building2 } from "lucide-react";
+import { ArrowDown, Globe, Building2, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import type { Metric, MetricHistory, MonthlyTarget } from "@/hooks/useMetrics";
 import { CircularProgressCard } from "./CircularProgressCard";
 
