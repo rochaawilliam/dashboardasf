@@ -947,7 +947,7 @@ export function GoalsPerformanceAnalysis({
             </span>
             {overallStyle.label} · {Math.round(computed.overall)}%
           </span>
-          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={fetchAnalysis} disabled={loading}>
+          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={() => fetchAnalysis(true)} disabled={loading}>
           <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
           <span className="hidden sm:inline">Atualizar</span>
           </Button>
