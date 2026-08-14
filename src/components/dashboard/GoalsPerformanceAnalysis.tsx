@@ -863,19 +863,20 @@ export function GoalsPerformanceAnalysis({
   })();
 
 
-  const dailyKey = `exec-analysis|${tabTitle}|${periodLabel}|${new Date().toISOString().slice(0, 10)}`;
+  // Data de referência em São Paulo (a análise do dia é única e compartilhada)
+  const spDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(today);
+  const spHour = Number(
+    new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", hour12: false }).format(today),
+  );
+  const dailyKey = `exec-analysis|${tabTitle}|${periodLabel}|${spDate}`;
 
-  const fetchAnalysis = async (force = false) => {
-    if (computed.items.length === 0) return;
-    if (!force) {
-      try {
-        const cached = localStorage.getItem(dailyKey);
-        if (cached) {
-          setAnalysis(cached);
-          return;
-        }
-      } catch {}
-    }
+  /** Gera a análise no gateway de IA e (quando possível) grava como análise do dia */
+  const generateAndStore = async (force: boolean) => {
     setLoading(true);
     setError(null);
     try {
@@ -893,7 +894,21 @@ export function GoalsPerformanceAnalysis({
       if ((data as any)?.error) throw new Error((data as any).error);
       const text = (data as any)?.analysis ?? "";
       setAnalysis(text);
-      try { if (text) localStorage.setItem(dailyKey, text); } catch {}
+      if (text) {
+        await supabase
+          .from("daily_analyses")
+          .upsert(
+            {
+              tab_key: tabTitle,
+              period_label: periodLabel,
+              analysis_date: spDate,
+              content: text,
+              overall: Math.round(computed.overall),
+              generated_by: user?.id ?? null,
+            },
+            { onConflict: "tab_key,period_label,analysis_date" },
+          );
+      }
     } catch (e: any) {
       setError("Não foi possível gerar a análise agora. Tente novamente em instantes.");
     } finally {
@@ -901,13 +916,42 @@ export function GoalsPerformanceAnalysis({
     }
   };
 
-  // gera uma vez por dia por aba/período (reaproveita o texto salvo)
+  /** Carrega a análise do dia; gera apenas se ainda não existir (após as 7h) */
+  const loadAnalysis = async (force = false) => {
+    if (computed.items.length === 0) return;
+
+    if (!force) {
+      setLoading(true);
+      const { data: stored } = await supabase
+        .from("daily_analyses")
+        .select("content")
+        .eq("tab_key", tabTitle)
+        .eq("period_label", periodLabel)
+        .eq("analysis_date", spDate)
+        .maybeSingle();
+      setLoading(false);
+      if (stored?.content) {
+        setAnalysis(stored.content);
+        return;
+      }
+      // sem análise do dia: só gera automaticamente após as 7h e para usuários logados
+      if (!user || spHour < 7) return;
+      await generateAndStore(false);
+      return;
+    }
+
+    // atualização manual — restrita a administradores
+    if (!isAdmin) return;
+    await generateAndStore(true);
+  };
+
+  // carrega/gera uma vez por dia por aba/período
   useEffect(() => {
     if (dailyKey === lastKey.current) return;
     if (computed.items.length === 0) return;
     lastKey.current = dailyKey;
     setAnalysis("");
-    fetchAnalysis();
+    loadAnalysis();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dailyKey, computed.items.length]);
 
