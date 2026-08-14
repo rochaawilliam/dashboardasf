@@ -59,6 +59,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_analyses: {
+        Row: {
+          analysis_date: string
+          content: string
+          created_at: string
+          generated_by: string | null
+          id: string
+          overall: number | null
+          period_label: string
+          tab_key: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_date?: string
+          content: string
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          overall?: number | null
+          period_label: string
+          tab_key: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_date?: string
+          content?: string
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          overall?: number | null
+          period_label?: string
+          tab_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       financial_sheet_sources: {
         Row: {
           created_at: string
