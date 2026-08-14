@@ -24,6 +24,8 @@ function stripMarkdown(text: string): string {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import type { Metric, MonthlyTarget } from "@/hooks/useMetrics";
 import { getRefMonthYear } from "@/utils/dateUtils";
 
@@ -786,6 +788,8 @@ export function GoalsPerformanceAnalysis({
   selectedMonth,
   selectedYear,
 }: GoalsAnalysisProps) {
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [analysis, setAnalysis] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1003,7 +1007,7 @@ export function GoalsPerformanceAnalysis({
             </span>
             {overallStyle.label} · {Math.round(computed.overall)}%
           </span>
-          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={() => fetchAnalysis(true)} disabled={loading}>
+          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={() => loadAnalysis(true)} disabled={loading}>
           <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
           <span className="hidden sm:inline">Atualizar</span>
           </Button>
