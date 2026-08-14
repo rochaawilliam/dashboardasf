@@ -511,8 +511,15 @@ const Index = () => {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
-      // TME (Operacional: minutos)
-      values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
+    }
+    // TME (minutos) — direto do Dashboard do Pipeline Vision Board
+    {
+      const dashTme = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+      if (dashTme?.tmeMinutes !== null && dashTme?.tmeMinutes !== undefined) {
+        values[TME_SLA_ID] = dashTme.tmeMinutes;
+      } else if (ops) {
+        values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
+      }
     }
 
     // TMA (dias) — direto do Dashboard do Pipeline Vision Board
@@ -724,7 +731,14 @@ const Index = () => {
       values[MEDIA_ACOES_DIA_ID] = ops.avgActionsPerDay;
       values[TAXA_ACOMPANHAMENTO_ID] = ops.followUpRate;
       values[COMENTARIOS_LEAD_ID] = ops.commentsPerLead;
-      values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
+    }
+    {
+      const dashTme = pipelineData.dashboardTotals;
+      if (dashTme?.tmeMinutes !== null && dashTme?.tmeMinutes !== undefined) {
+        values[TME_SLA_ID] = dashTme.tmeMinutes;
+      } else if (ops) {
+        values[TME_SLA_ID] = Math.round(ops.avgFirstContactHours * 60);
+      }
     }
     {
       const dashTma = pipelineData.dashboardTotals;
@@ -908,13 +922,17 @@ const Index = () => {
     }
 
     // TME (Tempo Médio até Primeiro Contato) — minutos
-    if (ops) {
-      info[TME_SLA_ID] = {
-        source: "Operacional",
-        filter: "created_at",
-        formula: "média(primeiro_contato − criação) em minutos",
-        calculation: `Média de ${fmt(Math.round(ops.avgFirstContactHours * 60))} min entre criação do lead e o primeiro atendimento.`,
-      };
+    {
+      const dashTme = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
+      const tmeMin = dashTme?.tmeMinutes ?? (ops ? Math.round(ops.avgFirstContactHours * 60) : null);
+      if (tmeMin !== null && tmeMin !== undefined) {
+        info[TME_SLA_ID] = {
+          source: dashTme?.tmeMinutes != null ? "Dashboard" : "Operacional",
+          filter: "created_at",
+          formula: "média(primeiro_contato − criação) em minutos",
+          calculation: `Média de ${fmt(tmeMin)} min entre criação do lead e o primeiro atendimento.`,
+        };
+      }
     }
     {
       const dashTma = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;

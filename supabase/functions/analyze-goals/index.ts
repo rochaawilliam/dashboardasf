@@ -30,12 +30,15 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as Payload;
-    const metrics = (body.metrics ?? []).slice(0, 60);
+    // Envia apenas as métricas mais relevantes (piores e melhores) para reduzir tokens/créditos
+    const all = (body.metrics ?? []).slice();
+    all.sort((a, b) => a.progress - b.progress);
+    const metrics = all.length > 20 ? [...all.slice(0, 14), ...all.slice(-6)] : all;
 
     const lines = metrics
       .map(
         (m) =>
-          `- ${m.name}: realizado ${m.value} ${m.unit ?? ""} | meta ${m.target} | atingimento ${Math.round(m.progress)}%${m.polarity === "lower_is_better" ? " (quanto menor, melhor)" : ""}`,
+          `- ${m.name}: ${m.value}${m.unit ?? ""} / meta ${m.target} = ${Math.round(m.progress)}%${m.polarity === "lower_is_better" ? " (menor é melhor)" : ""}`,
       )
       .join("\n");
 
@@ -51,57 +54,31 @@ Escreva em português do Brasil, tom executivo e direto. Responda em markdown co
 **Panorama** — 2 a 3 frases sobre a situação geral, considerando o ritmo esperado para o dia do mês.
 **Pontos de melhoria** — 3 a 4 bullets objetivos, citando as métricas mais críticas.
 **Checklist de ações corretivas** — 4 a 6 bullets curtos no formato "- [ ] Ação ..." (imperativo e específico).
-Máximo de 220 palavras no total. Não invente números que não estejam acima.`;
+Máximo de 160 palavras no total. Não invente números que não estejam acima.`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
+        "Authorization": `Bearer ${apiKey}`,
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5.6-sol",
-        input: prompt,
-        stream: true,
-        reasoning: { effort: "low", summary: "auto" },
+        // modelo econômico: reduz drasticamente o custo por análise
+        model: "google/gemini-2.5-flash-lite",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 600,
       }),
     });
 
-    if (!res.ok || !res.body) {
+    if (!res.ok) {
       const errText = await res.text().catch(() => "");
       const status = res.status === 429 || res.status === 402 ? res.status : 500;
       return new Response(JSON.stringify({ error: errText || "gateway_error" }), { status, headers: cors });
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let text = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const parts = buffer.split("\n");
-      buffer = parts.pop() ?? "";
-      for (const line of parts) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith("data:")) continue;
-        const data = trimmed.slice(5).trim();
-        if (!data || data === "[DONE]") continue;
-        try {
-          const evt = JSON.parse(data);
-          if (evt.type === "response.output_text.delta" && typeof evt.delta === "string") {
-            text += evt.delta;
-          } else if (evt.type === "response.completed" && !text) {
-            text = evt.response?.output_text ?? "";
-          }
-        } catch {
-          // ignore partial frames
-        }
-      }
-    }
+    const json = await res.json();
+    const text: string = json?.choices?.[0]?.message?.content ?? "";
 
     return new Response(JSON.stringify({ analysis: text.trim() }), { headers: cors });
   } catch (e) {
