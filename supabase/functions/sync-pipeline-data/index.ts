@@ -1527,7 +1527,7 @@ Deno.serve(async (req) => {
       const tmaTotal = computeTmaDays(allMonthCards, historyByCard);
       let closeTotalY = 0, closeNY = 0;
       for (const c of allMonthCards) {
-        if (!c.ghost_of) {
+        if (!c.ghost_of && typeof c.created_at === "string" && c.created_at.startsWith(String(year))) {
           const created = new Date(c.created_at).getTime();
           const fc = (commentsByCard.get(c.id) || []).map((cm: any) => new Date(cm.created_at).getTime()).filter((t: number) => t > created).sort((a: number, b: number) => a - b)[0];
           const fm = (historyByCard[c.id] || []).map((h: any) => new Date(h.moved_at).getTime()).filter((t: number) => t > created).sort((a: number, b: number) => a - b)[0];
@@ -1539,7 +1539,8 @@ Deno.serve(async (req) => {
           if (entry) { const d = Math.max(0, Math.floor((new Date(entry.moved_at).getTime() - new Date(c.created_at).getTime()) / (1000*60*60*24))); closeTotalY += d; closeNY++; }
         }
       }
-      dashboardTotals.tmeMinutes = tmeVals.length > 0 ? Math.round(tmeVals.reduce((a, b) => a + b, 0) / tmeVals.length) : null;
+      dashboardTotals.tmeMinutes = median(tmeVals);
+
       dashboardTotals.tmaDays = tmaTotal;
       dashboardTotals.avgCloseTimeDays = closeNY > 0 ? Math.round(closeTotalY / closeNY) : null;
       // Tarefas totals
