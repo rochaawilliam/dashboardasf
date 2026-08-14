@@ -167,11 +167,14 @@ export function SalesFunnel({
               )}
               <div
                 className={cn(
-                  "flex min-h-[128px] sm:min-h-[136px] [&>*]:w-full",
+                  // altura fixa em telas grandes garante que a mesma linha fique
+                  // alinhada nos três funis (mesmo com placeholders invisíveis)
+                  "flex min-h-[128px] sm:min-h-[136px] lg:h-[172px] lg:min-h-0 [&>*]:w-full",
                   isPlaceholder && "invisible pointer-events-none hidden lg:flex"
                 )}
                 aria-hidden={isPlaceholder}
               >
+
 
                 <CircularProgressCard
                   metric={{ ...metric, name: cleanName(metric.name) }}
