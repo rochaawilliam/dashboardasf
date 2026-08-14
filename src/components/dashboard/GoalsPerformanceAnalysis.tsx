@@ -1007,10 +1007,12 @@ export function GoalsPerformanceAnalysis({
             </span>
             {overallStyle.label} · {Math.round(computed.overall)}%
           </span>
-          <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={() => loadAnalysis(true)} disabled={loading}>
-          <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
-          <span className="hidden sm:inline">Atualizar</span>
-          </Button>
+          {isAdmin && (
+            <Button variant="outline" size="sm" className="h-7 text-sm gap-1" onClick={() => loadAnalysis(true)} disabled={loading}>
+              <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
+              <span className="hidden sm:inline">Atualizar</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1036,7 +1038,7 @@ export function GoalsPerformanceAnalysis({
             ) : analysis ? (
               <AnalysisText text={splitAnalysis(analysis).panorama} />
             ) : (
-              <p className="text-base text-muted-foreground">Clique em "Atualizar" para gerar a análise.</p>
+              <p className="text-base text-muted-foreground">A análise executiva do dia é gerada automaticamente a partir das 7h.</p>
             )}
           </div>
         </div>
