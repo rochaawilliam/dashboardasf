@@ -64,10 +64,11 @@ Máximo de 160 palavras no total. Não invente números que não estejam acima.`
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5.6-sol",
+        // modelo econômico: reduz drasticamente o custo por análise
+        model: "google/gemini-2.5-flash-lite",
         input: prompt,
         stream: true,
-        reasoning: { effort: "low", summary: "auto" },
+        max_output_tokens: 600,
       }),
     });
 
