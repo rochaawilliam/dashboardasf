@@ -146,7 +146,16 @@ interface OperationalMetrics {
   avgHandlingDays: number | null;
 }
 
+/** Mediana arredondada (null quando não há amostras) */
+function median(values: number[]): number | null {
+  if (!values.length) return null;
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return Math.round(s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2);
+}
+
 // Paginated fetch to bypass Supabase 1000-row default limit
+
 async function fetchAll(
   client: any,
   table: string,
@@ -1375,8 +1384,12 @@ Deno.serve(async (req) => {
         }
       }
 
-      // TME (minutes) - matching Dashboard computeTme
-      const tmeCards = monthFilteredCards.filter((c: any) => !c.ghost_of);
+      // TME (minutes) — mesma regra do Pipeline Vision Board:
+      // considera apenas cards criados dentro do mês e usa a MEDIANA (mediana evita
+      // que cards antigos/esquecidos distorçam o indicador).
+      const tmeCards = monthFilteredCards.filter(
+        (c: any) => !c.ghost_of && typeof c.created_at === "string" && c.created_at.startsWith(ms),
+      );
       const tmeValues: number[] = [];
       for (const c of tmeCards) {
         const created = new Date(c.created_at).getTime();
@@ -1393,7 +1406,8 @@ Deno.serve(async (req) => {
           tmeValues.push(Math.max(0, Math.round((Math.min(...candidates) - created) / (1000 * 60))));
         }
       }
-      const tmeAvg = tmeValues.length > 0 ? Math.round(tmeValues.reduce((a, b) => a + b, 0) / tmeValues.length) : null;
+      const tmeAvg = median(tmeValues);
+
 
       // TMA (days) — mesma regra do Pipeline Vision Board (inclui cards abertos)
       const tmaAvg = computeTmaDays(monthFilteredCards, historyByCard);
@@ -1522,7 +1536,7 @@ Deno.serve(async (req) => {
       const tmaTotal = computeTmaDays(allMonthCards, historyByCard);
       let closeTotalY = 0, closeNY = 0;
       for (const c of allMonthCards) {
-        if (!c.ghost_of) {
+        if (!c.ghost_of && typeof c.created_at === "string" && c.created_at.startsWith(String(year))) {
           const created = new Date(c.created_at).getTime();
           const fc = (commentsByCard.get(c.id) || []).map((cm: any) => new Date(cm.created_at).getTime()).filter((t: number) => t > created).sort((a: number, b: number) => a - b)[0];
           const fm = (historyByCard[c.id] || []).map((h: any) => new Date(h.moved_at).getTime()).filter((t: number) => t > created).sort((a: number, b: number) => a - b)[0];
@@ -1534,7 +1548,8 @@ Deno.serve(async (req) => {
           if (entry) { const d = Math.max(0, Math.floor((new Date(entry.moved_at).getTime() - new Date(c.created_at).getTime()) / (1000*60*60*24))); closeTotalY += d; closeNY++; }
         }
       }
-      dashboardTotals.tmeMinutes = tmeVals.length > 0 ? Math.round(tmeVals.reduce((a, b) => a + b, 0) / tmeVals.length) : null;
+      dashboardTotals.tmeMinutes = median(tmeVals);
+
       dashboardTotals.tmaDays = tmaTotal;
       dashboardTotals.avgCloseTimeDays = closeNY > 0 ? Math.round(closeTotalY / closeNY) : null;
       // Tarefas totals
