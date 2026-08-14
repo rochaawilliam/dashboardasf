@@ -146,7 +146,16 @@ interface OperationalMetrics {
   avgHandlingDays: number | null;
 }
 
+/** Mediana arredondada (null quando não há amostras) */
+function median(values: number[]): number | null {
+  if (!values.length) return null;
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return Math.round(s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2);
+}
+
 // Paginated fetch to bypass Supabase 1000-row default limit
+
 async function fetchAll(
   client: any,
   table: string,
