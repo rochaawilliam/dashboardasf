@@ -165,7 +165,13 @@ export function SalesFunnel({
                   <ArrowDown className="h-4 w-4 text-muted-foreground/40" />
                 </div>
               )}
-              <div className={cn(isPlaceholder && "invisible pointer-events-none hidden lg:block")} aria-hidden={isPlaceholder}>
+              <div
+                className={cn(
+                  "flex min-h-[128px] sm:min-h-[136px]",
+                  isPlaceholder && "invisible pointer-events-none hidden lg:flex"
+                )}
+                aria-hidden={isPlaceholder}
+              >
 
                 <CircularProgressCard
                   metric={{ ...metric, name: cleanName(metric.name) }}
