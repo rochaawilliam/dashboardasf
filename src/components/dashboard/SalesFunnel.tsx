@@ -167,7 +167,7 @@ export function SalesFunnel({
               )}
               <div
                 className={cn(
-                  "flex min-h-[128px] sm:min-h-[136px]",
+                  "flex min-h-[128px] sm:min-h-[136px] [&>*]:w-full",
                   isPlaceholder && "invisible pointer-events-none hidden lg:flex"
                 )}
                 aria-hidden={isPlaceholder}
