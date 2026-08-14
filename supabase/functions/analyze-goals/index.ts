@@ -56,56 +56,29 @@ Escreva em português do Brasil, tom executivo e direto. Responda em markdown co
 **Checklist de ações corretivas** — 4 a 6 bullets curtos no formato "- [ ] Ação ..." (imperativo e específico).
 Máximo de 160 palavras no total. Não invente números que não estejam acima.`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
+        "Authorization": `Bearer ${apiKey}`,
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
         // modelo econômico: reduz drasticamente o custo por análise
         model: "google/gemini-2.5-flash-lite",
-        input: prompt,
-        stream: true,
-        max_output_tokens: 600,
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 600,
       }),
     });
 
-    if (!res.ok || !res.body) {
+    if (!res.ok) {
       const errText = await res.text().catch(() => "");
       const status = res.status === 429 || res.status === 402 ? res.status : 500;
       return new Response(JSON.stringify({ error: errText || "gateway_error" }), { status, headers: cors });
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let text = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const parts = buffer.split("\n");
-      buffer = parts.pop() ?? "";
-      for (const line of parts) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith("data:")) continue;
-        const data = trimmed.slice(5).trim();
-        if (!data || data === "[DONE]") continue;
-        try {
-          const evt = JSON.parse(data);
-          if (evt.type === "response.output_text.delta" && typeof evt.delta === "string") {
-            text += evt.delta;
-          } else if (evt.type === "response.completed" && !text) {
-            text = evt.response?.output_text ?? "";
-          }
-        } catch {
-          // ignore partial frames
-        }
-      }
-    }
+    const json = await res.json();
+    const text: string = json?.choices?.[0]?.message?.content ?? "";
 
     return new Response(JSON.stringify({ analysis: text.trim() }), { headers: cors });
   } catch (e) {
