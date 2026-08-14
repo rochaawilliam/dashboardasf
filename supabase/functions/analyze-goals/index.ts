@@ -30,12 +30,15 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as Payload;
-    const metrics = (body.metrics ?? []).slice(0, 60);
+    // Envia apenas as métricas mais relevantes (piores e melhores) para reduzir tokens/créditos
+    const all = (body.metrics ?? []).slice();
+    all.sort((a, b) => a.progress - b.progress);
+    const metrics = all.length > 20 ? [...all.slice(0, 14), ...all.slice(-6)] : all;
 
     const lines = metrics
       .map(
         (m) =>
-          `- ${m.name}: realizado ${m.value} ${m.unit ?? ""} | meta ${m.target} | atingimento ${Math.round(m.progress)}%${m.polarity === "lower_is_better" ? " (quanto menor, melhor)" : ""}`,
+          `- ${m.name}: ${m.value}${m.unit ?? ""} / meta ${m.target} = ${Math.round(m.progress)}%${m.polarity === "lower_is_better" ? " (menor é melhor)" : ""}`,
       )
       .join("\n");
 
