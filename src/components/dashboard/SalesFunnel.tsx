@@ -112,9 +112,9 @@ export function SalesFunnel({
 
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden h-full flex flex-col">
-      {/* Funnel Header */}
+      {/* Funnel Header — altura fixa para alinhar as colunas */}
       <div className={cn(
-        "flex items-center gap-2 px-2.5 sm:px-4 py-2 sm:py-3 bg-gradient-to-r border-b",
+        "flex items-center gap-2 px-2.5 sm:px-4 h-10 sm:h-12 shrink-0 bg-gradient-to-r border-b",
         headerColors
       )}>
         <Icon className={cn("h-4 w-4 sm:h-5 sm:w-5 shrink-0", iconColors)} />
@@ -122,29 +122,30 @@ export function SalesFunnel({
         <span className="text-[10px] sm:text-xs text-muted-foreground ml-auto shrink-0">{metrics.filter((m: any) => !m.__placeholder).length} etapas</span>
       </div>
 
-      {/* Legenda da escala de conversão */}
-      {hasConversions && (
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 px-2.5 sm:px-4 py-1.5 border-b border-border/40 bg-muted/30">
-          <span className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground">Conversão</span>
-          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" /> ≥ meta
-          </span>
-          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-warning" /> gap até 15%
-          </span>
-          <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> gap maior
-          </span>
-        </div>
-      )}
+      {/* Legenda da escala de conversão — sempre ocupa a mesma altura */}
+      <div className="flex items-center gap-x-2.5 px-2.5 sm:px-4 h-7 shrink-0 overflow-hidden border-b border-border/40 bg-muted/30">
+        {hasConversions && (
+          <>
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground">Conversão</span>
+            <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" /> ≥ meta
+            </span>
+            <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-warning" /> gap até 15%
+            </span>
+            <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> gap maior
+            </span>
+          </>
+        )}
+      </div>
 
 
       {/* Funnel Steps */}
-      <div className={cn("p-2 sm:p-3 space-y-1", bodyColors)}>
+      <div className={cn("p-2 sm:p-3", bodyColors)}>
 
         {metrics.map((metric, index) => {
           const isPlaceholder = (metric as any).__placeholder === true;
-          const prevPlaceholder = index > 0 && (metrics[index - 1] as any).__placeholder === true;
           const monthlyValue = monthlyValues[metric.id] ?? null;
           const accumulated = accumulatedValues[metric.id] ?? 0;
           const monthlyTarget = selectedMonth && monthlyTargets
@@ -159,8 +160,16 @@ export function SalesFunnel({
             <React.Fragment key={metric.id}>
               {index > 0 && (
                 <div className={cn(
-                  "flex justify-center py-0.5",
-                  (isPlaceholder || prevPlaceholder) && "invisible hidden lg:flex"
+                  "hidden lg:flex items-center justify-center h-6 shrink-0",
+                  isPlaceholder && "invisible"
+                )}>
+                  <ArrowDown className="h-4 w-4 text-muted-foreground/40" />
+                </div>
+              )}
+              {index > 0 && (
+                <div className={cn(
+                  "flex lg:hidden items-center justify-center h-6",
+                  isPlaceholder && "hidden"
                 )}>
                   <ArrowDown className="h-4 w-4 text-muted-foreground/40" />
                 </div>
@@ -169,11 +178,12 @@ export function SalesFunnel({
                 className={cn(
                   // altura fixa em telas grandes garante que a mesma linha fique
                   // alinhada nos três funis (mesmo com placeholders invisíveis)
-                  "flex min-h-[128px] sm:min-h-[136px] lg:h-[172px] lg:min-h-0 [&>*]:w-full",
+                  "flex min-h-[128px] sm:min-h-[136px] lg:h-[176px] lg:min-h-0 [&>*]:w-full",
                   isPlaceholder && "invisible pointer-events-none hidden lg:flex"
                 )}
                 aria-hidden={isPlaceholder}
               >
+
 
 
                 <CircularProgressCard
