@@ -1375,8 +1375,12 @@ Deno.serve(async (req) => {
         }
       }
 
-      // TME (minutes) - matching Dashboard computeTme
-      const tmeCards = monthFilteredCards.filter((c: any) => !c.ghost_of);
+      // TME (minutes) — mesma regra do Pipeline Vision Board:
+      // considera apenas cards criados dentro do mês e usa a MEDIANA (mediana evita
+      // que cards antigos/esquecidos distorçam o indicador).
+      const tmeCards = monthFilteredCards.filter(
+        (c: any) => !c.ghost_of && typeof c.created_at === "string" && c.created_at.startsWith(ms),
+      );
       const tmeValues: number[] = [];
       for (const c of tmeCards) {
         const created = new Date(c.created_at).getTime();
@@ -1393,7 +1397,8 @@ Deno.serve(async (req) => {
           tmeValues.push(Math.max(0, Math.round((Math.min(...candidates) - created) / (1000 * 60))));
         }
       }
-      const tmeAvg = tmeValues.length > 0 ? Math.round(tmeValues.reduce((a, b) => a + b, 0) / tmeValues.length) : null;
+      const tmeAvg = median(tmeValues);
+
 
       // TMA (days) — mesma regra do Pipeline Vision Board (inclui cards abertos)
       const tmaAvg = computeTmaDays(monthFilteredCards, historyByCard);
