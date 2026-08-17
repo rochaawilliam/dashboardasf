@@ -901,7 +901,7 @@ const Index = () => {
       description?: string;
     };
     const info: Record<string, Info> = {};
-    if (!pipelineData) return info;
+    if (!pipelineData || !metrics) return info;
     const ms = selectedMonth ? `${selectedYear}-${String(selectedMonth).padStart(2, "0")}` : null;
     const ops = ms ? pipelineData.operational?.[ms] : pipelineData.operationalTotals;
     const dash = ms ? pipelineData.dashboard?.[ms] : pipelineData.dashboardTotals;
@@ -1124,7 +1124,7 @@ const Index = () => {
     }
 
     return info;
-  }, [pipelineData, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP]);
+  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP]);
 
   // Cashflow (Google Sheets Financeiro) → monthly values for selected month
   const cashflowMonthlyValues = useMemo(() => {
