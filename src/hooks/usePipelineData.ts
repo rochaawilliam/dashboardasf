@@ -127,7 +127,12 @@ export interface PipelineData {
   novosTotalsByOriginArea?: Record<string, { empresarial: number; trabalhista: number; tributario: number; ambiental?: number; total: number }>;
   qualificacaoByOrigin?: Record<string, Record<string, { mql: number; sql: number }>>;
   qualificacaoTotalsByOrigin?: Record<string, { mql: number; sql: number }>;
+  npsPulse?: {
+    nps: Record<string, { value: number; target: number }>;
+    enps: Record<string, { value: number; target: number }>;
+  };
 }
+
 
 const CACHE_KEY = "pipeline-data-cache-v5";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
