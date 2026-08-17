@@ -455,18 +455,23 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <div className="flex items-center gap-1">
-              <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-                {hideValues ? "••••••" : (
-                  <>
-                    {formatMetricValue(displayValue, metric.unit, metric.name)}
-                    {getStageLabel(metric.name, displayValue) && (
-                      <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
-                        {getStageLabel(metric.name, displayValue)}
-                      </span>
-                    )}
-                  </>
+              <div className="flex flex-col">
+                <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+                  {hideValues ? "••••••" : (
+                    <>
+                      {formatMetricValue(displayValue, metric.unit, metric.name)}
+                      {getStageLabel(metric.name, displayValue) && (
+                        <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
+                          {getStageLabel(metric.name, displayValue)}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </p>
+                {isComputedCard && !resultadoData && (
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground italic mt-0.5 leading-none">Automático</p>
                 )}
-              </p>
+              </div>
               {pipelineCardNames && pipelineCardNames.length > 0 && !hideValues && (
                 <Tooltip>
                   <TooltipTrigger asChild>
