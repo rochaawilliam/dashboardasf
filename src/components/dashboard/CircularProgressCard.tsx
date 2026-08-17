@@ -47,9 +47,10 @@ interface CircularProgressCardProps {
 }
 
 const nonAccumulativeKeywords = [
-"Ticket Médio", "Margem", "Churn", "Custo Fixo", "Folha sobre Receita",
-"Inadimplência", "Cumprimento do Orçamento", "Lead Time", "SLA", "NPS",
-"ENPS", "Taxa", "Turnover", "LTV", "Upsell"];
+  "Ticket Médio", "Margem", "Churn", "Custo Fixo", "Folha sobre Receita",
+  "Inadimplência", "Cumprimento do Orçamento", "Lead Time", "SLA", "NPS",
+  "ENPS", "Taxa", "Turnover", "LTV", "Upsell", "Receita por Colaborador"
+];
 
 
 function isNonAccumulativeMetric(name: string, unit: string): boolean {
