@@ -43,6 +43,7 @@ interface CircularProgressCardProps {
     formula?: string;
     calculation?: string;
   };
+  isComputedCard?: boolean;
 }
 
 const nonAccumulativeKeywords = [
