@@ -1139,6 +1139,7 @@ const Index = () => {
       .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
     values[RECEITA_BRUTA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix;
+    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
     if (monthsThroughSelected.length > 0) {
       values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
@@ -1150,7 +1151,8 @@ const Index = () => {
         : 0
     );
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+
 
   // Cashflow accumulated across the year
   const cashflowAccumulatedValues = useMemo(() => {
