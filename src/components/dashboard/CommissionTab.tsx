@@ -187,7 +187,6 @@ export function CommissionTab({
 
   const receitaData = useMemo(() => {
     const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
-    const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
     
     // Total Revenue calculation for Head Growth Commission:
     // Priority to Pipeline total (valor_gerado), fallback to finance achieved (sum of RECEITA_IDS)
