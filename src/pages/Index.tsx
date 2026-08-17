@@ -1124,9 +1124,31 @@ const Index = () => {
         };
       }
     }
+    
+    // Financial metrics audit info
+    if (cashflowData?.months && selectedMonth) {
+      const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+      const m = cashflowData.months[ms];
+      if (m) {
+        info[RECEITA_BRUTA_OPERACIONAL_ID] = {
+          source: (pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0) > 0 ? "Dashboard" : "Operacional",
+          filter: "month",
+          formula: "Pipeline.valor_gerado (prioridade) OU Planilha.total_recebimentos",
+          calculation: `Pipeline: R$ ${fmt(pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0)} | Planilha: R$ ${fmt(m.total_recebimentos)}`,
+          description: metrics.find(x => x.id === RECEITA_BRUTA_OPERACIONAL_ID)?.description,
+        };
+        info[FLUXO_CAIXA_OPERACIONAL_ID] = {
+          source: "Operacional",
+          filter: "month",
+          formula: "Planilha.total_recebimentos (consolidado da aba mensal)",
+          calculation: `Valor: R$ ${fmt(m.total_recebimentos)}`,
+          description: metrics.find(x => x.id === FLUXO_CAIXA_OPERACIONAL_ID)?.description,
+        };
+      }
+    }
 
     return info;
-  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP]);
+  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP, cashflowData]);
 
   // Cashflow (Google Sheets Financeiro) → monthly values for selected month
   const cashflowMonthlyValues = useMemo(() => {
