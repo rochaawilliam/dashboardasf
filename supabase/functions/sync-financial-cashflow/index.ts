@@ -183,7 +183,7 @@ function parseSheet(
     : 0;
 
   return {
-    recebimentos_dinheiro_pix: receb,
+    recebimentos_dinheiro_pix: total_recebimentos, 
     total_recebimentos,
     total_pagamentos,
     folha_total,
