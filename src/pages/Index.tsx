@@ -1021,6 +1021,8 @@ const Index = () => {
     const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
     const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
+      const m = metrics.find(x => x.id === metricId);
+      if (!m) continue;
       const isDashSnapshot =
         metricId === LEADS_FUNIL_ONLINE_ID ||
         metricId === LEADS_FUNIL_OFFLINE_ID ||
