@@ -5,22 +5,22 @@
 /**
  * Format a number in Brazilian locale (1.234,56)
  */
-export function formatNumber(value: number, decimals: number = 2): string {
+export function formatNumber(value: number, decimals: number = 0): string {
   return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 }
 
 /**
  * Format a number as Brazilian currency (R$ 1.234,56)
  */
-export function formatCurrency(value: number, decimals: number = 2): string {
+export function formatCurrency(value: number, decimals: number = 0): string {
   return value.toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 }
 
@@ -40,10 +40,8 @@ export function formatMetricValue(value: number, unit: string, metricName?: stri
                       unit.toLowerCase().includes("real") || 
                       unit.toLowerCase().includes("reais");
   
-  // Specific override for requested precision (e.g. Fluxo de Caixa target)
-  // Usually the user wants no decimals, but here they specifically asked for 108.459,97
-  const hasDecimals = value % 1 !== 0;
-  const decimals = isFinancial && hasDecimals ? 2 : 0;
+  // User requested to remove all decimals from all cards
+  const decimals = 0;
   
   // Currency units
   if (isFinancial) {
