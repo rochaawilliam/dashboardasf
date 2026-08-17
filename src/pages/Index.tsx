@@ -570,6 +570,32 @@ const Index = () => {
       }
     }
 
+    // NPS Pulse metrics
+    if (pipelineData.npsPulse) {
+      const np = pipelineData.npsPulse;
+      const NPS_ID = "f7b32bc5-7f37-4470-a52d-4cc8c096a2a5";
+      const ENPS_ID = "bfc3fbed-ec18-4009-a6ba-20c7f3ec184b";
+
+      if (selectedMonth) {
+        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+        if (np.nps?.[ms]) values[NPS_ID] = np.nps[ms].value;
+        if (np.enps?.[ms]) values[ENPS_ID] = np.enps[ms].value;
+      } else {
+        // Average for the year
+        const avg = (data: Record<string, { value: number }>) => {
+          const vals = Object.entries(data)
+            .filter(([ms]) => ms.startsWith(`${selectedYear}-`))
+            .map(([, d]) => d.value);
+          return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : undefined;
+        };
+        const npsAvg = avg(np.nps);
+        const enpsAvg = avg(np.enps);
+        if (npsAvg !== undefined) values[NPS_ID] = npsAvg;
+        if (enpsAvg !== undefined) values[ENPS_ID] = enpsAvg;
+      }
+    }
+
+
     // Override "Leads no Funil" and "Contratos" with Dashboard origin data (snapshot, not passage-based)
     const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
     const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
@@ -1554,7 +1580,8 @@ const Index = () => {
         current_value: currentValue
       };
     });
-  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues, pipelineData]);
+  }, [metrics, selectedMonth, accumulatedValues, originValues, originTargets, pipelineAccumulatedValues, pipelineMonthlyValues, pipelineData, monthlyTargets, selectedYear]);
+
 
   // Valores derivados (calculados só na renderização dos cards) para a Análise de Desempenho
   const analysisMonthlyValues = useMemo(() => {

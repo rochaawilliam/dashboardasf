@@ -6,6 +6,10 @@ const PIPELINE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const ONBOARDING_URL = "https://ttbwpcmlhssmzsgyppho.supabase.co";
 const ONBOARDING_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YndwY21saHNzbXpzZ3lwcGhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MTg5NTcsImV4cCI6MjA4NjM5NDk1N30.SZ3iHlhAbCuZgR_P7N65CPj2hxF4yMw47GYYDk-rnrk";
 
+const NPS_PULSE_URL = "https://ea380fd6-a007-4c8e-937e-5ca6fbe8828f.supabase.co";
+const NPS_PULSE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhMzgwZmQ2LWEwMDctNGM4ZS05MzdlLTVjYTZmYmU4ODJiZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzY5NTExMDQ3LCJleHAiOjIwODUwODcwNDd9.eesyFcjBBPWGf61XG554Q-oRXRBNCQILjs63Gi1yx8c";
+
+
 /**
  * Creates a Supabase client for an external project.
  * Prefers a service/secret key (env) over the public anon key so the sync keeps
@@ -1284,6 +1288,53 @@ Deno.serve(async (req) => {
       console.error("Training fetch error:", err);
     }
 
+    // ─── NPS Pulse Integration ──────────────────────────────────
+    let npsPulse: any = null;
+    try {
+      const pulse = makeExternalClient(NPS_PULSE_URL, NPS_PULSE_ANON_KEY, "NPS_PULSE_SERVICE_KEY");
+      const [npsHistory, npsTargets] = await Promise.all([
+        pulse.from("metric_history").select("metric_id, value, recorded_at, period_type").eq("period_type", "month"),
+        pulse.from("monthly_targets").select("metric_id, target_value, month, year"),
+      ]);
+
+      const npsHistoryData = npsHistory.data || [];
+      const npsTargetsData = npsTargets.data || [];
+
+      // Map Pulse metric IDs to dashboard metric IDs
+      // We assume Pulse project uses same IDs or we map them here if known.
+      // Since Pulse is a clone of the dashboard logic, it likely has its own metrics table.
+      // We'll map by name if IDs differ, but for now we look for NPS/ENPS.
+
+      const NPS_METRIC_NAME = "NPS";
+      const ENPS_METRIC_NAME = "ENPS";
+
+      // Helper to process Pulse data into our dashboard format
+      const processPulseData = (metricName: string) => {
+        const history = npsHistoryData.filter((h: any) => h.metric_id === metricName); // Adjust if IDs are used
+        const targets = npsTargetsData.filter((t: any) => t.metric_id === metricName);
+
+        const byMonth: Record<string, { value: number; target: number }> = {};
+        for (const h of history) {
+          const date = new Date(h.recorded_at);
+          const ms = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          byMonth[ms] = { ...byMonth[ms], value: h.value };
+        }
+        for (const t of targets) {
+          const ms = `${t.year}-${String(t.month).padStart(2, "0")}`;
+          byMonth[ms] = { ...byMonth[ms], target: t.target_value };
+        }
+        return byMonth;
+      };
+
+      npsPulse = {
+        nps: processPulseData(NPS_METRIC_NAME),
+        enps: processPulseData(ENPS_METRIC_NAME),
+      };
+    } catch (err) {
+      console.error("NPS Pulse fetch error:", err);
+    }
+
+
     // ─── Dashboard-style cumulative counts (matches Pipeline Dashboard panel) ───
     // Uses `month` field filtering and cumulative counting:
     // A card counts for a stage if it's (a) currently at that stage, (b) has history to that stage, or (c) at a later stage
@@ -1643,7 +1694,9 @@ Deno.serve(async (req) => {
       operationalTotals,
       onboarding,
       training,
+      npsPulse,
       cardNames,
+
       cardNamesByArea,
       cardNamesByAreaTag,
       dashboard: dashboardByMonth,
