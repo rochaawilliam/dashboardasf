@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import type { Metric } from "@/hooks/useMetrics";
 
 type SourceInfo = {
-  source: "Operacional" | "Dashboard";
+  source: "Operacional" | "Dashboard" | "Cálculo";
   filter: "created_at" | "month";
   formula?: string;
   calculation?: string;
@@ -24,7 +24,7 @@ interface AuditPanelProps {
 export function AuditPanel({ metrics, sourceInfo, selectedMonthName, selectedYear }: AuditPanelProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "Operacional" | "Dashboard">("all");
+  const [filter, setFilter] = useState<"all" | "Operacional" | "Dashboard" | "Cálculo">("all");
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -49,7 +49,9 @@ export function AuditPanel({ metrics, sourceInfo, selectedMonthName, selectedYea
       total: all.length,
       op: all.filter((i) => i.source === "Operacional").length,
       db: all.filter((i) => i.source === "Dashboard").length,
+      calc: all.filter((i) => i.source === "Cálculo").length,
     };
+
   }, [sourceInfo]);
 
   const exportCSV = () => {
@@ -89,7 +91,7 @@ export function AuditPanel({ metrics, sourceInfo, selectedMonthName, selectedYea
             </SheetTitle>
             <SheetDescription>
               Período: <span className="font-medium text-foreground">{selectedMonthName ?? "Acumulado"} {selectedYear}</span>
-              {" · "}{counts.total} métricas rastreadas ({counts.op} Operacional · {counts.db} Dashboard)
+              {" · "}{counts.total} métricas rastreadas ({counts.op} Operacional · {counts.db} Dashboard · {counts.calc} Cálculo)
             </SheetDescription>
           </SheetHeader>
 
@@ -104,7 +106,7 @@ export function AuditPanel({ metrics, sourceInfo, selectedMonthName, selectedYea
               />
             </div>
             <div className="flex gap-1">
-              {(["all", "Operacional", "Dashboard"] as const).map((f) => (
+              {(["all", "Operacional", "Dashboard", "Cálculo"] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? "default" : "outline"}
@@ -151,7 +153,10 @@ export function AuditPanel({ metrics, sourceInfo, selectedMonthName, selectedYea
                             "text-[10px] font-semibold",
                             info.source === "Operacional"
                               ? "bg-primary/10 text-primary border-primary/30"
-                              : "bg-muted text-muted-foreground border-border"
+                              : info.source === "Cálculo"
+                                ? "bg-amber-100 text-amber-700 border-amber-200"
+                                : "bg-muted text-muted-foreground border-border"
+
                           )}
                         >
                           {info.source}

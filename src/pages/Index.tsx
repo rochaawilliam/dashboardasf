@@ -396,6 +396,8 @@ const Index = () => {
   const FLUXO_CAIXA_OPERACIONAL_ID = "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
   const CUSTO_FIXO_SOBRE_RECEITA_ID = "0e52dcd3-7a81-413f-ad00-e54be82c9dc8";
+  const HEADCOUNT_ATIVO_ID = "a1b2c3d4-1001-4000-a001-000000000001";
+
 
 
   // ROI metric IDs
@@ -408,6 +410,7 @@ const Index = () => {
   const IMPRESSOES_ASF_ID = "12574c46-d6c0-4e18-9e7e-a42b05b8fcfe";
   const ALCANCE_ASF_ID = "54a2c98b-52e6-4b8a-850c-d7a38492d030";
   const CONVERSAS_INICIADAS_ID = "ca49be98-52c9-4da8-a580-6a681b54aeba";
+
   const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
   const pipelineMonthlyValues = useMemo(() => {
@@ -896,7 +899,7 @@ const Index = () => {
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
   const pipelineDataSourceInfo = useMemo(() => {
     type Info = {
-      source: "Operacional" | "Dashboard";
+      source: "Operacional" | "Dashboard" | "Cálculo";
       filter: "created_at" | "month";
       formula?: string;
       calculation?: string;
@@ -1144,6 +1147,14 @@ const Index = () => {
           calculation: `Valor: R$ ${fmt(m.total_recebimentos)}`,
           description: metrics.find(x => x.id === FLUXO_CAIXA_OPERACIONAL_ID)?.description,
         };
+        info[FOLHA_SOBRE_RECEITA_ID] = {
+          source: "Cálculo",
+          filter: "month",
+          formula: "Fluxo de Caixa Operacional ÷ Headcount Ativo",
+          calculation: `${fmt(m.recebimentos_dinheiro_pix)} ÷ ${fmtInt(pipelineData?.training?.headcount)} = ${fmt(m.recebimentos_dinheiro_pix / (pipelineData?.training?.headcount || 1))}`,
+          description: metrics.find(x => x.id === FOLHA_SOBRE_RECEITA_ID)?.description,
+        };
+
       }
     }
 
@@ -1183,7 +1194,11 @@ const Index = () => {
     if (monthsThroughSelected.length > 0) {
       values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
     }
-    values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
+    // Folha sobre Receita = Fluxo de Caixa Operacional / Headcount Ativo
+    const headcountAtivo = pipelineData?.training?.headcount ?? 0;
+    const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
+    values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
+
     values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
       m.recebimentos_dinheiro_pix > 0
         ? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100
@@ -1209,6 +1224,7 @@ const Index = () => {
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
+
         custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
       }
     }
@@ -1223,10 +1239,11 @@ const Index = () => {
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
       values[LUCRATIVIDADE_ANUAL_ID] = values[LUCRATIVIDADE_MENSAL_ID];
     }
-    if (folhaValues.length > 0) {
-      values[FOLHA_SOBRE_RECEITA_ID] =
-        Math.round((folhaValues.reduce((a, b) => a + b, 0) / folhaValues.length) * 100) / 100;
+    const headcountAccum = pipelineData?.training?.headcount ?? 0;
+    if (headcountAccum > 0) {
+      values[FOLHA_SOBRE_RECEITA_ID] = Math.round((receitaSum / headcountAccum) * 100) / 100;
     }
+
     if (custoFixoValues.length > 0) {
       values[CUSTO_FIXO_SOBRE_RECEITA_ID] =
         Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
