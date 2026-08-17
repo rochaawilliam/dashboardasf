@@ -5,22 +5,22 @@
 /**
  * Format a number in Brazilian locale (1.234,56)
  */
-export function formatNumber(value: number, decimals: number = 2): string {
+export function formatNumber(value: number, decimals: number = 0): string {
   return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 }
 
 /**
  * Format a number as Brazilian currency (R$ 1.234,56)
  */
-export function formatCurrency(value: number, decimals: number = 2): string {
+export function formatCurrency(value: number, decimals: number = 0): string {
   return value.toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 }
 
