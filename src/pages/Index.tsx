@@ -1156,16 +1156,29 @@ const Index = () => {
     if (!cashflowData?.months || !selectedMonth) return values;
     const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
     const m = cashflowData.months[ms];
-    if (!m) return values;
+    
+    // Fallback logic for current month if no sheet data yet: show 0 instead of blank
+    if (!m) {
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0;
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
+      values[LUCRATIVIDADE_MENSAL_ID] = 0;
+      values[FOLHA_SOBRE_RECEITA_ID] = 0;
+      values[CUSTO_FIXO_SOBRE_RECEITA_ID] = 0;
+      return values;
+    }
+
     const monthsThroughSelected = Object.entries(cashflowData.months)
       .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
+      
     // Receita Bruta Operacional prioritizes Pipeline (valor_gerado), link strictly to Pipeline
     const pipelineTotalGerado = pipelineData?.dashboard?.[ms]?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado ?? 0;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = (pipelineTotalGerado !== undefined && pipelineTotalGerado !== 0) 
+      ? pipelineTotalGerado 
+      : (m.recebimentos_dinheiro_pix || 0);
 
     // Fluxo de Caixa Operacional strictly from Sheet (total_recebimentos)
-    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos;
+    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos || 0;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
     if (monthsThroughSelected.length > 0) {
       values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;

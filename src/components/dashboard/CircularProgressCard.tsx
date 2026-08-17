@@ -265,6 +265,7 @@ export function CircularProgressCard({
   // Progress calculation for Receita Bruta Operacional per user request:
   // Use displayValue (realized) / targetForProgress (monthly target) * 100
   const isReceitaTotalMetric = metric.id === "b94952b3-b811-4200-872e-810b215240f6";
+  const isFluxoCaixaMetric = metric.id === "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
   
   const rawProgress = isInverse ?
   targetForProgress > 0 && displayValue > 0 ?
@@ -273,7 +274,8 @@ export function CircularProgressCard({
   targetForProgress > 0 ?
   displayValue / targetForProgress * 100 :
   0;
-  const progress = Math.min(rawProgress, 100);
+  // Permite que o progresso ultrapasse 100% para métricas de Receita e Fluxo de Caixa
+  const progress = (isReceitaTotalMetric || isFluxoCaixaMetric) ? rawProgress : Math.min(rawProgress, 100);
 
   const hasNoData = false; // Always show 0% when no data
 
