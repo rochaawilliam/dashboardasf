@@ -38,7 +38,7 @@ interface CircularProgressCardProps {
   sideContent?: React.ReactNode;
   pipelineCardNames?: string[];
   dataSourceBadge?: {
-    source: "Operacional" | "Dashboard";
+    source: "Operacional" | "Dashboard" | "Cálculo";
     filter: "created_at" | "month";
     formula?: string;
     calculation?: string;
@@ -296,20 +296,24 @@ export function CircularProgressCard({
               <button
                 className={cn(
                   "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium leading-none border transition-colors",
-                  dataSourceBadge.source === "Operacional"
-                    ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
-                    : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                    dataSourceBadge.source === "Operacional"
+                      ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                      : dataSourceBadge.source === "Cálculo"
+                        ? "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200/80"
+                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+
                 )}
                 aria-label={`Origem: ${dataSourceBadge.source}`}
                 onClick={(e) => e.stopPropagation()}
               >
-                {dataSourceBadge.source === "Operacional" ? "OP" : "DB"}
+                {dataSourceBadge.source === "Operacional" ? "OP" : dataSourceBadge.source === "Cálculo" ? "CALC" : "DB"}
               </button>
             </TooltipTrigger>
             <TooltipContent side="top" className="text-xs max-w-[320px]">
               <p className="font-semibold mb-1">
                 Painel {dataSourceBadge.source}
-                {dataSourceBadge.source === "Dashboard" ? " (fallback)" : ""}
+                {dataSourceBadge.source === "Dashboard" ? " (fallback)" : dataSourceBadge.source === "Cálculo" ? " (cálculo interno)" : ""}
+
               </p>
               <p className="text-popover-foreground/80">
                 <span className="text-popover-foreground/60">Campo filtrado:</span>{" "}
@@ -332,7 +336,10 @@ export function CircularProgressCard({
               <p className="text-popover-foreground/60 mt-1.5 italic">
                 {dataSourceBadge.source === "Operacional"
                   ? "Cards filtrados por data de criação; cada passagem entre etapas é contada (deduplicada por card)."
-                  : "Snapshot do funil filtrado pelo campo 'mês' atribuído ao card."}
+                  : dataSourceBadge.source === "Cálculo"
+                    ? "Métrica calculada dinamicamente com base em outros indicadores do dashboard."
+                    : "Snapshot do funil filtrado pelo campo 'mês' atribuído ao card."}
+
               </p>
             </TooltipContent>
           </Tooltip>
