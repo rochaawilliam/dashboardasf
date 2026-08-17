@@ -575,14 +575,19 @@ const Index = () => {
       const np = pipelineData.npsPulse;
       const NPS_ID = "f7b32bc5-7f37-4470-a52d-4cc8c096a2a5";
       const ENPS_ID = "bfc3fbed-ec18-4009-a6ba-20c7f3ec184b";
+      const CHURN_ID = "94d12621-1574-4041-ace3-9a3b6c064b07";
+      const HEALTH_SCORE_ID = "e6e6e6e6-1111-4eee-aaaa-111111111111";
 
       if (selectedMonth) {
         const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
         if (np.nps?.[ms]) values[NPS_ID] = np.nps[ms].value;
         if (np.enps?.[ms]) values[ENPS_ID] = np.enps[ms].value;
+        if (np.churn?.[ms]) values[CHURN_ID] = np.churn[ms].value;
+        if (np.healthScore?.[ms]) values[HEALTH_SCORE_ID] = np.healthScore[ms].value;
       } else {
         // Average for the year
         const avg = (data: Record<string, { value: number }>) => {
+          if (!data) return undefined;
           const vals = Object.entries(data)
             .filter(([ms]) => ms.startsWith(`${selectedYear}-`))
             .map(([, d]) => d.value);
@@ -590,8 +595,12 @@ const Index = () => {
         };
         const npsAvg = avg(np.nps);
         const enpsAvg = avg(np.enps);
+        const churnAvg = avg(np.churn);
+        const healthScoreAvg = avg(np.healthScore);
         if (npsAvg !== undefined) values[NPS_ID] = npsAvg;
         if (enpsAvg !== undefined) values[ENPS_ID] = enpsAvg;
+        if (churnAvg !== undefined) values[CHURN_ID] = churnAvg;
+        if (healthScoreAvg !== undefined) values[HEALTH_SCORE_ID] = healthScoreAvg;
       }
     }
 
