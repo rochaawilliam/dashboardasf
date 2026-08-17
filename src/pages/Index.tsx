@@ -1140,7 +1140,7 @@ const Index = () => {
         info[FLUXO_CAIXA_OPERACIONAL_ID] = {
           source: "Operacional",
           filter: "month",
-          formula: "Planilha.recebimentos_dinheiro_pix (consolidado da aba mensal)",
+          formula: "Planilha.Total de Recebimentos (consolidado da aba mensal)",
           calculation: `Valor: R$ ${fmt(m.total_recebimentos)}`,
           description: metrics.find(x => x.id === FLUXO_CAIXA_OPERACIONAL_ID)?.description,
         };
