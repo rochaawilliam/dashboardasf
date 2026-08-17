@@ -2635,6 +2635,7 @@ const Index = () => {
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
                                     const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
                                     const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
+                                    const isRevenueManualRestricted = metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
                                     const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
@@ -2673,7 +2674,7 @@ const Index = () => {
                                             selectedMonth={selectedMonth}
                                             monthlyTargets={monthlyTargets}
                                             monthlyTargetOverride={cardMonthlyTarget}
-                                            onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
+                                            onCardClick={isRevenueManualRestricted ? undefined : (isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric))}
                                             
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? (selectedMonth !== null ? (cashflowData?.months?.[`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`]?.boleto_total ?? null) : null)) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
