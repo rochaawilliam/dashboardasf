@@ -212,6 +212,7 @@ export function CircularProgressCard({
   sideContent,
   pipelineCardNames,
   dataSourceBadge,
+  isComputedCard
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
