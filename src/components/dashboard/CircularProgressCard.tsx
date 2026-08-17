@@ -43,6 +43,7 @@ interface CircularProgressCardProps {
     formula?: string;
     calculation?: string;
   };
+  isComputedCard?: boolean;
 }
 
 const nonAccumulativeKeywords = [
@@ -211,6 +212,7 @@ export function CircularProgressCard({
   sideContent,
   pipelineCardNames,
   dataSourceBadge,
+  isComputedCard
 }: CircularProgressCardProps) {
   const isInverse = metric.polarity === "lower_is_better";
   const isNonAccumulative = isNonAccumulativeMetric(metric.name, metric.unit);
@@ -279,9 +281,9 @@ export function CircularProgressCard({
     <div
       className={cn("metric-card group relative p-2 sm:p-4 lg:p-4 h-full flex flex-col",
 
-      onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
+      onCardClick && !isComputedCard && "cursor-pointer hover:shadow-md transition-shadow"
       )}
-      onClick={() => onCardClick?.()}>
+      onClick={() => !isComputedCard && onCardClick?.()}>
 
       {/* Header with polarity toggle */}
       <div className="mb-0.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
@@ -453,18 +455,23 @@ export function CircularProgressCard({
               {isMonthSelected ? "Realizado" : "Acumulado"}
             </p>
             <div className="flex items-center gap-1">
-              <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
-                {hideValues ? "••••••" : (
-                  <>
-                    {formatMetricValue(displayValue, metric.unit, metric.name)}
-                    {getStageLabel(metric.name, displayValue) && (
-                      <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
-                        {getStageLabel(metric.name, displayValue)}
-                      </span>
-                    )}
-                  </>
+              <div className="flex flex-col">
+                <p className="text-foreground leading-none text-xl sm:text-3xl lg:text-3xl font-sans font-extrabold tracking-tighter">
+                  {hideValues ? "••••••" : (
+                    <>
+                      {formatMetricValue(displayValue, metric.unit, metric.name)}
+                      {getStageLabel(metric.name, displayValue) && (
+                        <span className="text-lg sm:text-2xl lg:text-2xl font-semibold text-muted-foreground ml-1">
+                          {getStageLabel(metric.name, displayValue)}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </p>
+                {isComputedCard && !resultadoData && (
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground italic mt-0.5 leading-none">Automático</p>
                 )}
-              </p>
+              </div>
               {pipelineCardNames && pipelineCardNames.length > 0 && !hideValues && (
                 <Tooltip>
                   <TooltipTrigger asChild>

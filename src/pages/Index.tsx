@@ -1160,13 +1160,11 @@ const Index = () => {
     const monthsThroughSelected = Object.entries(cashflowData.months)
       .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
-    // Receita Bruta Operacional logic override per user request:
-    // Link to total generated from Pipeline if available, otherwise fallback to cashflow total_recebimentos.
+    // Receita Bruta Operacional prioritizes Pipeline (valor_gerado), link strictly to Pipeline
     const pipelineTotalGerado = pipelineData?.dashboard?.[ms]?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado !== undefined && pipelineTotalGerado > 0 
-      ? pipelineTotalGerado 
-      : m.total_recebimentos;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado ?? 0;
 
+    // Fluxo de Caixa Operacional strictly from Sheet (total_recebimentos)
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
     if (monthsThroughSelected.length > 0) {
@@ -1201,15 +1199,12 @@ const Index = () => {
         custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
       }
     }
-    // Accumulated Receita Bruta Operacional: priority to Pipeline Total, fallback to cashflow total_recebimentos
+    // Accumulated Receita Bruta Operacional: priority to Pipeline Total
     const pipelineTotalAccum = pipelineData?.dashboardTotals?.valor_gerado;
-    if (pipelineTotalAccum !== undefined && pipelineTotalAccum > 0) {
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalAccum;
-    } else if (totalRecebimentosSum > 0) {
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = totalRecebimentosSum;
-    }
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalAccum ?? 0;
 
-    if (totalRecebimentosSum > 0) values[FLUXO_CAIXA_OPERACIONAL_ID] = totalRecebimentosSum;
+    // Accumulated Fluxo de Caixa strictly from Sheet
+    values[FLUXO_CAIXA_OPERACIONAL_ID] = totalRecebimentosSum;
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
@@ -2405,10 +2400,8 @@ const Index = () => {
                             flatMap((s) => s.metrics);
 
                             const metricId = metric.id;
-                            const computedMonthly = cashflowMonthlyValues[metricId] ??
-                              (metricId === RECEITA_BRUTA_OPERACIONAL_ID ? revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0) : 0);
-                            const computedAccumulated = cashflowAccumulatedValues[metricId] ??
-                              (metricId === RECEITA_BRUTA_OPERACIONAL_ID ? revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0) : 0);
+                            const computedMonthly = cashflowMonthlyValues[metricId] ?? 0;
+                            const computedAccumulated = cashflowAccumulatedValues[metricId] ?? 0;
 
                             return {
                               ...metric,
@@ -2631,20 +2624,18 @@ const Index = () => {
                                       revSumAccumulated = sumComponents(RECEITA_TRIB_COMPONENTS, accumulatedValues);
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTotalAnual) {
-                                      // Receita Total = planilha de Fluxo de Caixa quando disponível; senão, soma manual das receitas
-                                      const allRevIds = [...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID];
-                                      const sheetMonthlyValue = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] : undefined;
-                                      const sheetAccumulatedValue = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID];
-                                      revSumMonthly = selectedMonth !== null ? sheetMonthlyValue ?? sumComponents(allRevIds, monthlyValues) : null;
-                                      revSumAccumulated = sheetAccumulatedValue ?? sumComponents(allRevIds, accumulatedValues);
+                                      // Receita Total strictly linked to Pipeline/Sheet sources
+                                      revSumMonthly = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0 : null;
+                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
 
                                     const isRevSumCard = isReceitaEmp || isReceitaTrab || isReceitaTrib || isReceitaTotalAnual;
-                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
+                                    const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID);
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
                                     const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
-                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed;
+                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
+                                    const isRevenueManualRestricted = metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
                                     const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
@@ -2683,7 +2674,7 @@ const Index = () => {
                                             selectedMonth={selectedMonth}
                                             monthlyTargets={monthlyTargets}
                                             monthlyTargetOverride={cardMonthlyTarget}
-                                            onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
+                                            onCardClick={isRevenueManualRestricted ? undefined : (isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric))}
                                             
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? (selectedMonth !== null ? (cashflowData?.months?.[`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`]?.boleto_total ?? null) : null)) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
@@ -2691,7 +2682,8 @@ const Index = () => {
                                             hideAnnualTarget={isTimeASFMetric}
                                             
                                             pipelineCardNames={pipelineCardNames[metric.id]}
-                                            dataSourceBadge={pipelineDataSourceInfo[metric.id]}>
+                                            dataSourceBadge={pipelineDataSourceInfo[metric.id]}
+                                            isComputedCard={isComputedCard}>
                                           </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
