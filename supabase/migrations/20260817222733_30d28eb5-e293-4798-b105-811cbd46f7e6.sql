@@ -1,0 +1,1 @@
+DELETE FROM public.metrics WHERE id = '8a4ed9b7-7e8b-45ff-a957-3818181a83f6';

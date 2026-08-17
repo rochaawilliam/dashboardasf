@@ -1499,7 +1499,7 @@ const Index = () => {
   const ARR_METRIC_ID = "c80c98f8-964c-4146-9012-eb0d0c5a30ee";
 
   // Computed revenue cards
-  const RESULTADO_ACUMULADO_ID = "8a4ed9b7-7e8b-45ff-a957-3818181a83f6";
+  
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
 
   // Computed revenue sum cards
@@ -2492,7 +2492,7 @@ const Index = () => {
                                       : 0;
 
                                     // Compute Resultado Acumulado ASF and Eficiência de Receita ASF
-                                    const isResultadoAcumulado = metric.id === RESULTADO_ACUMULADO_ID;
+                                    
                                     const isEficienciaReceita = metric.id === EFICIENCIA_RECEITA_ID;
                                      let resultadoAcumuladoValue = 0;
                                      let resultadoPrevisto = 0;
@@ -2500,7 +2500,7 @@ const Index = () => {
                                      let eficienciaReceitaValue = 0;
                                      let eficienciaProjecao = 0;
 
-                                     if (isResultadoAcumulado || isEficienciaReceita) {
+                                     if (isEficienciaReceita) {
                                        // Get all revenue metrics for computing totals
                                        const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
                                        const allRevenueMetrics = organizedSubcategories.
@@ -2567,9 +2567,6 @@ const Index = () => {
                                          eficienciaReceitaValue = metaAcumulada > 0 ? receitaAcumulada / metaAcumulada * 100 : 0;
                                        }
 
-                                       if (isResultadoAcumulado) {
-                                         dynamicMetric = { ...dynamicMetric, current_value: resultadoAcumuladoValue, target_value: metaAnual };
-                                       }
                                        if (isEficienciaReceita) {
                                          dynamicMetric = { ...dynamicMetric, current_value: eficienciaReceitaValue, target_value: 100 };
                                        }
@@ -2612,11 +2609,11 @@ const Index = () => {
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID);
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
                                     const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
-                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isResultadoAcumulado || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed;
+                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
-                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isResultadoAcumulado ? resultadoAcumuladoValue : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
@@ -2652,12 +2649,12 @@ const Index = () => {
                                             monthlyTargets={monthlyTargets}
                                             monthlyTargetOverride={cardMonthlyTarget}
                                             onCardClick={isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric)}
-                                            hideTarget={isResultadoAcumulado}
+                                            
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? (selectedMonth !== null ? (cashflowData?.months?.[`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`]?.boleto_total ?? null) : null)) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
-                                            forceAnnualLabel={isARR || isResultadoAcumulado}
+                                            forceAnnualLabel={isARR}
                                             hideAnnualTarget={isTimeASFMetric}
-                                            resultadoData={isResultadoAcumulado ? { previsto: resultadoPrevisto, realizado: resultadoRealizado, resultado: resultadoAcumuladoValue } : null}
+                                            
                                             pipelineCardNames={pipelineCardNames[metric.id]}
                                             dataSourceBadge={pipelineDataSourceInfo[metric.id]}>
                                           </CircularProgressCard>
