@@ -898,6 +898,7 @@ const Index = () => {
       filter: "created_at" | "month";
       formula?: string;
       calculation?: string;
+      description?: string;
     };
     const info: Record<string, Info> = {};
     if (!pipelineData) return info;
@@ -928,6 +929,7 @@ const Index = () => {
         filter: "created_at",
         formula: "Contratos ÷ Leads × 100",
         calculation: `${fmtInt(opContratos)} ÷ ${fmtInt(opLeads)} × 100 = ${fmt(opContratos / opLeads * 100)}%`,
+        description: metrics.find(x => x.id === TAXA_CONVERSAO_ID)?.description,
       };
     } else if (dash) {
       info[TAXA_CONVERSAO_ID] = {
@@ -935,6 +937,7 @@ const Index = () => {
         filter: "month",
         formula: "Contratos ÷ Leads × 100 (snapshot)",
         calculation: `Resultado: ${fmt(dash.conversao)}%`,
+        description: metrics.find(x => x.id === TAXA_CONVERSAO_ID)?.description,
       };
     }
 
@@ -946,6 +949,7 @@ const Index = () => {
         filter: "created_at",
         formula: "média(data_contrato − data_criação) em dias",
         calculation: `Média de ${fmt(closeOps)} dias entre criação do card e estágio Contratos.`,
+        description: metrics.find(x => x.id === TEMPO_MEDIO_FECHAMENTO_ID)?.description,
       };
     } else if (dash?.avgCloseTimeDays !== null && dash?.avgCloseTimeDays !== undefined) {
       info[TEMPO_MEDIO_FECHAMENTO_ID] = {
@@ -953,6 +957,7 @@ const Index = () => {
         filter: "month",
         formula: "média(data_contrato − data_criação) em dias",
         calculation: `Média de ${fmt(dash.avgCloseTimeDays)} dias (snapshot do Dashboard).`,
+        description: metrics.find(x => x.id === TEMPO_MEDIO_FECHAMENTO_ID)?.description,
       };
     }
 
@@ -966,6 +971,7 @@ const Index = () => {
           filter: "created_at",
           formula: "média(primeiro_contato − criação) em minutos",
           calculation: `Média de ${fmt(tmeMin)} min entre criação do lead e o primeiro atendimento.`,
+          description: metrics.find(x => x.id === TME_SLA_ID)?.description,
         };
       }
     }
@@ -977,6 +983,7 @@ const Index = () => {
           filter: "month",
           formula: "média(fechamento ou hoje − criação) em dias, agrupado por lead",
           calculation: `Média de ${fmt(dashTma.tmaDays)} dias no funil por lead.`,
+          description: metrics.find(x => x.id === TMA_ID)?.description,
         };
       }
     }
@@ -988,18 +995,21 @@ const Index = () => {
         filter: "created_at",
         formula: "total_ações ÷ dias_úteis",
         calculation: `Média de ${fmt(ops.avgActionsPerDay)} ações/dia.`,
+        description: metrics.find(x => x.id === MEDIA_ACOES_DIA_ID)?.description,
       };
       info[TAXA_ACOMPANHAMENTO_ID] = {
         source: "Operacional",
         filter: "created_at",
         formula: "leads_com_followup ÷ leads_totais × 100",
         calculation: `Taxa: ${fmt(ops.followUpRate)}%`,
+        description: metrics.find(x => x.id === TAXA_ACOMPANHAMENTO_ID)?.description,
       };
       info[COMENTARIOS_LEAD_ID] = {
         source: "Operacional",
         filter: "created_at",
         formula: "total_comentários ÷ total_leads",
         calculation: `Média de ${fmt(ops.commentsPerLead)} comentários por lead.`,
+        description: metrics.find(x => x.id === COMENTARIOS_LEAD_ID)?.description,
       };
     }
 
@@ -1011,6 +1021,8 @@ const Index = () => {
     const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
     const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
+      const m = metrics.find(x => x.id === metricId);
+      if (!m) continue;
       const isDashSnapshot =
         metricId === LEADS_FUNIL_ONLINE_ID ||
         metricId === LEADS_FUNIL_OFFLINE_ID ||
@@ -1024,6 +1036,7 @@ const Index = () => {
           filter: "month",
           formula: `snapshot[${mapping.origin}].${mapping.key}`,
           calculation: `Valor: ${fmtInt(val)} (cards do funil ${mapping.origin} cujo campo 'mês' = período selecionado).`,
+          description: m.description,
         };
       } else {
         val = (originSource as any)?.[mapping.origin]?.[mapping.key];
@@ -1032,6 +1045,7 @@ const Index = () => {
           filter: "created_at",
           formula: `passagens[${mapping.origin}].${mapping.key} (deduplicado por card)`,
           calculation: `Valor: ${fmtInt(val)} (cards ${mapping.origin} criados no período que passaram por '${mapping.key}').`,
+          description: m.description,
         };
       }
     }
@@ -1039,6 +1053,8 @@ const Index = () => {
     // Funnel by area (PIPELINE_AREA_MAP) — Operacional / passagens
     const areaSource = ms ? pipelineData.byArea?.[ms] : pipelineData.totalsByArea;
     for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      const m = metrics.find(x => x.id === metricId);
+      if (!m) continue;
       let val: number | undefined;
       if (mapping.origin === "_all" && areaSource) {
         let total = 0; let found = false;
@@ -1061,6 +1077,8 @@ const Index = () => {
     // Funnel by area + tag (PIPELINE_AREA_TAG_MAP) — Operacional / passagens
     const areaTagSource = ms ? pipelineData.byAreaTag?.[ms] : pipelineData.totalsByAreaTag;
     for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_TAG_MAP)) {
+      const m = metrics.find(x => x.id === metricId);
+      if (!m) continue;
       let val: number | undefined;
       if (mapping.origin === "_all" && areaTagSource) {
         let total = 0; let found = false;
@@ -1089,6 +1107,7 @@ const Index = () => {
           filter: "created_at",
           formula: "média(data_fim − data_início) em dias (Compass)",
           calculation: `Média de ${fmt(ob.avgOnboardingDays)} dias.`,
+          description: metrics.find(x => x.id === LEAD_TIME_ONBOARDING_ID)?.description,
         };
       }
       if (ob.avgProgress !== null && ob.avgProgress !== undefined) {
@@ -1097,6 +1116,7 @@ const Index = () => {
           filter: "created_at",
           formula: "média(etapas concluídas ÷ etapas totais) por cliente × 100",
           calculation: `Progresso médio: ${fmt(ob.avgProgress)}%`,
+          description: metrics.find(x => x.id === TAXA_ONBOARDING_PRAZO_ID)?.description,
         };
       }
     }

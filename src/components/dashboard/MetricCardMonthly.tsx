@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Edit2, Check, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Edit2, Check, X, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Popover,
   PopoverContent,
@@ -241,7 +246,22 @@ export function MetricCardMonthly({
       >
         {/* Header with name and trend */}
         <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
-          <span className="metric-label text-[9px] sm:text-[10px] lg:text-[11px] font-medium line-clamp-2 flex-1">{metric.name}</span>
+          <div className="flex-1 flex items-center gap-1.5">
+            <span className="metric-label text-[9px] sm:text-[10px] lg:text-[11px] font-medium line-clamp-2">{metric.name}</span>
+            {metric.description && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="shrink-0 p-0.5 rounded-full transition-colors hover:bg-muted/80" aria-label="Informações do indicador" onClick={(e) => e.stopPropagation()}>
+                    <Info className="w-3 h-3 text-muted-foreground/60" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs max-w-[320px] whitespace-pre-wrap">
+                  <p className="font-semibold mb-1">Conceito e Cálculo:</p>
+                  {metric.description}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
           <div className="flex items-center gap-1 shrink-0">
             {hasTrend && (
               <Popover>

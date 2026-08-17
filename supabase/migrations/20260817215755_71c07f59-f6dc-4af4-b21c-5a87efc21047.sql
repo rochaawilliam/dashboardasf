@@ -1,0 +1,10 @@
+UPDATE public.metrics SET description = 'Total de contratos assinados (Assessoria + Consultoria) no período. Meta baseada no planejamento estratégico 2026.' WHERE id = 'd3e4f5a6-b7c8-9012-cdef-234567890abc';
+UPDATE public.metrics SET description = 'Novos contratos da área Empresarial na modalidade Assessoria (recorrente). Cálculo: soma dos cards no Pipeline Vision Board.' WHERE id = 'f80d5c78-cf50-4aca-befb-5808b6557d8e';
+UPDATE public.metrics SET description = 'Novos contratos da área Trabalhista na modalidade Assessoria (recorrente). Cálculo: soma dos cards no Pipeline Vision Board.' WHERE id = 'ae64d582-a08d-442c-998e-b6bc214e486e';
+UPDATE public.metrics SET description = 'Receita total realizada no mês (Boleto Total). Fonte: Planilha de Fluxo de Caixa integrada via CSV.' WHERE id = 'b94952b3-b811-4200-872e-810b215240f6';
+UPDATE public.metrics SET description = 'Margem de lucro líquido da operação. Cálculo: (Receita - Custos - Despesas) / Receita * 100. Meta: 35%.' WHERE id = '5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc';
+UPDATE public.metrics SET description = 'Tempo médio entre o primeiro contato e o fechamento do contrato (dias). Cálculo: média dos tempos de conversão no Vision Board.' WHERE id = 'ab16383b-2125-4bec-b942-ae4466a8d069';
+UPDATE public.metrics SET description = 'Net Promoter Score. Cálculo: (% Promotores - % Detratores) coletado via projeto NPS Pulse.' WHERE id = 'f7b32bc5-7f37-4470-a52d-4cc8c096a2a5';
+UPDATE public.metrics SET description = 'Taxa de rotatividade de colaboradores. Cálculo: (Demissões / Headcount Ativo) no período.' WHERE id = 'c91525bc-5b10-49cd-bfcf-1179dfd89604';
+UPDATE public.metrics SET description = 'Tempo Médio de Espera para o primeiro atendimento (minutos). Meta: 5 minutos.' WHERE id = 'd1e2f3a4-5555-4ddd-eeee-555555555555';
+UPDATE public.metrics SET description = 'Tempo Médio de Atendimento desde o lead até o agendamento (dias). Meta: 90 dias.' WHERE id = 'd1e2f3a4-6666-4ddd-eeee-666666666666';
