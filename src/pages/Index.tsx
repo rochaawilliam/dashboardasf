@@ -392,9 +392,11 @@ const Index = () => {
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
   const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
-  const RECEITA_TOTAL_MENSAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
+  const RECEITA_BRUTA_OPERACIONAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
+  const FLUXO_CAIXA_OPERACIONAL_ID = "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
   const CUSTO_FIXO_SOBRE_RECEITA_ID = "0e52dcd3-7a81-413f-ad00-e54be82c9dc8";
+
 
   // ROI metric IDs
   const ROI_ONLINE_ID = "a1b2c3d4-7777-4aaa-bbbb-777777777777";
@@ -1136,7 +1138,8 @@ const Index = () => {
     const monthsThroughSelected = Object.entries(cashflowData.months)
       .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
-    values[RECEITA_TOTAL_MENSAL_ID] = m.recebimentos_dinheiro_pix;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix;
+    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
     if (monthsThroughSelected.length > 0) {
       values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
@@ -1148,26 +1151,30 @@ const Index = () => {
         : 0
     );
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+
 
   // Cashflow accumulated across the year
   const cashflowAccumulatedValues = useMemo(() => {
     const values: Record<string, number> = {};
     if (!cashflowData?.months) return values;
     let receitaSum = 0;
+    let totalRecebimentosSum = 0;
     const lucratValues: number[] = [];
     const folhaValues: number[] = [];
     const custoFixoValues: number[] = [];
     for (const m of Object.values(cashflowData.months)) {
       if (!m) continue;
       receitaSum += m.recebimentos_dinheiro_pix;
+      totalRecebimentosSum += m.total_recebimentos;
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
         custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
       }
     }
-    if (receitaSum > 0) values[RECEITA_TOTAL_MENSAL_ID] = receitaSum;
+    if (receitaSum > 0) values[RECEITA_BRUTA_OPERACIONAL_ID] = receitaSum;
+    if (totalRecebimentosSum > 0) values[FLUXO_CAIXA_OPERACIONAL_ID] = totalRecebimentosSum;
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
@@ -1182,7 +1189,8 @@ const Index = () => {
         Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
     }
     return values;
-  }, [cashflowData, RECEITA_TOTAL_MENSAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+
 
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
@@ -2061,7 +2069,7 @@ const Index = () => {
                                   (t: any) => t.metric_id !== VG_ONLINE_ID && t.metric_id !== VG_OFFLINE_ID
                                 ),
                                 ...(monthlyTargets ?? [])
-                                  .filter((t: any) => t.metric_id === RECEITA_TOTAL_MENSAL_ID)
+                                  .filter((t: any) => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID)
                                   .flatMap((t: any) => [
                                     { ...t, id: `${t.id}-vg-on`, metric_id: VG_ONLINE_ID, target_value: Number(t.target_value ?? 0) * 0.2 },
                                     { ...t, id: `${t.id}-vg-off`, metric_id: VG_OFFLINE_ID, target_value: Number(t.target_value ?? 0) * 0.8 },
@@ -2354,16 +2362,18 @@ const Index = () => {
                         const getReceitaTotalMetrics = () => {
                           if (!isReceitaTotal) return subcat.metrics;
                           return subcat.metrics.map((metric) => {
-                            if (!metric.name.includes("Receita Total")) return metric;
+                            if (!metric.name.includes("Receita Bruta Operacional") && !metric.name.includes("Fluxo de Caixa Operacional")) return metric;
+                            
                             // Sum all revenue metrics from other subcategories
                             const revenueMetrics = organizedSubcategories.
                             filter((s) => revenueSubcats.includes(s.name)).
                             flatMap((s) => s.metrics);
 
-                            const computedMonthly = cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID] ??
-                              revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                            const computedAccumulated = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID] ??
-                              revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                            const metricId = metric.id;
+                            const computedMonthly = cashflowMonthlyValues[metricId] ??
+                              (metricId === RECEITA_BRUTA_OPERACIONAL_ID ? revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0) : 0);
+                            const computedAccumulated = cashflowAccumulatedValues[metricId] ??
+                              (metricId === RECEITA_BRUTA_OPERACIONAL_ID ? revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0) : 0);
 
                             return {
                               ...metric,
@@ -2373,6 +2383,7 @@ const Index = () => {
                             };
                           });
                         };
+
 
                         const displayMetrics = getReceitaTotalMetrics();
 
@@ -2514,7 +2525,7 @@ const Index = () => {
                                               });
                                             });
                                           }
-                                          const receitaTarget = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear)?.target_value;
+                                          const receitaTarget = monthlyTargets?.find((t) => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.month === mo && t.year === selectedYear)?.target_value;
                                           monthMeta = receitaTarget ?? allRevenueMetrics.reduce((sum, rm) => {
                                             const mt = monthlyTargets?.find((t) => t.metric_id === rm.id && t.month === mo && t.year === selectedYear);
                                             return sum + (mt?.target_value ?? 0);
@@ -2525,12 +2536,12 @@ const Index = () => {
                                        resultadoAcumuladoValue = resultadoRealizado - resultadoPrevisto;
 
                                        // Eficiência de Receita = Realizado / Meta * 100 (mês a mês)
-                                       const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_TOTAL_MENSAL_ID);
+                                       const receitaTotalMetric = metrics?.find((m) => m.id === RECEITA_BRUTA_OPERACIONAL_ID);
                                        const metaAnual = receitaTotalMetric?.target_value || 2218000;
 
                                        if (selectedMonth !== null) {
                                           // Monthly: realizado do mês / meta do mês
-                                          const sheetRealizado = cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID];
+                                          const sheetRealizado = cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID];
                                           let monthRealizado = sheetRealizado ?? 0;
                                           if (sheetRealizado === undefined) {
                                             allRevenueMetrics.forEach((rm) => {
@@ -2542,15 +2553,15 @@ const Index = () => {
                                               });
                                             });
                                           }
-                                         const metaMes = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0;
+                                         const metaMes = monthlyTargets?.find((t) => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0;
                                          eficienciaReceitaValue = metaMes > 0 ? monthRealizado / metaMes * 100 : 0;
                                        } else {
                                          // Annual: realizado acumulado / meta acumulada (soma das metas mensais até agora)
-                                          const receitaAcumulada = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID] ??
+                                          const receitaAcumulada = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ??
                                             allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
                                          let metaAcumulada = 0;
                                          for (let mo = 1; mo < currentMonthRef; mo++) {
-                                           const mt = monthlyTargets?.find((t) => t.metric_id === RECEITA_TOTAL_MENSAL_ID && t.month === mo && t.year === selectedYear);
+                                           const mt = monthlyTargets?.find((t) => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.month === mo && t.year === selectedYear);
                                            metaAcumulada += mt?.target_value ?? 0;
                                          }
                                          eficienciaReceitaValue = metaAcumulada > 0 ? receitaAcumulada / metaAcumulada * 100 : 0;
@@ -2568,7 +2579,7 @@ const Index = () => {
                                     const isReceitaEmp = metric.id === RECEITA_EMP_ID;
                                     const isReceitaTrab = metric.id === RECEITA_TRAB_ID;
                                     const isReceitaTrib = metric.id === RECEITA_TRIB_ID;
-                                    const isReceitaTotalAnual = metric.id === RECEITA_TOTAL_MENSAL_ID;
+                                    const isReceitaTotalAnual = metric.id === RECEITA_BRUTA_OPERACIONAL_ID;
                                     let revSumMonthly: number | null = null;
                                     let revSumAccumulated = 0;
 
@@ -2590,8 +2601,8 @@ const Index = () => {
                                     } else if (isReceitaTotalAnual) {
                                       // Receita Total = planilha de Fluxo de Caixa quando disponível; senão, soma manual das receitas
                                       const allRevIds = [...RECEITA_EMP_COMPONENTS, ...RECEITA_TRAB_COMPONENTS, ...RECEITA_TRIB_COMPONENTS, OUTRAS_RECEITAS_ID];
-                                      const sheetMonthlyValue = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_TOTAL_MENSAL_ID] : undefined;
-                                      const sheetAccumulatedValue = cashflowAccumulatedValues[RECEITA_TOTAL_MENSAL_ID];
+                                      const sheetMonthlyValue = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] : undefined;
+                                      const sheetAccumulatedValue = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID];
                                       revSumMonthly = selectedMonth !== null ? sheetMonthlyValue ?? sumComponents(allRevIds, monthlyValues) : null;
                                       revSumAccumulated = sheetAccumulatedValue ?? sumComponents(allRevIds, accumulatedValues);
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
