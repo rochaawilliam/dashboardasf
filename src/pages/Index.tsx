@@ -2681,7 +2681,8 @@ const Index = () => {
                                             hideAnnualTarget={isTimeASFMetric}
                                             
                                             pipelineCardNames={pipelineCardNames[metric.id]}
-                                            dataSourceBadge={pipelineDataSourceInfo[metric.id]}>
+                                            dataSourceBadge={pipelineDataSourceInfo[metric.id]}
+                                            isComputedCard={isComputedCard}>
                                           </CircularProgressCard>
                                     </div>
                                   </DraggableCardWrapper>);
