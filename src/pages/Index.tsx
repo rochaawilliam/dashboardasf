@@ -408,6 +408,8 @@ const Index = () => {
   const IMPRESSOES_ASF_ID = "12574c46-d6c0-4e18-9e7e-a42b05b8fcfe";
   const ALCANCE_ASF_ID = "54a2c98b-52e6-4b8a-850c-d7a38492d030";
   const CONVERSAS_INICIADAS_ID = "ca49be98-52c9-4da8-a580-6a681b54aeba";
+  const FOLHA_SOBRE_RECEITA_ID = "a1b2c3d4-1001-4000-a001-000000000010"; // Placeholder ID, adjust if necessary
+  const HEADCOUNT_ATIVO_ID = "a1b2c3d4-1001-4000-a001-000000000001"; // ID for Headcount Ativo
   const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
   const pipelineMonthlyValues = useMemo(() => {
@@ -1183,7 +1185,11 @@ const Index = () => {
     if (monthsThroughSelected.length > 0) {
       values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
     }
-    values[FOLHA_SOBRE_RECEITA_ID] = m.folha_sobre_receita_pct;
+    // Folha sobre Receita = Fluxo de Caixa Operacional / Headcount Ativo
+    const headcountAtivo = pipelineData?.training?.headcount ?? 0;
+    const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
+    values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
+
     values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
       m.recebimentos_dinheiro_pix > 0
         ? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100
@@ -1223,10 +1229,11 @@ const Index = () => {
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
       values[LUCRATIVIDADE_ANUAL_ID] = values[LUCRATIVIDADE_MENSAL_ID];
     }
-    if (folhaValues.length > 0) {
-      values[FOLHA_SOBRE_RECEITA_ID] =
-        Math.round((folhaValues.reduce((a, b) => a + b, 0) / folhaValues.length) * 100) / 100;
+    const headcountAccum = pipelineData?.training?.headcount ?? 0;
+    if (headcountAccum > 0) {
+      values[FOLHA_SOBRE_RECEITA_ID] = Math.round((receitaSum / headcountAccum) * 100) / 100;
     }
+
     if (custoFixoValues.length > 0) {
       values[CUSTO_FIXO_SOBRE_RECEITA_ID] =
         Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
