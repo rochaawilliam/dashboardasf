@@ -335,7 +335,7 @@ export function CircularProgressCard({
                 <Info className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs max-w-[320px]">
+            <TooltipContent side="top" className="text-xs max-w-[320px] whitespace-pre-wrap">
               {metric.description}
             </TooltipContent>
           </Tooltip>
