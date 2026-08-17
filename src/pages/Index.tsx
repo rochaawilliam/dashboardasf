@@ -1032,6 +1032,7 @@ const Index = () => {
           filter: "created_at",
           formula: `passagens[${mapping.origin}].${mapping.key} (deduplicado por card)`,
           calculation: `Valor: ${fmtInt(val)} (cards ${mapping.origin} criados no período que passaram por '${mapping.key}').`,
+          description: m.description, // Passa a descrição para o prompt da IA
         };
       }
     }
@@ -1039,6 +1040,8 @@ const Index = () => {
     // Funnel by area (PIPELINE_AREA_MAP) — Operacional / passagens
     const areaSource = ms ? pipelineData.byArea?.[ms] : pipelineData.totalsByArea;
     for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_MAP)) {
+      const m = metrics.find(x => x.id === metricId);
+      if (!m) continue;
       let val: number | undefined;
       if (mapping.origin === "_all" && areaSource) {
         let total = 0; let found = false;
@@ -1061,6 +1064,8 @@ const Index = () => {
     // Funnel by area + tag (PIPELINE_AREA_TAG_MAP) — Operacional / passagens
     const areaTagSource = ms ? pipelineData.byAreaTag?.[ms] : pipelineData.totalsByAreaTag;
     for (const [metricId, mapping] of Object.entries(PIPELINE_AREA_TAG_MAP)) {
+      const m = metrics.find(x => x.id === metricId);
+      if (!m) continue;
       let val: number | undefined;
       if (mapping.origin === "_all" && areaTagSource) {
         let total = 0; let found = false;
@@ -1089,6 +1094,7 @@ const Index = () => {
           filter: "created_at",
           formula: "média(data_fim − data_início) em dias (Compass)",
           calculation: `Média de ${fmt(ob.avgOnboardingDays)} dias.`,
+          description: metrics.find(x => x.id === LEAD_TIME_ONBOARDING_ID)?.description,
         };
       }
       if (ob.avgProgress !== null && ob.avgProgress !== undefined) {
@@ -1097,6 +1103,7 @@ const Index = () => {
           filter: "created_at",
           formula: "média(etapas concluídas ÷ etapas totais) por cliente × 100",
           calculation: `Progresso médio: ${fmt(ob.avgProgress)}%`,
+          description: metrics.find(x => x.id === TAXA_ONBOARDING_PRAZO_ID)?.description,
         };
       }
     }
