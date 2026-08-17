@@ -2362,16 +2362,18 @@ const Index = () => {
                         const getReceitaTotalMetrics = () => {
                           if (!isReceitaTotal) return subcat.metrics;
                           return subcat.metrics.map((metric) => {
-                            if (!metric.name.includes("Receita Total")) return metric;
+                            if (!metric.name.includes("Receita Bruta Operacional") && !metric.name.includes("Fluxo de Caixa Operacional")) return metric;
+                            
                             // Sum all revenue metrics from other subcategories
                             const revenueMetrics = organizedSubcategories.
                             filter((s) => revenueSubcats.includes(s.name)).
                             flatMap((s) => s.metrics);
 
-                            const computedMonthly = cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] ??
-                              revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                            const computedAccumulated = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ??
-                              revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
+                            const metricId = metric.id;
+                            const computedMonthly = cashflowMonthlyValues[metricId] ??
+                              (metricId === RECEITA_BRUTA_OPERACIONAL_ID ? revenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0) : 0);
+                            const computedAccumulated = cashflowAccumulatedValues[metricId] ??
+                              (metricId === RECEITA_BRUTA_OPERACIONAL_ID ? revenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0) : 0);
 
                             return {
                               ...metric,
@@ -2381,6 +2383,7 @@ const Index = () => {
                             };
                           });
                         };
+
 
                         const displayMetrics = getReceitaTotalMetrics();
 
