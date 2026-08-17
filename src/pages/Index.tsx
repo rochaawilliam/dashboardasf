@@ -23,6 +23,8 @@ import { PrintStyles } from "@/components/dashboard/PrintStyles";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
 import { MobileDrawer } from "@/components/dashboard/MobileDrawer";
 import { SwipeableTabs } from "@/components/dashboard/SwipeableTabs";
+import { updateCollaboratorRevenueTargets } from "@/utils/updateTargets";
+
 
 import { CommissionTab, TridentIcon } from "@/components/dashboard/CommissionTab";
 import { SDRCommissionTab } from "@/components/dashboard/SDRCommissionTab";
@@ -200,6 +202,12 @@ const Index = () => {
 
   // Enable push notifications for metric goal changes
   useMetricNotifications(metrics, historyData, selectedYear);
+
+  // Run target updates once
+  useEffect(() => {
+    updateCollaboratorRevenueTargets();
+  }, []);
+
 
   const handlePrint = useCallback(() => {
     window.print();
