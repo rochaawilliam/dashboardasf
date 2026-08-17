@@ -1139,11 +1139,11 @@ const Index = () => {
       .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
     // Receita Bruta Operacional logic override per user request:
-    // Link to total generated from Pipeline if available, otherwise fallback to cashflow.
+    // Link to total generated from Pipeline if available, otherwise fallback to cashflow total_recebimentos.
     const pipelineTotalGerado = pipelineData?.dashboard?.[ms]?.valor_gerado;
     values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado !== undefined && pipelineTotalGerado > 0 
       ? pipelineTotalGerado 
-      : m.recebimentos_dinheiro_pix;
+      : m.total_recebimentos;
 
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
@@ -1179,12 +1179,12 @@ const Index = () => {
         custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
       }
     }
-    // Accumulated Receita Bruta Operacional: priority to Pipeline Total
+    // Accumulated Receita Bruta Operacional: priority to Pipeline Total, fallback to cashflow total_recebimentos
     const pipelineTotalAccum = pipelineData?.dashboardTotals?.valor_gerado;
     if (pipelineTotalAccum !== undefined && pipelineTotalAccum > 0) {
       values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalAccum;
-    } else if (receitaSum > 0) {
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = receitaSum;
+    } else if (totalRecebimentosSum > 0) {
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = totalRecebimentosSum;
     }
 
     if (totalRecebimentosSum > 0) values[FLUXO_CAIXA_OPERACIONAL_ID] = totalRecebimentosSum;
