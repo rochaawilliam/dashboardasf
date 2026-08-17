@@ -1071,6 +1071,7 @@ const Index = () => {
         filter: "created_at",
         formula: `passagens[${mapping.origin}][${mapping.area}].${mapping.key}`,
         calculation: `Valor: ${fmtInt(val)} (área ${mapping.area}, origem ${mapping.origin}).`,
+        description: m.description,
       };
     }
 
@@ -1095,6 +1096,7 @@ const Index = () => {
         filter: "created_at",
         formula: `passagens[${mapping.origin}][${mapping.area}][${mapping.tag}].${mapping.key}`,
         calculation: `Valor: ${fmtInt(val)} (${mapping.area} · ${mapping.tag}).`,
+        description: m.description,
       };
     }
 
