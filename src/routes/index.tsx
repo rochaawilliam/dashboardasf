@@ -1,5 +1,5 @@
 /**
- * continua errado conforme anexo. Corrija o valor para realizado.
+ * ignore os centavos dos cards
  */
 const Index = () => {
   return null;
