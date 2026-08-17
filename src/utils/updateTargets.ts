@@ -21,12 +21,17 @@ export async function updateCollaboratorRevenueTargets() {
   console.log("Updating targets for Receita por Colaborador...");
   
   for (const item of TARGETS) {
+    // We use an upsert to ensure the target exists for that month/year/metric
     const { error } = await supabase
       .from("monthly_targets")
-      .update({ target_value: item.target })
-      .eq("metric_id", METRIC_ID)
-      .eq("month", item.month)
-      .eq("year", 2026);
+      .upsert({ 
+        metric_id: METRIC_ID,
+        month: item.month,
+        year: 2026,
+        target_value: item.target
+      }, {
+        onConflict: 'metric_id,month,year'
+      });
       
     if (error) {
       console.error(`Error updating month ${item.month}:`, error);
