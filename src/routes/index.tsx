@@ -1,10 +1,10 @@
 /**
- * os valores de Receita bruta operacional e Fluxo de caixa operacional estão agora vinculados estritamente às fontes automáticas.
+ * Vinculação automática de Receita e Fluxo de Caixa:
  * 
- * - Fluxo de Caixa Operacional: vem do valor "TOTAL DE RECEBIMENTOS" da planilha financeira.
- * - Receita Bruta Operacional: vem do "Valor Total" gerado no Pipeline Vision Board.
+ * - Receita Bruta Operacional: Vinculada exclusivamente ao "Valor Total" gerado no Pipeline Vision Board.
+ * - Fluxo de Caixa Operacional: Vinculado exclusivamente ao "TOTAL DE RECEBIMENTOS" da planilha financeira.
  * 
- * Lançamentos manuais para esses dois cards foram desabilitados para garantir a integridade dos dados automáticos.
+ * Os lançamentos manuais para esses cards foram desabilitados e substituídos por um rótulo "Automático" para evitar divergências.
  */
 const Index = () => {
   return null;
