@@ -1034,6 +1034,7 @@ const Index = () => {
           filter: "month",
           formula: `snapshot[${mapping.origin}].${mapping.key}`,
           calculation: `Valor: ${fmtInt(val)} (cards do funil ${mapping.origin} cujo campo 'mês' = período selecionado).`,
+          description: m.description,
         };
       } else {
         val = (originSource as any)?.[mapping.origin]?.[mapping.key];
