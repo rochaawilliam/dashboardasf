@@ -899,7 +899,7 @@ const Index = () => {
   // Allows the UI to show a small badge "Operacional · created_at" or "Dashboard · month" beside each card.
   const pipelineDataSourceInfo = useMemo(() => {
     type Info = {
-      source: "Operacional" | "Dashboard";
+      source: "Operacional" | "Dashboard" | "Cálculo";
       filter: "created_at" | "month";
       formula?: string;
       calculation?: string;
