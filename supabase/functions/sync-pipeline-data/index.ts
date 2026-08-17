@@ -1307,10 +1307,12 @@ Deno.serve(async (req) => {
 
       const NPS_METRIC_NAME = "NPS";
       const ENPS_METRIC_NAME = "ENPS";
+      const CHURN_METRIC_NAME = "Churn de Clientes";
+      const HEALTH_SCORE_METRIC_NAME = "Health Score";
 
       // Helper to process Pulse data into our dashboard format
       const processPulseData = (metricName: string) => {
-        const history = npsHistoryData.filter((h: any) => h.metric_id === metricName); // Adjust if IDs are used
+        const history = npsHistoryData.filter((h: any) => h.metric_id === metricName);
         const targets = npsTargetsData.filter((t: any) => t.metric_id === metricName);
 
         const byMonth: Record<string, { value: number; target: number }> = {};
@@ -1329,6 +1331,8 @@ Deno.serve(async (req) => {
       npsPulse = {
         nps: processPulseData(NPS_METRIC_NAME),
         enps: processPulseData(ENPS_METRIC_NAME),
+        churn: processPulseData(CHURN_METRIC_NAME),
+        healthScore: processPulseData(HEALTH_SCORE_METRIC_NAME),
       };
     } catch (err) {
       console.error("NPS Pulse fetch error:", err);
