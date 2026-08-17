@@ -35,16 +35,13 @@ export function formatPercent(value: number, decimals: number = 2): string {
  * Format a metric value with its unit in Brazilian format
  */
 export function formatMetricValue(value: number, unit: string, metricName?: string): string {
-  // Check if this is a financial metric (uses decimals)
+  // Check if this is a financial metric
   const isFinancial = unit === "R$" || 
                       unit.toLowerCase().includes("real") || 
                       unit.toLowerCase().includes("reais");
   
-  // Default: no decimals unless financial
-  let decimals = isFinancial ? 2 : 0;
-  
-  // Always show 2 decimals for financial values
-
+  // Per user request: no decimal places for currency values
+  const decimals = 0;
   
   // Currency units
   if (isFinancial) {

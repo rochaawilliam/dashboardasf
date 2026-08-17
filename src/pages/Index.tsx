@@ -1140,7 +1140,7 @@ const Index = () => {
         info[FLUXO_CAIXA_OPERACIONAL_ID] = {
           source: "Operacional",
           filter: "month",
-          formula: "Planilha.total_recebimentos (consolidado da aba mensal)",
+          formula: "Planilha.recebimentos_dinheiro_pix (consolidado da aba mensal)",
           calculation: `Valor: R$ ${fmt(m.total_recebimentos)}`,
           description: metrics.find(x => x.id === FLUXO_CAIXA_OPERACIONAL_ID)?.description,
         };
@@ -1177,8 +1177,8 @@ const Index = () => {
       ? pipelineTotalGerado 
       : (m.recebimentos_dinheiro_pix || 0);
 
-    // Fluxo de Caixa Operacional strictly from Sheet (total_recebimentos)
-    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos || 0;
+    // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
+    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
     if (monthsThroughSelected.length > 0) {
       values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
@@ -1217,7 +1217,7 @@ const Index = () => {
     values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalAccum ?? 0;
 
     // Accumulated Fluxo de Caixa strictly from Sheet
-    values[FLUXO_CAIXA_OPERACIONAL_ID] = totalRecebimentosSum;
+    values[FLUXO_CAIXA_OPERACIONAL_ID] = receitaSum;
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
