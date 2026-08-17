@@ -1159,12 +1159,14 @@ const Index = () => {
     const values: Record<string, number> = {};
     if (!cashflowData?.months) return values;
     let receitaSum = 0;
+    let totalRecebimentosSum = 0;
     const lucratValues: number[] = [];
     const folhaValues: number[] = [];
     const custoFixoValues: number[] = [];
     for (const m of Object.values(cashflowData.months)) {
       if (!m) continue;
       receitaSum += m.recebimentos_dinheiro_pix;
+      totalRecebimentosSum += m.total_recebimentos;
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
@@ -1172,6 +1174,7 @@ const Index = () => {
       }
     }
     if (receitaSum > 0) values[RECEITA_BRUTA_OPERACIONAL_ID] = receitaSum;
+    if (totalRecebimentosSum > 0) values[FLUXO_CAIXA_OPERACIONAL_ID] = totalRecebimentosSum;
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
@@ -1186,7 +1189,8 @@ const Index = () => {
         Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
     }
     return values;
-  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+
 
   const mergedMonthlyValues = useMemo(() => {
     const merged = {
