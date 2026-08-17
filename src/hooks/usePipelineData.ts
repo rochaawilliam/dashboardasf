@@ -130,6 +130,8 @@ export interface PipelineData {
   npsPulse?: {
     nps: Record<string, { value: number; target: number }>;
     enps: Record<string, { value: number; target: number }>;
+    churn: Record<string, { value: number; target: number }>;
+    healthScore: Record<string, { value: number; target: number }>;
   };
 }
 
