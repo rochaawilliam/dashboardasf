@@ -40,10 +40,8 @@ export function formatMetricValue(value: number, unit: string, metricName?: stri
                       unit.toLowerCase().includes("real") || 
                       unit.toLowerCase().includes("reais");
   
-  // Specific override for requested precision (e.g. Fluxo de Caixa target)
-  // Usually the user wants no decimals, but here they specifically asked for 108.459,97
-  const hasDecimals = value % 1 !== 0;
-  const decimals = isFinancial && hasDecimals ? 2 : 0;
+  // User requested to remove all decimals from all cards
+  const decimals = 0;
   
   // Currency units
   if (isFinancial) {
