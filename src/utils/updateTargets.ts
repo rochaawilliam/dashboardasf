@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const METRIC_ID = "8602a4c6-6e6a-456d-b1bd-10d99671bdaa";
+const METRIC_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
 
 const TARGETS = [
   { month: 1, target: 7418.18 },

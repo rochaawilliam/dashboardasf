@@ -1659,8 +1659,8 @@ const Index = () => {
         return { ...metric, current_value: currentValue, target_value: originTargets.offline * 12 };
       }
 
-      // Force monthly targets for Receita por Colaborador (8602a4c6-6e6a-456d-b1bd-10d99671bdaa)
-      if (metric.id === "8602a4c6-6e6a-456d-b1bd-10d99671bdaa" && selectedYear === 2026) {
+      // Force monthly targets for Receita por Colaborador (966513fb-82c1-4565-8677-58dd7f4a90be)
+      if (metric.id === "966513fb-82c1-4565-8677-58dd7f4a90be" && selectedYear === 2026) {
         const target = monthlyTargets?.find(t => t.metric_id === metric.id && t.month === selectedMonth && t.year === 2026)?.target_value;
         if (target !== undefined) {
           return { ...metric, current_value: currentValue, target_value: Number(target) };
