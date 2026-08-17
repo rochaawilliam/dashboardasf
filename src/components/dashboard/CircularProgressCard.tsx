@@ -259,6 +259,11 @@ export function CircularProgressCard({
   const targetForProgress = isMonthSelected ? monthlyTarget : annualTarget;
 
   const status = getStatus(displayValue, targetForProgress, isInverse);
+  
+  // Progress calculation for Receita Bruta Operacional per user request:
+  // Use displayValue (realized) / targetForProgress (monthly target) * 100
+  const isReceitaTotalMetric = metric.id === "b94952b3-b811-4200-872e-810b215240f6";
+  
   const rawProgress = isInverse ?
   targetForProgress > 0 && displayValue > 0 ?
   targetForProgress / displayValue * 100 :

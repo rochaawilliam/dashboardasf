@@ -187,20 +187,20 @@ export function CommissionTab({
 
   const receitaData = useMemo(() => {
     const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
-    const financeAchieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
+    
+    // Total Revenue calculation for Head Growth Commission:
+    // Priority to Pipeline total (valor_gerado), fallback to finance achieved (sum of RECEITA_IDS)
     const pipelineAchieved = (() => {
       if (!pipelineData) return 0;
-
       if (selectedMonth !== null) {
         const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
-        const dbo = pipelineData.dashboardByOrigin?.[ms];
-        return (dbo?.offline?.valor_gerado ?? 0) + (dbo?.online?.valor_gerado ?? 0);
+        return pipelineData.dashboard?.[ms]?.valor_gerado ?? 0;
       }
-
-      const dbo = pipelineData.dashboardTotalsByOrigin;
-      return (dbo?.offline?.valor_gerado ?? 0) + (dbo?.online?.valor_gerado ?? 0);
+      return pipelineData.dashboardTotals?.valor_gerado ?? 0;
     })();
-    const achieved = financeAchieved > 0 ? financeAchieved : pipelineAchieved;
+
+    const financeAchieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
+    const achieved = pipelineAchieved > 0 ? pipelineAchieved : financeAchieved;
 
     let target = 0;
     if (selectedMonth !== null) {
