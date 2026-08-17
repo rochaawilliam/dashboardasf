@@ -2689,7 +2689,7 @@ const Index = () => {
                                             monthlyTargetOverride={cardMonthlyTarget}
                                             onCardClick={isRevenueManualRestricted ? undefined : (isComputedCard && !isReceitaTotalAnual ? undefined : () => setDrilldownMetric(metric))}
                                             
-                                            forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? (selectedMonth !== null ? (cashflowData?.months?.[`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`]?.boleto_total ?? null) : null)) : undefined}
+                                            forecastValue={undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
                                             forceAnnualLabel={isARR}
                                             hideAnnualTarget={isTimeASFMetric}
