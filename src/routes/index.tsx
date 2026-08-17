@@ -1,9 +1,10 @@
 /**
- * esse valor da planilha recebimentos é o valor de Fluxo de Caixa operacional.
- *
- * O valor total do @project:3fbcbaa6-a45f-4a04-ad67-1b190a843ee1:"Pipeline Vision Board" é para o card Receita bruta operacional
+ * os valores de Receita bruta operacional e Fluxo de caixa operacional estão agora vinculados estritamente às fontes automáticas.
  * 
- * Confirme que os cards de agosto mostram os valores corretos de Receita Bruta Operacional e Fluxo de Caixa Operacional.
+ * - Fluxo de Caixa Operacional: vem do valor "TOTAL DE RECEBIMENTOS" da planilha financeira.
+ * - Receita Bruta Operacional: vem do "Valor Total" gerado no Pipeline Vision Board.
+ * 
+ * Lançamentos manuais para esses dois cards foram desabilitados para garantir a integridade dos dados automáticos.
  */
 const Index = () => {
   return null;
