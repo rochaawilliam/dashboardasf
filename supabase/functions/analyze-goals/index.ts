@@ -7,6 +7,7 @@ interface MetricInput {
   target: number;
   progress: number;
   polarity?: string;
+  description?: string; // Nova propriedade para conceito/cálculo
 }
 
 interface Payload {
@@ -30,7 +31,7 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as Payload;
-    // Envia apenas as métricas mais relevantes (piores e melhores) para reduzir tokens/créditos
+    // Envia métricas mais relevantes e agora inclui a descrição se disponível
     const all = (body.metrics ?? []).slice();
     all.sort((a, b) => a.progress - b.progress);
     const metrics = all.length > 20 ? [...all.slice(0, 14), ...all.slice(-6)] : all;
@@ -38,7 +39,7 @@ Deno.serve(async (req) => {
     const lines = metrics
       .map(
         (m) =>
-          `- ${m.name}: ${m.value}${m.unit ?? ""} / meta ${m.target} = ${Math.round(m.progress)}%${m.polarity === "lower_is_better" ? " (menor é melhor)" : ""}`,
+          `- ${m.name}: ${m.value}${m.unit ?? ""} / meta ${m.target} = ${Math.round(m.progress)}%${m.polarity === "lower_is_better" ? " (menor é melhor)" : ""}${m.description ? `\n  Conceito/Cálculo: ${m.description}` : ""}`,
       )
       .join("\n");
 
@@ -47,14 +48,15 @@ Analise as metas indutoras da área "${body.tabTitle}" no período ${body.period
 ${body.dayOfMonth && body.daysInMonth ? `Estamos no dia ${body.dayOfMonth} de ${body.daysInMonth} do mês (${Math.round((body.dayOfMonth / body.daysInMonth) * 100)}% do mês decorrido).` : ""}
 Desempenho geral consolidado: ${Math.round(body.overall)}%.
 
-Métricas:
+Métricas e seus conceitos/cálculos:
 ${lines || "Sem métricas com meta definida."}
 
 Escreva em português do Brasil, tom executivo e direto. Responda em markdown com exatamente três seções, nesta ordem e com estes títulos exatos:
-**Panorama** — 2 a 3 frases sobre a situação geral, considerando o ritmo esperado para o dia do mês.
+**Panorama** — 2 a 3 frases sobre a situação geral, considerando o ritmo esperado para o dia do mês. Mencione brevemente o que os indicadores representam se for relevante para a análise.
 **Pontos de melhoria** — 3 a 4 bullets objetivos, citando as métricas mais críticas.
 **Checklist de ações corretivas** — 4 a 6 bullets curtos no formato "- [ ] Ação ..." (imperativo e específico).
-Máximo de 160 palavras no total. Não invente números que não estejam acima.`;
+
+Máximo de 180 palavras no total. Não invente números que não estejam acima.`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -64,10 +66,9 @@ Máximo de 160 palavras no total. Não invente números que não estejam acima.`
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        // modelo econômico: reduz drasticamente o custo por análise
-        model: "google/gemini-2.5-flash-lite",
+        model: "google/gemini-2.0-flash-lite",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 600,
+        max_tokens: 800,
       }),
     });
 
