@@ -281,9 +281,9 @@ export function CircularProgressCard({
     <div
       className={cn("metric-card group relative p-2 sm:p-4 lg:p-4 h-full flex flex-col",
 
-      onCardClick && "cursor-pointer hover:shadow-md transition-shadow"
+      onCardClick && !isComputedCard && "cursor-pointer hover:shadow-md transition-shadow"
       )}
-      onClick={() => onCardClick?.()}>
+      onClick={() => !isComputedCard && onCardClick?.()}>
 
       {/* Header with polarity toggle */}
       <div className="mb-0.5 sm:mb-2 lg:mb-3 flex items-center gap-1.5">
