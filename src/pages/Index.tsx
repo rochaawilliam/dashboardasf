@@ -1307,6 +1307,21 @@ const Index = () => {
       const clientesAssessoria = (s as any).clientes_assessoria || 0;
       values[TICKET_MEDIO_ASSESSORIA_ID] = clientesAssessoria > 0 ? receitaAssessoriaTotal / clientesAssessoria : 0;
       
+      // Calculate Ticket Médio specific by Area
+      const clientesEmp = s.receita_emp_assessoria > 0 ? clientesAssessoria : 0; // Simplified for now as we don't have per-area client count
+      const clientesTra = s.receita_tra_assessoria > 0 ? clientesAssessoria : 0;
+      const clientesTri = s.receita_tri_assessoria > 0 ? clientesAssessoria : 0;
+      
+      values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
+      values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
+      values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
+      
+      // Consultoria Ticket Médio
+      values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (s.receita_emp_consultoria || 0);
+      values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (s.receita_tra_consultoria || 0);
+      values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (s.receita_tri_contencioso || 0); // Contencioso is consulted here based on UI
+      
+      
       values[RECEITA_EMP_ID] = s.receita_emp;
 
       values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
@@ -1426,9 +1441,24 @@ const Index = () => {
         if ((values as any)._acc_clientes_assessoria > 0) {
           values[TICKET_MEDIO_ASSESSORIA_ID] = (values as any)._acc_receita_assessoria / (values as any)._acc_clientes_assessoria;
         }
+
+        // Area-specific ticket médio accumulated
+        (values as any)._acc_emp_assessoria = ((values as any)._acc_emp_assessoria || 0) + (s.receita_emp_assessoria || 0);
+        (values as any)._acc_tra_assessoria = ((values as any)._acc_tra_assessoria || 0) + (s.receita_tra_assessoria || 0);
+        (values as any)._acc_tri_assessoria = ((values as any)._acc_tri_assessoria || 0) + (s.receita_tri_assessoria || 0);
+        
+        if (clientesAssessoria > 0) {
+           values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = (values as any)._acc_emp_assessoria / (values as any)._acc_clientes_assessoria;
+           values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = (values as any)._acc_tra_assessoria / (values as any)._acc_clientes_assessoria;
+           values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = (values as any)._acc_tri_assessoria / (values as any)._acc_clientes_assessoria;
+        }
+
+        // Consultoria Ticket Médio Accumulated
+        values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (values["b1c2d3e4-1111-4bbb-cccc-111111111111"] || 0) + (s.receita_emp_consultoria || 0);
+        values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (values["b1c2d3e4-2222-4bbb-cccc-222222222222"] || 0) + (s.receita_tra_consultoria || 0);
+        values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (values["b1c2d3e4-3333-4bbb-cccc-333333333333"] || 0) + (s.receita_tri_contencioso || 0);
       }
     });
-
 
     // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
     const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
@@ -1440,7 +1470,6 @@ const Index = () => {
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
-      
     }
     const headcountAccum = pipelineData?.training?.headcount ?? 0;
     if (headcountAccum > 0) {
@@ -2660,20 +2689,27 @@ const Index = () => {
                                     let ticketAccumulatedValue = 0;
                                     
                                     if (isTicketMedioAssessoria) {
-                                      const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + 
-                                                           (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + 
-                                                           (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      const assessoriaClients = pipelineMonthlyValues["clientes_assessoria"] ?? (selectedMonth === 7 ? 10 : selectedMonth === 8 ? 8 : 0);
-                                      ticketMonthlyValue = assessoriaClients > 0 ? assessoriaSum / assessoriaClients : 0;
-                                      
-                                      const assessoriaSumAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + 
-                                                                (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + 
-                                                                (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      const assessoriaClientsAccum = pipelineAccumulatedValues["clientes_assessoria"] ?? (selectedMonth ? (selectedMonth >= 8 ? 18 : 10) : 0);
-                                      ticketAccumulatedValue = assessoriaClientsAccum > 0 ? assessoriaSumAccum / assessoriaClientsAccum : 0;
-                                      
+                                      ticketMonthlyValue = cashflowMonthlyValues[TICKET_MEDIO_ASSESSORIA_ID] ?? 0;
+                                      ticketAccumulatedValue = cashflowAccumulatedValues[TICKET_MEDIO_ASSESSORIA_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: ticketAccumulatedValue };
                                     }
+
+                                    // Check for area-specific ticket médio
+                                    const areaTicketMedioIds = [
+                                      "a1b2c3d4-1111-4aaa-bbbb-111111111111",
+                                      "a1b2c3d4-2222-4aaa-bbbb-222222222222",
+                                      "a1b2c3d4-3333-4aaa-bbbb-333333333333",
+                                      "b1c2d3e4-1111-4bbb-cccc-111111111111",
+                                      "b1c2d3e4-2222-4bbb-cccc-222222222222",
+                                      "b1c2d3e4-3333-4bbb-cccc-333333333333"
+                                    ];
+                                    const isAreaTicketMedio = areaTicketMedioIds.includes(metric.id);
+                                    if (isAreaTicketMedio) {
+                                      ticketMonthlyValue = cashflowMonthlyValues[metric.id] ?? 0;
+                                      ticketAccumulatedValue = cashflowAccumulatedValues[metric.id] ?? 0;
+                                      dynamicMetric = { ...dynamicMetric, current_value: ticketAccumulatedValue };
+                                    }
+
 
                                     // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
                                     const isMRR = metric.id === MRR_METRIC_ID;
@@ -2827,12 +2863,12 @@ const Index = () => {
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID);
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
                                     const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
-                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isTicketMedioAssessoria || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
+                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isTicketMedioAssessoria || isAreaTicketMedio || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID || metric.id === LUCRATIVIDADE_MENSAL_ID;
                                     const isRevenueManualRestricted = metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isTicketMedioAssessoria ? ticketMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
-                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isTicketMedioAssessoria ? ticketAccumulatedValue : isOriginCard ? originAccumulated : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : (isTicketMedioAssessoria || isAreaTicketMedio) ? ticketMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : metric.id === LUCRATIVIDADE_MENSAL_ID ? cashflowMonthlyValues[LUCRATIVIDADE_MENSAL_ID] : mergedMonthlyValues[metric.id] ?? null;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : (isTicketMedioAssessoria || isAreaTicketMedio) ? ticketAccumulatedValue : isOriginCard ? originAccumulated : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : metric.id === LUCRATIVIDADE_MENSAL_ID ? cashflowAccumulatedValues[LUCRATIVIDADE_MENSAL_ID] : mergedAccumulatedValues[metric.id] ?? 0;
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
