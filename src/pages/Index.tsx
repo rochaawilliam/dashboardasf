@@ -1652,21 +1652,6 @@ const Index = () => {
     return names;
   }, [pipelineData, selectedMonth, selectedYear]);
 
-  const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
-  const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
-  const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
-  const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
-
-  // ID for "Total de Contratos" (computed)
-  const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
-
-  // IDs for tributário metrics used in Total de Contratos
-  const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
-  const CONTRATOS_TRIB_CONTENCIOSO_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
-
-  // IDs for origin tracking cards
-  const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
-  const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
 
   // MRR % Mensal - auto-calculated metric
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
