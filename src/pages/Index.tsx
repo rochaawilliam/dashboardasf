@@ -2946,8 +2946,9 @@ const Index = () => {
                                           data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                           className="h-full">
                                         <CircularProgressCard
-                                            metric={cardMetric}
+                                            metric={dynamicMetric}
                                             monthlyValue={cardMonthlyValue}
+
                                             isMonthSelected={selectedMonth !== null}
                                             accumulatedValue={cardAccumulatedValue}
                                             selectedMonthName={selectedMonthName}
