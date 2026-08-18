@@ -1707,7 +1707,7 @@ const Index = () => {
     const novosContratosIds = [
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_CONTENCIOSO_ID
     ];
     const month = selectedMonth ?? new Date().getMonth() + 1;
     const year = selectedYear;
