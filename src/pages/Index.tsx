@@ -1283,9 +1283,13 @@ const Index = () => {
         receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0,
         receita_outras: 0,
-        clientes_assessoria: 8
+        clientes_assessoria: 8,
+        total_recebimentos: 108459.97,
+        total_pagamentos: 75921.98,
+        lucratividade_pct: 30
       };
       s = s ? { ...s, ...fallbackAugust } : fallbackAugust as any;
+
     }
 
     if (s) {
@@ -1294,8 +1298,11 @@ const Index = () => {
                                              (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
                                              (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
                                              (s.receita_outras || 0);
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = s.total_recebimentos || 0;
+      values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
       
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
+
       const clientesAssessoria = Number(s.clientes_assessoria) || 0;
       
       // Calculate Ticket Médio Assessoria
