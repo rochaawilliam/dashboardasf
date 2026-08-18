@@ -15,7 +15,11 @@ export interface FinancialSpreadsheetData {
   receita_tri_contencioso?: number;
   receita_outras?: number;
   clientes_assessoria?: number;
+  total_recebimentos?: number;
+  total_pagamentos?: number;
+  lucratividade_pct?: number;
 }
+
 
 
 export interface FinancialSpreadsheetsResponse {
