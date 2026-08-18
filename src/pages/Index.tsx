@@ -1244,12 +1244,12 @@ const Index = () => {
         receita_emp: 48093.38,
         receita_emp_assessoria: 38243.38,
         receita_emp_consultoria: 9850.00,
-        receita_tra: 125600.45,
-        receita_tra_assessoria: 110450.25,
-        receita_tra_consultoria: 15150.20,
-        receita_tri: 52340.00,
-        receita_tri_assessoria: 45600.00,
-        receita_tri_consultoria: 6740.00
+        receita_tra: 6386.12,
+        receita_tra_assessoria: 4536.12,
+        receita_tra_consultoria: 1850.00,
+        receita_tri: 7575.00,
+        receita_tri_assessoria: 6125.00,
+        receita_tri_consultoria: 1450.00
       } as any;
     }
 
@@ -1311,12 +1311,12 @@ const Index = () => {
         receita_emp: 48093.38,
         receita_emp_assessoria: 38243.38,
         receita_emp_consultoria: 9850.00,
-        receita_tra: 125600.45,
-        receita_tra_assessoria: 110450.25,
-        receita_tra_consultoria: 15150.20,
-        receita_tri: 52340.00,
-        receita_tri_assessoria: 45600.00,
-        receita_tri_consultoria: 6740.00
+        receita_tra: 6386.12,
+        receita_tra_assessoria: 4536.12,
+        receita_tra_consultoria: 1850.00,
+        receita_tri: 7575.00,
+        receita_tri_assessoria: 6125.00,
+        receita_tri_consultoria: 1450.00
       } as any;
     }
 
