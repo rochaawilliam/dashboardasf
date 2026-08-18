@@ -2710,27 +2710,20 @@ const Index = () => {
                                       dynamicMetric = { ...dynamicMetric, current_value: ticketAccumulatedValue };
                                     }
 
-
                                     // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
                                     const isMRR = metric.id === MRR_METRIC_ID;
                                     let mrrMonthlyValue: number | null = null;
                                     let mrrAccumulatedValue = 0;
                                     if (isMRR) {
-                                      // Get all revenue metrics from subcategories for Receita Total denominator
-                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
-                                      const allRevenueMetrics = organizedSubcategories.
-                                      filter((s) => revenueSubcatNames.includes(s.name)).
-                                      flatMap((s) => s.metrics);
-
                                       if (selectedMonth !== null) {
-                                        const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                        const fluxoCaixa = cashflowMonthlyValues[FLUXO_CAIXA_OPERACIONAL_ID] || 0;
-                                        mrrMonthlyValue = fluxoCaixa > 0 ? assessoriaSum / fluxoCaixa * 100 : 0;
+                                        const assessoriaSum = (mergedMonthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (mergedMonthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (mergedMonthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                        const fluxoCaixa = mergedMonthlyValues[FLUXO_CAIXA_OPERACIONAL_ID] || 0;
+                                        mrrMonthlyValue = fluxoCaixa > 0 ? (assessoriaSum / fluxoCaixa) * 100 : 0;
                                       }
                                       // Accumulated: weighted average across months with data
-                                      const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      const fluxoCaixaAccum = cashflowAccumulatedValues[FLUXO_CAIXA_OPERACIONAL_ID] || 0;
-                                      mrrAccumulatedValue = fluxoCaixaAccum > 0 ? assessoriaAccum / fluxoCaixaAccum * 100 : 0;
+                                      const assessoriaAccum = (mergedAccumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (mergedAccumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (mergedAccumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
+                                      const fluxoCaixaAccum = mergedAccumulatedValues[FLUXO_CAIXA_OPERACIONAL_ID] || 0;
+                                      mrrAccumulatedValue = fluxoCaixaAccum > 0 ? (assessoriaAccum / fluxoCaixaAccum) * 100 : 0;
 
                                       dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
                                     }
