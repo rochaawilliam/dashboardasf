@@ -2791,7 +2791,7 @@ const Index = () => {
 
                                        if (selectedMonth !== null) {
                                           // Monthly: realizado do mês / meta do mês
-                                          const sheetRealizado = cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID];
+                                          const sheetRealizado = mergedMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID];
                                           let monthRealizado = sheetRealizado ?? 0;
                                           if (sheetRealizado === undefined) {
                                             allRevenueMetrics.forEach((rm) => {
