@@ -98,7 +98,10 @@ function parseFinancialSheet(csv: string): FinancialData {
     }),
   };
 
+  const seenClients = new Set<string>();
+
   for (let i = headerIdx + 1; i < lines.length; i++) {
+
     const cols = parseCSVLine(lines[i]);
     if (cols.length <= Math.max(colIdx.contrato, colIdx.emp, colIdx.tra, colIdx.tri)) continue;
 
@@ -129,13 +132,20 @@ function parseFinancialSheet(csv: string): FinancialData {
     }
     
     // Count assessment clients (excluding Group and Others)
+    // Deduping by name within the same month to get unique clients
     if (contrato.includes("assessoria")) {
       const nomeIdx = colIdx.nome !== -1 ? colIdx.nome : Math.max(0, colIdx.contrato - 1);
-      const nomeCliente = (cols[nomeIdx] || "").trim().toLowerCase();
-      if (!nomeCliente.includes("grupo") && !nomeCliente.includes("outros") && !nomeCliente.includes("outro")) {
-        data.clientes_assessoria += 1;
+      const nomeCliente = (cols[nomeIdx] || "").trim();
+      const normalizedName = nomeCliente.toLowerCase();
+      if (normalizedName && !normalizedName.includes("grupo") && !normalizedName.includes("outros") && !normalizedName.includes("outro")) {
+        if (!seenClients.has(normalizedName)) {
+          seenClients.add(normalizedName);
+          data.clientes_assessoria += 1;
+        }
       }
     }
+
+
 
     if (contrato.includes("outros")) {
       const valTotal = parseBRNumber(cols[colIdx.valor]);
