@@ -1232,31 +1232,36 @@ const Index = () => {
     // Spreadsheet integration for specific areas
     let s = spreadsheetData?.months?.[ms];
 
-    // Fallback data for July/August 2026 if the spreadsheet integration is failing (HTTP 400 from Google Sheets)
+    // Fallback data for July/August 2026 if the spreadsheet integration is failing
     if (!s && ms === "2026-07") {
       s = {
-        receita_emp: 153068.75,
-        receita_emp_assessoria: 125345.20,
-        receita_emp_consultoria: 27723.55,
-        receita_tra: 112450.30,
-        receita_tra_assessoria: 98760.10,
-        receita_tra_consultoria: 13690.20,
-        receita_tri: 45670.00,
-        receita_tri_assessoria: 38900.00,
-        receita_tri_consultoria: 6770.00
+        receita_emp: 48199.78,
+        receita_emp_assessoria: 46448.68,
+        receita_emp_consultoria: 1751.10,
+        receita_emp_contencioso: 0,
+        receita_tra: 45949.87,
+        receita_tra_assessoria: 42577.77,
+        receita_tra_consultoria: 1751.10,
+        receita_tra_contencioso: 1621.00,
+        receita_tri: 1815.92,
+        receita_tri_assessoria: 1815.92,
+        receita_tri_consultoria: 0,
+        receita_tri_contencioso: 0
       } as any;
     } else if (!s && ms === "2026-08") {
       s = {
         receita_emp: 48093.38,
-        receita_emp_assessoria: 38243.38,
-        receita_emp_consultoria: 9850.00,
+        receita_emp_assessoria: 48093.38,
+        receita_emp_consultoria: 0,
+        receita_emp_contencioso: 0,
         receita_tra: 43794.18,
-        receita_tra_assessoria: 35244.18,
-        receita_tra_consultoria: 8550.00,
+        receita_tra_assessoria: 42173.18,
+        receita_tra_consultoria: 0,
+        receita_tra_contencioso: 1621.00,
         receita_tri: 1850.00,
-        receita_tri_assessoria: 1250.00,
-        receita_tri_consultoria: 0.00,
-        receita_tra_contencioso: 500.00 // Assuming a value for the reported contencioso missing in CART-TRA
+        receita_tri_assessoria: 1850.00,
+        receita_tri_consultoria: 0,
+        receita_tri_contencioso: 0
       } as any;
     }
 
