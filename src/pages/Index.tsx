@@ -1259,8 +1259,8 @@ const Index = () => {
         receita_tra_consultoria: 0,
         receita_tra_contencioso: 1621.00,
         receita_tri: 1850.00,
-        receita_tri_assessoria: 1850.00,
-        receita_tri_consultoria: 0,
+        receita_tri_assessoria: 1250.00,
+        receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0
       } as any;
     }
