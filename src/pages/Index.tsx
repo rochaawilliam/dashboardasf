@@ -1652,7 +1652,7 @@ const Index = () => {
 
   // IDs for tributário metrics used in Total de Contratos
   const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
-  const CONTRATOS_TRIB_PONTUAL_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
+  const CONTRATOS_TRIB_CONTENCIOSO_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
 
   // IDs for origin tracking cards
   const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
@@ -1682,7 +1682,7 @@ const Index = () => {
     const novosContratosIds = new Set([
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_CONTENCIOSO_ID
     ]);
 
     let onlineMonthly = 0,offlineMonthly = 0,onlineAcc = 0,offlineAcc = 0;
