@@ -84,7 +84,7 @@ function parseFinancialSheet(csv: string): FinancialData {
     data.receita_tra += valTra;
     data.receita_tri += valTri;
 
-    if (contrato === "assessoria") {
+    if (contrato.includes("assessoria")) {
       data.receita_emp_assessoria += valEmp;
       data.receita_tra_assessoria += valTra;
       data.receita_tri_assessoria += valTri;
@@ -108,9 +108,9 @@ Deno.serve(async (req) => {
     const year = parseInt(url.searchParams.get("year") || "2026");
     
     // Spreadsheets specified by the user
-    // Fixed URLs for direct CSV export
-    const JULY_URL = "https://docs.google.com/spreadsheets/d/1RiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/export?format=csv&gid=0";
-    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/1RiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/export?format=csv&gid=2047530861";
+    // Using simple pub?gid=XXX&output=csv format
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?output=csv&gid=0";
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?output=csv&gid=2047530861";
     
     const result: FinancialResponse = {
       months: {},
