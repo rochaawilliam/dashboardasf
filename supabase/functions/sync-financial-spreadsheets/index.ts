@@ -122,10 +122,9 @@ Deno.serve(async (req) => {
       const ms = `2026-${String(monthNum).padStart(2, "0")}`;
       try {
         // Using a basic fetch without headers as it worked for sync-financial-cashflow
-        const res = await fetch(fetchUrl);
+        const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(15000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csv = await res.text();
-        console.log(`Successfully fetched ${ms}, length: ${csv.length}`);
         result.months[ms] = parseFinancialSheet(csv);
       } catch (e) {
         result.errors[ms] = (e as Error).message;
