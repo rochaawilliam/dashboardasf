@@ -1246,7 +1246,8 @@ const Index = () => {
         receita_tri: 1815.92,
         receita_tri_assessoria: 1215.92,
         receita_tri_consultoria: 600.00,
-        receita_tri_contencioso: 0
+        receita_tri_contencioso: 0,
+        receita_outras: 0
       } as any;
     } else if (!s && ms === "2026-08") {
       s = {
@@ -1261,11 +1262,13 @@ const Index = () => {
         receita_tri: 1850.00,
         receita_tri_assessoria: 1250.00,
         receita_tri_consultoria: 600.00,
-        receita_tri_contencioso: 0
+        receita_tri_contencioso: 0,
+        receita_outras: 0
       } as any;
     }
 
     if (s) {
+      values[OUTRAS_RECEITAS_ID] = s.receita_outras || 0;
       values[RECEITA_EMP_ID] = s.receita_emp;
       values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
       values[RECEITA_EMP_CONSULTORIA_ID] = s.receita_emp_consultoria;
