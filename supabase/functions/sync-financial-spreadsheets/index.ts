@@ -98,7 +98,10 @@ function parseFinancialSheet(csv: string): FinancialData {
     }),
   };
 
+  const seenClients = new Set<string>();
+
   for (let i = headerIdx + 1; i < lines.length; i++) {
+
     const cols = parseCSVLine(lines[i]);
     if (cols.length <= Math.max(colIdx.contrato, colIdx.emp, colIdx.tra, colIdx.tri)) continue;
 
