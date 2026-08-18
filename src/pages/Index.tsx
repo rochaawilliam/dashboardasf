@@ -1259,9 +1259,8 @@ const Index = () => {
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
-
-        
       }
+    }
     // Spreadsheet integration for accumulated values
     if (spreadsheetData?.months) {
       Object.entries(spreadsheetData.months).forEach(([ms, s]) => {
