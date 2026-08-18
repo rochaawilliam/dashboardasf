@@ -2834,20 +2834,20 @@ const Index = () => {
                                     ids.reduce((sum, id) => sum + (source[id] ?? 0), 0);
 
                                     if (isReceitaEmp) {
-                                      revSumMonthly = selectedMonth !== null ? (cashflowMonthlyValues[RECEITA_EMP_ID] ?? 0) : null;
-                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_EMP_ID] ?? 0;
+                                      revSumMonthly = selectedMonth !== null ? (mergedMonthlyValues[RECEITA_EMP_ID] ?? 0) : null;
+                                      revSumAccumulated = mergedAccumulatedValues[RECEITA_EMP_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTrab) {
-                                      revSumMonthly = selectedMonth !== null ? (cashflowMonthlyValues[RECEITA_TRAB_ID] ?? 0) : null;
-                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_TRAB_ID] ?? 0;
+                                      revSumMonthly = selectedMonth !== null ? (mergedMonthlyValues[RECEITA_TRAB_ID] ?? 0) : null;
+                                      revSumAccumulated = mergedAccumulatedValues[RECEITA_TRAB_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTrib) {
-                                      revSumMonthly = selectedMonth !== null ? (cashflowMonthlyValues[RECEITA_TRIB_ID] ?? 0) : null;
-                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_TRIB_ID] ?? 0;
+                                      revSumMonthly = selectedMonth !== null ? (mergedMonthlyValues[RECEITA_TRIB_ID] ?? 0) : null;
+                                      revSumAccumulated = mergedAccumulatedValues[RECEITA_TRIB_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTotalAnual) {
                                       // Receita Total strictly linked to Pipeline/Sheet sources
-                                      revSumMonthly = selectedMonth !== null ? cashflowMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0 : null;
+                                      revSumMonthly = selectedMonth !== null ? mergedMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0 : null;
                                       revSumAccumulated = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
