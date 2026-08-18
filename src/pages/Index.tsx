@@ -1226,27 +1226,24 @@ const Index = () => {
     const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
     const m = cashflowData.months[ms];
     
-    // Fallback logic for current month if no sheet data yet: show 0 instead of blank
+    // Basic values from cashflow API if available
     if (!m) {
-      const vOnlineFallback = pipelineData?.dashboardByOrigin?.[ms]?.online?.valor_gerado || 0;
-      const vOfflineFallback = pipelineData?.dashboardByOrigin?.[ms]?.offline?.valor_gerado || 0;
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = 0;
       values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
       values[LUCRATIVIDADE_MENSAL_ID] = 0;
       values[FOLHA_SOBRE_RECEITA_ID] = 0;
+      values["966513fb-82c1-4565-8677-58dd7f4a90be"] = 0;
+    } else {
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
+      values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
       
-      return values;
+      const headcountAtivo = pipelineData?.training?.headcount ?? 0;
+      const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
+      values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
+      values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
 
-    const monthsThroughSelected = Object.entries(cashflowData.months)
-      .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
-      .map(([, monthData]) => monthData.lucratividade_pct);
-      
-    // Receita Bruta Operacional strictly reflects Pipeline total value generated
-    // Receita Bruta Operacional strictly reflects Pipeline total value generated (Online + Offline)
-    const valorGeradoOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
-    const valorGeradoOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
 
 
     // Spreadsheet integration for specific areas
