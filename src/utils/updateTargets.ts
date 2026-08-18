@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const METRIC_ID = "8602a4c6-6e6a-456d-b1bd-10d99671bdaa";
+const METRIC_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
 
 const TARGETS = [
   { month: 1, target: 7418.18 },
@@ -21,12 +21,17 @@ export async function updateCollaboratorRevenueTargets() {
   console.log("Updating targets for Receita por Colaborador...");
   
   for (const item of TARGETS) {
+    // We use an upsert to ensure the target exists for that month/year/metric
     const { error } = await supabase
       .from("monthly_targets")
-      .update({ target_value: item.target })
-      .eq("metric_id", METRIC_ID)
-      .eq("month", item.month)
-      .eq("year", 2026);
+      .upsert({ 
+        metric_id: METRIC_ID,
+        month: item.month,
+        year: 2026,
+        target_value: item.target
+      }, {
+        onConflict: 'metric_id,month,year'
+      });
       
     if (error) {
       console.error(`Error updating month ${item.month}:`, error);

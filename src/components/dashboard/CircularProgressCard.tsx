@@ -47,9 +47,10 @@ interface CircularProgressCardProps {
 }
 
 const nonAccumulativeKeywords = [
-"Ticket Médio", "Margem", "Churn", "Custo Fixo", "Folha sobre Receita",
-"Inadimplência", "Cumprimento do Orçamento", "Lead Time", "SLA", "NPS",
-"ENPS", "Taxa", "Turnover", "LTV", "Upsell"];
+  "Ticket Médio", "Margem", "Churn", "Custo Fixo", "Folha sobre Receita",
+  "Inadimplência", "Cumprimento do Orçamento", "Lead Time", "SLA", "NPS",
+  "ENPS", "Taxa", "Turnover", "LTV", "Upsell", "Receita por Colaborador"
+];
 
 
 function isNonAccumulativeMetric(name: string, unit: string): boolean {
@@ -266,6 +267,7 @@ export function CircularProgressCard({
   // Use displayValue (realized) / targetForProgress (monthly target) * 100
   const isReceitaTotalMetric = metric.id === "b94952b3-b811-4200-872e-810b215240f6";
   const isFluxoCaixaMetric = metric.id === "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
+  const isReceitaColaboradorMetric = metric.id === "966513fb-82c1-4565-8677-58dd7f4a90be";
   
   const rawProgress = isInverse ?
   targetForProgress > 0 && displayValue > 0 ?
@@ -275,7 +277,7 @@ export function CircularProgressCard({
   displayValue / targetForProgress * 100 :
   0;
   // Permite que o progresso ultrapasse 100% para métricas de Receita e Fluxo de Caixa
-  const progress = (isReceitaTotalMetric || isFluxoCaixaMetric) ? rawProgress : Math.min(rawProgress, 100);
+  const progress = (isReceitaTotalMetric || isFluxoCaixaMetric || isReceitaColaboradorMetric) ? rawProgress : Math.min(rawProgress, 100);
 
   const hasNoData = false; // Always show 0% when no data
 
@@ -447,7 +449,7 @@ export function CircularProgressCard({
           )}
 
           {/* Valor Previsto - middle (only when available and month selected) */}
-          {isMonthSelected && forecastValue != null && !metric.name.includes("Receita Bruta") && (
+          {isMonthSelected && forecastValue != null && !metric.name.includes("Receita") && (
           <div>
             <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
               Previsto

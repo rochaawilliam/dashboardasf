@@ -1206,6 +1206,8 @@ const Index = () => {
     const headcountAtivo = pipelineData?.training?.headcount ?? 0;
     const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
     values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
+    // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
+    values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
       m.recebimentos_dinheiro_pix > 0
@@ -1250,6 +1252,7 @@ const Index = () => {
     const headcountAccum = pipelineData?.training?.headcount ?? 0;
     if (headcountAccum > 0) {
       values[FOLHA_SOBRE_RECEITA_ID] = Math.round((receitaSum / headcountAccum) * 100) / 100;
+      values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
 
     if (custoFixoValues.length > 0) {
@@ -1657,6 +1660,14 @@ const Index = () => {
           ? (selectedMonth !== null ? (pipelineMonthlyValues[CONTRATOS_OFFLINE_ID] ?? 0) : pipelineVal)
           : (selectedMonth !== null ? originValues.offline.monthly : originValues.offline.accumulated);
         return { ...metric, current_value: currentValue, target_value: originTargets.offline * 12 };
+      }
+
+      // Force monthly targets for Receita por Colaborador (966513fb-82c1-4565-8677-58dd7f4a90be)
+      if (metric.id === "966513fb-82c1-4565-8677-58dd7f4a90be" && selectedYear === 2026) {
+        const target = monthlyTargets?.find(t => t.metric_id === metric.id && t.month === selectedMonth && t.year === 2026)?.target_value;
+        if (target !== undefined) {
+          return { ...metric, current_value: currentValue, target_value: Number(target) };
+        }
       }
 
       // Override training metric targets dynamically from pipeline data
