@@ -403,7 +403,7 @@ const Index = () => {
   const RECEITA_BRUTA_OPERACIONAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
   const FLUXO_CAIXA_OPERACIONAL_ID = "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
-  const CUSTO_FIXO_SOBRE_RECEITA_ID = "0e52dcd3-7a81-413f-ad00-e54be82c9dc8";
+  
   const HEADCOUNT_ATIVO_ID = "a1b2c3d4-1001-4000-a001-000000000001";
 
 
@@ -1182,7 +1182,7 @@ const Index = () => {
       values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
       values[LUCRATIVIDADE_MENSAL_ID] = 0;
       values[FOLHA_SOBRE_RECEITA_ID] = 0;
-      values[CUSTO_FIXO_SOBRE_RECEITA_ID] = 0;
+      
       return values;
     }
 
@@ -1209,13 +1209,8 @@ const Index = () => {
     // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
     values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
-    values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
-      m.recebimentos_dinheiro_pix > 0
-        ? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100
-        : 0
-    );
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
 
 
   // Cashflow accumulated across the year
@@ -1226,7 +1221,7 @@ const Index = () => {
     let totalRecebimentosSum = 0;
     const lucratValues: number[] = [];
     const folhaValues: number[] = [];
-    const custoFixoValues: number[] = [];
+    
     for (const m of Object.values(cashflowData.months)) {
       if (!m) continue;
       receitaSum += m.recebimentos_dinheiro_pix;
@@ -1235,7 +1230,7 @@ const Index = () => {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
 
-        custoFixoValues.push(m.custo_fixo_sobre_receita_pct ?? Math.round(((m.total_pagamentos - m.folha_total) / m.recebimentos_dinheiro_pix) * 10000) / 100);
+        
       }
     }
     // Accumulated Receita Bruta Operacional: priority to Pipeline Total
@@ -1255,12 +1250,8 @@ const Index = () => {
       values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
 
-    if (custoFixoValues.length > 0) {
-      values[CUSTO_FIXO_SOBRE_RECEITA_ID] =
-        Math.round((custoFixoValues.reduce((a, b) => a + b, 0) / custoFixoValues.length) * 100) / 100;
-    }
     return values;
-  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID, CUSTO_FIXO_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
 
 
   const mergedMonthlyValues = useMemo(() => {
