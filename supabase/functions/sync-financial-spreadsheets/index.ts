@@ -138,11 +138,13 @@ function parseFinancialSheet(csv: string): FinancialData {
       const nomeCliente = (cols[nomeIdx] || "").trim();
       const normalizedName = nomeCliente.toLowerCase();
       if (normalizedName && !normalizedName.includes("grupo") && !normalizedName.includes("outros") && !normalizedName.includes("outro")) {
-        // We handle uniqueness at the parseFinancialSheet level if needed, 
-        // but since we want the count of unique clients per month, 
-        // let's track seen names in this function.
+        if (!seenClients.has(normalizedName)) {
+          seenClients.add(normalizedName);
+          data.clientes_assessoria += 1;
+        }
       }
     }
+
 
 
     if (contrato.includes("outros")) {
