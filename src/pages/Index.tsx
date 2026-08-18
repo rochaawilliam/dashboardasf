@@ -1230,7 +1230,7 @@ const Index = () => {
     if (!m) {
       const vOnlineFallback = pipelineData?.dashboardByOrigin?.[ms]?.online?.valor_gerado || 0;
       const vOfflineFallback = pipelineData?.dashboardByOrigin?.[ms]?.offline?.valor_gerado || 0;
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineFallback + vOfflineFallback;
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
       values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
       values[LUCRATIVIDADE_MENSAL_ID] = 0;
       values[FOLHA_SOBRE_RECEITA_ID] = 0;
@@ -1246,7 +1246,7 @@ const Index = () => {
     // Receita Bruta Operacional strictly reflects Pipeline total value generated (Online + Offline)
     const valorGeradoOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
     const valorGeradoOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = valorGeradoOnline + valorGeradoOffline;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
 
     // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
@@ -1302,6 +1302,10 @@ const Index = () => {
 
     if (s) {
       values[OUTRAS_RECEITAS_ID] = s.receita_outras || 0;
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = (s.receita_emp_assessoria || 0) + (s.receita_emp_consultoria || 0) + (s.receita_emp_contencioso || 0) +
+                                             (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
+                                             (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
+                                             (s.receita_outras || 0);
       
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
       const clientesAssessoria = Number(s.clientes_assessoria) || 0;
@@ -1416,7 +1420,11 @@ const Index = () => {
         values[RECEITA_EMP_ASSESSORIA_ID] = (values[RECEITA_EMP_ASSESSORIA_ID] || 0) + s.receita_emp_assessoria;
         values[RECEITA_EMP_CONSULTORIA_ID] = (values[RECEITA_EMP_CONSULTORIA_ID] || 0) + s.receita_emp_consultoria;
         values[RECEITA_EMP_CONTENCIOSO_ID] = (values[RECEITA_EMP_CONTENCIOSO_ID] || 0) + (s.receita_emp_contencioso || 0);
-        
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = (s.receita_emp_assessoria || 0) + (s.receita_emp_consultoria || 0) + (s.receita_emp_contencioso || 0) +
+                                             (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
+                                             (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
+                                             (s.receita_outras || 0);
+      
         values[RECEITA_TRAB_ID] = (values[RECEITA_TRAB_ID] || 0) + s.receita_tra;
         values[RECEITA_TRAB_ASSESSORIA_ID] = (values[RECEITA_TRAB_ASSESSORIA_ID] || 0) + s.receita_tra_assessoria;
         values[RECEITA_TRAB_CONSULTORIA_ID] = (values[RECEITA_TRAB_CONSULTORIA_ID] || 0) + s.receita_tra_consultoria;
