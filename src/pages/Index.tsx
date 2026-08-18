@@ -410,12 +410,12 @@ const Index = () => {
   const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
   const RECEITA_TRAB_ASSESSORIA_ID = "be1fcc4f-c1b8-476a-b330-e2b8675ae458";
   const RECEITA_TRIB_ASSESSORIA_ID = "b829cf12-3f66-4a0c-8753-70260a9645d8";
-  const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";
   const RECEITA_EMP_CONSULTORIA_ID = "560bece4-6e53-46be-add1-fa6dfdbdaaf7";
-  const RECEITA_TRAB_ID = "5368d04f-a051-450e-9654-7553dc3db981";
   const RECEITA_TRAB_CONSULTORIA_ID = "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1";
-  const RECEITA_TRIB_ID = "6326e88a-ba6d-4fbf-958d-0ae9bc76b889";
   const RECEITA_TRIB_CONSULTORIA_ID = "847ce517-c118-46c9-9012-c69dfa5474d9";
+  const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";
+  const RECEITA_TRAB_ID = "5368d04f-a051-450e-9654-7553dc3db981";
+  const RECEITA_TRIB_ID = "6326e88a-ba6d-4fbf-958d-0ae9bc76b889";
   
   const HEADCOUNT_ATIVO_ID = "a1b2c3d4-1001-4000-a001-000000000001";
 
@@ -1660,15 +1660,15 @@ const Index = () => {
   
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
 
-  const RECEITA_EMP_PONTUAL_ID = "de3186d7-1b20-41e2-8fd9-9fef114096bb";
-  const RECEITA_TRAB_PONTUAL_ID = "f1fd7525-963f-401e-a1e1-7b449f022bbd";
-  const RECEITA_TRIB_PONTUAL_ID = "6122d0fc-e606-4020-afab-45658e063158";
+  const RECEITA_EMP_CONTENCIOSO_ID = "de3186d7-1b20-41e2-8fd9-9fef114096bb";
+  const RECEITA_TRAB_CONTENCIOSO_ID = "f1fd7525-963f-401e-a1e1-7b449f022bbd";
+  const RECEITA_TRIB_CONTENCIOSO_ID = "6122d0fc-e606-4020-afab-45658e063158";
   const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
 
   // Revenue sum component IDs grouped
-  const RECEITA_EMP_COMPONENTS = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_EMP_PONTUAL_ID];
-  const RECEITA_TRAB_COMPONENTS = [RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRAB_PONTUAL_ID];
-  const RECEITA_TRIB_COMPONENTS = [RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID, RECEITA_TRIB_PONTUAL_ID];
+  const RECEITA_EMP_COMPONENTS = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_EMP_CONTENCIOSO_ID];
+  const RECEITA_TRAB_COMPONENTS = [RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRAB_CONTENCIOSO_ID];
+  const RECEITA_TRIB_COMPONENTS = [RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID, RECEITA_TRIB_CONTENCIOSO_ID];
 
 
   // Compute origin card values from history source field
@@ -2516,7 +2516,7 @@ const Index = () => {
 
                         // Compute Receita Total as sum of revenue subcategories
                         const isReceitaTotal = category === "lucratividade" && subcat.name === "Receita Total";
-                        const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                        const revenueSubcats = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
 
                         const getReceitaTotalMetrics = () => {
                           if (!isReceitaTotal) return subcat.metrics;
@@ -2595,7 +2595,7 @@ const Index = () => {
                                     let mrrAccumulatedValue = 0;
                                     if (isMRR) {
                                       // Get all revenue metrics from subcategories for Receita Total denominator
-                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
                                       const allRevenueMetrics = organizedSubcategories.
                                       filter((s) => revenueSubcatNames.includes(s.name)).
                                       flatMap((s) => s.metrics);
@@ -2637,7 +2637,7 @@ const Index = () => {
 
                                      if (isEficienciaReceita) {
                                        // Get all revenue metrics for computing totals
-                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
                                        const allRevenueMetrics = organizedSubcategories.
                                        filter((s) => revenueSubcatNames.includes(s.name)).
                                        flatMap((s) => s.metrics);

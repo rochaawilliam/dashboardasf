@@ -1,0 +1,11 @@
+
+DO $$
+BEGIN
+    UPDATE public.metrics 
+    SET name = REPLACE(name, 'Pontual', 'Contencioso') 
+    WHERE category = 'lucratividade' AND name LIKE '%Pontual%';
+
+    UPDATE public.metric_subcategories
+    SET name = REPLACE(name, 'Pontual', 'Contencioso')
+    WHERE category = 'lucratividade' AND name LIKE '%Pontual%';
+END $$;
