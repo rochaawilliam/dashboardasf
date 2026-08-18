@@ -1,5 +1,4 @@
 import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 export interface FinancialData {
   receita_emp: number;
@@ -66,39 +65,30 @@ function parseFinancialSheet(csv: string): FinancialData {
 
   const header = parseCSVLine(lines[0]);
   const colIdx = {
-    contrato: header.findIndex(h => h.toUpperCase().trim() === "CONTRATO"),
-    emp: header.findIndex(h => h.toUpperCase().trim() === "CART-EMP"),
-    tra: header.findIndex(h => h.toUpperCase().trim() === "CART-TRA"),
-    tri: header.findIndex(h => h.toUpperCase().trim() === "CART-TRI"),
+    contrato: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")),
+    emp: header.findIndex(h => h.toUpperCase().trim().includes("CART-EMP")),
+    tra: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRA")),
+    tri: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRI")),
   };
-
-  // If columns not found, try common variants
-  if (colIdx.emp === -1) colIdx.emp = header.findIndex(h => h.toUpperCase().includes("CART-EMP"));
-  if (colIdx.tra === -1) colIdx.tra = header.findIndex(h => h.toUpperCase().includes("CART-TRA"));
-  if (colIdx.tri === -1) colIdx.tri = header.findIndex(h => h.toUpperCase().includes("CART-TRI"));
 
   for (let i = 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
-    if (cols.length < Math.max(colIdx.contrato, colIdx.emp, colIdx.tra, colIdx.tri)) continue;
+    if (cols.length <= Math.max(colIdx.contrato, colIdx.emp, colIdx.tra, colIdx.tri)) continue;
 
     const contrato = (cols[colIdx.contrato] || "").trim().toLowerCase();
     const valEmp = parseBRNumber(cols[colIdx.emp]);
     const valTra = parseBRNumber(cols[colIdx.tra]);
     const valTri = parseBRNumber(cols[colIdx.tri]);
 
-    // Totals
     data.receita_emp += valEmp;
     data.receita_tra += valTra;
     data.receita_tri += valTri;
 
-    // Assessoria
     if (contrato === "assessoria") {
       data.receita_emp_assessoria += valEmp;
       data.receita_tra_assessoria += valTra;
       data.receita_tri_assessoria += valTri;
-    }
-    // Consultoria
-    else if (contrato.includes("consultoria")) {
+    } else if (contrato.includes("consultoria")) {
       data.receita_emp_consultoria += valEmp;
       data.receita_tra_consultoria += valTra;
       data.receita_tri_consultoria += valTri;
@@ -115,11 +105,11 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
+    const year = parseInt(url.searchParams.get("year") || "2026");
     
     // Spreadsheets specified by the user
-    const JULY_URL = "https://docs.google.com/spreadsheets/d/1RiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/export?format=csv&gid=0";
-    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/1RiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/export?format=csv&gid=2047530861";
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&output=csv";
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&output=csv";
     
     const result: FinancialResponse = {
       months: {},
@@ -130,24 +120,17 @@ Deno.serve(async (req) => {
     const processMonth = async (monthNum: number, fetchUrl: string) => {
       const ms = `2026-${String(monthNum).padStart(2, "0")}`;
       try {
-        const res = await fetch(fetchUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0',
-            'Accept': 'text/csv'
-          }
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errText.slice(0, 100)}`);
-        }
+        console.log(`Fetching ${ms} from ${fetchUrl}`);
+        const res = await fetch(fetchUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csv = await res.text();
         result.months[ms] = parseFinancialSheet(csv);
       } catch (e) {
+        console.error(`Error processing ${ms}:`, e);
         result.errors[ms] = (e as Error).message;
       }
     };
 
-    // Apply the specific abas for July and August
     await Promise.all([
       processMonth(7, JULY_URL),
       processMonth(8, AUGUST_URL)
