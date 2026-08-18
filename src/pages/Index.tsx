@@ -1140,11 +1140,13 @@ const Index = () => {
       const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
       const m = cashflowData.months[ms];
       if (m) {
+        const vOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
+        const vOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
         info[RECEITA_BRUTA_OPERACIONAL_ID] = {
-          source: (pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0) > 0 ? "Dashboard" : "Operacional",
-          filter: "month",
-          formula: "Pipeline.valor_gerado (total de contratos)",
-          calculation: `Pipeline: R$ ${fmt(pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0)}`,
+          source: "Operacional",
+          filter: "created_at",
+          formula: "Pipeline (Online.valor_gerado + Offline.valor_gerado)",
+          calculation: `Online: R$ ${fmt(vOnline)} + Offline: R$ ${fmt(vOffline)} = R$ ${fmt(vOnline + vOffline)}`,
           description: metrics.find(x => x.id === RECEITA_BRUTA_OPERACIONAL_ID)?.description,
         };
         info[FLUXO_CAIXA_OPERACIONAL_ID] = {
@@ -1166,7 +1168,7 @@ const Index = () => {
     }
 
     return info;
-  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP, cashflowData]);
+  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP, cashflowData, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
 
   // Cashflow (Google Sheets Financeiro) → monthly values for selected month
   const cashflowMonthlyValues = useMemo(() => {
@@ -1177,7 +1179,9 @@ const Index = () => {
     
     // Fallback logic for current month if no sheet data yet: show 0 instead of blank
     if (!m) {
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0;
+      const vOnlineFallback = pipelineData?.dashboardByOrigin?.[ms]?.online?.valor_gerado || 0;
+      const vOfflineFallback = pipelineData?.dashboardByOrigin?.[ms]?.offline?.valor_gerado || 0;
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineFallback + vOfflineFallback;
       values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
       values[LUCRATIVIDADE_MENSAL_ID] = 0;
       values[FOLHA_SOBRE_RECEITA_ID] = 0;
@@ -1190,8 +1194,10 @@ const Index = () => {
       .map(([, monthData]) => monthData.lucratividade_pct);
       
     // Receita Bruta Operacional strictly reflects Pipeline total value generated
-    const pipelineTotalGerado = pipelineData?.dashboard?.[ms]?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado || 0;
+    // Receita Bruta Operacional strictly reflects Pipeline total value generated (Online + Offline)
+    const valorGeradoOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
+    const valorGeradoOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = valorGeradoOnline + valorGeradoOffline;
 
     // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
@@ -1204,7 +1210,7 @@ const Index = () => {
     values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
 
 
   // Cashflow accumulated across the year
@@ -1227,9 +1233,10 @@ const Index = () => {
         
       }
     }
-    // Accumulated Receita Bruta Operacional: priority to Pipeline Total
-    const pipelineTotalAccum = pipelineData?.dashboardTotals?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalAccum ?? 0;
+    // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
+    const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
+    const vOfflineAccum = pipelineAccumulatedValues[VALOR_GERADO_OFFLINE_ID] || 0;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineAccum + vOfflineAccum;
 
     // Accumulated Fluxo de Caixa strictly from Sheet
     values[FLUXO_CAIXA_OPERACIONAL_ID] = receitaSum;
@@ -1245,7 +1252,7 @@ const Index = () => {
     }
 
     return values;
-  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineAccumulatedValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
 
 
   const mergedMonthlyValues = useMemo(() => {
