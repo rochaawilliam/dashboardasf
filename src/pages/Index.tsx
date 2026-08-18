@@ -1241,9 +1241,9 @@ const Index = () => {
       } as any;
     } else if (!s && ms === "2026-08") {
       s = {
-        receita_emp: 168450.90,
-        receita_emp_assessoria: 142300.50,
-        receita_emp_consultoria: 26150.40,
+        receita_emp: 48093.38,
+        receita_emp_assessoria: 38243.38,
+        receita_emp_consultoria: 9850.00,
         receita_tra: 125600.45,
         receita_tra_assessoria: 110450.25,
         receita_tra_consultoria: 15150.20,
@@ -1308,9 +1308,9 @@ const Index = () => {
     }
     if (!allMonths["2026-08"] && selectedYear === 2026) {
       allMonths["2026-08"] = {
-        receita_emp: 168450.90,
-        receita_emp_assessoria: 142300.50,
-        receita_emp_consultoria: 26150.40,
+        receita_emp: 48093.38,
+        receita_emp_assessoria: 38243.38,
+        receita_emp_consultoria: 9850.00,
         receita_tra: 125600.45,
         receita_tra_assessoria: 110450.25,
         receita_tra_consultoria: 15150.20,
