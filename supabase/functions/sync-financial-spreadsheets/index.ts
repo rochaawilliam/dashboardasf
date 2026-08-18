@@ -108,10 +108,9 @@ Deno.serve(async (req) => {
     const year = parseInt(url.searchParams.get("year") || "2026");
     
     // Spreadsheets specified by the user
-    // ABA JULHO: 07-2026
-    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&single=true&output=csv";
-    // ABA AGOSTO: 08-2026
-    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&single=true&output=csv";
+    // Using simple pub?gid=XXX&output=csv format
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&output=csv";
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&output=csv";
     
     const result: FinancialResponse = {
       months: {},
@@ -122,12 +121,8 @@ Deno.serve(async (req) => {
     const processMonth = async (monthNum: number, fetchUrl: string) => {
       const ms = `2026-${String(monthNum).padStart(2, "0")}`;
       try {
-        // Using fetch with a custom User-Agent to avoid 400 errors from Google Sheets
-        const res = await fetch(fetchUrl, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-          }
-        });
+        // Using a basic fetch without headers as it worked for sync-financial-cashflow
+        const res = await fetch(fetchUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csv = await res.text();
         console.log(`Successfully fetched ${ms}, length: ${csv.length}`);
