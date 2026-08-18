@@ -14,7 +14,9 @@ export interface FinancialData {
   receita_tri_consultoria: number;
   receita_tri_contencioso: number;
   receita_outras: number;
+  clientes_assessoria: number;
 }
+
 
 export interface FinancialResponse {
   months: Record<string, FinancialData>;
@@ -67,7 +69,9 @@ function parseFinancialSheet(csv: string): FinancialData {
     receita_tri_consultoria: 0,
     receita_tri_contencioso: 0,
     receita_outras: 0,
+    clientes_assessoria: 0,
   };
+
 
   if (lines.length < 2) return data;
 
@@ -122,14 +126,21 @@ function parseFinancialSheet(csv: string): FinancialData {
       data.receita_tra_contencioso += valTra;
       data.receita_tri_contencioso += valTri;
     }
+    
+    // Count assessment clients (excluding Group and Others)
+    if (contrato.includes("assessoria")) {
+      const nomeCliente = (cols[colIdx.contrato - 1] || "").trim().toLowerCase(); // NOME is usually before CONTRATO
+      if (!nomeCliente.includes("grupo") && !nomeCliente.includes("outros") && !nomeCliente.includes("outro")) {
+        data.clientes_assessoria += 1;
+      }
+    }
 
     if (contrato.includes("outros")) {
       const valTotal = parseBRNumber(cols[colIdx.valor]);
-      // If there's a specific "Valor" column, use it, otherwise sum the categories if they weren't already captured
-      // But user said: sum values from column "Valor" where "Tipo" (Contrato) is "Outros"
       data.receita_outras += valTotal || (valEmp + valTra + valTri);
     }
   }
+
 
   return data;
 }

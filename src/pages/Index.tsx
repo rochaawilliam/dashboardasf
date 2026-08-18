@@ -467,6 +467,8 @@ const Index = () => {
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
   const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
+  const TICKET_MEDIO_ASSESSORIA_ID = "0fa037ef-7740-4670-a7e8-f2efe4753472"; // Reusing an existing ID or need a new one if not present
+
   
   const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
@@ -1269,7 +1271,14 @@ const Index = () => {
 
     if (s) {
       values[OUTRAS_RECEITAS_ID] = s.receita_outras || 0;
+      
+      // Calculate Ticket Médio Assessoria: (Receita Assessoria Emp + Trab + Trib) / Clientes Assessoria
+      const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
+      const clientesAssessoria = (s as any).clientes_assessoria || 0;
+      values[TICKET_MEDIO_ASSESSORIA_ID] = clientesAssessoria > 0 ? receitaAssessoriaTotal / clientesAssessoria : 0;
+      
       values[RECEITA_EMP_ID] = s.receita_emp;
+
       values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
       values[RECEITA_EMP_CONSULTORIA_ID] = s.receita_emp_consultoria;
       values[RECEITA_EMP_CONTENCIOSO_ID] = s.receita_emp_contencioso || 0;
