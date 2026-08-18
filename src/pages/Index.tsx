@@ -2848,7 +2848,7 @@ const Index = () => {
                                     } else if (isReceitaTotalAnual) {
                                       // Receita Total strictly linked to Pipeline/Sheet sources
                                       revSumMonthly = selectedMonth !== null ? mergedMonthlyValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0 : null;
-                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
+                                      revSumAccumulated = mergedAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     }
 
