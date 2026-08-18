@@ -66,7 +66,7 @@ Máximo de 180 palavras no total. Não invente números que não estejam acima.`
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-lite",
+        model: "google/gemini-2.5-flash-lite",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 800,
       }),
