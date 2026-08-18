@@ -106,7 +106,7 @@ function parseFinancialSheet(csv: string): FinancialData {
       data.receita_emp_assessoria += valEmp;
       data.receita_tra_assessoria += valTra;
       data.receita_tri_assessoria += valTri;
-    } else if (contrato.includes("consultoria")) {
+    } else if (contrato.includes("consultoria") || contrato.includes("pontual")) {
       data.receita_emp_consultoria += valEmp;
       data.receita_tra_consultoria += valTra;
       data.receita_tri_consultoria += valTri;
