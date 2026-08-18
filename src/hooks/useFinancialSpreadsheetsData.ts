@@ -14,7 +14,9 @@ export interface FinancialSpreadsheetData {
   receita_tri_consultoria: number;
   receita_tri_contencioso?: number;
   receita_outras?: number;
+  clientes_assessoria?: number;
 }
+
 
 export interface FinancialSpreadsheetsResponse {
   months: Record<string, FinancialSpreadsheetData>;
