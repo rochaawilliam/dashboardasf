@@ -1,0 +1,1 @@
+DELETE FROM public.metrics WHERE id IN ('605e480d-4f21-406f-af6c-56e555aa458c', 'c80c98f8-964c-4146-9012-eb0d0c5a30ee');
