@@ -122,9 +122,15 @@ Deno.serve(async (req) => {
     const processMonth = async (monthNum: number, fetchUrl: string) => {
       const ms = `2026-${String(monthNum).padStart(2, "0")}`;
       try {
-        const res = await fetch(fetchUrl);
+        // Using fetch with a custom User-Agent to avoid 400 errors from Google Sheets
+        const res = await fetch(fetchUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+          }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csv = await res.text();
+        console.log(`Successfully fetched ${ms}, length: ${csv.length}`);
         result.months[ms] = parseFinancialSheet(csv);
       } catch (e) {
         result.errors[ms] = (e as Error).message;
