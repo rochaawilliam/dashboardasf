@@ -118,10 +118,9 @@ Deno.serve(async (req) => {
     const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
     
     // Spreadsheets specified by the user
-    // ABA JULHO: 07-2026
-    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&single=true&output=csv";
-    // ABA AGOSTO: 08-2026
-    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&single=true&output=csv";
+    // Using simple pub?output=csv?gid=XXX format which is more robust for some reason in fetch
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?output=csv&gid=0";
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?output=csv&gid=2047530861";
     
     const result: FinancialResponse = {
       months: {},
