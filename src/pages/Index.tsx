@@ -444,6 +444,16 @@ const Index = () => {
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
   const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
   const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
+  const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
+  const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
+  const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
+  const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
+  const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
+  const PROSPECTS_OFFLINE_ID = "b2c3d4e5-2222-4bbb-cccc-222222222222";
+  const NPS_ID = "f7b32bc5-7f37-4470-a52d-4cc8c096a2a5";
+  const ENPS_ID = "bfc3fbed-ec18-4009-a6ba-20c7f3ec184b";
+  const CHURN_ID = "94d12621-1574-4041-ace3-9a3b6c064b07";
+  const HEALTH_SCORE_ID = "e6e6e6e6-1111-4eee-aaaa-111111111111";
   
   const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
@@ -612,10 +622,6 @@ const Index = () => {
     // NPS Pulse metrics
     if (pipelineData.npsPulse) {
       const np = pipelineData.npsPulse;
-      const NPS_ID = "f7b32bc5-7f37-4470-a52d-4cc8c096a2a5";
-      const ENPS_ID = "bfc3fbed-ec18-4009-a6ba-20c7f3ec184b";
-      const CHURN_ID = "94d12621-1574-4041-ace3-9a3b6c064b07";
-      const HEALTH_SCORE_ID = "e6e6e6e6-1111-4eee-aaaa-111111111111";
 
       if (selectedMonth) {
         const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
@@ -645,10 +651,6 @@ const Index = () => {
 
 
     // Override "Leads no Funil" and "Contratos" with Dashboard origin data (snapshot, not passage-based)
-    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
-    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
-    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
-    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     if (ms) {
       const dbo = pipelineData.dashboardByOrigin?.[ms];
       if (dbo?.online) {
@@ -699,9 +701,6 @@ const Index = () => {
     }
 
     // MQL / SQL vindos do lead scoring do Pipeline Vision Board
-    const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
-    const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
-    const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
     const qual = ms ? pipelineData.qualificacaoByOrigin?.[ms] : pipelineData.qualificacaoTotalsByOrigin;
     if (qual?.online) {
       values[MQL_ONLINE_ID] = qual.online.mql ?? 0;
@@ -839,10 +838,6 @@ const Index = () => {
 
     // ── Acumulado anual = SOMA dos meses (buckets disjuntos pelo campo `month`/`created_at`)
     // Evita usar o snapshot anual (que só conta o estado ATUAL dos cards e subestima o acumulado).
-    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
-    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
-    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
-    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
 
     const sumMonths = <T,>(
       byMonth: Record<string, T> | undefined,
@@ -904,9 +899,6 @@ const Index = () => {
     // MQL / SQL — soma dos meses
     const qualMonths = pipelineData.qualificacaoByOrigin;
     const qualTotals = pipelineData.qualificacaoTotalsByOrigin;
-    const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
-    const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
-    const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
     setAcc(MQL_ONLINE_ID, sumMonths(qualMonths, (m: any) => m?.online?.mql), qualTotals?.online?.mql);
     setAcc(SQL_ONLINE_ID, sumMonths(qualMonths, (m: any) => m?.online?.sql), qualTotals?.online?.sql);
     setAcc(SQL_OFFLINE_ID, sumMonths(qualMonths, (m: any) => m?.offline?.sql), qualTotals?.offline?.sql);
@@ -1055,10 +1047,6 @@ const Index = () => {
     // Funnel snapshot metrics from Dashboard panel (PIPELINE_METRIC_MAP — by origin)
     const originSource = ms ? pipelineData.months?.[ms] : pipelineData.totals;
     const dashOriginSource = ms ? pipelineData.dashboardByOrigin?.[ms] : pipelineData.dashboardTotalsByOrigin;
-    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
-    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
-    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
-    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
       const m = metrics.find(x => x.id === metricId);
       if (!m) continue;
@@ -2219,8 +2207,6 @@ const Index = () => {
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               // Valor Gerado targets derive from Receita Total Mensal (20% online / 80% offline)
-                              const VG_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
-                              const VG_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
                               const funnelTargets = [
                                 ...(monthlyTargets ?? []).filter(
                                   (t: any) => t.metric_id !== VG_ONLINE_ID && t.metric_id !== VG_OFFLINE_ID
