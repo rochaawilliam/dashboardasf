@@ -2698,7 +2698,17 @@ const Index = () => {
                                     const computedMonthly = (metric as any)._computedMonthly;
                                     const computedAccumulated = (metric as any)._computedAccumulated;
 
-                                    let dynamicMetric = metric;
+                                    let dynamicMetric = { ...metric };
+                                    
+                                    // Inject dynamic formula into tooltip
+                                    const safeId = metric.id.replace(/-/g, "_");
+                                    const dynamicFormula = (mergedMonthlyValues as any)[`_formula_${safeId}`] || (mergedMonthlyValues as any)[`_formula_${metric.id}`];
+                                    if (dynamicFormula) {
+                                      dynamicMetric.description = metric.description 
+                                        ? `${metric.description}\n\nFórmula atual: ${dynamicFormula}`
+                                        : `Fórmula atual: ${dynamicFormula}`;
+                                    }
+
 
                                     // Compute "Total de Contratos" = Novos Contratos Online + Offline ASF
                                     const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
