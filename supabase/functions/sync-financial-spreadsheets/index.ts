@@ -86,7 +86,7 @@ function parseFinancialSheet(csv: string): FinancialData {
     tri: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRI")),
   };
 
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = headerIdx + 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
     if (cols.length <= Math.max(colIdx.contrato, colIdx.emp, colIdx.tra, colIdx.tri)) continue;
 
