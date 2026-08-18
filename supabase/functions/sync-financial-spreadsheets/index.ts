@@ -108,9 +108,9 @@ Deno.serve(async (req) => {
     const year = parseInt(url.searchParams.get("year") || "2026");
     
     // Spreadsheets specified by the user
-    // Using pub?gid=XXX&single=true&output=csv format (this is the most reliable published URL format)
-    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&single=true&output=csv";
-    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&single=true&output=csv";
+    // Using simple pub?gid=XXX&output=csv format
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&output=csv";
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&output=csv";
     
     const result: FinancialResponse = {
       months: {},
@@ -122,7 +122,11 @@ Deno.serve(async (req) => {
       const ms = `2026-${String(monthNum).padStart(2, "0")}`;
       try {
         // Simple fetch for export URL
-        const res = await fetch(fetchUrl);
+        const res = await fetch(fetchUrl, {
+          headers: {
+            'Accept': 'text/csv'
+          }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csv = await res.text();
         result.months[ms] = parseFinancialSheet(csv);
