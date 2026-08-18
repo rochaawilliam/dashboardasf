@@ -1302,7 +1302,6 @@ const Index = () => {
       values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
       
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
-
       const clientesAssessoria = Number(s.clientes_assessoria) || 0;
       
       // Calculate Ticket Médio Assessoria
@@ -1312,6 +1311,13 @@ const Index = () => {
       values["74e5baf4-41c4-4d3b-82d1-445a00aba0b8"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
       values["8c4b5df4-da48-43a5-821c-bdfc9a6ff87c"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
       values["00ec471d-d863-4293-ab17-ec9054c90017"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
+      
+      // Formulas for tooltips
+      (values as any)._formula_TICKET_MEDIO_ASSESSORIA = `Receita Assessoria (R$ ${formatNumber(receitaAssessoriaTotal, 2)}) / Clientes (${clientesAssessoria})`;
+      (values as any)._formula_74e5baf4_41c4_4d3b_82d1_445a00aba0b8 = `Receita Emp. Assessoria (R$ ${formatNumber(s.receita_emp_assessoria || 0, 2)}) / Clientes (${clientesAssessoria})`;
+      (values as any)._formula_8c4b5df4_da48_43a5_821c_bdfc9a6ff87c = `Receita Trab. Assessoria (R$ ${formatNumber(s.receita_tra_assessoria || 0, 2)}) / Clientes (${clientesAssessoria})`;
+      (values as any)._formula_00ec471d_d863_4293_ab17_ec9054c90017 = `Receita Trib. Assessoria (R$ ${formatNumber(s.receita_tri_assessoria || 0, 2)}) / Clientes (${clientesAssessoria})`;
+
       
       // Consultoria/Contencioso Ticket Médio (Direct values from spreadsheet)
       values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (s.receita_emp_consultoria || 0);
