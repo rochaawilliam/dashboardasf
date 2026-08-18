@@ -399,7 +399,6 @@ const Index = () => {
 
   // Lucratividade
   const LUCRATIVIDADE_MENSAL_ID = "5d9ddf5d-2b10-48f6-baf0-3a2da4025bbc";
-  const LUCRATIVIDADE_ANUAL_ID = "605e480d-4f21-406f-af6c-56e555aa458c";
   const RECEITA_BRUTA_OPERACIONAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
   const FLUXO_CAIXA_OPERACIONAL_ID = "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
@@ -1199,9 +1198,6 @@ const Index = () => {
     // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
     values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
-    if (monthsThroughSelected.length > 0) {
-      values[LUCRATIVIDADE_ANUAL_ID] = Math.round((monthsThroughSelected.reduce((a, b) => a + b, 0) / monthsThroughSelected.length) * 100) / 100;
-    }
     // Folha sobre Receita = Fluxo de Caixa Operacional / Headcount Ativo
     const headcountAtivo = pipelineData?.training?.headcount ?? 0;
     const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
@@ -1210,7 +1206,7 @@ const Index = () => {
     values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
 
 
   // Cashflow accumulated across the year
@@ -1242,7 +1238,7 @@ const Index = () => {
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
-      values[LUCRATIVIDADE_ANUAL_ID] = values[LUCRATIVIDADE_MENSAL_ID];
+      
     }
     const headcountAccum = pipelineData?.training?.headcount ?? 0;
     if (headcountAccum > 0) {
@@ -1251,7 +1247,7 @@ const Index = () => {
     }
 
     return values;
-  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, LUCRATIVIDADE_ANUAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
 
 
   const mergedMonthlyValues = useMemo(() => {
@@ -1558,7 +1554,7 @@ const Index = () => {
   const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
   const RECEITA_TRAB_ASSESSORIA_ID = "be1fcc4f-c1b8-476a-b330-e2b8675ae458";
   const RECEITA_TRIB_ASSESSORIA_ID = "b829cf12-3f66-4a0c-8753-70260a9645d8";
-  const ARR_METRIC_ID = "c80c98f8-964c-4146-9012-eb0d0c5a30ee";
+  
 
   // Computed revenue cards
   
@@ -2524,28 +2520,6 @@ const Index = () => {
                                       dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
                                     }
 
-                                    // Compute ARR % Anual = receita recorrente (assessoria) acumulada / receita total realizada acumulada * 100
-                                    const isARR = metric.id === ARR_METRIC_ID;
-                                    let arrMonthlyValue: number | null = null;
-                                    let arrAccumulatedValue = 0;
-                                    if (isARR) {
-                                      const assessoriaIds = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRIB_ASSESSORIA_ID];
-
-                                      // Receita recorrente (assessoria) acumulada
-                                      const assessoriaAccum = assessoriaIds.reduce((sum, id) => sum + (accumulatedValues[id] ?? 0), 0);
-
-                                      // Receita total realizada acumulada (todas as receitas)
-                                      const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
-                                      const allRevenueMetrics = organizedSubcategories
-                                        .filter((s) => revenueSubcatNames.includes(s.name))
-                                        .flatMap((s) => s.metrics);
-                                      const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-
-                                      arrAccumulatedValue = receitaTotalAccum > 0 ? assessoriaAccum / receitaTotalAccum * 100 : 0;
-
-                                      arrMonthlyValue = arrAccumulatedValue;
-                                      dynamicMetric = { ...dynamicMetric, current_value: arrAccumulatedValue };
-                                    }
 
                                     const isOriginCard = metric.id === CONTRATOS_ONLINE_ID || metric.id === CONTRATOS_OFFLINE_ID;
                                     const originMonthly = metric.id === CONTRATOS_ONLINE_ID
@@ -2678,8 +2652,8 @@ const Index = () => {
                                     const isRevenueManualRestricted = metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
-                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isARR ? arrMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
-                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isARR ? arrAccumulatedValue : isOriginCard ? originAccumulated : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
+                                    const cardMonthlyValue = isAutoSum ? computedMonthly : isTotalContratos ? totalContratosMonthly : isMRR ? mrrMonthlyValue : isOriginCard ? originMonthly : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumMonthly : mergedMonthlyValues[metric.id] ?? null;
+                                    const cardAccumulatedValue = isAutoSum ? computedAccumulated ?? 0 : isTotalContratos ? totalContratosAccumulated : isMRR ? mrrAccumulatedValue : isOriginCard ? originAccumulated : isEficienciaReceita ? eficienciaReceitaValue : isRevSumCard ? revSumAccumulated : mergedAccumulatedValues[metric.id] ?? 0;
                                     const cardMetric = isAutoSum ? { ...dynamicMetric, current_value: computedAccumulated ?? 0 } : dynamicMetric;
 
                                     // Pre-compute monthly target for this metric
