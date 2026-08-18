@@ -2516,7 +2516,7 @@ const Index = () => {
 
                         // Compute Receita Total as sum of revenue subcategories
                         const isReceitaTotal = category === "lucratividade" && subcat.name === "Receita Total";
-                        const revenueSubcats = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                        const revenueSubcats = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
 
                         const getReceitaTotalMetrics = () => {
                           if (!isReceitaTotal) return subcat.metrics;
@@ -2595,7 +2595,7 @@ const Index = () => {
                                     let mrrAccumulatedValue = 0;
                                     if (isMRR) {
                                       // Get all revenue metrics from subcategories for Receita Total denominator
-                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
                                       const allRevenueMetrics = organizedSubcategories.
                                       filter((s) => revenueSubcatNames.includes(s.name)).
                                       flatMap((s) => s.metrics);
@@ -2637,7 +2637,7 @@ const Index = () => {
 
                                      if (isEficienciaReceita) {
                                        // Get all revenue metrics for computing totals
-                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Pontual", "Sucumbência"];
+                                       const revenueSubcatNames = ["Assessoria", "Consultoria", "Contencioso", "Sucumbência"];
                                        const allRevenueMetrics = organizedSubcategories.
                                        filter((s) => revenueSubcatNames.includes(s.name)).
                                        flatMap((s) => s.metrics);
