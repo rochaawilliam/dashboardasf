@@ -464,6 +464,10 @@ const Index = () => {
   const LEADS_OFF_TRAB = "371dd70d-7c46-4488-b7ad-80ded893af5d";
   const LEADS_OFF_TRIB = "57ca6f08-7bb6-4697-87fe-8ac33161285c";
   
+  const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
+  const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
+  const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
+  
   const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
   const pipelineMonthlyValues = useMemo(() => {
