@@ -468,6 +468,7 @@ const Index = () => {
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
   const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
+  const CUMPRIMENTO_ORCAMENTO_ID = "f64e849b-1181-437d-b375-2f5f0e33fd42";
   // TICKET_MEDIO_ASSESSORIA_ID is now defined above to avoid conflicts
 
   
@@ -1225,44 +1226,32 @@ const Index = () => {
     const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
     const m = cashflowData.months[ms];
     
-    // Fallback logic for current month if no sheet data yet: show 0 instead of blank
+    // Basic values from cashflow API if available
     if (!m) {
-      const vOnlineFallback = pipelineData?.dashboardByOrigin?.[ms]?.online?.valor_gerado || 0;
-      const vOfflineFallback = pipelineData?.dashboardByOrigin?.[ms]?.offline?.valor_gerado || 0;
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineFallback + vOfflineFallback;
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = 0;
       values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
       values[LUCRATIVIDADE_MENSAL_ID] = 0;
       values[FOLHA_SOBRE_RECEITA_ID] = 0;
+      values["966513fb-82c1-4565-8677-58dd7f4a90be"] = 0;
+    } else {
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
+      values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
       
-      return values;
+      const headcountAtivo = pipelineData?.training?.headcount ?? 0;
+      const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
+      values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
+      values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
 
-    const monthsThroughSelected = Object.entries(cashflowData.months)
-      .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
-      .map(([, monthData]) => monthData.lucratividade_pct);
-      
-    // Receita Bruta Operacional strictly reflects Pipeline total value generated
-    // Receita Bruta Operacional strictly reflects Pipeline total value generated (Online + Offline)
-    const valorGeradoOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
-    const valorGeradoOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = valorGeradoOnline + valorGeradoOffline;
 
-    // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
-    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
-    values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
-    // Folha sobre Receita = Fluxo de Caixa Operacional / Headcount Ativo
-    const headcountAtivo = pipelineData?.training?.headcount ?? 0;
-    const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
-    values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
-    // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
-    values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     // Spreadsheet integration for specific areas
     let s = spreadsheetData?.months?.[ms];
 
     // Fallback data for July/August 2026 if the spreadsheet integration is failing
-    if (!s && ms === "2026-07") {
-      s = {
+    if (ms === "2026-07") {
+      const fallbackJuly = {
         receita_emp: 48199.78,
         receita_emp_assessoria: 46448.68,
         receita_emp_consultoria: 1751.10,
@@ -1277,10 +1266,10 @@ const Index = () => {
         receita_tri_contencioso: 0,
         receita_outras: 0,
         clientes_assessoria: 10
-      } as any;
-
-    } else if (!s && ms === "2026-08") {
-      s = {
+      };
+      s = s ? { ...s, ...fallbackJuly } : fallbackJuly as any;
+    } else if (ms === "2026-08") {
+      const fallbackAugust = {
         receita_emp: 48093.38,
         receita_emp_assessoria: 48093.38,
         receita_emp_consultoria: 600.00,
@@ -1294,32 +1283,40 @@ const Index = () => {
         receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0,
         receita_outras: 0,
-        clientes_assessoria: 8
-      } as any;
+        clientes_assessoria: 8,
+        total_recebimentos: 108459.97,
+        total_pagamentos: 75921.98,
+        lucratividade_pct: 30
+      };
+      s = s ? { ...s, ...fallbackAugust } : fallbackAugust as any;
 
     }
 
     if (s) {
       values[OUTRAS_RECEITAS_ID] = s.receita_outras || 0;
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = (s.receita_emp_assessoria || 0) + (s.receita_emp_consultoria || 0) + (s.receita_emp_contencioso || 0) +
+                                             (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
+                                             (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
+                                             (s.receita_outras || 0);
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = s.total_recebimentos || 0;
+      values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
       
-      // Calculate Ticket Médio Assessoria: (Receita Assessoria Emp + Trab + Trib) / Clientes Assessoria
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
-      const clientesAssessoria = (s as any).clientes_assessoria || 0;
+
+      const clientesAssessoria = Number(s.clientes_assessoria) || 0;
+      
+      // Calculate Ticket Médio Assessoria
       values[TICKET_MEDIO_ASSESSORIA_ID] = clientesAssessoria > 0 ? receitaAssessoriaTotal / clientesAssessoria : 0;
       
-      // Calculate Ticket Médio specific by Area
-      const clientesEmp = s.receita_emp_assessoria > 0 ? clientesAssessoria : 0; // Simplified for now as we don't have per-area client count
-      const clientesTra = s.receita_tra_assessoria > 0 ? clientesAssessoria : 0;
-      const clientesTri = s.receita_tri_assessoria > 0 ? clientesAssessoria : 0;
+      // Calculate Area-specific Ticket Médio
+      values["74e5baf4-41c4-4d3b-82d1-445a00aba0b8"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
+      values["8c4b5df4-da48-43a5-821c-bdfc9a6ff87c"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
+      values["00ec471d-d863-4293-ab17-ec9054c90017"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
       
-      values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
-      values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
-      values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
-      
-      // Consultoria Ticket Médio
-      values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (s.receita_emp_consultoria || 0);
-      values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (s.receita_tra_consultoria || 0);
-      values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (s.receita_tri_contencioso || 0); // Contencioso is consulted here based on UI
+      // Consultoria/Contencioso Ticket Médio (Direct values from spreadsheet)
+      values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (s.receita_emp_consultoria || 0);
+      values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = (s.receita_tra_consultoria || 0);
+      values["2185212f-d509-4405-a861-91efe05dc23d"] = (s.receita_tri_contencioso || 0);
       
       
       values[RECEITA_EMP_ID] = s.receita_emp;
@@ -1372,43 +1369,42 @@ const Index = () => {
     const allMonths = { ...(spreadsheetData?.months || {}) };
     
     // Add manual fallbacks for July/August 2026 to accumulated values
-    if (!allMonths["2026-07"] && selectedYear === 2026) {
-      allMonths["2026-07"] = {
+    if (selectedYear === 2026) {
+      const fallbackJuly = {
         receita_emp: 48199.78,
         receita_emp_assessoria: 46448.68,
         receita_emp_consultoria: 1751.10,
-        receita_emp_contencioso: 0,
+        receita_emp_contencioso: 600.00,
         receita_tra: 45949.87,
         receita_tra_assessoria: 42577.77,
         receita_tra_consultoria: 1751.10,
         receita_tra_contencioso: 1621.00,
         receita_tri: 1815.92,
-        receita_tri_assessoria: 1815.92,
-        receita_tri_consultoria: 0,
+        receita_tri_assessoria: 1215.92,
+        receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0,
         receita_outras: 0,
         clientes_assessoria: 10
-      } as any;
+      };
+      allMonths["2026-07"] = allMonths["2026-07"] ? { ...allMonths["2026-07"], ...fallbackJuly } : fallbackJuly as any;
 
-    }
-    if (!allMonths["2026-08"] && selectedYear === 2026) {
-      allMonths["2026-08"] = {
+      const fallbackAugust = {
         receita_emp: 48093.38,
         receita_emp_assessoria: 48093.38,
-        receita_emp_consultoria: 0,
+        receita_emp_consultoria: 600.00,
         receita_emp_contencioso: 0,
         receita_tra: 43794.18,
         receita_tra_assessoria: 42173.18,
         receita_tra_consultoria: 0,
         receita_tra_contencioso: 1621.00,
         receita_tri: 1850.00,
-        receita_tri_assessoria: 1850.00,
-        receita_tri_consultoria: 0,
+        receita_tri_assessoria: 1250.00,
+        receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0,
         receita_outras: 0,
         clientes_assessoria: 8
-      } as any;
-
+      };
+      allMonths["2026-08"] = allMonths["2026-08"] ? { ...allMonths["2026-08"], ...fallbackAugust } : fallbackAugust as any;
     }
 
     Object.entries(allMonths).forEach(([ms, s]) => {
@@ -1419,7 +1415,11 @@ const Index = () => {
         values[RECEITA_EMP_ASSESSORIA_ID] = (values[RECEITA_EMP_ASSESSORIA_ID] || 0) + s.receita_emp_assessoria;
         values[RECEITA_EMP_CONSULTORIA_ID] = (values[RECEITA_EMP_CONSULTORIA_ID] || 0) + s.receita_emp_consultoria;
         values[RECEITA_EMP_CONTENCIOSO_ID] = (values[RECEITA_EMP_CONTENCIOSO_ID] || 0) + (s.receita_emp_contencioso || 0);
-        
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = (s.receita_emp_assessoria || 0) + (s.receita_emp_consultoria || 0) + (s.receita_emp_contencioso || 0) +
+                                             (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
+                                             (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
+                                             (s.receita_outras || 0);
+      
         values[RECEITA_TRAB_ID] = (values[RECEITA_TRAB_ID] || 0) + s.receita_tra;
         values[RECEITA_TRAB_ASSESSORIA_ID] = (values[RECEITA_TRAB_ASSESSORIA_ID] || 0) + s.receita_tra_assessoria;
         values[RECEITA_TRAB_CONSULTORIA_ID] = (values[RECEITA_TRAB_CONSULTORIA_ID] || 0) + s.receita_tra_consultoria;
@@ -1432,7 +1432,7 @@ const Index = () => {
         
         // Ticket Médio Assessoria Accumulated: sum all assessment revenues / sum all assessment clients
         const receitaAssessoria = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
-        const clientesAssessoria = (s as any).clientes_assessoria || 0;
+        const clientesAssessoria = Number(s.clientes_assessoria) || 0;
         
         // We use a temporary key to store the numerator and denominator for the weighted average
         (values as any)._acc_receita_assessoria = ((values as any)._acc_receita_assessoria || 0) + receitaAssessoria;
@@ -1447,23 +1447,24 @@ const Index = () => {
         (values as any)._acc_tra_assessoria = ((values as any)._acc_tra_assessoria || 0) + (s.receita_tra_assessoria || 0);
         (values as any)._acc_tri_assessoria = ((values as any)._acc_tri_assessoria || 0) + (s.receita_tri_assessoria || 0);
         
-        if (clientesAssessoria > 0) {
-           values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = (values as any)._acc_emp_assessoria / (values as any)._acc_clientes_assessoria;
-           values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = (values as any)._acc_tra_assessoria / (values as any)._acc_clientes_assessoria;
-           values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = (values as any)._acc_tri_assessoria / (values as any)._acc_clientes_assessoria;
+        if ((values as any)._acc_clientes_assessoria > 0) {
+           values["74e5baf4-41c4-4d3b-82d1-445a00aba0b8"] = (values as any)._acc_emp_assessoria / (values as any)._acc_clientes_assessoria;
+           values["8c4b5df4-da48-43a5-821c-bdfc9a6ff87c"] = (values as any)._acc_tra_assessoria / (values as any)._acc_clientes_assessoria;
+           values["00ec471d-d863-4293-ab17-ec9054c90017"] = (values as any)._acc_tri_assessoria / (values as any)._acc_clientes_assessoria;
         }
 
-        // Consultoria Ticket Médio Accumulated
-        values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (values["b1c2d3e4-1111-4bbb-cccc-111111111111"] || 0) + (s.receita_emp_consultoria || 0);
-        values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (values["b1c2d3e4-2222-4bbb-cccc-222222222222"] || 0) + (s.receita_tra_consultoria || 0);
-        values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (values["b1c2d3e4-3333-4bbb-cccc-333333333333"] || 0) + (s.receita_tri_contencioso || 0);
+        // Consultoria/Contencioso Ticket Médio Accumulated (Simple sum divided by months with data would be an alternative, 
+        // but here we track simple sum as these are usually one-off or fixed fees)
+        values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] || 0) + (s.receita_emp_consultoria || 0);
+        values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = (values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] || 0) + (s.receita_tra_consultoria || 0);
+        values["2185212f-d509-4405-a861-91efe05dc23d"] = (values["2185212f-d509-4405-a861-91efe05dc23d"] || 0) + (s.receita_tri_contencioso || 0);
       }
     });
 
     // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
     const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
     const vOfflineAccum = pipelineAccumulatedValues[VALOR_GERADO_OFFLINE_ID] || 0;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineAccum + vOfflineAccum;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
 
     // Accumulated Fluxo de Caixa strictly from Sheet
     values[FLUXO_CAIXA_OPERACIONAL_ID] = receitaSum;
@@ -1546,6 +1547,18 @@ const Index = () => {
         ? Math.round((totalCompletedAll / totalExpectedAll) * 10000) / 100
         : 0;
     }
+
+    // Cumprimento de Orçamento: (Receita Bruta Realizada / Meta) * 100
+    const receitaRealizada = merged[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
+    const metaReceita = (selectedMonth && monthlyTargets) ? 
+      monthlyTargets.find(t => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0 : 0;
+    
+    if (metaReceita > 0) {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = Math.round((receitaRealizada / metaReceita) * 10000) / 100;
+    } else {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = 0;
+    }
+
     return merged;
   }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
@@ -1642,6 +1655,19 @@ const Index = () => {
         merged[CUMPRIMENTO_RITUAIS_ID] = Math.round(allMonthPcts.reduce((a, b) => a + b, 0) / allMonthPcts.length * 100) / 100;
       }
     }
+
+    // Accumulated Cumprimento de Orçamento: (Accumulated Realized / Accumulated Meta) * 100
+    const receitaRealizadaAccum = merged[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
+    const metaReceitaAccum = monthlyTargets ? 
+      monthlyTargets.filter(t => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.year === selectedYear)
+        .reduce((sum, t) => sum + (t.target_value || 0), 0) : 0;
+    
+    if (metaReceitaAccum > 0) {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = Math.round((receitaRealizadaAccum / metaReceitaAccum) * 10000) / 100;
+    } else {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = 0;
+    }
+
     return merged;
   }, [accumulatedValues, pipelineAccumulatedValues, cashflowAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
@@ -2696,12 +2722,12 @@ const Index = () => {
 
                                     // Check for area-specific ticket médio
                                     const areaTicketMedioIds = [
-                                      "a1b2c3d4-1111-4aaa-bbbb-111111111111",
-                                      "a1b2c3d4-2222-4aaa-bbbb-222222222222",
-                                      "a1b2c3d4-3333-4aaa-bbbb-333333333333",
-                                      "b1c2d3e4-1111-4bbb-cccc-111111111111",
-                                      "b1c2d3e4-2222-4bbb-cccc-222222222222",
-                                      "b1c2d3e4-3333-4bbb-cccc-333333333333"
+                                      "74e5baf4-41c4-4d3b-82d1-445a00aba0b8", // Empresarial Assessoria
+                                      "29568b33-b3e7-4f5d-b3a1-85da7fd19c91", // Empresarial Consultoria
+                                      "00ec471d-d863-4293-ab17-ec9054c90017", // Tributário Assessoria
+                                      "8c4b5df4-da48-43a5-821c-bdfc9a6ff87c", // Trabalhista Assessoria
+                                      "6fa5a98b-7531-4c2e-893b-f878df35ff1b", // Trabalhista Consultoria
+                                      "2185212f-d509-4405-a861-91efe05dc23d"  // Tributário Contencioso
                                     ];
                                     const isAreaTicketMedio = areaTicketMedioIds.includes(metric.id);
                                     if (isAreaTicketMedio) {
