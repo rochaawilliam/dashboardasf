@@ -1580,9 +1580,6 @@ const Index = () => {
 
   // MRR % Mensal - auto-calculated metric
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
-  const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
-  const RECEITA_TRAB_ASSESSORIA_ID = "be1fcc4f-c1b8-476a-b330-e2b8675ae458";
-  const RECEITA_TRIB_ASSESSORIA_ID = "b829cf12-3f66-4a0c-8753-70260a9645d8";
   
 
   // Computed revenue cards
