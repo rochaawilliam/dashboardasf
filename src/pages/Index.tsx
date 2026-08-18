@@ -2666,13 +2666,13 @@ const Index = () => {
 
                                       if (selectedMonth !== null) {
                                         const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                        const receitaTotal = allRevenueMetrics.reduce((sum, m) => sum + (monthlyValues[m.id] ?? 0), 0);
-                                        mrrMonthlyValue = receitaTotal > 0 ? assessoriaSum / receitaTotal * 100 : 0;
+                                        const fluxoCaixa = cashflowMonthlyValues[FLUXO_CAIXA_OPERACIONAL_ID] || 0;
+                                        mrrMonthlyValue = fluxoCaixa > 0 ? assessoriaSum / fluxoCaixa * 100 : 0;
                                       }
                                       // Accumulated: weighted average across months with data
                                       const assessoriaAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      const receitaTotalAccum = allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
-                                      mrrAccumulatedValue = receitaTotalAccum > 0 ? assessoriaAccum / receitaTotalAccum * 100 : 0;
+                                      const fluxoCaixaAccum = cashflowAccumulatedValues[FLUXO_CAIXA_OPERACIONAL_ID] || 0;
+                                      mrrAccumulatedValue = fluxoCaixaAccum > 0 ? assessoriaAccum / fluxoCaixaAccum * 100 : 0;
 
                                       dynamicMetric = { ...dynamicMetric, current_value: mrrAccumulatedValue };
                                     }

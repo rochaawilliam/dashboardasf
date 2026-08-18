@@ -86,11 +86,12 @@ function parseFinancialSheet(csv: string): FinancialData {
 
   const header = parseCSVLine(lines[headerIdx]);
   const colIdx = {
+    nome: header.findIndex(h => h.toUpperCase().trim() === "NOME"),
     contrato: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")),
     emp: header.findIndex(h => h.toUpperCase().trim().includes("CART-EMP")),
     tra: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRA")),
     tri: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRI")),
-    tipo: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")), // Already defined, but let's be explicit
+    tipo: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")),
     valor: header.findIndex(h => {
       const H = h.toUpperCase().trim();
       return H === "VALOR" || H.includes("VALOR BRUTO") || H.includes("TOTAL");
@@ -129,7 +130,8 @@ function parseFinancialSheet(csv: string): FinancialData {
     
     // Count assessment clients (excluding Group and Others)
     if (contrato.includes("assessoria")) {
-      const nomeCliente = (cols[colIdx.contrato - 1] || "").trim().toLowerCase(); // NOME is usually before CONTRATO
+      const nomeIdx = colIdx.nome !== -1 ? colIdx.nome : Math.max(0, colIdx.contrato - 1);
+      const nomeCliente = (cols[nomeIdx] || "").trim().toLowerCase();
       if (!nomeCliente.includes("grupo") && !nomeCliente.includes("outros") && !nomeCliente.includes("outro")) {
         data.clientes_assessoria += 1;
       }

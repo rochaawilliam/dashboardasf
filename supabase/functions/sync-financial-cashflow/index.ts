@@ -124,6 +124,7 @@ function parseSheet(
   let total_pagamentos = 0;
   let folha_total = 0;
   let boleto_total = 0; // sempre lido da coluna Total da linha Boleto — usado como previsto
+  let total_pagamentos_raw = 0; // valor da linha TOTAL DE PAGAMENTOS
 
   let section: "header" | "recebimentos" | "pagamentos" | "outros" = "header";
 
@@ -143,7 +144,8 @@ function parseSheet(
       continue;
     }
     if (labelUpper === "TOTAL DE PAGAMENTOS") {
-      total_pagamentos = extractValue(cols, mode, daysInMonth, dayLimit);
+      total_pagamentos_raw = extractValue(cols, mode, daysInMonth, dayLimit);
+      total_pagamentos = total_pagamentos_raw;
       section = "header";
       continue;
     }
@@ -172,7 +174,7 @@ function parseSheet(
     ? (boleto_total > 0 ? boleto_total : operacional)
     : operacional;
   const lucratividade_pct = receb > 0
-    ? Math.round(((receb - total_pagamentos) / receb) * 10000) / 100
+    ? Math.round(((receb - total_pagamentos_raw) / receb) * 10000) / 100
     : 0;
   const custo_fixo_total = Math.max(0, total_pagamentos - folha_total);
   const folha_sobre_receita_pct = receb > 0
