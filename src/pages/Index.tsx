@@ -1231,9 +1231,10 @@ const Index = () => {
         
       }
     }
-    // Accumulated Receita Bruta Operacional: priority to Pipeline Total
-    const pipelineTotalAccum = pipelineData?.dashboardTotals?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalAccum ?? 0;
+    // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
+    const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
+    const vOfflineAccum = pipelineAccumulatedValues[VALOR_GERADO_OFFLINE_ID] || 0;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineAccum + vOfflineAccum;
 
     // Accumulated Fluxo de Caixa strictly from Sheet
     values[FLUXO_CAIXA_OPERACIONAL_ID] = receitaSum;
