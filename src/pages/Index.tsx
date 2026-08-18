@@ -1190,8 +1190,10 @@ const Index = () => {
       .map(([, monthData]) => monthData.lucratividade_pct);
       
     // Receita Bruta Operacional strictly reflects Pipeline total value generated
-    const pipelineTotalGerado = pipelineData?.dashboard?.[ms]?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado || 0;
+    // Receita Bruta Operacional strictly reflects Pipeline total value generated (Online + Offline)
+    const valorGeradoOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
+    const valorGeradoOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = valorGeradoOnline + valorGeradoOffline;
 
     // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
