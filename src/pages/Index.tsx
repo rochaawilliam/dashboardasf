@@ -1140,11 +1140,13 @@ const Index = () => {
       const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
       const m = cashflowData.months[ms];
       if (m) {
+        const vOnline = pipelineMonthlyValues[VALOR_GERADO_ONLINE_ID] || 0;
+        const vOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
         info[RECEITA_BRUTA_OPERACIONAL_ID] = {
-          source: (pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0) > 0 ? "Dashboard" : "Operacional",
-          filter: "month",
-          formula: "Pipeline.valor_gerado (total de contratos)",
-          calculation: `Pipeline: R$ ${fmt(pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0)}`,
+          source: "Operacional",
+          filter: "created_at",
+          formula: "Pipeline (Online.valor_gerado + Offline.valor_gerado)",
+          calculation: `Online: R$ ${fmt(vOnline)} + Offline: R$ ${fmt(vOffline)} = R$ ${fmt(vOnline + vOffline)}`,
           description: metrics.find(x => x.id === RECEITA_BRUTA_OPERACIONAL_ID)?.description,
         };
         info[FLUXO_CAIXA_OPERACIONAL_ID] = {
