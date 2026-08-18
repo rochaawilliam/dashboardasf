@@ -1252,7 +1252,7 @@ const Index = () => {
       s = {
         receita_emp: 48093.38,
         receita_emp_assessoria: 48093.38,
-        receita_emp_consultoria: 0,
+        receita_emp_consultoria: 600.00,
         receita_emp_contencioso: 0,
         receita_tra: 43794.18,
         receita_tra_assessoria: 42173.18,
