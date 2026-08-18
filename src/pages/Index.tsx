@@ -1247,9 +1247,9 @@ const Index = () => {
         receita_tra: 43794.18,
         receita_tra_assessoria: 35244.18,
         receita_tra_consultoria: 8550.00,
-        receita_tri: 7575.00,
-        receita_tri_assessoria: 6125.00,
-        receita_tri_consultoria: 1450.00
+        receita_tri: 1850.00,
+        receita_tri_assessoria: 1250.00,
+        receita_tri_consultoria: 600.00
       } as any;
     }
 
@@ -1314,9 +1314,9 @@ const Index = () => {
         receita_tra: 43794.18,
         receita_tra_assessoria: 35244.18,
         receita_tra_consultoria: 8550.00,
-        receita_tri: 7575.00,
-        receita_tri_assessoria: 6125.00,
-        receita_tri_consultoria: 1450.00
+        receita_tri: 1850.00,
+        receita_tri_assessoria: 1250.00,
+        receita_tri_consultoria: 600.00
       } as any;
     }
 
