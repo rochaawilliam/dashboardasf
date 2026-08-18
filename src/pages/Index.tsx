@@ -1307,14 +1307,14 @@ const Index = () => {
       values[TICKET_MEDIO_ASSESSORIA_ID] = clientesAssessoria > 0 ? receitaAssessoriaTotal / clientesAssessoria : 0;
       
       // Calculate Area-specific Ticket Médio
-      values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
-      values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
-      values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
+      values["74e5baf4-41c4-4d3b-82d1-445a00aba0b8"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
+      values["8c4b5df4-da48-43a5-821c-bdfc9a6ff87c"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
+      values["00ec471d-d863-4293-ab17-ec9054c90017"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
       
-      // Consultoria Ticket Médio
-      values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (s.receita_emp_consultoria || 0);
-      values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (s.receita_tra_consultoria || 0);
-      values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (s.receita_tri_contencioso || 0); // Contencioso is consulted here based on UI
+      // Consultoria/Contencioso Ticket Médio (Direct values from spreadsheet)
+      values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (s.receita_emp_consultoria || 0);
+      values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = (s.receita_tra_consultoria || 0);
+      values["2185212f-d509-4405-a861-91efe05dc23d"] = (s.receita_tri_contencioso || 0);
       
       
       values[RECEITA_EMP_ID] = s.receita_emp;
@@ -1427,7 +1427,7 @@ const Index = () => {
         
         // Ticket Médio Assessoria Accumulated: sum all assessment revenues / sum all assessment clients
         const receitaAssessoria = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
-        const clientesAssessoria = (s as any).clientes_assessoria || 0;
+        const clientesAssessoria = Number(s.clientes_assessoria) || 0;
         
         // We use a temporary key to store the numerator and denominator for the weighted average
         (values as any)._acc_receita_assessoria = ((values as any)._acc_receita_assessoria || 0) + receitaAssessoria;
@@ -1442,16 +1442,17 @@ const Index = () => {
         (values as any)._acc_tra_assessoria = ((values as any)._acc_tra_assessoria || 0) + (s.receita_tra_assessoria || 0);
         (values as any)._acc_tri_assessoria = ((values as any)._acc_tri_assessoria || 0) + (s.receita_tri_assessoria || 0);
         
-        if (clientesAssessoria > 0) {
-           values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = (values as any)._acc_emp_assessoria / (values as any)._acc_clientes_assessoria;
-           values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = (values as any)._acc_tra_assessoria / (values as any)._acc_clientes_assessoria;
-           values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = (values as any)._acc_tri_assessoria / (values as any)._acc_clientes_assessoria;
+        if ((values as any)._acc_clientes_assessoria > 0) {
+           values["74e5baf4-41c4-4d3b-82d1-445a00aba0b8"] = (values as any)._acc_emp_assessoria / (values as any)._acc_clientes_assessoria;
+           values["8c4b5df4-da48-43a5-821c-bdfc9a6ff87c"] = (values as any)._acc_tra_assessoria / (values as any)._acc_clientes_assessoria;
+           values["00ec471d-d863-4293-ab17-ec9054c90017"] = (values as any)._acc_tri_assessoria / (values as any)._acc_clientes_assessoria;
         }
 
-        // Consultoria Ticket Médio Accumulated
-        values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (values["b1c2d3e4-1111-4bbb-cccc-111111111111"] || 0) + (s.receita_emp_consultoria || 0);
-        values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (values["b1c2d3e4-2222-4bbb-cccc-222222222222"] || 0) + (s.receita_tra_consultoria || 0);
-        values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (values["b1c2d3e4-3333-4bbb-cccc-333333333333"] || 0) + (s.receita_tri_contencioso || 0);
+        // Consultoria/Contencioso Ticket Médio Accumulated (Simple sum divided by months with data would be an alternative, 
+        // but here we track simple sum as these are usually one-off or fixed fees)
+        values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] || 0) + (s.receita_emp_consultoria || 0);
+        values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = (values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] || 0) + (s.receita_tra_consultoria || 0);
+        values["2185212f-d509-4405-a861-91efe05dc23d"] = (values["2185212f-d509-4405-a861-91efe05dc23d"] || 0) + (s.receita_tri_contencioso || 0);
       }
     });
 
@@ -2691,12 +2692,12 @@ const Index = () => {
 
                                     // Check for area-specific ticket médio
                                     const areaTicketMedioIds = [
-                                      "a1b2c3d4-1111-4aaa-bbbb-111111111111",
-                                      "a1b2c3d4-2222-4aaa-bbbb-222222222222",
-                                      "a1b2c3d4-3333-4aaa-bbbb-333333333333",
-                                      "b1c2d3e4-1111-4bbb-cccc-111111111111",
-                                      "b1c2d3e4-2222-4bbb-cccc-222222222222",
-                                      "b1c2d3e4-3333-4bbb-cccc-333333333333"
+                                      "74e5baf4-41c4-4d3b-82d1-445a00aba0b8", // Empresarial Assessoria
+                                      "29568b33-b3e7-4f5d-b3a1-85da7fd19c91", // Empresarial Consultoria
+                                      "00ec471d-d863-4293-ab17-ec9054c90017", // Tributário Assessoria
+                                      "8c4b5df4-da48-43a5-821c-bdfc9a6ff87c", // Trabalhista Assessoria
+                                      "6fa5a98b-7531-4c2e-893b-f878df35ff1b", // Trabalhista Consultoria
+                                      "2185212f-d509-4405-a861-91efe05dc23d"  // Tributário Contencioso
                                     ];
                                     const isAreaTicketMedio = areaTicketMedioIds.includes(metric.id);
                                     if (isAreaTicketMedio) {
