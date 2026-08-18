@@ -2807,7 +2807,7 @@ const Index = () => {
                                          eficienciaReceitaValue = metaMes > 0 ? monthRealizado / metaMes * 100 : 0;
                                        } else {
                                          // Annual: realizado acumulado / meta acumulada (soma das metas mensais até agora)
-                                          const receitaAcumulada = cashflowAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ??
+                                          const receitaAcumulada = mergedAccumulatedValues[RECEITA_BRUTA_OPERACIONAL_ID] ??
                                             allRevenueMetrics.reduce((sum, m) => sum + (accumulatedValues[m.id] ?? 0), 0);
                                          let metaAcumulada = 0;
                                          for (let mo = 1; mo < currentMonthRef; mo++) {
