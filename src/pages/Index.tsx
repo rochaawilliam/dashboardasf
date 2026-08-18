@@ -1248,15 +1248,6 @@ const Index = () => {
     const valorGeradoOffline = pipelineMonthlyValues[VALOR_GERADO_OFFLINE_ID] || 0;
     values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
 
-    // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
-    values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
-    values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
-    // Folha sobre Receita = Fluxo de Caixa Operacional / Headcount Ativo
-    const headcountAtivo = pipelineData?.training?.headcount ?? 0;
-    const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
-    values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
-    // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
-    values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     // Spreadsheet integration for specific areas
     let s = spreadsheetData?.months?.[ms];
