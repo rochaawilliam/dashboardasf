@@ -1441,9 +1441,24 @@ const Index = () => {
         if ((values as any)._acc_clientes_assessoria > 0) {
           values[TICKET_MEDIO_ASSESSORIA_ID] = (values as any)._acc_receita_assessoria / (values as any)._acc_clientes_assessoria;
         }
+
+        // Area-specific ticket médio accumulated
+        (values as any)._acc_emp_assessoria = ((values as any)._acc_emp_assessoria || 0) + (s.receita_emp_assessoria || 0);
+        (values as any)._acc_tra_assessoria = ((values as any)._acc_tra_assessoria || 0) + (s.receita_tra_assessoria || 0);
+        (values as any)._acc_tri_assessoria = ((values as any)._acc_tri_assessoria || 0) + (s.receita_tri_assessoria || 0);
+        
+        if (clientesAssessoria > 0) {
+           values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = (values as any)._acc_emp_assessoria / (values as any)._acc_clientes_assessoria;
+           values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = (values as any)._acc_tra_assessoria / (values as any)._acc_clientes_assessoria;
+           values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = (values as any)._acc_tri_assessoria / (values as any)._acc_clientes_assessoria;
+        }
+
+        // Consultoria Ticket Médio Accumulated
+        values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (values["b1c2d3e4-1111-4bbb-cccc-111111111111"] || 0) + (s.receita_emp_consultoria || 0);
+        values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (values["b1c2d3e4-2222-4bbb-cccc-222222222222"] || 0) + (s.receita_tra_consultoria || 0);
+        values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (values["b1c2d3e4-3333-4bbb-cccc-333333333333"] || 0) + (s.receita_tri_contencioso || 0);
       }
     });
-
 
     // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
     const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
@@ -1455,7 +1470,6 @@ const Index = () => {
     if (lucratValues.length > 0) {
       values[LUCRATIVIDADE_MENSAL_ID] =
         Math.round((lucratValues.reduce((a, b) => a + b, 0) / lucratValues.length) * 100) / 100;
-      
     }
     const headcountAccum = pipelineData?.training?.headcount ?? 0;
     if (headcountAccum > 0) {
