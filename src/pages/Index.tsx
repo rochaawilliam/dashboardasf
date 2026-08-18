@@ -2719,16 +2719,16 @@ const Index = () => {
                                     ids.reduce((sum, id) => sum + (source[id] ?? 0), 0);
 
                                     if (isReceitaEmp) {
-                                      revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_EMP_COMPONENTS, monthlyValues) : null;
-                                      revSumAccumulated = sumComponents(RECEITA_EMP_COMPONENTS, accumulatedValues);
+                                      revSumMonthly = selectedMonth !== null ? (cashflowMonthlyValues[RECEITA_EMP_ID] ?? 0) : null;
+                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_EMP_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTrab) {
-                                      revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_TRAB_COMPONENTS, monthlyValues) : null;
-                                      revSumAccumulated = sumComponents(RECEITA_TRAB_COMPONENTS, accumulatedValues);
+                                      revSumMonthly = selectedMonth !== null ? (cashflowMonthlyValues[RECEITA_TRAB_ID] ?? 0) : null;
+                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_TRAB_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTrib) {
-                                      revSumMonthly = selectedMonth !== null ? sumComponents(RECEITA_TRIB_COMPONENTS, monthlyValues) : null;
-                                      revSumAccumulated = sumComponents(RECEITA_TRIB_COMPONENTS, accumulatedValues);
+                                      revSumMonthly = selectedMonth !== null ? (cashflowMonthlyValues[RECEITA_TRIB_ID] ?? 0) : null;
+                                      revSumAccumulated = cashflowAccumulatedValues[RECEITA_TRIB_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: revSumAccumulated };
                                     } else if (isReceitaTotalAnual) {
                                       // Receita Total strictly linked to Pipeline/Sheet sources
