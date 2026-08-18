@@ -1380,8 +1380,21 @@ const Index = () => {
         values[RECEITA_TRIB_ASSESSORIA_ID] = (values[RECEITA_TRIB_ASSESSORIA_ID] || 0) + s.receita_tri_assessoria;
         values[RECEITA_TRIB_CONSULTORIA_ID] = (values[RECEITA_TRIB_CONSULTORIA_ID] || 0) + s.receita_tri_consultoria;
         values[RECEITA_TRIB_CONTENCIOSO_ID] = (values[RECEITA_TRIB_CONTENCIOSO_ID] || 0) + (s.receita_tri_contencioso || 0);
+        
+        // Ticket Médio Assessoria Accumulated: sum all assessment revenues / sum all assessment clients
+        const receitaAssessoria = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
+        const clientesAssessoria = (s as any).clientes_assessoria || 0;
+        
+        // We use a temporary key to store the numerator and denominator for the weighted average
+        (values as any)._acc_receita_assessoria = ((values as any)._acc_receita_assessoria || 0) + receitaAssessoria;
+        (values as any)._acc_clientes_assessoria = ((values as any)._acc_clientes_assessoria || 0) + clientesAssessoria;
+        
+        if ((values as any)._acc_clientes_assessoria > 0) {
+          values[TICKET_MEDIO_ASSESSORIA_ID] = (values as any)._acc_receita_assessoria / (values as any)._acc_clientes_assessoria;
+        }
       }
     });
+
 
     // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
     const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
