@@ -1258,7 +1258,7 @@ const Index = () => {
         receita_emp: 48199.78,
         receita_emp_assessoria: 46448.68,
         receita_emp_consultoria: 1751.10,
-        receita_emp_contencioso: 600.00, // Extracted: one contencioso row in CART-EMP in July
+        receita_emp_contencioso: 600.00,
         receita_tra: 45949.87,
         receita_tra_assessoria: 42577.77,
         receita_tra_consultoria: 1751.10,
@@ -1267,8 +1267,10 @@ const Index = () => {
         receita_tri_assessoria: 1215.92,
         receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0,
-        receita_outras: 0
+        receita_outras: 0,
+        clientes_assessoria: 10
       } as any;
+
     } else if (!s && ms === "2026-08") {
       s = {
         receita_emp: 48093.38,
@@ -1283,8 +1285,10 @@ const Index = () => {
         receita_tri_assessoria: 1250.00,
         receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0,
-        receita_outras: 0
+        receita_outras: 0,
+        clientes_assessoria: 8
       } as any;
+
     }
 
     if (s) {
@@ -1359,8 +1363,10 @@ const Index = () => {
         receita_tri_assessoria: 1815.92,
         receita_tri_consultoria: 0,
         receita_tri_contencioso: 0,
-        receita_outras: 0
+        receita_outras: 0,
+        clientes_assessoria: 10
       } as any;
+
     }
     if (!allMonths["2026-08"] && selectedYear === 2026) {
       allMonths["2026-08"] = {
@@ -1376,8 +1382,10 @@ const Index = () => {
         receita_tri_assessoria: 1850.00,
         receita_tri_consultoria: 0,
         receita_tri_contencioso: 0,
-        receita_outras: 0
+        receita_outras: 0,
+        clientes_assessoria: 8
       } as any;
+
     }
 
     Object.entries(allMonths).forEach(([ms, s]) => {
