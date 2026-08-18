@@ -413,6 +413,9 @@ const Index = () => {
   const RECEITA_EMP_CONSULTORIA_ID = "560bece4-6e53-46be-add1-fa6dfdbdaaf7";
   const RECEITA_TRAB_CONSULTORIA_ID = "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1";
   const RECEITA_TRIB_CONSULTORIA_ID = "847ce517-c118-46c9-9012-c69dfa5474d9";
+  const RECEITA_EMP_CONTENCIOSO_ID = "de3186d7-1b20-41e2-8fd9-9fef114096bb";
+  const RECEITA_TRAB_CONTENCIOSO_ID = "f1fd7525-963f-401e-a1e1-7b449f022bbd";
+  const RECEITA_TRIB_CONTENCIOSO_ID = "6122d0fc-e606-4020-afab-45658e063158";
   const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";
   const RECEITA_TRAB_ID = "5368d04f-a051-450e-9654-7553dc3db981";
   const RECEITA_TRIB_ID = "6326e88a-ba6d-4fbf-958d-0ae9bc76b889";
@@ -432,6 +435,39 @@ const Index = () => {
   const ALCANCE_ASF_ID = "54a2c98b-52e6-4b8a-850c-d7a38492d030";
   const CONVERSAS_INICIADAS_ID = "ca49be98-52c9-4da8-a580-6a681b54aeba";
 
+  const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
+  const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
+  const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
+  const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
+  const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
+  const CONTRATOS_TRIB_CONTENCIOSO_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
+  const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
+  const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
+  const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
+  const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
+  const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
+  const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
+  const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
+  const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
+  const PROSPECTS_OFFLINE_ID = "b2c3d4e5-2222-4bbb-cccc-222222222222";
+  const NPS_ID = "f7b32bc5-7f37-4470-a52d-4cc8c096a2a5";
+  const ENPS_ID = "bfc3fbed-ec18-4009-a6ba-20c7f3ec184b";
+  const CHURN_ID = "94d12621-1574-4041-ace3-9a3b6c064b07";
+  const HEALTH_SCORE_ID = "e6e6e6e6-1111-4eee-aaaa-111111111111";
+  
+  const NOVOS_LEADS_ONLINE = "e1f2a3b4-1111-4eee-ffff-111111111111";
+  const NOVOS_LEADS_OFFLINE = "e1f2a3b4-2222-4eee-ffff-222222222222";
+  const LEADS_ON_EMP = "c1d2e3f4-1111-4ccc-dddd-111111111111";
+  const LEADS_ON_TRAB = "c1d2e3f4-2222-4ccc-dddd-222222222222";
+  const LEADS_ON_TRIB = "c1d2e3f4-3333-4ccc-dddd-333333333333";
+  const LEADS_OFF_EMP = "86714c67-bf73-452a-aad3-2be1691c33ac";
+  const LEADS_OFF_TRAB = "371dd70d-7c46-4488-b7ad-80ded893af5d";
+  const LEADS_OFF_TRIB = "57ca6f08-7bb6-4697-87fe-8ac33161285c";
+  
+  const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
+  const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
+  const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
+  
   const NOVOS_LEADS_ONLINE_ID = "e1f2a3b4-1111-4eee-ffff-111111111111";
 
   const pipelineMonthlyValues = useMemo(() => {
@@ -599,10 +635,6 @@ const Index = () => {
     // NPS Pulse metrics
     if (pipelineData.npsPulse) {
       const np = pipelineData.npsPulse;
-      const NPS_ID = "f7b32bc5-7f37-4470-a52d-4cc8c096a2a5";
-      const ENPS_ID = "bfc3fbed-ec18-4009-a6ba-20c7f3ec184b";
-      const CHURN_ID = "94d12621-1574-4041-ace3-9a3b6c064b07";
-      const HEALTH_SCORE_ID = "e6e6e6e6-1111-4eee-aaaa-111111111111";
 
       if (selectedMonth) {
         const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
@@ -632,10 +664,6 @@ const Index = () => {
 
 
     // Override "Leads no Funil" and "Contratos" with Dashboard origin data (snapshot, not passage-based)
-    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
-    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
-    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
-    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     if (ms) {
       const dbo = pipelineData.dashboardByOrigin?.[ms];
       if (dbo?.online) {
@@ -663,14 +691,6 @@ const Index = () => {
     }
 
     // Override "Leads On/Off" by area + "Novos Leads" with Dashboard cumulative data (snapshot-style)
-    const NOVOS_LEADS_ONLINE = "e1f2a3b4-1111-4eee-ffff-111111111111";
-    const NOVOS_LEADS_OFFLINE = "e1f2a3b4-2222-4eee-ffff-222222222222";
-    const LEADS_ON_EMP = "c1d2e3f4-1111-4ccc-dddd-111111111111";
-    const LEADS_ON_TRAB = "c1d2e3f4-2222-4ccc-dddd-222222222222";
-    const LEADS_ON_TRIB = "c1d2e3f4-3333-4ccc-dddd-333333333333";
-    const LEADS_OFF_EMP = "86714c67-bf73-452a-aad3-2be1691c33ac";
-    const LEADS_OFF_TRAB = "371dd70d-7c46-4488-b7ad-80ded893af5d";
-    const LEADS_OFF_TRIB = "57ca6f08-7bb6-4697-87fe-8ac33161285c";
     const novosOA = ms ? pipelineData.novosByOriginArea?.[ms] : pipelineData.novosTotalsByOriginArea;
     if (novosOA?.online) {
       values[LEADS_ON_EMP] = novosOA.online.empresarial ?? 0;
@@ -686,9 +706,6 @@ const Index = () => {
     }
 
     // MQL / SQL vindos do lead scoring do Pipeline Vision Board
-    const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
-    const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
-    const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
     const qual = ms ? pipelineData.qualificacaoByOrigin?.[ms] : pipelineData.qualificacaoTotalsByOrigin;
     if (qual?.online) {
       values[MQL_ONLINE_ID] = qual.online.mql ?? 0;
@@ -826,10 +843,6 @@ const Index = () => {
 
     // ── Acumulado anual = SOMA dos meses (buckets disjuntos pelo campo `month`/`created_at`)
     // Evita usar o snapshot anual (que só conta o estado ATUAL dos cards e subestima o acumulado).
-    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
-    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
-    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
-    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
 
     const sumMonths = <T,>(
       byMonth: Record<string, T> | undefined,
@@ -891,9 +904,6 @@ const Index = () => {
     // MQL / SQL — soma dos meses
     const qualMonths = pipelineData.qualificacaoByOrigin;
     const qualTotals = pipelineData.qualificacaoTotalsByOrigin;
-    const MQL_ONLINE_ID = "e5e5e5e5-1111-4eee-aaaa-111111111111";
-    const SQL_ONLINE_ID = "e5e5e5e5-2222-4eee-aaaa-222222222222";
-    const SQL_OFFLINE_ID = "e5e5e5e5-3333-4eee-aaaa-333333333333";
     setAcc(MQL_ONLINE_ID, sumMonths(qualMonths, (m: any) => m?.online?.mql), qualTotals?.online?.mql);
     setAcc(SQL_ONLINE_ID, sumMonths(qualMonths, (m: any) => m?.online?.sql), qualTotals?.online?.sql);
     setAcc(SQL_OFFLINE_ID, sumMonths(qualMonths, (m: any) => m?.offline?.sql), qualTotals?.offline?.sql);
@@ -1042,10 +1052,6 @@ const Index = () => {
     // Funnel snapshot metrics from Dashboard panel (PIPELINE_METRIC_MAP — by origin)
     const originSource = ms ? pipelineData.months?.[ms] : pipelineData.totals;
     const dashOriginSource = ms ? pipelineData.dashboardByOrigin?.[ms] : pipelineData.dashboardTotalsByOrigin;
-    const LEADS_FUNIL_ONLINE_ID = "dc434066-4bd6-4c89-a22e-04ba5ea1dd9c";
-    const LEADS_FUNIL_OFFLINE_ID = "b2c3d4e5-3333-4bbb-cccc-333333333333";
-    const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
-    const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
     for (const [metricId, mapping] of Object.entries(PIPELINE_METRIC_MAP)) {
       const m = metrics.find(x => x.id === metricId);
       if (!m) continue;
@@ -1271,7 +1277,7 @@ const Index = () => {
     }
 
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID, spreadsheetData, RECEITA_EMP_ID, RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_TRAB_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRIB_ID, RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID, spreadsheetData, RECEITA_EMP_ID, RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_EMP_CONTENCIOSO_ID, RECEITA_TRAB_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRAB_CONTENCIOSO_ID, RECEITA_TRIB_ID, RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID, RECEITA_TRIB_CONTENCIOSO_ID]);
 
 
   // Cashflow accumulated across the year
@@ -1639,34 +1645,8 @@ const Index = () => {
     return names;
   }, [pipelineData, selectedMonth, selectedYear]);
 
-  const CONTRATOS_EMP_ASSESSORIA_ID = "f80d5c78-cf50-4aca-befb-5808b6557d8e";
-  const CONTRATOS_EMP_CONSULTORIA_ID = "90726f8c-8cf7-47d8-81b6-c6f22c4eeef5";
-  const CONTRATOS_TRAB_ASSESSORIA_ID = "ae64d582-a08d-442c-998e-b6bc214e486e";
-  const CONTRATOS_TRAB_CONSULTORIA_ID = "0ffeaffb-ab3c-4371-be5b-172f57160ec4";
-
-  // ID for "Total de Contratos" (computed)
-  const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
-
-  // IDs for tributário metrics used in Total de Contratos
-  const CONTRATOS_TRIB_ASSESSORIA_ID = "a1102d97-a2a6-44d6-8ac7-716cc1474d16";
-  const CONTRATOS_TRIB_PONTUAL_ID = "95280373-3e3b-4596-b2c4-ce8e01ee1b2c";
-
-  // IDs for origin tracking cards
-  const CONTRATOS_OFFLINE_ID = "7ea4560c-5f42-4982-9b27-b68f2475b838";
-  const CONTRATOS_ONLINE_ID = "1d927738-a02b-4867-8a7a-a7a2331773ec";
 
   // MRR % Mensal - auto-calculated metric
-  const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
-  
-
-  // Computed revenue cards
-  
-  const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
-
-  const RECEITA_EMP_CONTENCIOSO_ID = "de3186d7-1b20-41e2-8fd9-9fef114096bb";
-  const RECEITA_TRAB_CONTENCIOSO_ID = "f1fd7525-963f-401e-a1e1-7b449f022bbd";
-  const RECEITA_TRIB_CONTENCIOSO_ID = "6122d0fc-e606-4020-afab-45658e063158";
-  const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
 
   // Revenue sum component IDs grouped
   const RECEITA_EMP_COMPONENTS = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_EMP_CONTENCIOSO_ID];
@@ -1682,7 +1662,7 @@ const Index = () => {
     const novosContratosIds = new Set([
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_CONTENCIOSO_ID
     ]);
 
     let onlineMonthly = 0,offlineMonthly = 0,onlineAcc = 0,offlineAcc = 0;
@@ -1707,7 +1687,7 @@ const Index = () => {
     const novosContratosIds = [
     CONTRATOS_EMP_ASSESSORIA_ID, CONTRATOS_EMP_CONSULTORIA_ID,
     CONTRATOS_TRAB_ASSESSORIA_ID, CONTRATOS_TRAB_CONSULTORIA_ID,
-    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_PONTUAL_ID
+    CONTRATOS_TRIB_ASSESSORIA_ID, CONTRATOS_TRIB_CONTENCIOSO_ID
     ];
     const month = selectedMonth ?? new Date().getMonth() + 1;
     const year = selectedYear;
@@ -2224,17 +2204,15 @@ const Index = () => {
                             ]);
                             if (category === "experiencia_cliente" && (funnelOnline || funnelOffline)) {
                               // Valor Gerado targets derive from Receita Total Mensal (20% online / 80% offline)
-                              const VG_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
-                              const VG_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
                               const funnelTargets = [
                                 ...(monthlyTargets ?? []).filter(
-                                  (t: any) => t.metric_id !== VG_ONLINE_ID && t.metric_id !== VG_OFFLINE_ID
+                                  (t: any) => t.metric_id !== VALOR_GERADO_ONLINE_ID && t.metric_id !== VALOR_GERADO_OFFLINE_ID
                                 ),
                                 ...(monthlyTargets ?? [])
                                   .filter((t: any) => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID)
                                   .flatMap((t: any) => [
-                                    { ...t, id: `${t.id}-vg-on`, metric_id: VG_ONLINE_ID, target_value: Number(t.target_value ?? 0) * 0.2 },
-                                    { ...t, id: `${t.id}-vg-off`, metric_id: VG_OFFLINE_ID, target_value: Number(t.target_value ?? 0) * 0.8 },
+                                    { ...t, id: `${t.id}-vg-on`, metric_id: VALOR_GERADO_ONLINE_ID, target_value: Number(t.target_value ?? 0) * 0.2 },
+                                    { ...t, id: `${t.id}-vg-off`, metric_id: VALOR_GERADO_OFFLINE_ID, target_value: Number(t.target_value ?? 0) * 0.8 },
                                   ]),
                               ];
 
