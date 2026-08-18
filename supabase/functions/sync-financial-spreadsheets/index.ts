@@ -117,16 +117,11 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
     
-    // Base URL for the spreadsheet
-    const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?output=csv";
-    
-    // Tab GIDs as specified by the user (usually found in the URL when selecting a tab)
-    // Based on previous patterns, we assume standard export URLs for specific tabs
-    // The user says "as demais abas seguem as ordens dos meses"
-    // Since we don't have the explicit GIDs for July/August for this new spreadsheet yet,
-    // we fetch the main one and map it to both months as a starting point, 
-    // or use specific URLs if we can determine them.
-    // For now, we will handle July (07) and August (08) using the same logic.
+    // Spreadsheets specified by the user
+    // ABA JULHO: 07-2026
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&single=true&output=csv";
+    // ABA AGOSTO: 08-2026
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&single=true&output=csv";
     
     const result: FinancialResponse = {
       months: {},
@@ -134,11 +129,9 @@ Deno.serve(async (req) => {
       errors: {}
     };
 
-    // Helper to fetch and parse a specific month
-    const processMonth = async (monthNum: number, gid?: string) => {
+    const processMonth = async (monthNum: number, fetchUrl: string) => {
       const ms = `2026-${String(monthNum).padStart(2, "0")}`;
       try {
-        const fetchUrl = gid ? `${BASE_URL}&gid=${gid}` : BASE_URL;
         const res = await fetch(fetchUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csv = await res.text();
@@ -148,12 +141,10 @@ Deno.serve(async (req) => {
       }
     };
 
-    // User explicitly asked for July and August
-    // Assuming GIDs for these months if they exist in the shared sheet structure
-    // Since I don't have the GIDs, I'll fetch the main one for both as requested for these months.
+    // Apply the specific abas for July and August
     await Promise.all([
-      processMonth(7), // July
-      processMonth(8)  // August
+      processMonth(7, JULY_URL),
+      processMonth(8, AUGUST_URL)
     ]);
 
     return new Response(JSON.stringify(result), { headers, status: 200 });
