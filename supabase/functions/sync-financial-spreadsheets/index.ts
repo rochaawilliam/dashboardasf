@@ -69,7 +69,16 @@ function parseFinancialSheet(csv: string): FinancialData {
 
   if (lines.length < 2) return data;
 
-  const header = parseCSVLine(lines[0]);
+  let headerIdx = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (cols.some(c => c.toUpperCase().trim() === "NOME") || cols.some(c => c.toUpperCase().trim() === "CONTRATO")) {
+      headerIdx = i;
+      break;
+    }
+  }
+
+  const header = parseCSVLine(lines[headerIdx]);
   const colIdx = {
     contrato: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")),
     emp: header.findIndex(h => h.toUpperCase().trim().includes("CART-EMP")),
@@ -77,7 +86,7 @@ function parseFinancialSheet(csv: string): FinancialData {
     tri: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRI")),
   };
 
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = headerIdx + 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
     if (cols.length <= Math.max(colIdx.contrato, colIdx.emp, colIdx.tra, colIdx.tri)) continue;
 
@@ -122,8 +131,8 @@ Deno.serve(async (req) => {
     
     // Spreadsheets specified by the user
     // Using simple pub?gid=XXX&output=csv format
-    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&output=csv";
-    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=94252654&output=csv";
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=133184476&output=csv";
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=255530383&output=csv";
     
     const result: FinancialResponse = {
       months: {},
