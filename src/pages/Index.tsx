@@ -1647,14 +1647,6 @@ const Index = () => {
 
 
   // MRR % Mensal - auto-calculated metric
-  const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
-  
-
-  // Computed revenue cards
-  
-  const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
-
-  const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
 
   // Revenue sum component IDs grouped
   const RECEITA_EMP_COMPONENTS = [RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_EMP_CONTENCIOSO_ID];
