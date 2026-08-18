@@ -98,7 +98,7 @@ function parseFinancialSheet(csv: string): FinancialData {
       data.receita_tri_assessoria += valTri;
     }
     // Consultoria
-    else if (contrato === "consultoria") {
+    else if (contrato.includes("consultoria")) {
       data.receita_emp_consultoria += valEmp;
       data.receita_tra_consultoria += valTra;
       data.receita_tri_consultoria += valTri;
