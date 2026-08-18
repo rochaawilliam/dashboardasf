@@ -1206,6 +1206,8 @@ const Index = () => {
     const headcountAtivo = pipelineData?.training?.headcount ?? 0;
     const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
     values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
+    // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
+    values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     values[CUSTO_FIXO_SOBRE_RECEITA_ID] = m.custo_fixo_sobre_receita_pct ?? (
       m.recebimentos_dinheiro_pix > 0
@@ -1250,6 +1252,7 @@ const Index = () => {
     const headcountAccum = pipelineData?.training?.headcount ?? 0;
     if (headcountAccum > 0) {
       values[FOLHA_SOBRE_RECEITA_ID] = Math.round((receitaSum / headcountAccum) * 100) / 100;
+      values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
 
     if (custoFixoValues.length > 0) {
