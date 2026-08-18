@@ -1270,16 +1270,23 @@ const Index = () => {
       values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
       values[RECEITA_EMP_CONSULTORIA_ID] = s.receita_emp_consultoria;
       values[RECEITA_EMP_CONTENCIOSO_ID] = s.receita_emp_contencioso || 0;
+      // Overwrite base cards to be the sum of Assessoria + Consultoria + Contencioso
+      values[RECEITA_EMP_ID] = (s.receita_emp_assessoria || 0) + (s.receita_emp_consultoria || 0) + (s.receita_emp_contencioso || 0);
+      
       
       values[RECEITA_TRAB_ID] = s.receita_tra;
       values[RECEITA_TRAB_ASSESSORIA_ID] = s.receita_tra_assessoria;
       values[RECEITA_TRAB_CONSULTORIA_ID] = s.receita_tra_consultoria;
       values[RECEITA_TRAB_CONTENCIOSO_ID] = s.receita_tra_contencioso || 0;
+      values[RECEITA_TRAB_ID] = (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0);
+      
       
       values[RECEITA_TRIB_ID] = s.receita_tri;
       values[RECEITA_TRIB_ASSESSORIA_ID] = s.receita_tri_assessoria;
       values[RECEITA_TRIB_CONSULTORIA_ID] = s.receita_tri_consultoria;
       values[RECEITA_TRIB_CONTENCIOSO_ID] = s.receita_tri_contencioso || 0;
+      values[RECEITA_TRIB_ID] = (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0);
+      
     }
 
     return values;
