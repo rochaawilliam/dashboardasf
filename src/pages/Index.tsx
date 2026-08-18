@@ -1347,14 +1347,17 @@ const Index = () => {
         values[RECEITA_EMP_ID] = (values[RECEITA_EMP_ID] || 0) + s.receita_emp;
         values[RECEITA_EMP_ASSESSORIA_ID] = (values[RECEITA_EMP_ASSESSORIA_ID] || 0) + s.receita_emp_assessoria;
         values[RECEITA_EMP_CONSULTORIA_ID] = (values[RECEITA_EMP_CONSULTORIA_ID] || 0) + s.receita_emp_consultoria;
+        values[RECEITA_EMP_CONTENCIOSO_ID] = (values[RECEITA_EMP_CONTENCIOSO_ID] || 0) + (s.receita_emp_contencioso || 0);
         
         values[RECEITA_TRAB_ID] = (values[RECEITA_TRAB_ID] || 0) + s.receita_tra;
         values[RECEITA_TRAB_ASSESSORIA_ID] = (values[RECEITA_TRAB_ASSESSORIA_ID] || 0) + s.receita_tra_assessoria;
         values[RECEITA_TRAB_CONSULTORIA_ID] = (values[RECEITA_TRAB_CONSULTORIA_ID] || 0) + s.receita_tra_consultoria;
+        values[RECEITA_TRAB_CONTENCIOSO_ID] = (values[RECEITA_TRAB_CONTENCIOSO_ID] || 0) + (s.receita_tra_contencioso || 0);
         
         values[RECEITA_TRIB_ID] = (values[RECEITA_TRIB_ID] || 0) + s.receita_tri;
         values[RECEITA_TRIB_ASSESSORIA_ID] = (values[RECEITA_TRIB_ASSESSORIA_ID] || 0) + s.receita_tri_assessoria;
         values[RECEITA_TRIB_CONSULTORIA_ID] = (values[RECEITA_TRIB_CONSULTORIA_ID] || 0) + s.receita_tri_consultoria;
+        values[RECEITA_TRIB_CONTENCIOSO_ID] = (values[RECEITA_TRIB_CONTENCIOSO_ID] || 0) + (s.receita_tri_contencioso || 0);
       }
     });
 
