@@ -449,7 +449,7 @@ export function CircularProgressCard({
           )}
 
           {/* Valor Previsto - middle (only when available and month selected) */}
-          {isMonthSelected && forecastValue != null && !metric.name.includes("Receita Bruta") && (
+          {isMonthSelected && forecastValue != null && !metric.name.includes("Receita") && (
           <div>
             <p className="text-[10px] sm:text-sm lg:text-xs text-muted-foreground uppercase tracking-wide">
               Previsto
