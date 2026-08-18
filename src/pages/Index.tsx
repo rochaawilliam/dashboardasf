@@ -1331,7 +1331,8 @@ const Index = () => {
         receita_tri: 1815.92,
         receita_tri_assessoria: 1815.92,
         receita_tri_consultoria: 0,
-        receita_tri_contencioso: 0
+        receita_tri_contencioso: 0,
+        receita_outras: 0
       } as any;
     }
     if (!allMonths["2026-08"] && selectedYear === 2026) {
@@ -1347,13 +1348,15 @@ const Index = () => {
         receita_tri: 1850.00,
         receita_tri_assessoria: 1850.00,
         receita_tri_consultoria: 0,
-        receita_tri_contencioso: 0
+        receita_tri_contencioso: 0,
+        receita_outras: 0
       } as any;
     }
 
     Object.entries(allMonths).forEach(([ms, s]) => {
       const yearMonth = ms.split("-");
       if (Number(yearMonth[0]) === selectedYear && s) {
+        values[OUTRAS_RECEITAS_ID] = (values[OUTRAS_RECEITAS_ID] || 0) + (s.receita_outras || 0);
         values[RECEITA_EMP_ID] = (values[RECEITA_EMP_ID] || 0) + s.receita_emp;
         values[RECEITA_EMP_ASSESSORIA_ID] = (values[RECEITA_EMP_ASSESSORIA_ID] || 0) + s.receita_emp_assessoria;
         values[RECEITA_EMP_CONSULTORIA_ID] = (values[RECEITA_EMP_CONSULTORIA_ID] || 0) + s.receita_emp_consultoria;
