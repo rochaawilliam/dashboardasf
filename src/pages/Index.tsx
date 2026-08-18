@@ -1179,7 +1179,9 @@ const Index = () => {
     
     // Fallback logic for current month if no sheet data yet: show 0 instead of blank
     if (!m) {
-      values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0;
+      const vOnlineFallback = pipelineData?.dashboardByOrigin?.[ms]?.online?.valor_gerado || 0;
+      const vOfflineFallback = pipelineData?.dashboardByOrigin?.[ms]?.offline?.valor_gerado || 0;
+      values[RECEITA_BRUTA_OPERACIONAL_ID] = vOnlineFallback + vOfflineFallback;
       values[FLUXO_CAIXA_OPERACIONAL_ID] = 0;
       values[LUCRATIVIDADE_MENSAL_ID] = 0;
       values[FOLHA_SOBRE_RECEITA_ID] = 0;
