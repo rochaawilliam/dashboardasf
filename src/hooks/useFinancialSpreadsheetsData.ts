@@ -13,6 +13,7 @@ export interface FinancialSpreadsheetData {
   receita_tri_assessoria: number;
   receita_tri_consultoria: number;
   receita_tri_contencioso?: number;
+  receita_outras?: number;
 }
 
 export interface FinancialSpreadsheetsResponse {
