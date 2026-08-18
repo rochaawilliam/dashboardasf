@@ -1320,9 +1320,19 @@ const Index = () => {
 
       
       // Consultoria/Contencioso Ticket Médio (Direct values from spreadsheet)
-      values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (s.receita_emp_consultoria || 0);
-      values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = (s.receita_tra_consultoria || 0);
-      values["2185212f-d509-4405-a861-91efe05dc23d"] = (s.receita_tri_contencioso || 0);
+      const ticketEmpConsultoria = (s.receita_emp_consultoria || 0);
+      const ticketTraConsultoria = (s.receita_tra_consultoria || 0);
+      const ticketTriContencioso = (s.receita_tri_contencioso || 0);
+
+      values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = ticketEmpConsultoria;
+      values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = ticketTraConsultoria;
+      values["2185212f-d509-4405-a861-91efe05dc23d"] = ticketTriContencioso;
+      
+      // Formulas for tooltips (Direct values for these cards as per user request previously)
+      (values as any)._formula_29568b33_b3e7_4f5d_b3a1_85da7fd19c91 = `Valor da Receita (R$ ${formatNumber(ticketEmpConsultoria, 2)})`;
+      (values as any)._formula_6fa5a98b_7531_4c2e_893b_f878df35ff1b = `Valor da Receita (R$ ${formatNumber(ticketTraConsultoria, 2)})`;
+      (values as any)._formula_2185212f_d509_4405_a861_91efe05dc23d = `Valor da Receita (R$ ${formatNumber(ticketTriContencioso, 2)})`;
+
       
       
       values[RECEITA_EMP_ID] = s.receita_emp;
