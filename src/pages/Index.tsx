@@ -1195,14 +1195,21 @@ const Index = () => {
             calculation: `Valor: R$ ${fmt(s.receita_outras)}`,
             description: metrics.find(x => x.id === OUTRAS_RECEITAS_ID)?.description,
           };
+          
+          // Using a internal calculation for the audit tooltip since mergedMonthlyValues is defined later
+          const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
+          const clientesAssessoria = (s as any).clientes_assessoria || 0;
+          const ticketVal = clientesAssessoria > 0 ? receitaAssessoriaTotal / clientesAssessoria : 0;
+
           info[TICKET_MEDIO_ASSESSORIA_ID] = {
             source: "Cálculo",
             filter: "month",
             formula: "(Assessoria Emp + Trab + Trib) ÷ Clientes Assessoria (excl. Grupo/Outro)",
-            calculation: `(R$ ${fmt((s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0))}) ÷ ${(s as any).clientes_assessoria || 0} = R$ ${fmt(mergedMonthlyValues[TICKET_MEDIO_ASSESSORIA_ID] || 0)}`,
+            calculation: `(R$ ${fmt(receitaAssessoriaTotal)}) ÷ ${clientesAssessoria} = R$ ${fmt(ticketVal)}`,
             description: metrics.find(x => x.id === TICKET_MEDIO_ASSESSORIA_ID)?.description,
           };
         }
+
       }
     }
 
