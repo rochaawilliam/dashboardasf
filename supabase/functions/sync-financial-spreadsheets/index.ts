@@ -4,12 +4,15 @@ export interface FinancialData {
   receita_emp: number;
   receita_emp_assessoria: number;
   receita_emp_consultoria: number;
+  receita_emp_contencioso: number;
   receita_tra: number;
   receita_tra_assessoria: number;
   receita_tra_consultoria: number;
+  receita_tra_contencioso: number;
   receita_tri: number;
   receita_tri_assessoria: number;
   receita_tri_consultoria: number;
+  receita_tri_contencioso: number;
 }
 
 export interface FinancialResponse {
@@ -53,12 +56,15 @@ function parseFinancialSheet(csv: string): FinancialData {
     receita_emp: 0,
     receita_emp_assessoria: 0,
     receita_emp_consultoria: 0,
+    receita_emp_contencioso: 0,
     receita_tra: 0,
     receita_tra_assessoria: 0,
     receita_tra_consultoria: 0,
+    receita_tra_contencioso: 0,
     receita_tri: 0,
     receita_tri_assessoria: 0,
     receita_tri_consultoria: 0,
+    receita_tri_contencioso: 0,
   };
 
   if (lines.length < 2) return data;
@@ -95,6 +101,10 @@ function parseFinancialSheet(csv: string): FinancialData {
       data.receita_emp_consultoria += valEmp;
       data.receita_tra_consultoria += valTra;
       data.receita_tri_consultoria += valTri;
+    } else if (contrato.includes("contencioso")) {
+      data.receita_emp_contencioso += valEmp;
+      data.receita_tra_contencioso += valTra;
+      data.receita_tri_contencioso += valTri;
     }
   }
 
