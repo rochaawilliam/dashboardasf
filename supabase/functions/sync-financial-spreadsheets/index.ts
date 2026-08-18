@@ -13,6 +13,7 @@ export interface FinancialData {
   receita_tri_assessoria: number;
   receita_tri_consultoria: number;
   receita_tri_contencioso: number;
+  receita_outras: number;
 }
 
 export interface FinancialResponse {
@@ -65,6 +66,7 @@ function parseFinancialSheet(csv: string): FinancialData {
     receita_tri_assessoria: 0,
     receita_tri_consultoria: 0,
     receita_tri_contencioso: 0,
+    receita_outras: 0,
   };
 
   if (lines.length < 2) return data;
@@ -84,6 +86,11 @@ function parseFinancialSheet(csv: string): FinancialData {
     emp: header.findIndex(h => h.toUpperCase().trim().includes("CART-EMP")),
     tra: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRA")),
     tri: header.findIndex(h => h.toUpperCase().trim().includes("CART-TRI")),
+    tipo: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")), // Already defined, but let's be explicit
+    valor: header.findIndex(h => {
+      const H = h.toUpperCase().trim();
+      return H === "VALOR" || H.includes("VALOR BRUTO") || H.includes("TOTAL");
+    }),
   };
 
   for (let i = headerIdx + 1; i < lines.length; i++) {
@@ -114,6 +121,13 @@ function parseFinancialSheet(csv: string): FinancialData {
       data.receita_emp_contencioso += valEmp;
       data.receita_tra_contencioso += valTra;
       data.receita_tri_contencioso += valTri;
+    }
+
+    if (contrato.includes("outros")) {
+      const valTotal = parseBRNumber(cols[colIdx.valor]);
+      // If there's a specific "Valor" column, use it, otherwise sum the categories if they weren't already captured
+      // But user said: sum values from column "Valor" where "Tipo" (Contrato) is "Outros"
+      data.receita_outras += valTotal || (valEmp + valTra + valTri);
     }
   }
 
