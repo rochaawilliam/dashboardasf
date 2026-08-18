@@ -70,6 +70,7 @@ import {
   type Filters,
   type MetricCategory } from
 "@/hooks/useMetrics";
+import { useFinancialSpreadsheetsData } from "@/hooks/useFinancialSpreadsheetsData";
 import { useMetricNotifications } from "@/hooks/useMetricNotifications";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import { useAuth } from "@/hooks/useAuth";
@@ -171,6 +172,9 @@ const Index = () => {
 
   // Ritual completions data
   const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
+
+  // Financial spreadsheets data
+  const { data: spreadsheetData } = useFinancialSpreadsheetsData(selectedYear);
 
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
@@ -402,6 +406,16 @@ const Index = () => {
   const RECEITA_BRUTA_OPERACIONAL_ID = "b94952b3-b811-4200-872e-810b215240f6";
   const FLUXO_CAIXA_OPERACIONAL_ID = "d2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b";
   const FOLHA_SOBRE_RECEITA_ID = "966513fb-82c1-4565-8677-58dd7f4a90be";
+  
+  const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
+  const RECEITA_TRAB_ASSESSORIA_ID = "be1fcc4f-c1b8-476a-b330-e2b8675ae458";
+  const RECEITA_TRIB_ASSESSORIA_ID = "b829cf12-3f66-4a0c-8753-70260a9645d8";
+  const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";
+  const RECEITA_EMP_CONSULTORIA_ID = "560bece4-6e53-46be-add1-fa6dfdbdaaf7";
+  const RECEITA_TRAB_ID = "5368d04f-a051-450e-9654-7553dc3db981";
+  const RECEITA_TRAB_CONSULTORIA_ID = "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1";
+  const RECEITA_TRIB_ID = "6326e88a-ba6d-4fbf-958d-0ae9bc76b889";
+  const RECEITA_TRIB_CONSULTORIA_ID = "847ce517-c118-46c9-9012-c69dfa5474d9";
   
   const HEADCOUNT_ATIVO_ID = "a1b2c3d4-1001-4000-a001-000000000001";
 
@@ -1209,8 +1223,24 @@ const Index = () => {
     // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
     values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
+    // Spreadsheet integration for specific areas
+    if (spreadsheetData?.months?.[ms]) {
+      const s = spreadsheetData.months[ms];
+      values[RECEITA_EMP_ID] = s.receita_emp;
+      values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
+      values[RECEITA_EMP_CONSULTORIA_ID] = s.receita_emp_consultoria;
+      
+      values[RECEITA_TRAB_ID] = s.receita_tra;
+      values[RECEITA_TRAB_ASSESSORIA_ID] = s.receita_tra_assessoria;
+      values[RECEITA_TRAB_CONSULTORIA_ID] = s.receita_tra_consultoria;
+      
+      values[RECEITA_TRIB_ID] = s.receita_tri;
+      values[RECEITA_TRIB_ASSESSORIA_ID] = s.receita_tri_assessoria;
+      values[RECEITA_TRIB_CONSULTORIA_ID] = s.receita_tri_consultoria;
+    }
+
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID, spreadsheetData, RECEITA_EMP_ID, RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_TRAB_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRIB_ID, RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID]);
 
 
   // Cashflow accumulated across the year
@@ -1229,10 +1259,28 @@ const Index = () => {
       if (m.recebimentos_dinheiro_pix > 0) {
         lucratValues.push(m.lucratividade_pct);
         folhaValues.push(m.folha_sobre_receita_pct);
-
-        
       }
     }
+    // Spreadsheet integration for accumulated values
+    if (spreadsheetData?.months) {
+      Object.entries(spreadsheetData.months).forEach(([ms, s]) => {
+        const yearMonth = ms.split("-");
+        if (Number(yearMonth[0]) === selectedYear) {
+          values[RECEITA_EMP_ID] = (values[RECEITA_EMP_ID] || 0) + s.receita_emp;
+          values[RECEITA_EMP_ASSESSORIA_ID] = (values[RECEITA_EMP_ASSESSORIA_ID] || 0) + s.receita_emp_assessoria;
+          values[RECEITA_EMP_CONSULTORIA_ID] = (values[RECEITA_EMP_CONSULTORIA_ID] || 0) + s.receita_emp_consultoria;
+          
+          values[RECEITA_TRAB_ID] = (values[RECEITA_TRAB_ID] || 0) + s.receita_tra;
+          values[RECEITA_TRAB_ASSESSORIA_ID] = (values[RECEITA_TRAB_ASSESSORIA_ID] || 0) + s.receita_tra_assessoria;
+          values[RECEITA_TRAB_CONSULTORIA_ID] = (values[RECEITA_TRAB_CONSULTORIA_ID] || 0) + s.receita_tra_consultoria;
+          
+          values[RECEITA_TRIB_ID] = (values[RECEITA_TRIB_ID] || 0) + s.receita_tri;
+          values[RECEITA_TRIB_ASSESSORIA_ID] = (values[RECEITA_TRIB_ASSESSORIA_ID] || 0) + s.receita_tri_assessoria;
+          values[RECEITA_TRIB_CONSULTORIA_ID] = (values[RECEITA_TRIB_CONSULTORIA_ID] || 0) + s.receita_tri_consultoria;
+        }
+      });
+    }
+
     // Accumulated Receita Bruta Operacional: priority to Pipeline Total (Online + Offline)
     const vOnlineAccum = pipelineAccumulatedValues[VALOR_GERADO_ONLINE_ID] || 0;
     const vOfflineAccum = pipelineAccumulatedValues[VALOR_GERADO_OFFLINE_ID] || 0;
@@ -1252,7 +1300,7 @@ const Index = () => {
     }
 
     return values;
-  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineAccumulatedValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
+  }, [cashflowData, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineAccumulatedValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID, spreadsheetData, RECEITA_EMP_ID, RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_TRAB_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRIB_ID, RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID, selectedYear]);
 
 
   const mergedMonthlyValues = useMemo(() => {
@@ -1550,24 +1598,14 @@ const Index = () => {
 
   // MRR % Mensal - auto-calculated metric
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
-  const RECEITA_EMP_ASSESSORIA_ID = "b3291022-409f-4679-bddc-bc687f3d9d68";
-  const RECEITA_TRAB_ASSESSORIA_ID = "be1fcc4f-c1b8-476a-b330-e2b8675ae458";
-  const RECEITA_TRIB_ASSESSORIA_ID = "b829cf12-3f66-4a0c-8753-70260a9645d8";
   
 
   // Computed revenue cards
   
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
 
-  // Computed revenue sum cards
-  const RECEITA_EMP_ID = "8d4cfa8e-1d37-48d0-8c17-ce896c875be0";
-  const RECEITA_EMP_CONSULTORIA_ID = "560bece4-6e53-46be-add1-fa6dfdbdaaf7";
   const RECEITA_EMP_PONTUAL_ID = "de3186d7-1b20-41e2-8fd9-9fef114096bb";
-  const RECEITA_TRAB_ID = "5368d04f-a051-450e-9654-7553dc3db981";
-  const RECEITA_TRAB_CONSULTORIA_ID = "33d2ab91-2534-4cb0-b21c-6a2d7fc628b1";
   const RECEITA_TRAB_PONTUAL_ID = "f1fd7525-963f-401e-a1e1-7b449f022bbd";
-  const RECEITA_TRIB_ID = "6326e88a-ba6d-4fbf-958d-0ae9bc76b889";
-  const RECEITA_TRIB_CONSULTORIA_ID = "847ce517-c118-46c9-9012-c69dfa5474d9";
   const RECEITA_TRIB_PONTUAL_ID = "6122d0fc-e606-4020-afab-45658e063158";
   const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
 
