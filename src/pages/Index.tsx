@@ -2209,13 +2209,13 @@ const Index = () => {
                               // Valor Gerado targets derive from Receita Total Mensal (20% online / 80% offline)
                               const funnelTargets = [
                                 ...(monthlyTargets ?? []).filter(
-                                  (t: any) => t.metric_id !== VG_ONLINE_ID && t.metric_id !== VG_OFFLINE_ID
+                                  (t: any) => t.metric_id !== VALOR_GERADO_ONLINE_ID && t.metric_id !== VALOR_GERADO_OFFLINE_ID
                                 ),
                                 ...(monthlyTargets ?? [])
                                   .filter((t: any) => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID)
                                   .flatMap((t: any) => [
-                                    { ...t, id: `${t.id}-vg-on`, metric_id: VG_ONLINE_ID, target_value: Number(t.target_value ?? 0) * 0.2 },
-                                    { ...t, id: `${t.id}-vg-off`, metric_id: VG_OFFLINE_ID, target_value: Number(t.target_value ?? 0) * 0.8 },
+                                    { ...t, id: `${t.id}-vg-on`, metric_id: VALOR_GERADO_ONLINE_ID, target_value: Number(t.target_value ?? 0) * 0.2 },
+                                    { ...t, id: `${t.id}-vg-off`, metric_id: VALOR_GERADO_OFFLINE_ID, target_value: Number(t.target_value ?? 0) * 0.8 },
                                   ]),
                               ];
 
