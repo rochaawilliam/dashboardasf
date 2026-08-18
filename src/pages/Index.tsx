@@ -1143,8 +1143,8 @@ const Index = () => {
         info[RECEITA_BRUTA_OPERACIONAL_ID] = {
           source: (pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0) > 0 ? "Dashboard" : "Operacional",
           filter: "month",
-          formula: "Pipeline.valor_gerado (prioridade) OU Planilha.total_recebimentos",
-          calculation: `Pipeline: R$ ${fmt(pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0)} | Planilha: R$ ${fmt(m.total_recebimentos)}`,
+          formula: "Pipeline.valor_gerado (total de contratos)",
+          calculation: `Pipeline: R$ ${fmt(pipelineData?.dashboard?.[ms]?.valor_gerado ?? 0)}`,
           description: metrics.find(x => x.id === RECEITA_BRUTA_OPERACIONAL_ID)?.description,
         };
         info[FLUXO_CAIXA_OPERACIONAL_ID] = {
@@ -1189,11 +1189,9 @@ const Index = () => {
       .filter(([key, monthData]) => monthData && Number(key.slice(5, 7)) <= selectedMonth && monthData.recebimentos_dinheiro_pix > 0)
       .map(([, monthData]) => monthData.lucratividade_pct);
       
-    // Receita Bruta Operacional prioritizes Pipeline (valor_gerado), link strictly to Pipeline
+    // Receita Bruta Operacional strictly reflects Pipeline total value generated
     const pipelineTotalGerado = pipelineData?.dashboard?.[ms]?.valor_gerado;
-    values[RECEITA_BRUTA_OPERACIONAL_ID] = (pipelineTotalGerado !== undefined && pipelineTotalGerado !== 0) 
-      ? pipelineTotalGerado 
-      : (m.recebimentos_dinheiro_pix || 0);
+    values[RECEITA_BRUTA_OPERACIONAL_ID] = pipelineTotalGerado || 0;
 
     // Fluxo de Caixa Operacional strictly from Sheet (recebimentos_dinheiro_pix)
     values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
