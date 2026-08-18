@@ -1185,9 +1185,27 @@ const Index = () => {
           calculation: `${fmt(m.recebimentos_dinheiro_pix)} ÷ ${fmtInt(pipelineData?.training?.headcount)} = ${fmt(m.recebimentos_dinheiro_pix / (pipelineData?.training?.headcount || 1))}`,
           description: metrics.find(x => x.id === FOLHA_SOBRE_RECEITA_ID)?.description,
         };
-
+        
+        const s = spreadsheetData?.months?.[ms];
+        if (s) {
+          info[OUTRAS_RECEITAS_ID] = {
+            source: "Operacional",
+            filter: "month",
+            formula: "Planilha.VALOR onde CONTRATO contém 'outros'",
+            calculation: `Valor: R$ ${fmt(s.receita_outras)}`,
+            description: metrics.find(x => x.id === OUTRAS_RECEITAS_ID)?.description,
+          };
+          info[TICKET_MEDIO_ASSESSORIA_ID] = {
+            source: "Cálculo",
+            filter: "month",
+            formula: "(Assessoria Emp + Trab + Trib) ÷ Clientes Assessoria (excl. Grupo/Outro)",
+            calculation: `(R$ ${fmt((s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0))}) ÷ ${(s as any).clientes_assessoria || 0} = R$ ${fmt(mergedMonthlyValues[TICKET_MEDIO_ASSESSORIA_ID] || 0)}`,
+            description: metrics.find(x => x.id === TICKET_MEDIO_ASSESSORIA_ID)?.description,
+          };
+        }
       }
     }
+
 
     return info;
   }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP, cashflowData, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
