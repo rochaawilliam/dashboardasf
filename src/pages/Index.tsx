@@ -1210,7 +1210,7 @@ const Index = () => {
     values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
 
 
   // Cashflow accumulated across the year
