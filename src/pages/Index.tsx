@@ -2675,20 +2675,27 @@ const Index = () => {
                                     let ticketAccumulatedValue = 0;
                                     
                                     if (isTicketMedioAssessoria) {
-                                      const assessoriaSum = (monthlyValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + 
-                                                           (monthlyValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + 
-                                                           (monthlyValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      const assessoriaClients = pipelineMonthlyValues["clientes_assessoria"] ?? (selectedMonth === 7 ? 10 : selectedMonth === 8 ? 8 : 0);
-                                      ticketMonthlyValue = assessoriaClients > 0 ? assessoriaSum / assessoriaClients : 0;
-                                      
-                                      const assessoriaSumAccum = (accumulatedValues[RECEITA_EMP_ASSESSORIA_ID] ?? 0) + 
-                                                                (accumulatedValues[RECEITA_TRAB_ASSESSORIA_ID] ?? 0) + 
-                                                                (accumulatedValues[RECEITA_TRIB_ASSESSORIA_ID] ?? 0);
-                                      const assessoriaClientsAccum = pipelineAccumulatedValues["clientes_assessoria"] ?? (selectedMonth ? (selectedMonth >= 8 ? 18 : 10) : 0);
-                                      ticketAccumulatedValue = assessoriaClientsAccum > 0 ? assessoriaSumAccum / assessoriaClientsAccum : 0;
-                                      
+                                      ticketMonthlyValue = cashflowMonthlyValues[TICKET_MEDIO_ASSESSORIA_ID] ?? 0;
+                                      ticketAccumulatedValue = cashflowAccumulatedValues[TICKET_MEDIO_ASSESSORIA_ID] ?? 0;
                                       dynamicMetric = { ...dynamicMetric, current_value: ticketAccumulatedValue };
                                     }
+
+                                    // Check for area-specific ticket médio
+                                    const areaTicketMedioIds = [
+                                      "a1b2c3d4-1111-4aaa-bbbb-111111111111",
+                                      "a1b2c3d4-2222-4aaa-bbbb-222222222222",
+                                      "a1b2c3d4-3333-4aaa-bbbb-333333333333",
+                                      "b1c2d3e4-1111-4bbb-cccc-111111111111",
+                                      "b1c2d3e4-2222-4bbb-cccc-222222222222",
+                                      "b1c2d3e4-3333-4bbb-cccc-333333333333"
+                                    ];
+                                    const isAreaTicketMedio = areaTicketMedioIds.includes(metric.id);
+                                    if (isAreaTicketMedio) {
+                                      ticketMonthlyValue = cashflowMonthlyValues[metric.id] ?? 0;
+                                      ticketAccumulatedValue = cashflowAccumulatedValues[metric.id] ?? 0;
+                                      dynamicMetric = { ...dynamicMetric, current_value: ticketAccumulatedValue };
+                                    }
+
 
                                     // Compute MRR % Mensal = (Assessoria Emp + Trab + Trib) / Receita Total * 100
                                     const isMRR = metric.id === MRR_METRIC_ID;
