@@ -1307,6 +1307,21 @@ const Index = () => {
       const clientesAssessoria = (s as any).clientes_assessoria || 0;
       values[TICKET_MEDIO_ASSESSORIA_ID] = clientesAssessoria > 0 ? receitaAssessoriaTotal / clientesAssessoria : 0;
       
+      // Calculate Ticket Médio specific by Area
+      const clientesEmp = s.receita_emp_assessoria > 0 ? clientesAssessoria : 0; // Simplified for now as we don't have per-area client count
+      const clientesTra = s.receita_tra_assessoria > 0 ? clientesAssessoria : 0;
+      const clientesTri = s.receita_tri_assessoria > 0 ? clientesAssessoria : 0;
+      
+      values["a1b2c3d4-1111-4aaa-bbbb-111111111111"] = clientesAssessoria > 0 ? (s.receita_emp_assessoria || 0) / clientesAssessoria : 0;
+      values["a1b2c3d4-2222-4aaa-bbbb-222222222222"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
+      values["a1b2c3d4-3333-4aaa-bbbb-333333333333"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
+      
+      // Consultoria Ticket Médio
+      values["b1c2d3e4-1111-4bbb-cccc-111111111111"] = (s.receita_emp_consultoria || 0);
+      values["b1c2d3e4-2222-4bbb-cccc-222222222222"] = (s.receita_tra_consultoria || 0);
+      values["b1c2d3e4-3333-4bbb-cccc-333333333333"] = (s.receita_tri_contencioso || 0); // Contencioso is consulted here based on UI
+      
+      
       values[RECEITA_EMP_ID] = s.receita_emp;
 
       values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
