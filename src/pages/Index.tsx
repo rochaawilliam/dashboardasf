@@ -1244,8 +1244,8 @@ const Index = () => {
         receita_tra_consultoria: 1751.10,
         receita_tra_contencioso: 1621.00,
         receita_tri: 1815.92,
-        receita_tri_assessoria: 1815.92,
-        receita_tri_consultoria: 0,
+        receita_tri_assessoria: 1215.92,
+        receita_tri_consultoria: 600.00,
         receita_tri_contencioso: 0
       } as any;
     } else if (!s && ms === "2026-08") {
