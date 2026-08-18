@@ -116,33 +116,36 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?output=csv";
-
-    const SB_URL = Deno.env.get("SUPABASE_URL")!;
-    const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY")!;
-    const sb = createClient(SB_URL, SB_KEY);
-
-    // For now we use the single spreadsheet provided. 
-    // In a production scenario, we might have multiple GIDs or tabs per month.
-    // The user says "as demais abas seguem a ordem dos meses", but the public CSV export 
-    // usually exports a specific tab (the first one by default if no gid is provided).
-    // We will fetch the main CSV and assume it represents the current context.
-
-    const res = await fetch(CSV_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const csv = await res.text();
-    const parsed = parseFinancialSheet(csv);
-
-    // We return this data mapped to months. 
-    // Since the spreadsheet represents "the month", we'll need to know which month.
-    // For now, let's map it to August 2026 as per user's prompt mention "08-2026".
+    
+    // Spreadsheets specified by the user
+    // ABA JULHO: 07-2026
+    const JULY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=0&single=true&output=csv";
+    // ABA AGOSTO: 08-2026
+    const AUGUST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiilXqIm17FZkDHFpyMKPmL1Wat400EQJ42NlkRYueakkG6eRZ9ToiwRFzMdErSQ/pub?gid=2047530861&single=true&output=csv";
+    
     const result: FinancialResponse = {
-      months: {
-        [`2026-08`]: parsed
-      },
+      months: {},
       year,
       errors: {}
     };
+
+    const processMonth = async (monthNum: number, fetchUrl: string) => {
+      const ms = `2026-${String(monthNum).padStart(2, "0")}`;
+      try {
+        const res = await fetch(fetchUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const csv = await res.text();
+        result.months[ms] = parseFinancialSheet(csv);
+      } catch (e) {
+        result.errors[ms] = (e as Error).message;
+      }
+    };
+
+    // Apply the specific abas for July and August
+    await Promise.all([
+      processMonth(7, JULY_URL),
+      processMonth(8, AUGUST_URL)
+    ]);
 
     return new Response(JSON.stringify(result), { headers, status: 200 });
   } catch (err) {
