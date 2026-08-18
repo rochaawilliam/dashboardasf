@@ -1560,6 +1560,8 @@ const Index = () => {
     
     if (metaReceita > 0) {
       merged[CUMPRIMENTO_ORCAMENTO_ID] = Math.round((receitaRealizada / metaReceita) * 10000) / 100;
+    } else {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = 0;
     }
 
     return merged;
@@ -1667,6 +1669,8 @@ const Index = () => {
     
     if (metaReceitaAccum > 0) {
       merged[CUMPRIMENTO_ORCAMENTO_ID] = Math.round((receitaRealizadaAccum / metaReceitaAccum) * 10000) / 100;
+    } else {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = 0;
     }
 
     return merged;
