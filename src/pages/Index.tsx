@@ -468,6 +468,7 @@ const Index = () => {
   const MRR_METRIC_ID = "f21b4372-4b70-4bb0-9236-e2cd2695c156";
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
   const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
+  const CUMPRIMENTO_ORCAMENTO_ID = "f64e849b-1181-437d-b375-2f5f0e33fd42";
   // TICKET_MEDIO_ASSESSORIA_ID is now defined above to avoid conflicts
 
   
@@ -1543,6 +1544,16 @@ const Index = () => {
         ? Math.round((totalCompletedAll / totalExpectedAll) * 10000) / 100
         : 0;
     }
+
+    // Cumprimento de Orçamento: (Receita Bruta Realizada / Meta) * 100
+    const receitaRealizada = merged[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
+    const metaReceita = (selectedMonth && monthlyTargets) ? 
+      monthlyTargets.find(t => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.month === selectedMonth && t.year === selectedYear)?.target_value ?? 0 : 0;
+    
+    if (metaReceita > 0) {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = Math.round((receitaRealizada / metaReceita) * 10000) / 100;
+    }
+
     return merged;
   }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
@@ -1639,6 +1650,17 @@ const Index = () => {
         merged[CUMPRIMENTO_RITUAIS_ID] = Math.round(allMonthPcts.reduce((a, b) => a + b, 0) / allMonthPcts.length * 100) / 100;
       }
     }
+
+    // Accumulated Cumprimento de Orçamento: (Accumulated Realized / Accumulated Meta) * 100
+    const receitaRealizadaAccum = merged[RECEITA_BRUTA_OPERACIONAL_ID] ?? 0;
+    const metaReceitaAccum = monthlyTargets ? 
+      monthlyTargets.filter(t => t.metric_id === RECEITA_BRUTA_OPERACIONAL_ID && t.year === selectedYear)
+        .reduce((sum, t) => sum + (t.target_value || 0), 0) : 0;
+    
+    if (metaReceitaAccum > 0) {
+      merged[CUMPRIMENTO_ORCAMENTO_ID] = Math.round((receitaRealizadaAccum / metaReceitaAccum) * 10000) / 100;
+    }
+
     return merged;
   }, [accumulatedValues, pipelineAccumulatedValues, cashflowAccumulatedValues, historyData, selectedYear, ritualCompletions]);
 
