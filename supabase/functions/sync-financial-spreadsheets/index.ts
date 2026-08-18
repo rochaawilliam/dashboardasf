@@ -69,7 +69,16 @@ function parseFinancialSheet(csv: string): FinancialData {
 
   if (lines.length < 2) return data;
 
-  const header = parseCSVLine(lines[0]);
+  let headerIdx = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (cols.some(c => c.toUpperCase().trim() === "NOME") || cols.some(c => c.toUpperCase().trim() === "CONTRATO")) {
+      headerIdx = i;
+      break;
+    }
+  }
+
+  const header = parseCSVLine(lines[headerIdx]);
   const colIdx = {
     contrato: header.findIndex(h => h.toUpperCase().trim().includes("CONTRATO")),
     emp: header.findIndex(h => h.toUpperCase().trim().includes("CART-EMP")),
