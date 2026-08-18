@@ -1504,6 +1504,14 @@ const Index = () => {
       ...pipelineMonthlyValues,
       ...cashflowMonthlyValues,
     };
+    
+    // Copy spreadsheet formulas to merged object
+    Object.keys(cashflowMonthlyValues).forEach(key => {
+      if (key.startsWith("_formula_")) {
+        (merged as any)[key] = (cashflowMonthlyValues as any)[key];
+      }
+    });
+
     // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
     const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
