@@ -1283,9 +1283,6 @@ const Index = () => {
         }
       });
       const months = Object.values(lucratMonthly);
-      if (months.length > 0 && cashflowMonthlyValues[LUCRATIVIDADE_ANUAL_ID] === undefined) {
-        merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
-      }
     }
     // Turnover: count entries (each = 1 collaborator) / headcount * 100
     if (historyData && selectedMonth && pipelineData?.training?.headcount) {
@@ -1354,9 +1351,6 @@ const Index = () => {
         }
       });
       const months = Object.values(lucratMonthly);
-      if (months.length > 0 && cashflowAccumulatedValues[LUCRATIVIDADE_ANUAL_ID] === undefined) {
-        merged[LUCRATIVIDADE_ANUAL_ID] = Math.round(months.reduce((a, b) => a + b, 0) / months.length * 100) / 100;
-      }
     }
     // Turnover accumulated: average monthly turnover across the year
     if (historyData && pipelineData?.training?.headcount) {
@@ -2648,7 +2642,7 @@ const Index = () => {
                                     const isPipelineCard = !!(PIPELINE_METRIC_MAP[metric.id] || PIPELINE_AREA_MAP[metric.id] || metric.id === TAXA_CONVERSAO_ID || metric.id === TEMPO_MEDIO_FECHAMENTO_ID || metric.id === ROI_ONLINE_ID || metric.id === ROI_OFFLINE_ID || metric.id === MEDIA_ACOES_DIA_ID || metric.id === TAXA_ACOMPANHAMENTO_ID || metric.id === COMENTARIOS_LEAD_ID || metric.id === TME_SLA_ID || metric.id === TMA_ID || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID);
                                     const isTrainingComputed = metric.id === HEADCOUNT_TREINAMENTO_ID;
                                     const isTimeASFMetric = [HEADCOUNT_ID, HORAS_TREINAMENTO_ID, MODULOS_CONCLUIDOS_ID, TAXA_CERTIFICACAO_ID, TEMPO_MEDIO_CASA_ID, HEADCOUNT_TREINAMENTO_ID, ...ALL_RITUAL_IDS].includes(metric.id);
-                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isARR || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
+                                    const isComputedCard = isAutoSum || isTotalContratos || isMRR || isOriginCard || isEficienciaReceita || isRevSumCard || isPipelineCard || isTrainingComputed || metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
                                     const isRevenueManualRestricted = metric.id === RECEITA_BRUTA_OPERACIONAL_ID || metric.id === FLUXO_CAIXA_OPERACIONAL_ID;
 
                                     const isReceitaTotalCard = metric.name.includes("Receita Total");
@@ -2692,7 +2686,6 @@ const Index = () => {
                                             
                                             forecastValue={isReceitaTotalAnual ? (forecastValues[metric.id] ?? (selectedMonth !== null ? (cashflowData?.months?.[`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`]?.boleto_total ?? null) : null)) : undefined}
                                             hideValues={category === "lucratividade" && !showFinancialValues}
-                                            forceAnnualLabel={isARR}
                                             hideAnnualTarget={isTimeASFMetric}
                                             
                                             pipelineCardNames={pipelineCardNames[metric.id]}
