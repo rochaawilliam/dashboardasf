@@ -1,4 +1,4 @@
-/**
+valores não estão sendo apresentados confirme imagem anexo.
  * nos cards de Receita Bruta, retira o previsto. 
  *
  * Retire de todos os cards as casas decimais dos centavos.
