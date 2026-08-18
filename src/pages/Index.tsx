@@ -1168,7 +1168,7 @@ const Index = () => {
     }
 
     return info;
-  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP, cashflowData]);
+  }, [pipelineData, metrics, selectedMonth, selectedYear, PIPELINE_METRIC_MAP, PIPELINE_AREA_MAP, PIPELINE_AREA_TAG_MAP, cashflowData, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
 
   // Cashflow (Google Sheets Financeiro) → monthly values for selected month
   const cashflowMonthlyValues = useMemo(() => {
