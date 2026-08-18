@@ -4,12 +4,15 @@ export interface FinancialSpreadsheetData {
   receita_emp: number;
   receita_emp_assessoria: number;
   receita_emp_consultoria: number;
+  receita_emp_contencioso?: number;
   receita_tra: number;
   receita_tra_assessoria: number;
   receita_tra_consultoria: number;
+  receita_tra_contencioso?: number;
   receita_tri: number;
   receita_tri_assessoria: number;
   receita_tri_consultoria: number;
+  receita_tri_contencioso?: number;
 }
 
 export interface FinancialSpreadsheetsResponse {
