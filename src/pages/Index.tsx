@@ -1238,7 +1238,7 @@ const Index = () => {
         receita_emp: 48199.78,
         receita_emp_assessoria: 46448.68,
         receita_emp_consultoria: 1751.10,
-        receita_emp_contencioso: 0,
+        receita_emp_contencioso: 600.00, // Extracted: one contencioso row in CART-EMP in July
         receita_tra: 45949.87,
         receita_tra_assessoria: 42577.77,
         receita_tra_consultoria: 1751.10,
