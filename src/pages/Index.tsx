@@ -1666,9 +1666,6 @@ const Index = () => {
   
   const EFICIENCIA_RECEITA_ID = "3c0e94b6-9128-4e54-b5a8-7ae6862641bc";
 
-  const RECEITA_EMP_CONTENCIOSO_ID = "de3186d7-1b20-41e2-8fd9-9fef114096bb";
-  const RECEITA_TRAB_CONTENCIOSO_ID = "f1fd7525-963f-401e-a1e1-7b449f022bbd";
-  const RECEITA_TRIB_CONTENCIOSO_ID = "6122d0fc-e606-4020-afab-45658e063158";
   const OUTRAS_RECEITAS_ID = "c0a1fe29-7d31-424c-9f86-6766981dcd82";
 
   // Revenue sum component IDs grouped
