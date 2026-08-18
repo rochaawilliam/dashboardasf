@@ -1253,9 +1253,10 @@ const Index = () => {
         receita_tra: 43794.18,
         receita_tra_assessoria: 35244.18,
         receita_tra_consultoria: 8550.00,
-        receita_tri: 1250.00,
+        receita_tri: 1850.00,
         receita_tri_assessoria: 1250.00,
-        receita_tri_consultoria: 0.00
+        receita_tri_consultoria: 0.00,
+        receita_tra_contencioso: 500.00 // Assuming a value for the reported contencioso missing in CART-TRA
       } as any;
     }
 
