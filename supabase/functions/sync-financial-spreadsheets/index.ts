@@ -81,6 +81,8 @@ function parseFinancialSheet(csv: string): FinancialData {
     const valTri = parseBRNumber(cols[colIdx.tri]);
 
     // O card Receita Empresarial deve somar todos os valores da coluna CART-EMP
+    // O card Receita Trabalhista deve somar todos os valores da coluna CART-TRA
+    // O card Receita Tributário deve somar todos os valores da coluna CART-TRI
     data.receita_emp += valEmp;
     data.receita_tra += valTra;
     data.receita_tri += valTri;
