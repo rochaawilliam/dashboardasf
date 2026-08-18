@@ -1302,7 +1302,6 @@ const Index = () => {
       values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
       
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
-
       const clientesAssessoria = Number(s.clientes_assessoria) || 0;
       
       // Calculate Ticket Médio Assessoria
@@ -1313,10 +1312,27 @@ const Index = () => {
       values["8c4b5df4-da48-43a5-821c-bdfc9a6ff87c"] = clientesAssessoria > 0 ? (s.receita_tra_assessoria || 0) / clientesAssessoria : 0;
       values["00ec471d-d863-4293-ab17-ec9054c90017"] = clientesAssessoria > 0 ? (s.receita_tri_assessoria || 0) / clientesAssessoria : 0;
       
+      // Formulas for tooltips
+      (values as any)._formula_TICKET_MEDIO_ASSESSORIA = `Receita Assessoria (R$ ${formatNumber(receitaAssessoriaTotal, 2)}) / Clientes (${clientesAssessoria})`;
+      (values as any)._formula_74e5baf4_41c4_4d3b_82d1_445a00aba0b8 = `Receita Emp. Assessoria (R$ ${formatNumber(s.receita_emp_assessoria || 0, 2)}) / Clientes (${clientesAssessoria})`;
+      (values as any)._formula_8c4b5df4_da48_43a5_821c_bdfc9a6ff87c = `Receita Trab. Assessoria (R$ ${formatNumber(s.receita_tra_assessoria || 0, 2)}) / Clientes (${clientesAssessoria})`;
+      (values as any)._formula_00ec471d_d863_4293_ab17_ec9054c90017 = `Receita Trib. Assessoria (R$ ${formatNumber(s.receita_tri_assessoria || 0, 2)}) / Clientes (${clientesAssessoria})`;
+
+      
       // Consultoria/Contencioso Ticket Médio (Direct values from spreadsheet)
-      values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = (s.receita_emp_consultoria || 0);
-      values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = (s.receita_tra_consultoria || 0);
-      values["2185212f-d509-4405-a861-91efe05dc23d"] = (s.receita_tri_contencioso || 0);
+      const ticketEmpConsultoria = (s.receita_emp_consultoria || 0);
+      const ticketTraConsultoria = (s.receita_tra_consultoria || 0);
+      const ticketTriContencioso = (s.receita_tri_contencioso || 0);
+
+      values["29568b33-b3e7-4f5d-b3a1-85da7fd19c91"] = ticketEmpConsultoria;
+      values["6fa5a98b-7531-4c2e-893b-f878df35ff1b"] = ticketTraConsultoria;
+      values["2185212f-d509-4405-a861-91efe05dc23d"] = ticketTriContencioso;
+      
+      // Formulas for tooltips (Direct values for these cards as per user request previously)
+      (values as any)._formula_29568b33_b3e7_4f5d_b3a1_85da7fd19c91 = `Valor da Receita (R$ ${formatNumber(ticketEmpConsultoria, 2)})`;
+      (values as any)._formula_6fa5a98b_7531_4c2e_893b_f878df35ff1b = `Valor da Receita (R$ ${formatNumber(ticketTraConsultoria, 2)})`;
+      (values as any)._formula_2185212f_d509_4405_a861_91efe05dc23d = `Valor da Receita (R$ ${formatNumber(ticketTriContencioso, 2)})`;
+
       
       
       values[RECEITA_EMP_ID] = s.receita_emp;
@@ -1488,6 +1504,14 @@ const Index = () => {
       ...pipelineMonthlyValues,
       ...cashflowMonthlyValues,
     };
+    
+    // Copy spreadsheet formulas to merged object
+    Object.keys(cashflowMonthlyValues).forEach(key => {
+      if (key.startsWith("_formula_")) {
+        (merged as any)[key] = (cashflowMonthlyValues as any)[key];
+      }
+    });
+
     // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
     const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
@@ -2692,7 +2716,17 @@ const Index = () => {
                                     const computedMonthly = (metric as any)._computedMonthly;
                                     const computedAccumulated = (metric as any)._computedAccumulated;
 
-                                    let dynamicMetric = metric;
+                                    let dynamicMetric = { ...metric };
+                                    
+                                    // Inject dynamic formula into tooltip
+                                    const safeId = metric.id.replace(/-/g, "_");
+                                    const dynamicFormula = (mergedMonthlyValues as any)[`_formula_${safeId}`] || (mergedMonthlyValues as any)[`_formula_${metric.id}`];
+                                    if (dynamicFormula) {
+                                      dynamicMetric.description = metric.description 
+                                        ? `${metric.description}\n\nFórmula atual: ${dynamicFormula}`
+                                        : `Fórmula atual: ${dynamicFormula}`;
+                                    }
+
 
                                     // Compute "Total de Contratos" = Novos Contratos Online + Offline ASF
                                     const isTotalContratos = metric.id === TOTAL_CONTRATOS_ID;
@@ -2912,8 +2946,9 @@ const Index = () => {
                                           data-tour={metricIndex === 0 && category === "lucratividade" ? "metric-card" : undefined}
                                           className="h-full">
                                         <CircularProgressCard
-                                            metric={cardMetric}
+                                            metric={dynamicMetric}
                                             monthlyValue={cardMonthlyValue}
+
                                             isMonthSelected={selectedMonth !== null}
                                             accumulatedValue={cardAccumulatedValue}
                                             selectedMonthName={selectedMonthName}
