@@ -70,6 +70,7 @@ import {
   type Filters,
   type MetricCategory } from
 "@/hooks/useMetrics";
+import { useFinancialSpreadsheetsData } from "@/hooks/useFinancialSpreadsheetsData";
 import { useMetricNotifications } from "@/hooks/useMetricNotifications";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import { useAuth } from "@/hooks/useAuth";
@@ -171,6 +172,9 @@ const Index = () => {
 
   // Ritual completions data
   const { data: ritualCompletions } = useAllRitualCompletions(selectedYear);
+
+  // Financial spreadsheets data
+  const { data: spreadsheetData } = useFinancialSpreadsheetsData(selectedYear);
 
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
@@ -1209,8 +1213,24 @@ const Index = () => {
     // Receita por Colaborador uses the same calculation as Folha sobre Receita (Fluxo de Caixa / Headcount)
     values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
 
+    // Spreadsheet integration for specific areas
+    if (spreadsheetData?.months?.[ms]) {
+      const s = spreadsheetData.months[ms];
+      values[RECEITA_EMP_ID] = s.receita_emp;
+      values[RECEITA_EMP_ASSESSORIA_ID] = s.receita_emp_assessoria;
+      values[RECEITA_EMP_CONSULTORIA_ID] = s.receita_emp_consultoria;
+      
+      values[RECEITA_TRAB_ID] = s.receita_tra;
+      values[RECEITA_TRAB_ASSESSORIA_ID] = s.receita_tra_assessoria;
+      values[RECEITA_TRAB_CONSULTORIA_ID] = s.receita_tra_consultoria;
+      
+      values[RECEITA_TRIB_ID] = s.receita_tri;
+      values[RECEITA_TRIB_ASSESSORIA_ID] = s.receita_tri_assessoria;
+      values[RECEITA_TRIB_CONSULTORIA_ID] = s.receita_tri_consultoria;
+    }
+
     return values;
-  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID]);
+  }, [cashflowData, selectedMonth, selectedYear, RECEITA_BRUTA_OPERACIONAL_ID, FLUXO_CAIXA_OPERACIONAL_ID, LUCRATIVIDADE_MENSAL_ID, FOLHA_SOBRE_RECEITA_ID, pipelineMonthlyValues, VALOR_GERADO_ONLINE_ID, VALOR_GERADO_OFFLINE_ID, spreadsheetData, RECEITA_EMP_ID, RECEITA_EMP_ASSESSORIA_ID, RECEITA_EMP_CONSULTORIA_ID, RECEITA_TRAB_ID, RECEITA_TRAB_ASSESSORIA_ID, RECEITA_TRAB_CONSULTORIA_ID, RECEITA_TRIB_ID, RECEITA_TRIB_ASSESSORIA_ID, RECEITA_TRIB_CONSULTORIA_ID]);
 
 
   // Cashflow accumulated across the year
