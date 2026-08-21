@@ -2561,6 +2561,10 @@ const Index = () => {
                                 "Contratos": { from: "Propostas", target: 37 },
                               };
 
+                              const tfSel = selectedMonth !== null
+                                ? trafficFunnelData?.months?.[`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`]
+                                : trafficFunnelData?.totals;
+
                               const conversasExtra = (() => {
                                 const impressoes = selectedMonth !== null
                                   ? mergedMonthlyValues[IMPRESSOES_ASF_ID]
@@ -2568,8 +2572,22 @@ const Index = () => {
                                 const alcance = selectedMonth !== null
                                   ? mergedMonthlyValues[ALCANCE_ASF_ID]
                                   : mergedAccumulatedValues[ALCANCE_ASF_ID];
+                                const metaConv = Number(tfSel?.meta_conversas_iniciadas ?? 0);
+                                const googleConv = Number(tfSel?.google_conversoes ?? 0);
                                 return (
                                   <div className="space-y-1">
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                                      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Meta Ads</p>
+                                      <p className="text-xs font-semibold text-foreground leading-tight">
+                                        {formatNumber(metaConv, 0)}
+                                      </p>
+                                    </div>
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                                      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Google (conv.)</p>
+                                      <p className="text-xs font-semibold text-foreground leading-tight">
+                                        {formatNumber(googleConv, 0)}
+                                      </p>
+                                    </div>
                                     <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
                                       <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Impressões</p>
                                       <p className="text-xs font-semibold text-foreground leading-tight">
@@ -2586,7 +2604,29 @@ const Index = () => {
 
                                 );
                               })();
-                              const onlineExtras = { [CONVERSAS_INICIADAS_ID]: conversasExtra };
+                              const investimentoExtra = (() => {
+                                const metaInv = Number(tfSel?.meta_valor_investido ?? 0);
+                                const googleInv = Number(tfSel?.google_valor_investido ?? 0);
+                                if (!metaInv && !googleInv) return null;
+                                return (
+                                  <div className="space-y-1">
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                                      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Meta Ads</p>
+                                      <p className="text-xs font-semibold text-foreground leading-tight">
+                                        R$ {formatNumber(metaInv, 2)}
+                                      </p>
+                                    </div>
+                                    <div className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1">
+                                      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Google Ads</p>
+                                      <p className="text-xs font-semibold text-foreground leading-tight">
+                                        R$ {formatNumber(googleInv, 2)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })();
+                              const onlineExtras: Record<string, any> = { [CONVERSAS_INICIADAS_ID]: conversasExtra };
+                              if (investimentoExtra) onlineExtras[VALOR_INVESTIDO_ONLINE_ID] = investimentoExtra;
 
                               return (
 

@@ -11,6 +11,12 @@ interface MonthData {
   cliques_saida: number;
   conversas_iniciadas: number;
   custo_por_conversa: number;
+  meta_valor_investido: number;
+  meta_conversas_iniciadas: number;
+  google_valor_investido: number;
+  google_impressoes: number;
+  google_cliques: number;
+  google_conversoes: number;
 }
 
 export interface TrafficFunnelData {
@@ -77,13 +83,25 @@ function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
   const flush = () => {
     if (currentMonth && currentYear === filterYear) {
       const key = `${currentYear}-${currentMonth}`;
+      const metaInvest = current.meta_valor_investido ?? 0;
+      const metaConversas = current.meta_conversas_iniciadas ?? 0;
+      const gInvest = current.google_valor_investido ?? 0;
+      const gConv = current.google_conversoes ?? 0;
+      const totalInvest = metaInvest + gInvest;
+      const totalConversas = metaConversas + gConv;
       months[key] = {
-        valor_investido: current.valor_investido ?? 0,
-        impressoes: current.impressoes ?? 0,
+        valor_investido: totalInvest,
+        impressoes: (current.impressoes ?? 0) + (current.google_impressoes ?? 0),
         alcance: current.alcance ?? 0,
-        cliques_saida: current.cliques_saida ?? 0,
-        conversas_iniciadas: current.conversas_iniciadas ?? 0,
-        custo_por_conversa: current.custo_por_conversa ?? 0,
+        cliques_saida: (current.cliques_saida ?? 0) + (current.google_cliques ?? 0),
+        conversas_iniciadas: totalConversas,
+        custo_por_conversa: totalConversas > 0 ? totalInvest / totalConversas : 0,
+        meta_valor_investido: metaInvest,
+        meta_conversas_iniciadas: metaConversas,
+        google_valor_investido: gInvest,
+        google_impressoes: current.google_impressoes ?? 0,
+        google_cliques: current.google_cliques ?? 0,
+        google_conversoes: gConv,
       };
     }
     currentMonth = null;
@@ -94,6 +112,16 @@ function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
   for (const line of lines) {
     const cols = parseCSVLine(line);
     const first = cols[0]?.toUpperCase() || "";
+    const gLabel = (cols[4] || "").toUpperCase().trim();
+    const gValue = cols[6] || cols[5] || "";
+
+    // Google (side block) metrics for the current month
+    if (currentMonth && gLabel && !gLabel.startsWith("FUNIL DE ")) {
+      if (gLabel.includes("VALOR INVESTIDO")) current.google_valor_investido = parseBRNumber(gValue);
+      else if (gLabel.includes("IMPRESS")) current.google_impressoes = parseBRNumber(gValue);
+      else if (gLabel.includes("CLIQUES")) current.google_cliques = parseBRNumber(gValue);
+      else if (gLabel.includes("CONVERS") && !gLabel.includes("CUSTO")) current.google_conversoes = parseBRNumber(gValue);
+    }
 
     // Detect "FUNIL DE <MONTH> [DE <YEAR>]"
     if (first.startsWith("FUNIL DE ")) {
@@ -122,11 +150,11 @@ function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
     const label = first;
     const value = cols[2] || cols[1] || "";
 
-    if (label.includes("VALOR INVESTIDO")) current.valor_investido = parseBRNumber(value);
+    if (label.includes("VALOR INVESTIDO")) current.meta_valor_investido = parseBRNumber(value);
     else if (label.includes("IMPRESSÕES")) current.impressoes = parseBRNumber(value);
     else if (label.includes("ALCANCE")) current.alcance = parseBRNumber(value);
     else if (label.includes("CLIQUES")) current.cliques_saida = parseBRNumber(value);
-    else if (label.includes("CONVERSAS INICIADAS")) current.conversas_iniciadas = parseBRNumber(value);
+    else if (label.includes("CONVERSAS INICIADAS")) current.meta_conversas_iniciadas = parseBRNumber(value);
     else if (label.includes("CUSTO POR CONVERSA")) current.custo_por_conversa = parseBRNumber(value);
   }
   flush();
@@ -139,6 +167,12 @@ function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
     cliques_saida: 0,
     conversas_iniciadas: 0,
     custo_por_conversa: 0,
+    meta_valor_investido: 0,
+    meta_conversas_iniciadas: 0,
+    google_valor_investido: 0,
+    google_impressoes: 0,
+    google_cliques: 0,
+    google_conversoes: 0,
   };
   const monthKeys = Object.keys(months);
   for (const data of Object.values(months)) {
@@ -147,6 +181,12 @@ function parseCSV(csv: string, filterYear: number): TrafficFunnelData {
     totals.alcance += data.alcance;
     totals.cliques_saida += data.cliques_saida;
     totals.conversas_iniciadas += data.conversas_iniciadas;
+    totals.meta_valor_investido += data.meta_valor_investido ?? 0;
+    totals.meta_conversas_iniciadas += data.meta_conversas_iniciadas ?? 0;
+    totals.google_valor_investido += data.google_valor_investido ?? 0;
+    totals.google_impressoes += data.google_impressoes ?? 0;
+    totals.google_cliques += data.google_cliques ?? 0;
+    totals.google_conversoes += data.google_conversoes ?? 0;
   }
   if (monthKeys.length > 0) {
     totals.custo_por_conversa =
@@ -193,13 +233,19 @@ Deno.serve(async (req) => {
               if (sp.months !== undefined) data.months[ms] = sp.months;
             }
             // Recompute totals from (possibly frozen) monthly slices
-            const t = { valor_investido: 0, impressoes: 0, alcance: 0, cliques_saida: 0, conversas_iniciadas: 0, custo_por_conversa: 0 };
+            const t: MonthData = { valor_investido: 0, impressoes: 0, alcance: 0, cliques_saida: 0, conversas_iniciadas: 0, custo_por_conversa: 0, meta_valor_investido: 0, meta_conversas_iniciadas: 0, google_valor_investido: 0, google_impressoes: 0, google_cliques: 0, google_conversoes: 0 };
             for (const m of Object.values(data.months)) {
               t.valor_investido += m.valor_investido;
               t.impressoes += m.impressoes;
               t.alcance += m.alcance;
               t.cliques_saida += m.cliques_saida;
               t.conversas_iniciadas += m.conversas_iniciadas;
+              t.meta_valor_investido += m.meta_valor_investido ?? 0;
+              t.meta_conversas_iniciadas += m.meta_conversas_iniciadas ?? 0;
+              t.google_valor_investido += m.google_valor_investido ?? 0;
+              t.google_impressoes += m.google_impressoes ?? 0;
+              t.google_cliques += m.google_cliques ?? 0;
+              t.google_conversoes += m.google_conversoes ?? 0;
             }
             t.custo_por_conversa = t.conversas_iniciadas > 0 ? t.valor_investido / t.conversas_iniciadas : 0;
             data.totals = t;
