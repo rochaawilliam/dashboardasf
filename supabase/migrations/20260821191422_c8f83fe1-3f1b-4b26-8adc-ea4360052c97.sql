@@ -1,0 +1,1 @@
+update public.monthly_targets set target_value = 60 where metric_id='ca49be98-52c9-4da8-a580-6a681b54aeba' and ((year=2026 and month>=8) or year>=2027);
