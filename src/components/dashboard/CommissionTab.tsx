@@ -185,22 +185,14 @@ export function CommissionTab({
   const { data: dbAssignments } = useSubcategoryAssignments();
   const { data: pipelineData } = usePipelineData(selectedYear);
 
+  const VALOR_GERADO_ONLINE_ID = "a1b2c3d4-6666-4aaa-bbbb-666666666666";
+  const VALOR_GERADO_OFFLINE_ID = "b2c3d4e5-6666-4bbb-cccc-666666666666";
+
   const receitaData = useMemo(() => {
     const values = selectedMonth !== null ? monthlyValues : accumulatedValues;
     
-    // Total Revenue calculation for Head Growth Commission:
-    // Priority to Pipeline total (valor_gerado), fallback to finance achieved (sum of RECEITA_IDS)
-    const pipelineAchieved = (() => {
-      if (!pipelineData) return 0;
-      if (selectedMonth !== null) {
-        const ms = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
-        return pipelineData.dashboard?.[ms]?.valor_gerado ?? 0;
-      }
-      return pipelineData.dashboardTotals?.valor_gerado ?? 0;
-    })();
-
-    const financeAchieved = RECEITA_IDS.reduce((sum, id) => sum + (values[id] ?? 0), 0);
-    const achieved = pipelineAchieved > 0 ? pipelineAchieved : financeAchieved;
+    // Receita Total = Valor Gerado Total (Online + Offline) da aba Crescimento
+    const achieved = (values[VALOR_GERADO_ONLINE_ID] ?? 0) + (values[VALOR_GERADO_OFFLINE_ID] ?? 0);
 
     let target = 0;
     if (selectedMonth !== null) {
@@ -210,7 +202,7 @@ export function CommissionTab({
     }
 
     return { achieved, target };
-  }, [monthlyValues, accumulatedValues, pipelineData, selectedMonth, selectedYear]);
+  }, [monthlyValues, accumulatedValues, selectedMonth, selectedYear]);
 
   // Compute Total Contratos using the "Total de Contratos" card value and monthly targets
   const TOTAL_CONTRATOS_ID = "d3e4f5a6-b7c8-9012-cdef-234567890abc";
