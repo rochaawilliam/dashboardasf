@@ -1512,6 +1512,9 @@ const Index = () => {
       }
     });
 
+    // Receita Bruta Operacional = Valor Gerado Total (Online + Offline) da aba Crescimento
+    merged[RECEITA_BRUTA_OPERACIONAL_ID] = (merged[VALOR_GERADO_ONLINE_ID] ?? 0) + (merged[VALOR_GERADO_OFFLINE_ID] ?? 0);
+
     // Auto-calculate ROI = (Valor Gerado / Valor Investido) * 100
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
     const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
@@ -1593,6 +1596,8 @@ const Index = () => {
       ...cashflowAccumulatedValues,
     };
     // Auto-calculate ROI accumulated
+    // Receita Bruta Operacional = Valor Gerado Total (Online + Offline) da aba Crescimento
+    merged[RECEITA_BRUTA_OPERACIONAL_ID] = (merged[VALOR_GERADO_ONLINE_ID] ?? 0) + (merged[VALOR_GERADO_OFFLINE_ID] ?? 0);
     const valorGeradoOnline = merged[VALOR_GERADO_ONLINE_ID] ?? 0;
     const valorInvestidoOnline = merged[VALOR_INVESTIDO_ONLINE_ID] ?? 0;
     if (valorInvestidoOnline > 0) {
