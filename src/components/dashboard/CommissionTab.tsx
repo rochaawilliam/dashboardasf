@@ -281,7 +281,7 @@ export function CommissionTab({
 
       {/* Legend */}
       <p className="text-xs text-muted-foreground italic px-1">
-        * Receita Total = soma das receitas financeiras; quando não houver lançamento financeiro no mês, usa Valor Gerado Online + Offline do Pipeline ASF. Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
+        * Receita Total = Valor Gerado Total (Online + Offline) da aba Crescimento. Total de Contratos = Novos Contratos Online + Offline do Pipeline ASF.
       </p>
 
       {/* Total Commission */}
