@@ -7,6 +7,12 @@ export interface TrafficMonthData {
   cliques_saida: number;
   conversas_iniciadas: number;
   custo_por_conversa: number;
+  meta_valor_investido?: number;
+  meta_conversas_iniciadas?: number;
+  google_valor_investido?: number;
+  google_impressoes?: number;
+  google_cliques?: number;
+  google_conversoes?: number;
 }
 
 export interface TrafficFunnelData {
