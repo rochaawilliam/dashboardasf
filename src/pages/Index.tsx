@@ -193,6 +193,7 @@ const Index = () => {
 
   // Financial spreadsheets data
   const { data: spreadsheetData } = useFinancialSpreadsheetsData(selectedYear);
+  const { data: marketingSheetData } = useMarketingSheetData();
 
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
