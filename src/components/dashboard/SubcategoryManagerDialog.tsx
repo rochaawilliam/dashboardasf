@@ -18,15 +18,19 @@ import {
 const categoryLabels: Record<string, string> = {
   lucratividade: "Financeiro",
   experiencia_cliente: "Crescimento",
+  marketing: "Marketing",
+  administrativo: "Administrativo",
   produtividade: "Jurídico",
-  gestao_pessoas: "Time ASF",
+  gestao_pessoas: "Pessoas",
 };
 
 const categoryOrder: MetricCategory[] = [
   "experiencia_cliente",
+  "marketing",
   "produtividade",
   "gestao_pessoas",
   "lucratividade",
+  "administrativo",
 ];
 
 interface SubcategoryManagerDialogProps {
