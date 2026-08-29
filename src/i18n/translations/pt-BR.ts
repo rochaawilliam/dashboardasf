@@ -29,9 +29,11 @@ export const ptBR = {
   categories: {
     lucratividade: "Financeiro",
     experiencia_cliente: "Crescimento",
+    marketing: "Marketing",
+    administrativo: "Administrativo",
     produtividade: "Jurídico",
-    gestao_pessoas: "Time ASF",
-    aprendizado_crescimento: "Time ASF",
+    gestao_pessoas: "Pessoas",
+    aprendizado_crescimento: "Pessoas",
   },
   
   // Metrics

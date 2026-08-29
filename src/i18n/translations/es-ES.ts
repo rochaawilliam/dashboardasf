@@ -31,9 +31,11 @@ export const esES: TranslationKeys = {
   categories: {
     lucratividade: "Financiero",
     experiencia_cliente: "Crecimiento",
+    marketing: "Marketing",
+    administrativo: "Administrativo",
     produtividade: "Jurídico",
-    gestao_pessoas: "Equipo ASF",
-    aprendizado_crescimento: "Equipo ASF",
+    gestao_pessoas: "Personas",
+    aprendizado_crescimento: "Personas",
   },
   
   // Metrics

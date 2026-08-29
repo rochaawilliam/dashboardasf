@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, DollarSign, Rocket, Zap, Users, ChevronRight, Lock } from "lucide-react";
+import { Menu, DollarSign, Rocket, Zap, Users, ChevronRight, Lock, Megaphone, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -21,9 +21,11 @@ interface MobileDrawerProps {
 
 const categories: { id: MetricCategory; title: string; icon: any; variant: string }[] = [
   { id: "experiencia_cliente", title: "Crescimento", icon: Rocket, variant: "accent" },
+  { id: "marketing", title: "Marketing", icon: Megaphone, variant: "accent" },
   { id: "produtividade", title: "Jurídico", icon: Zap, variant: "warning" },
-  { id: "gestao_pessoas", title: "Time ASF", icon: Users, variant: "success" },
+  { id: "gestao_pessoas", title: "Pessoas", icon: Users, variant: "success" },
   { id: "lucratividade", title: "Financeiro", icon: DollarSign, variant: "primary" },
+  { id: "administrativo", title: "Administrativo", icon: ClipboardList, variant: "primary" },
 ];
 
 const variantStyles: Record<string, string> = {
