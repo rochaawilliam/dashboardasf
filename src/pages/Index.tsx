@@ -73,6 +73,7 @@ import {
   type MetricCategory } from
 "@/hooks/useMetrics";
 import { useFinancialSpreadsheetsData } from "@/hooks/useFinancialSpreadsheetsData";
+import { useMarketingSheetData } from "@/hooks/useMarketingSheetData";
 import { useMetricNotifications } from "@/hooks/useMetricNotifications";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import { useAuth } from "@/hooks/useAuth";
@@ -193,6 +194,7 @@ const Index = () => {
 
   // Financial spreadsheets data
   const { data: spreadsheetData } = useFinancialSpreadsheetsData(selectedYear);
+  const { data: marketingSheetData } = useMarketingSheetData();
 
   // DB-based subcategories
   const { data: dbSubcategories } = useSubcategories();
@@ -1522,6 +1524,17 @@ const Index = () => {
       ...pipelineMonthlyValues,
       ...cashflowMonthlyValues,
     };
+
+    // Marketing: valores realizados vindos da planilha (mensal ou acumulado)
+    if (marketingSheetData) {
+      const mktValues = selectedMonth !== null
+        ? marketingSheetData.months?.[String(selectedMonth)] ?? {}
+        : marketingSheetData.accumulated ?? {};
+      Object.entries(mktValues).forEach(([id, v]) => {
+        merged[id] = v;
+      });
+    }
+    
     
     // Copy spreadsheet formulas to merged object
     Object.keys(cashflowMonthlyValues).forEach(key => {
@@ -1605,7 +1618,7 @@ const Index = () => {
     }
 
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
+  }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, marketingSheetData, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
