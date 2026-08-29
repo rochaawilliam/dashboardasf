@@ -598,6 +598,8 @@ export type Database = {
         | "gestao_pessoas"
         | "aprendizado_crescimento"
         | "execucao_comercial"
+        | "marketing"
+        | "administrativo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -734,6 +736,8 @@ export const Constants = {
         "gestao_pessoas",
         "aprendizado_crescimento",
         "execucao_comercial",
+        "marketing",
+        "administrativo",
       ],
     },
   },
