@@ -56,7 +56,9 @@ import {
   EyeOff,
   Globe,
   Building2,
-  Layers } from
+  Layers,
+  Megaphone,
+  ClipboardList } from
 "lucide-react";
 import { SalesFunnel } from "@/components/dashboard/SalesFunnel";
 import { usePipelineData } from "@/hooks/usePipelineData";
@@ -90,6 +92,20 @@ const categoryConfig: Record<string, {title: string;shortTitle: string;subtitle:
     icon: Rocket,
     variant: "accent"
   },
+  marketing: {
+    title: "Marketing",
+    shortTitle: "Marketing",
+    subtitle: "Acompanhar presença digital, marca e ações de marketing",
+    icon: Megaphone,
+    variant: "accent"
+  },
+  administrativo: {
+    title: "Administrativo",
+    shortTitle: "Adm",
+    subtitle: "Indicadores administrativos e de backoffice",
+    icon: ClipboardList,
+    variant: "primary"
+  },
   produtividade: {
     title: "Jurídico",
     shortTitle: "Jurídico",
@@ -98,8 +114,8 @@ const categoryConfig: Record<string, {title: string;shortTitle: string;subtitle:
     variant: "warning"
   },
   gestao_pessoas: {
-    title: "Time ASF",
-    shortTitle: "Time ASF",
+    title: "Pessoas",
+    shortTitle: "Pessoas",
     subtitle: "Construir um time estável, produtivo e engajado",
     icon: Users,
     variant: "success"
@@ -108,9 +124,11 @@ const categoryConfig: Record<string, {title: string;shortTitle: string;subtitle:
 
 const categoryOrder: MetricCategory[] = [
 "experiencia_cliente",
+"marketing",
 "produtividade",
 "gestao_pessoas",
-"lucratividade"];
+"lucratividade",
+"administrativo"];
 
 
 const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
