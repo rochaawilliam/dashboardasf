@@ -39,6 +39,8 @@ const defaultPermissions: Record<TabKey, TabPermissionSet> = {
   lucratividade: { view: false, edit: false, delete: false },
   execucao_comercial: { view: false, edit: false, delete: false },
   experiencia_cliente: { view: false, edit: false, delete: false },
+  marketing: { view: false, edit: false, delete: false },
+  administrativo: { view: false, edit: false, delete: false },
   produtividade: { view: false, edit: false, delete: false },
   gestao_pessoas: { view: false, edit: false, delete: false },
   aprendizado_crescimento: { view: false, edit: false, delete: false },
