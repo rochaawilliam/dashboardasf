@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# Dashboard Crescimento ASF
 
-## Project info
+quero criar um dashboard para acompanhar metas do setor de crescimento (comercial mais marketing). 
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Lucratividade  | Aumentar lucratividade e margem do Negócio
+Cumprimento de Orçamento: 95%
 
-## How can I edit this code?
+Lucratividade:
+Lucratividade | Proteger o caixa e blindar contra perdas financeiras
+SLA Externo: 90%
+Lead Time de Onboarding:  45%
 
-There are several ways of editing your application.
+Taxa de Sucesso: 
+Experiência do Cliente  Entregar Experiência Consistente e Previsível  Divisão: Jurídico
+Churn de Clientes: 3,75%
+Lifetime Médio do Cliente: 2,5%
 
-**Use Lovable**
+Clientes  Experiência do Cliente  Entregar Experiência Consistente e Previsível  Divisão: Crescimento
+NPS: 76%
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Produtividade|  Garantir Eficiência do Time Jurídico 
+Capacidade Ocupada (%–IC): 80%
+IC Médio por Advogado:80%
+Aprendizado e Crescimento  Gestão de Pessoas  Construir um Time Estável, Produtivo e engajado
+Turnover: 3,5%
+ENPS: 76%
 
-Changes made via Lovable will be committed automatically to this repo.
+Aprendizado e Crescimento  Gestão de Pessoas  Desenvolver Competências Técnicas e Lideranças Internas  Divisão
+Horas de Treinamento por Colaborador
+Estagiário: 04 Hrs
+Jurídico Interno; 05hrs
+Administrativo Interno: 06hrs
+Liderança: 06Hrs
 
-**Use your preferred IDE**
+This project was built with [Lovable](https://lovable.dev).
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+**Live app**: https://dashboardasf.lovable.app
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Build with Lovable
 
-Follow these steps:
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/a5e477ed-f0f9-45f3-9556-890bc508f983).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
