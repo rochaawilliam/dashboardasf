@@ -2354,6 +2354,7 @@ const Index = () => {
                             </div>
                           </div>
 
+                          {categoryMetrics.length > 0 && (
                           <GoalsPerformanceAnalysis
                             tabTitle={config.title}
                             metrics={categoryMetrics}
@@ -2363,6 +2364,7 @@ const Index = () => {
                             selectedMonth={selectedMonth}
                             selectedYear={selectedYear}
                           />
+                          )}
 
 
 
