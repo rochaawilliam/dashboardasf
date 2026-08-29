@@ -73,6 +73,7 @@ import {
   type MetricCategory } from
 "@/hooks/useMetrics";
 import { useFinancialSpreadsheetsData } from "@/hooks/useFinancialSpreadsheetsData";
+import { useMarketingSheetData } from "@/hooks/useMarketingSheetData";
 import { useMetricNotifications } from "@/hooks/useMetricNotifications";
 import { useUserTabPermissions } from "@/hooks/useTabPermissions";
 import { useAuth } from "@/hooks/useAuth";
