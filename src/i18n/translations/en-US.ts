@@ -31,9 +31,11 @@ export const enUS: TranslationKeys = {
   categories: {
     lucratividade: "Financial",
     experiencia_cliente: "Growth",
+    marketing: "Marketing",
+    administrativo: "Administrative",
     produtividade: "Legal",
-    gestao_pessoas: "ASF Team",
-    aprendizado_crescimento: "ASF Team",
+    gestao_pessoas: "People",
+    aprendizado_crescimento: "People",
   },
   
   // Metrics
