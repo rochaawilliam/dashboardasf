@@ -8,6 +8,8 @@ export type TabKey =
   | "lucratividade" 
   | "execucao_comercial" 
   | "experiencia_cliente" 
+  | "marketing"
+  | "administrativo"
   | "produtividade" 
   | "gestao_pessoas" 
   | "aprendizado_crescimento";
@@ -18,6 +20,8 @@ export const ALL_TABS: TabKey[] = [
   "lucratividade",
   "execucao_comercial",
   "experiencia_cliente",
+  "marketing",
+  "administrativo",
   "produtividade",
   "gestao_pessoas",
   "aprendizado_crescimento",
@@ -27,9 +31,11 @@ export const TAB_LABELS: Record<TabKey, string> = {
   lucratividade: "Financeiro",
   execucao_comercial: "Crescimento",
   experiencia_cliente: "Crescimento",
+  marketing: "Marketing",
+  administrativo: "Administrativo",
   produtividade: "Jurídico",
-  gestao_pessoas: "Time ASF",
-  aprendizado_crescimento: "Time ASF",
+  gestao_pessoas: "Pessoas",
+  aprendizado_crescimento: "Pessoas",
 };
 
 export const PERMISSION_LABELS: Record<PermissionType, string> = {

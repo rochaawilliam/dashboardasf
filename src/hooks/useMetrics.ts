@@ -9,7 +9,9 @@ export type MetricCategory =
   | "produtividade" 
   | "gestao_pessoas" 
   | "aprendizado_crescimento"
-  | "execucao_comercial";
+  | "execucao_comercial"
+  | "marketing"
+  | "administrativo";
 
 export type Division = "juridico" | "crescimento" | "marketing" | "administrativo";
 
