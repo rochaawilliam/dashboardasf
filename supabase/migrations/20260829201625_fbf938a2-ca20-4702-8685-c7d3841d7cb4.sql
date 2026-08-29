@@ -1,0 +1,15 @@
+INSERT INTO public.metrics (name, category, division, target_value, current_value, unit, polarity, description) VALUES
+  ('Ativações com Parceiros', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Número de ativações/ações realizadas com parceiros no período.'),
+  ('Parcerias Formalizadas', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Quantidade de novas parcerias formalizadas (contrato ou acordo assinado) no período.'),
+  ('Postagens', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Total de postagens publicadas nas redes sociais no período.'),
+  ('Stories', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Total de stories publicados no período.'),
+  ('Seguidores (Ganho Líquido)', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Ganho líquido de seguidores (novos seguidores menos perdas) no período.'),
+  ('LinkedIn', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Resultado das ações de LinkedIn (seguidores/alcance conforme definição interna).'),
+  ('E-mail Marketing', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Disparos/resultados de e-mail marketing no período.'),
+  ('Avaliações Google Meu Negócio', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Novas avaliações recebidas no Google Meu Negócio no período.'),
+  ('Gravações (Videomaker + Social Media)', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Quantidade de gravações realizadas (videomaker + social media) no período.'),
+  ('Blog', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Artigos de blog publicados no período.'),
+  ('Visitas ao Site', 'marketing', 'marketing', 0, 0, '', 'higher_is_better', 'Total de visitas ao site no período.'),
+  ('Engajamento do Site', 'marketing', 'marketing', 0, 0, '%', 'higher_is_better', 'Taxa de engajamento do site (interações/sessões engajadas).'),
+  ('Investimento em Conversão', 'marketing', 'marketing', 0, 0, 'R$', 'higher_is_better', 'Valor investido em mídia/ações de conversão no período.'),
+  ('Investimento em Branding', 'marketing', 'marketing', 0, 0, 'R$', 'higher_is_better', 'Valor investido em branding no período.');
