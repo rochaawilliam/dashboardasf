@@ -1618,7 +1618,7 @@ const Index = () => {
     }
 
     return merged;
-  }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
+  }, [monthlyValues, pipelineMonthlyValues, cashflowMonthlyValues, marketingSheetData, historyData, selectedMonth, selectedYear, pipelineData, ritualCompletions]);
 
   const mergedAccumulatedValues = useMemo(() => {
     const merged = {
