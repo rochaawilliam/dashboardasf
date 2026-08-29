@@ -1524,6 +1524,17 @@ const Index = () => {
       ...pipelineMonthlyValues,
       ...cashflowMonthlyValues,
     };
+
+    // Marketing: valores realizados vindos da planilha (mensal ou acumulado)
+    if (marketingSheetData) {
+      const mktValues = selectedMonth !== null
+        ? marketingSheetData.months?.[String(selectedMonth)] ?? {}
+        : marketingSheetData.accumulated ?? {};
+      Object.entries(mktValues).forEach(([id, v]) => {
+        merged[id] = v;
+      });
+    }
+    
     
     // Copy spreadsheet formulas to merged object
     Object.keys(cashflowMonthlyValues).forEach(key => {
