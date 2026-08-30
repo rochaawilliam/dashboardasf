@@ -132,6 +132,15 @@ const categoryOrder: MetricCategory[] = [
 "administrativo"];
 
 
+// Remove chaves vazias (undefined/null/0) para que dados vivos tenham prioridade sobre fallbacks
+function pruneEmpty<T extends Record<string, any>>(obj: T): Partial<T> {
+  const out: Record<string, any> = {};
+  Object.entries(obj || {}).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== 0) out[k] = v;
+  });
+  return out as Partial<T>;
+}
+
 const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
 const SDR_ALLOWED_EMAILS = ["william.rocha@asfnegocios.com.br", "jaderjunior@asfnegocios.com.br"];
 
@@ -1255,11 +1264,11 @@ const Index = () => {
       values["966513fb-82c1-4565-8677-58dd7f4a90be"] = 0;
     } else {
       values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
-      values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos || m.recebimentos_dinheiro_pix || 0;
       values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
       
       const headcountAtivo = pipelineData?.training?.headcount ?? 0;
-      const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
+      const fluxoCaixa = values[FLUXO_CAIXA_OPERACIONAL_ID];
       values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
       values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
@@ -1287,7 +1296,7 @@ const Index = () => {
         receita_outras: 0,
         clientes_assessoria: 10
       };
-      s = s ? { ...s, ...fallbackJuly } : fallbackJuly as any;
+      s = s ? { ...fallbackJuly, ...pruneEmpty(s) } : fallbackJuly as any;
     } else if (ms === "2026-08") {
       const fallbackAugust = {
         receita_emp: 48093.38,
@@ -1304,11 +1313,8 @@ const Index = () => {
         receita_tri_contencioso: 0,
         receita_outras: 0,
         clientes_assessoria: 8,
-        total_recebimentos: 108459.97,
-        total_pagamentos: 75921.98,
-        lucratividade_pct: 30
       };
-      s = s ? { ...s, ...fallbackAugust } : fallbackAugust as any;
+      s = s ? { ...fallbackAugust, ...pruneEmpty(s) } : fallbackAugust as any;
 
     }
 
@@ -1318,8 +1324,10 @@ const Index = () => {
                                              (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
                                              (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
                                              (s.receita_outras || 0);
-      values[FLUXO_CAIXA_OPERACIONAL_ID] = s.total_recebimentos || 0;
-      values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
+      // Fluxo de Caixa Operacional sempre vem da planilha de Fluxo de Caixa (integração viva)
+      if (!m) values[FLUXO_CAIXA_OPERACIONAL_ID] = s.total_recebimentos || 0;
+      if (!m?.lucratividade_pct) values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
+
       
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
       const clientesAssessoria = Number(s.clientes_assessoria) || 0;
