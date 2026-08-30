@@ -11,7 +11,11 @@
       "src_components_dashboard_adminuserspanel",
       "src_components_dashboard_adminuserspanel_adminuserspanel",
       "src_components_dashboard_adminuserspanel_user",
+      "src_components_dashboard_dashboardheader",
       "src_components_dashboard_dashboardheader_dashboardheader",
+      "src_components_dashboard_draggablecardwrapper",
+      "src_components_dashboard_draggablecardwrapper_draggablecardwrapperprops",
+      "src_components_dashboard_draggablecardwrapper_subcategoryoption",
       "src_components_dashboard_financialsheetspanel",
       "src_components_dashboard_financialsheetspanel_financialsheetspanel",
       "src_components_dashboard_financialsheetspanel_month_names",
@@ -29,29 +33,36 @@
       "src_components_dashboard_tabpermissionsdialog_tabpermissionsdialog",
       "src_components_dashboard_trainingdashboard",
       "src_components_dashboard_trainingdashboard_trainingdashboardprops",
+      "src_components_dashboard_usermenu",
       "src_components_dashboard_usermenu_usermenu",
       "src_components_protectedroute",
       "src_components_protectedroute_protectedroute",
       "src_components_protectedroute_protectedrouteprops",
+      "src_components_themetoggle",
+      "src_components_themetoggle_themetoggle",
+      "src_components_ui_avatar",
+      "src_components_ui_avatar_avatar",
+      "src_components_ui_avatar_avatarfallback",
+      "src_components_ui_avatar_avatarimage",
       "src_components_ui_badge",
       "src_components_ui_badge_badge",
       "src_components_ui_badge_badgeprops",
       "src_components_ui_badge_badgevariants",
+      "src_components_ui_button",
+      "src_components_ui_button_button",
       "src_components_ui_card",
       "src_components_ui_card_card",
       "src_components_ui_card_cardcontent",
       "src_components_ui_card_carddescription",
       "src_components_ui_card_cardheader",
       "src_components_ui_card_cardtitle",
+      "src_components_ui_dropdown_menu_dropdownmenucontent",
+      "src_components_ui_dropdown_menu_dropdownmenuitem",
       "src_components_ui_skeleton",
       "src_components_ui_skeleton_skeleton",
       "src_components_ui_sonner",
       "src_components_ui_sonner_toaster",
       "src_components_ui_sonner_toasterprops",
-      "src_components_ui_tabs",
-      "src_components_ui_tabs_tabscontent",
-      "src_components_ui_tabs_tabslist",
-      "src_components_ui_tabs_tabstrigger",
       "src_components_ui_toaster_toaster",
       "src_hooks_useauth",
       "src_hooks_useauth_authcontext",
@@ -97,85 +108,8 @@
       "src_pages_profile_profile"
     ],
     "1": [
-      "src_components_dashboard_bulkdataentry",
-      "src_components_dashboard_bulkdataentry_metricentry",
-      "src_components_dashboard_bulkdataentry_trainingentry",
-      "src_components_dashboard_createuserdialog",
-      "src_components_dashboard_createuserdialog_createuserdata",
-      "src_components_dashboard_createuserdialog_createuserdialog",
-      "src_components_dashboard_createuserdialog_createuserdialogprops",
-      "src_components_dashboard_createuserdialog_defaultpermissions",
-      "src_components_dashboard_dataentrymodal",
-      "src_components_dashboard_guidedtour",
-      "src_components_dashboard_guidedtour_autostarttour",
-      "src_components_dashboard_guidedtour_tourbutton",
-      "src_components_dashboard_guidedtour_toursteps",
-      "src_components_dashboard_guidedtour_usetour",
-      "src_components_dashboard_metricdrilldowndialog",
-      "src_components_dashboard_metricdrilldowndialog_all_revenue_component_ids",
-      "src_components_dashboard_metricdrilldowndialog_collaboratorbreakdown",
-      "src_components_dashboard_metricdrilldowndialog_historyentry",
-      "src_components_dashboard_metricdrilldowndialog_iscontractmetric",
-      "src_components_dashboard_metricdrilldowndialog_isforecastmetric",
-      "src_components_dashboard_metricdrilldowndialog_isrevenuemetric",
-      "src_components_dashboard_metricdrilldowndialog_metricdrilldowndialog",
-      "src_components_dashboard_metricdrilldowndialog_metricdrilldowndialogprops",
-      "src_components_dashboard_metricdrilldowndialog_month_names",
-      "src_components_dashboard_metricgoaleditor",
-      "src_components_dashboard_metrichistorymodal",
-      "src_components_dashboard_metrichistorymodal_historyentry",
-      "src_components_dashboard_metrichistorymodal_metrichistorymodalprops",
-      "src_components_dashboard_tabpermissionsdialog",
-      "src_components_dashboard_tabpermissionsdialog_defaultpermissions",
-      "src_components_dashboard_tabpermissionsdialog_tabpermissionsdialogprops",
-      "src_components_dashboard_trainingcardeditable",
-      "src_components_ui_alert_dialog",
-      "src_components_ui_alert_dialog_alertdialogaction",
-      "src_components_ui_alert_dialog_alertdialogcancel",
-      "src_components_ui_alert_dialog_alertdialogcontent",
-      "src_components_ui_alert_dialog_alertdialogdescription",
-      "src_components_ui_alert_dialog_alertdialogfooter",
-      "src_components_ui_alert_dialog_alertdialogheader",
-      "src_components_ui_alert_dialog_alertdialogoverlay",
-      "src_components_ui_alert_dialog_alertdialogtitle",
-      "src_components_ui_button",
-      "src_components_ui_button_button",
-      "src_components_ui_button_buttonvariants",
-      "src_components_ui_calendar",
-      "src_components_ui_calendar_calendar",
-      "src_components_ui_calendar_calendarprops",
-      "src_components_ui_checkbox",
-      "src_components_ui_checkbox_checkbox",
-      "src_components_ui_dialog",
-      "src_components_ui_dialog_dialogcontent",
-      "src_components_ui_dialog_dialogdescription",
-      "src_components_ui_dialog_dialogfooter",
-      "src_components_ui_dialog_dialogheader",
-      "src_components_ui_dialog_dialogoverlay",
-      "src_components_ui_dialog_dialogtitle",
-      "src_components_ui_input",
-      "src_components_ui_input_input",
-      "src_components_ui_label",
-      "src_components_ui_label_label",
-      "src_components_ui_label_labelvariants",
-      "src_components_ui_table",
-      "src_components_ui_table_table",
-      "src_components_ui_table_tablebody",
-      "src_components_ui_table_tablecaption",
-      "src_components_ui_table_tablecell",
-      "src_components_ui_table_tablefooter",
-      "src_components_ui_table_tablehead",
-      "src_components_ui_table_tableheader",
-      "src_components_ui_table_tablerow",
-      "src_hooks_usetabpermissions_all_tabs",
-      "src_hooks_usetabpermissions_tab_labels",
-      "src_hooks_usetabpermissions_tabkey",
-      "src_hooks_usetabpermissions_tabpermissionset"
-    ],
-    "2": [
       "src_components_dashboard_auditpanel",
       "src_components_dashboard_auditpanel_auditpanel",
-      "src_components_dashboard_auditpanel_auditpanelprops",
       "src_components_dashboard_auditpanel_sourceinfo",
       "src_components_dashboard_mobiledrawer",
       "src_components_dashboard_mobiledrawer_categories",
@@ -197,8 +131,6 @@
       "src_components_dashboard_usersettingspanel_settingstoggle",
       "src_components_dashboard_usersettingspanel_settingstoggleprops",
       "src_components_dashboard_usersettingspanel_usersettingspanel",
-      "src_components_themetoggle",
-      "src_components_themetoggle_themetoggle",
       "src_components_ui_sheet",
       "src_components_ui_sheet_sheetcontent",
       "src_components_ui_sheet_sheetcontentprops",
@@ -239,6 +171,70 @@
       "src_i18n_translations_pt_br",
       "src_i18n_translations_pt_br_ptbr",
       "src_i18n_translations_pt_br_translationkeys"
+    ],
+    "2": [
+      "src_components_dashboard_bulkdataentry",
+      "src_components_dashboard_bulkdataentry_metricentry",
+      "src_components_dashboard_bulkdataentry_trainingentry",
+      "src_components_dashboard_createuserdialog",
+      "src_components_dashboard_createuserdialog_createuserdata",
+      "src_components_dashboard_createuserdialog_createuserdialog",
+      "src_components_dashboard_createuserdialog_createuserdialogprops",
+      "src_components_dashboard_createuserdialog_defaultpermissions",
+      "src_components_dashboard_dataentrymodal",
+      "src_components_dashboard_goalsperformanceanalysis",
+      "src_components_dashboard_goalsperformanceanalysis_alertitem",
+      "src_components_dashboard_goalsperformanceanalysis_alertlevel",
+      "src_components_dashboard_goalsperformanceanalysis_alertspanel",
+      "src_components_dashboard_goalsperformanceanalysis_analysistext",
+      "src_components_dashboard_goalsperformanceanalysis_checklistpanel",
+      "src_components_dashboard_goalsperformanceanalysis_gaugechart",
+      "src_components_dashboard_goalsperformanceanalysis_goalsanalysisprops",
+      "src_components_dashboard_goalsperformanceanalysis_goalsperformanceanalysis",
+      "src_components_dashboard_goalsperformanceanalysis_goalstrendchart",
+      "src_components_dashboard_goalsperformanceanalysis_isnonaccumulative",
+      "src_components_dashboard_goalsperformanceanalysis_month_names",
+      "src_components_dashboard_goalsperformanceanalysis_nonaccumulativekeywords",
+      "src_components_dashboard_goalsperformanceanalysis_renderinline",
+      "src_components_dashboard_goalsperformanceanalysis_short_months",
+      "src_components_dashboard_goalsperformanceanalysis_snapshotvaluefor",
+      "src_components_dashboard_goalsperformanceanalysis_splitanalysis",
+      "src_components_dashboard_goalsperformanceanalysis_status_styles",
+      "src_components_dashboard_goalsperformanceanalysis_statusof",
+      "src_components_dashboard_goalsperformanceanalysis_stripmarkdown",
+      "src_components_dashboard_notificationtoggle",
+      "src_components_dashboard_notificationtoggle_notificationtoggle",
+      "src_components_dashboard_notificationtoggle_permissionstatus",
+      "src_components_dashboard_tabpermissionsdialog",
+      "src_components_dashboard_tabpermissionsdialog_defaultpermissions",
+      "src_components_dashboard_tabpermissionsdialog_tabpermissionsdialogprops",
+      "src_components_ui_calendar",
+      "src_components_ui_calendar_calendar",
+      "src_components_ui_calendar_calendarprops",
+      "src_components_ui_checkbox",
+      "src_components_ui_checkbox_checkbox",
+      "src_components_ui_dialog",
+      "src_components_ui_dialog_dialogcontent",
+      "src_components_ui_dialog_dialogdescription",
+      "src_components_ui_dialog_dialogfooter",
+      "src_components_ui_dialog_dialogheader",
+      "src_components_ui_dialog_dialogoverlay",
+      "src_components_ui_dialog_dialogtitle",
+      "src_components_ui_input",
+      "src_components_ui_input_input",
+      "src_components_ui_label",
+      "src_components_ui_label_label",
+      "src_components_ui_label_labelvariants",
+      "src_components_ui_popover",
+      "src_components_ui_popover_popovercontent",
+      "src_components_ui_textarea",
+      "src_components_ui_textarea_textarea",
+      "src_components_ui_textarea_textareaprops",
+      "src_hooks_usetabpermissions_all_tabs",
+      "src_hooks_usetabpermissions_tab_labels",
+      "src_hooks_usetabpermissions_tabkey",
+      "src_hooks_usetabpermissions_tabpermissionset",
+      "src_lib_utils"
     ],
     "3": [
       "supabase_functions_analyze_goals_index",
@@ -289,10 +285,14 @@
       "supabase_functions_toggle_user_role_index"
     ],
     "4": [
-      "src_components_ui_accordion",
-      "src_components_ui_accordion_accordioncontent",
-      "src_components_ui_accordion_accordionitem",
-      "src_components_ui_accordion_accordiontrigger",
+      "src_components_ui_breadcrumb",
+      "src_components_ui_breadcrumb_breadcrumb",
+      "src_components_ui_breadcrumb_breadcrumbellipsis",
+      "src_components_ui_breadcrumb_breadcrumbitem",
+      "src_components_ui_breadcrumb_breadcrumblink",
+      "src_components_ui_breadcrumb_breadcrumblist",
+      "src_components_ui_breadcrumb_breadcrumbpage",
+      "src_components_ui_breadcrumb_breadcrumbseparator",
       "src_components_ui_card_cardfooter",
       "src_components_ui_context_menu",
       "src_components_ui_context_menu_contextmenucheckboxitem",
@@ -320,9 +320,6 @@
       "src_components_ui_menubar_menubartrigger",
       "src_components_ui_progress",
       "src_components_ui_progress_progress",
-      "src_components_ui_radio_group",
-      "src_components_ui_radio_group_radiogroup",
-      "src_components_ui_radio_group_radiogroupitem",
       "src_components_ui_resizable",
       "src_components_ui_resizable_resizablehandle",
       "src_components_ui_resizable_resizablepanelgroup",
@@ -331,6 +328,47 @@
       "src_lib_utils_cn"
     ],
     "5": [
+      "src_components_dashboard_metriccardmonthly",
+      "src_components_dashboard_metriccardmonthly_calculatetrend",
+      "src_components_dashboard_metriccardmonthly_getprogressbordercolor",
+      "src_components_dashboard_metriccardmonthly_getstatus",
+      "src_components_dashboard_metriccardmonthly_getstatuscolor",
+      "src_components_dashboard_metriccardmonthly_inversemetrics",
+      "src_components_dashboard_metriccardmonthly_isnonaccumulativemetric",
+      "src_components_dashboard_metriccardmonthly_metriccardmonthly",
+      "src_components_dashboard_metriccardmonthly_nonaccumulativekeywords",
+      "src_components_dashboard_metricdrilldowndialog",
+      "src_components_dashboard_metricdrilldowndialog_all_revenue_component_ids",
+      "src_components_dashboard_metricdrilldowndialog_collaboratorbreakdown",
+      "src_components_dashboard_metricdrilldowndialog_historyentry",
+      "src_components_dashboard_metricdrilldowndialog_iscontractmetric",
+      "src_components_dashboard_metricdrilldowndialog_isforecastmetric",
+      "src_components_dashboard_metricdrilldowndialog_isrevenuemetric",
+      "src_components_dashboard_metricdrilldowndialog_metricdrilldowndialog",
+      "src_components_dashboard_metricdrilldowndialog_month_names",
+      "src_components_dashboard_metrichistorymodal",
+      "src_components_dashboard_metrichistorymodal_historyentry",
+      "src_components_ui_alert_dialog",
+      "src_components_ui_alert_dialog_alertdialogaction",
+      "src_components_ui_alert_dialog_alertdialogcancel",
+      "src_components_ui_alert_dialog_alertdialogcontent",
+      "src_components_ui_alert_dialog_alertdialogdescription",
+      "src_components_ui_alert_dialog_alertdialogfooter",
+      "src_components_ui_alert_dialog_alertdialogheader",
+      "src_components_ui_alert_dialog_alertdialogoverlay",
+      "src_components_ui_alert_dialog_alertdialogtitle",
+      "src_components_ui_button_buttonvariants",
+      "src_components_ui_table",
+      "src_components_ui_table_table",
+      "src_components_ui_table_tablebody",
+      "src_components_ui_table_tablecaption",
+      "src_components_ui_table_tablecell",
+      "src_components_ui_table_tablefooter",
+      "src_components_ui_table_tablehead",
+      "src_components_ui_table_tableheader",
+      "src_components_ui_table_tablerow"
+    ],
+    "6": [
       "src_components_dashboard_bulkdataentry_bulkdataentryprops",
       "src_components_dashboard_dataentrymodal_dataentrymodal",
       "src_components_dashboard_dataentrysection",
@@ -343,7 +381,6 @@
       "src_components_dashboard_metrichistorymodal_metrichistorymodal",
       "src_components_dashboard_monthselector",
       "src_components_dashboard_monthselector_months",
-      "src_components_dashboard_monthselector_monthselector",
       "src_components_dashboard_monthselector_monthselectorprops",
       "src_components_dashboard_swipeabletabs",
       "src_components_dashboard_swipeabletabs_swipeabletabs",
@@ -368,45 +405,6 @@
       "src_hooks_usemetrics_division",
       "src_hooks_usemetrics_filters",
       "src_hooks_usemetrics_traininghours"
-    ],
-    "6": [
-      "src_components_dashboard_dashboardheader",
-      "src_components_dashboard_draggablecardwrapper",
-      "src_components_dashboard_draggablecardwrapper_draggablecardwrapper",
-      "src_components_dashboard_draggablecardwrapper_draggablecardwrapperprops",
-      "src_components_dashboard_draggablecardwrapper_subcategoryoption",
-      "src_components_dashboard_notificationbell",
-      "src_components_dashboard_notificationbell_alertseverity",
-      "src_components_dashboard_notificationbell_calculatetrend",
-      "src_components_dashboard_notificationbell_getalertseverity",
-      "src_components_dashboard_notificationbell_getmessage",
-      "src_components_dashboard_notificationbell_getseveritybadge",
-      "src_components_dashboard_notificationbell_getseverityicon",
-      "src_components_dashboard_notificationbell_gettrendicon",
-      "src_components_dashboard_notificationbell_inversemetrics",
-      "src_components_dashboard_notificationbell_metricalert",
-      "src_components_dashboard_notificationbell_notificationbell",
-      "src_components_dashboard_notificationbell_trendtype",
-      "src_components_dashboard_usermenu",
-      "src_components_ui_avatar",
-      "src_components_ui_avatar_avatar",
-      "src_components_ui_avatar_avatarfallback",
-      "src_components_ui_avatar_avatarimage",
-      "src_components_ui_dropdown_menu",
-      "src_components_ui_dropdown_menu_dropdownmenucheckboxitem",
-      "src_components_ui_dropdown_menu_dropdownmenucontent",
-      "src_components_ui_dropdown_menu_dropdownmenuitem",
-      "src_components_ui_dropdown_menu_dropdownmenulabel",
-      "src_components_ui_dropdown_menu_dropdownmenuradioitem",
-      "src_components_ui_dropdown_menu_dropdownmenuseparator",
-      "src_components_ui_dropdown_menu_dropdownmenushortcut",
-      "src_components_ui_dropdown_menu_dropdownmenusubcontent",
-      "src_components_ui_dropdown_menu_dropdownmenusubtrigger",
-      "src_hooks_usenotificationstate",
-      "src_hooks_usenotificationstate_loadstate",
-      "src_hooks_usenotificationstate_notificationstate",
-      "src_hooks_usenotificationstate_savestate",
-      "src_hooks_usenotificationstate_usenotificationstate"
     ],
     "7": [
       "supabase_functions_sync_pipeline_data_index",
@@ -475,6 +473,7 @@
       "src_components_ui_sidebar_usesidebar"
     ],
     "9": [
+      "src_components_dashboard_draggablecardwrapper_draggablecardwrapper",
       "src_components_dashboard_printstyles",
       "src_components_dashboard_printstyles_printstyles",
       "src_components_dashboard_sectionheader",
@@ -484,7 +483,6 @@
       "src_components_dashboard_subcategoryheader",
       "src_components_dashboard_subcategoryheader_subcategoryheader",
       "src_components_dashboard_subcategoryheader_subcategoryheaderprops",
-      "src_components_dashboard_trainingcardeditable_trainingcardeditable",
       "src_components_dashboard_trainingdashboard_trainingdashboard",
       "src_hooks_usefinancialspreadsheetsdata",
       "src_hooks_usefinancialspreadsheetsdata_financialspreadsheetdata",
@@ -583,56 +581,33 @@
       "src_hooks_usepipelinedata_trainingtargets",
       "src_hooks_usepipelinedata_trainingtheme",
       "src_hooks_usepipelinedata_usepipelinedata",
-      "src_hooks_usesubcategories_usesubcategoryassignments"
-    ],
-    "13": [
-      "src_components_dashboard_goalsperformanceanalysis",
-      "src_components_dashboard_goalsperformanceanalysis_alertitem",
-      "src_components_dashboard_goalsperformanceanalysis_alertlevel",
-      "src_components_dashboard_goalsperformanceanalysis_alertspanel",
-      "src_components_dashboard_goalsperformanceanalysis_analysistext",
-      "src_components_dashboard_goalsperformanceanalysis_checklistpanel",
-      "src_components_dashboard_goalsperformanceanalysis_gaugechart",
-      "src_components_dashboard_goalsperformanceanalysis_goalsperformanceanalysis",
-      "src_components_dashboard_goalsperformanceanalysis_goalstrendchart",
-      "src_components_dashboard_goalsperformanceanalysis_isnonaccumulative",
-      "src_components_dashboard_goalsperformanceanalysis_month_names",
-      "src_components_dashboard_goalsperformanceanalysis_nonaccumulativekeywords",
-      "src_components_dashboard_goalsperformanceanalysis_renderinline",
-      "src_components_dashboard_goalsperformanceanalysis_short_months",
-      "src_components_dashboard_goalsperformanceanalysis_snapshotvaluefor",
-      "src_components_dashboard_goalsperformanceanalysis_splitanalysis",
-      "src_components_dashboard_goalsperformanceanalysis_status_styles",
-      "src_components_dashboard_goalsperformanceanalysis_statusof",
-      "src_components_dashboard_goalsperformanceanalysis_stripmarkdown",
-      "src_components_ui_textarea",
-      "src_components_ui_textarea_textarea",
-      "src_components_ui_textarea_textareaprops"
-    ],
-    "14": [
-      "src_components_dashboard_bulkdataentry_bulkdataentry",
-      "src_components_dashboard_subcategorymanagerdialog",
-      "src_components_dashboard_subcategorymanagerdialog_categorylabels",
-      "src_components_dashboard_subcategorymanagerdialog_categoryorder",
-      "src_components_dashboard_subcategorymanagerdialog_subcategorymanagerdialog",
-      "src_components_dashboard_subcategorymanagerdialog_subcategorymanagerdialogprops",
-      "src_hooks_usemetrics_metriccategory",
-      "src_hooks_usesubcategories",
-      "src_hooks_usesubcategories_subcategory",
-      "src_hooks_usesubcategories_subcategoryassignment",
-      "src_hooks_usesubcategories_usebulkreordersubcategories",
-      "src_hooks_usesubcategories_usebulkupdateassignments",
-      "src_hooks_usesubcategories_usecreatesubcategory",
-      "src_hooks_usesubcategories_usedeletesubcategory",
-      "src_hooks_usesubcategories_usesubcategories",
-      "src_hooks_usesubcategories_useupdateassignment",
-      "src_hooks_usesubcategories_useupdatesubcategory",
-      "src_lib_error_handler",
-      "src_lib_error_handler_sanitizeerror",
-      "src_utils_metricorganizer",
+      "src_hooks_usesubcategories_usesubcategoryassignments",
       "src_utils_metricorganizer_organizemetricsbysubcategory"
     ],
-    "15": [
+    "13": [
+      "src_components_dashboard_auditpanel_auditpanelprops",
+      "src_components_dashboard_circularprogresscard_circularprogresscardprops",
+      "src_components_dashboard_commissiontab_commissiontabprops",
+      "src_components_dashboard_dashboardheader_dashboardheaderprops",
+      "src_components_dashboard_dataentrymodal_dataentrymodalprops",
+      "src_components_dashboard_metriccardmonthly_metriccardmonthlyprops",
+      "src_components_dashboard_metricdrilldowndialog_metricdrilldowndialogprops",
+      "src_components_dashboard_metrichistorymodal_metrichistorymodalprops",
+      "src_components_dashboard_monthssummary",
+      "src_components_dashboard_monthssummary_monthnames",
+      "src_components_dashboard_monthssummary_monthnamesfull",
+      "src_components_dashboard_monthssummary_monthssummary",
+      "src_components_dashboard_monthssummary_monthssummaryprops",
+      "src_components_dashboard_notificationbell_metricalert",
+      "src_components_dashboard_notificationbell_notificationbellprops",
+      "src_components_dashboard_salesfunnel_salesfunnelprops",
+      "src_components_dashboard_sparkline_sparklineprops",
+      "src_hooks_usemetrics_metric",
+      "src_hooks_usemetrics_metrichistory",
+      "src_hooks_usemetrics_monthlytarget",
+      "src_utils_metricorganizer_groupedsubcategory"
+    ],
+    "14": [
       "src_components_dashboard_ritualchecklist",
       "src_components_dashboard_ritualchecklist_freq_colors",
       "src_components_dashboard_ritualchecklist_ritualchecklist",
@@ -655,36 +630,34 @@
       "src_hooks_useritualcompletions_useritualcompletions",
       "src_hooks_useritualcompletions_usetoggleritualcompletion"
     ],
-    "16": [
-      "src_components_dashboard_metriccardeditable",
-      "src_components_dashboard_metriccardeditable_getstatus",
-      "src_components_dashboard_metriccardeditable_getstatusbg",
-      "src_components_dashboard_metriccardeditable_getstatuscolor",
-      "src_components_dashboard_metriccardeditable_inversemetrics",
-      "src_components_dashboard_metriccardeditable_metriccardeditable",
-      "src_components_dashboard_metriccardeditable_metriccardeditableprops",
-      "src_components_dashboard_metricgoaleditor_metricgoaleditor",
-      "src_components_dashboard_summarycardslive",
-      "src_components_dashboard_summarycardslive_getchange",
-      "src_components_dashboard_summarycardslive_inversemetrics",
-      "src_components_dashboard_summarycardslive_summarycardslive",
-      "src_components_dashboard_summarycardslive_summarycardsliveprops",
-      "src_components_dashboard_summarycardslive_summaryconfig",
-      "src_hooks_usemetrics_useupdatemetric",
-      "src_utils_formatters",
-      "src_utils_formatters_formatcurrency",
-      "src_utils_formatters_formatmetricvalue",
-      "src_utils_formatters_formatpercent"
+    "15": [
+      "src_components_dashboard_bulkdataentry_bulkdataentry",
+      "src_components_dashboard_subcategorymanagerdialog",
+      "src_components_dashboard_subcategorymanagerdialog_categorylabels",
+      "src_components_dashboard_subcategorymanagerdialog_categoryorder",
+      "src_components_dashboard_subcategorymanagerdialog_subcategorymanagerdialog",
+      "src_components_dashboard_subcategorymanagerdialog_subcategorymanagerdialogprops",
+      "src_hooks_usemetrics_metriccategory",
+      "src_hooks_usesubcategories",
+      "src_hooks_usesubcategories_subcategory",
+      "src_hooks_usesubcategories_subcategoryassignment",
+      "src_hooks_usesubcategories_usebulkreordersubcategories",
+      "src_hooks_usesubcategories_usebulkupdateassignments",
+      "src_hooks_usesubcategories_usecreatesubcategory",
+      "src_hooks_usesubcategories_usedeletesubcategory",
+      "src_hooks_usesubcategories_usesubcategories",
+      "src_hooks_usesubcategories_useupdateassignment",
+      "src_hooks_usesubcategories_useupdatesubcategory",
+      "src_lib_error_handler",
+      "src_lib_error_handler_sanitizeerror",
+      "src_utils_metricorganizer"
     ],
-    "17": [
+    "16": [
       "src_components_dashboard_metricchart",
       "src_components_dashboard_metricchart_colors",
       "src_components_dashboard_metricchart_metricchart",
       "src_components_dashboard_metricchart_metricchartprops",
-      "src_components_dashboard_monthssummary",
-      "src_components_dashboard_monthssummary_monthnames",
-      "src_components_dashboard_monthssummary_monthnamesfull",
-      "src_components_dashboard_monthssummary_monthssummary",
+      "src_components_dashboard_monthselector_monthselector",
       "src_components_dashboard_paceindicator",
       "src_components_dashboard_paceindicator_monthnames",
       "src_components_dashboard_paceindicator_paceindicator",
@@ -692,10 +665,35 @@
       "src_components_dashboard_sparkline",
       "src_components_dashboard_sparkline_smoothpath",
       "src_components_dashboard_sparkline_sparkline",
-      "src_components_dashboard_sparkline_sparklineprops",
+      "src_components_dashboard_trendindicator",
+      "src_components_dashboard_trendindicator_calculatetrend",
+      "src_components_dashboard_trendindicator_trendindicator",
+      "src_components_dashboard_trendindicator_trendindicatorprops",
+      "src_components_dashboard_trendindicator_trendtype",
       "src_utils_dateutils",
       "src_utils_dateutils_getrefmonthyear",
       "src_utils_dateutils_parselocaldate"
+    ],
+    "17": [
+      "src_components_dashboard_circularprogresscard",
+      "src_components_dashboard_circularprogresscard_band_hsl",
+      "src_components_dashboard_circularprogresscard_circularprogress",
+      "src_components_dashboard_circularprogresscard_circularprogresscard",
+      "src_components_dashboard_circularprogresscard_getinterpolatedcolor",
+      "src_components_dashboard_circularprogresscard_getstagelabel",
+      "src_components_dashboard_circularprogresscard_getstatus",
+      "src_components_dashboard_circularprogresscard_interpolatehsl",
+      "src_components_dashboard_circularprogresscard_isnonaccumulativemetric",
+      "src_components_dashboard_circularprogresscard_nonaccumulativekeywords",
+      "src_components_dashboard_circularprogresscard_segment_colors",
+      "src_components_dashboard_guidedtour",
+      "src_components_dashboard_guidedtour_autostarttour",
+      "src_components_dashboard_guidedtour_tourbutton",
+      "src_components_dashboard_guidedtour_toursteps",
+      "src_components_dashboard_guidedtour_usetour",
+      "src_components_dashboard_salesfunnel",
+      "src_components_ui_tooltip",
+      "src_components_ui_tooltip_tooltipcontent"
     ],
     "18": [
       "ref_es2023",
@@ -723,7 +721,6 @@
       "src_hooks_usemetrics_usemetrics",
       "src_hooks_usemetrics_usemonthlytargets",
       "src_hooks_usemetrics_usetraininghours",
-      "src_hooks_usemetrics_useupdatetraininghours",
       "src_hooks_useofflinemode",
       "src_hooks_useofflinemode_cache_keys",
       "src_hooks_useofflinemode_offlineindicator",
@@ -734,6 +731,7 @@
       "src_hooks_useofflinemode_useonlinestatus",
       "src_hooks_useofflinemode_usependingmutations",
       "src_pages_index_index",
+      "src_pages_index_pruneempty",
       "src_routes_index",
       "src_routes_index_app"
     ],
@@ -757,41 +755,40 @@
       "components_tsx"
     ],
     "21": [
-      "src_components_dashboard_alertssummary",
-      "src_components_dashboard_alertssummary_abbreviations",
-      "src_components_dashboard_alertssummary_alertssummary",
-      "src_components_dashboard_alertssummary_alertssummaryprops",
-      "src_components_dashboard_alertssummary_getabbreviatedname",
-      "src_components_dashboard_alertssummary_getstatus",
-      "src_components_dashboard_alertssummary_inversemetrics",
-      "src_components_dashboard_notificationtoggle",
-      "src_components_dashboard_notificationtoggle_notificationtoggle",
-      "src_components_dashboard_notificationtoggle_permissionstatus",
-      "src_components_dashboard_trendindicator",
-      "src_components_dashboard_trendindicator_calculatetrend",
-      "src_components_dashboard_trendindicator_trendindicator",
-      "src_components_dashboard_trendindicator_trendindicatorprops",
-      "src_components_dashboard_trendindicator_trendtype",
-      "src_components_ui_popover",
-      "src_components_ui_popover_popovercontent"
+      "src_components_dashboard_metricgoaleditor",
+      "src_components_dashboard_metricgoaleditor_metricgoaleditor",
+      "src_components_dashboard_metricgoaleditor_metricgoaleditorprops",
+      "src_components_dashboard_salesfunnel_salesfunnel",
+      "src_components_dashboard_summarycardslive",
+      "src_components_dashboard_summarycardslive_getchange",
+      "src_components_dashboard_summarycardslive_inversemetrics",
+      "src_components_dashboard_summarycardslive_summarycardslive",
+      "src_components_dashboard_summarycardslive_summarycardsliveprops",
+      "src_components_dashboard_summarycardslive_summaryconfig",
+      "src_utils_formatters",
+      "src_utils_formatters_formatcompactnumber",
+      "src_utils_formatters_formatcurrency",
+      "src_utils_formatters_formatmetricvalue",
+      "src_utils_formatters_formatnumber",
+      "src_utils_formatters_formatpercent"
     ],
     "22": [
-      "src_components_dashboard_circularprogresscard",
-      "src_components_dashboard_circularprogresscard_band_hsl",
-      "src_components_dashboard_circularprogresscard_circularprogress",
-      "src_components_dashboard_circularprogresscard_circularprogresscard",
-      "src_components_dashboard_circularprogresscard_getinterpolatedcolor",
-      "src_components_dashboard_circularprogresscard_getstagelabel",
-      "src_components_dashboard_circularprogresscard_getstatus",
-      "src_components_dashboard_circularprogresscard_interpolatehsl",
-      "src_components_dashboard_circularprogresscard_isnonaccumulativemetric",
-      "src_components_dashboard_circularprogresscard_nonaccumulativekeywords",
-      "src_components_dashboard_circularprogresscard_segment_colors",
-      "src_components_dashboard_salesfunnel",
-      "src_components_dashboard_salesfunnel_salesfunnel",
-      "src_components_ui_tooltip",
-      "src_components_ui_tooltip_tooltipcontent",
-      "src_lib_utils"
+      "src_components_dashboard_notificationbell",
+      "src_components_dashboard_notificationbell_alertseverity",
+      "src_components_dashboard_notificationbell_calculatetrend",
+      "src_components_dashboard_notificationbell_getalertseverity",
+      "src_components_dashboard_notificationbell_getmessage",
+      "src_components_dashboard_notificationbell_getseveritybadge",
+      "src_components_dashboard_notificationbell_getseverityicon",
+      "src_components_dashboard_notificationbell_gettrendicon",
+      "src_components_dashboard_notificationbell_inversemetrics",
+      "src_components_dashboard_notificationbell_notificationbell",
+      "src_components_dashboard_notificationbell_trendtype",
+      "src_hooks_usenotificationstate",
+      "src_hooks_usenotificationstate_loadstate",
+      "src_hooks_usenotificationstate_notificationstate",
+      "src_hooks_usenotificationstate_savestate",
+      "src_hooks_usenotificationstate_usenotificationstate"
     ],
     "23": [
       "class_variance_authority",
@@ -811,39 +808,6 @@
       "react_resizable_panels"
     ],
     "24": [
-      "src_components_dashboard_circularprogresscard_circularprogresscardprops",
-      "src_components_dashboard_commissiontab_commissiontabprops",
-      "src_components_dashboard_dashboardheader_dashboardheaderprops",
-      "src_components_dashboard_dataentrymodal_dataentrymodalprops",
-      "src_components_dashboard_goalsperformanceanalysis_goalsanalysisprops",
-      "src_components_dashboard_metriccardmonthly_metriccardmonthlyprops",
-      "src_components_dashboard_metricgoaleditor_metricgoaleditorprops",
-      "src_components_dashboard_monthssummary_monthssummaryprops",
-      "src_components_dashboard_notificationbell_notificationbellprops",
-      "src_components_dashboard_salesfunnel_salesfunnelprops",
-      "src_components_dashboard_sdrcommissiontab_sdrcommissiontabprops",
-      "src_hooks_usemetrics_metric",
-      "src_hooks_usemetrics_metrichistory",
-      "src_hooks_usemetrics_monthlytarget",
-      "src_utils_metricorganizer_groupedsubcategory"
-    ],
-    "25": [
-      "src_components_dashboard_sdrcommissiontab",
-      "src_components_dashboard_sdrcommissiontab_commissioncolumn",
-      "src_components_dashboard_sdrcommissiontab_commissioncolumnprops",
-      "src_components_dashboard_sdrcommissiontab_gethalfcommission",
-      "src_components_dashboard_sdrcommissiontab_metricgroupcard",
-      "src_components_dashboard_sdrcommissiontab_metricgroupcardprops",
-      "src_components_dashboard_sdrcommissiontab_pctcolor",
-      "src_components_dashboard_sdrcommissiontab_progressbar",
-      "src_components_dashboard_sdrcommissiontab_sdr_metric_ids",
-      "src_components_dashboard_sdrcommissiontab_sdr_tiers",
-      "src_components_dashboard_sdrcommissiontab_sdrcommissiontab",
-      "src_components_dashboard_trainingcardeditable_trainingitem",
-      "src_utils_formatters_formatcompactnumber",
-      "src_utils_formatters_formatnumber"
-    ],
-    "26": [
       "src_components_ui_carousel",
       "src_components_ui_carousel_carousel",
       "src_components_ui_carousel_carouselapi",
@@ -859,7 +823,21 @@
       "src_components_ui_carousel_usecarousel",
       "src_components_ui_carousel_usecarouselparameters"
     ],
-    "27": [
+    "25": [
+      "src_components_dashboard_sdrcommissiontab",
+      "src_components_dashboard_sdrcommissiontab_commissioncolumn",
+      "src_components_dashboard_sdrcommissiontab_commissioncolumnprops",
+      "src_components_dashboard_sdrcommissiontab_gethalfcommission",
+      "src_components_dashboard_sdrcommissiontab_metricgroupcard",
+      "src_components_dashboard_sdrcommissiontab_metricgroupcardprops",
+      "src_components_dashboard_sdrcommissiontab_pctcolor",
+      "src_components_dashboard_sdrcommissiontab_progressbar",
+      "src_components_dashboard_sdrcommissiontab_sdr_metric_ids",
+      "src_components_dashboard_sdrcommissiontab_sdr_tiers",
+      "src_components_dashboard_sdrcommissiontab_sdrcommissiontab",
+      "src_components_dashboard_sdrcommissiontab_sdrcommissiontabprops"
+    ],
+    "26": [
       "src_components_ui_form",
       "src_components_ui_form_formcontrol",
       "src_components_ui_form_formdescription",
@@ -873,7 +851,7 @@
       "src_components_ui_form_formmessage",
       "src_components_ui_form_useformfield"
     ],
-    "28": [
+    "27": [
       "autoprefixer",
       "globals",
       "package_devdependencies",
@@ -886,7 +864,7 @@
       "typescript",
       "vitest"
     ],
-    "29": [
+    "28": [
       "src_components_ui_chart",
       "src_components_ui_chart_chartconfig",
       "src_components_ui_chart_chartcontainer",
@@ -899,7 +877,7 @@
       "src_components_ui_chart_themes",
       "src_components_ui_chart_usechart"
     ],
-    "30": [
+    "29": [
       "src_components_ui_command",
       "src_components_ui_command_command",
       "src_components_ui_command_commanddialog",
@@ -912,7 +890,7 @@
       "src_components_ui_command_commandseparator",
       "src_components_ui_command_commandshortcut"
     ],
-    "31": [
+    "30": [
       "src_integrations_supabase_types",
       "src_integrations_supabase_types_compositetypes",
       "src_integrations_supabase_types_constants",
@@ -925,7 +903,7 @@
       "src_integrations_supabase_types_tablesinsert",
       "src_integrations_supabase_types_tablesupdate"
     ],
-    "32": [
+    "31": [
       "tsconfig",
       "tsconfig_compileroptions",
       "tsconfig_compileroptions_allowjs",
@@ -938,7 +916,7 @@
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "33": [
+    "32": [
       "src_components_dashboard_alertcenter",
       "src_components_dashboard_alertcenter_alertcenter",
       "src_components_dashboard_alertcenter_alertcenterprops",
@@ -950,7 +928,7 @@
       "src_components_dashboard_alertcenter_metricalert",
       "src_components_dashboard_alertcenter_trendtype"
     ],
-    "34": [
+    "33": [
       "src_components_dashboard_notificationtoggle_arenotificationsenabled",
       "src_hooks_usemetricnotifications",
       "src_hooks_usemetricnotifications_checkgoalachieved",
@@ -962,7 +940,7 @@
       "src_hooks_usemetricnotifications_requestnotificationpermission",
       "src_hooks_usemetricnotifications_usemetricnotifications"
     ],
-    "35": [
+    "34": [
       "src_components_ui_button_buttonprops",
       "src_components_ui_pagination",
       "src_components_ui_pagination_pagination",
@@ -974,18 +952,7 @@
       "src_components_ui_pagination_paginationnext",
       "src_components_ui_pagination_paginationprevious"
     ],
-    "36": [
-      "src_components_dashboard_metriccardmonthly",
-      "src_components_dashboard_metriccardmonthly_calculatetrend",
-      "src_components_dashboard_metriccardmonthly_getprogressbordercolor",
-      "src_components_dashboard_metriccardmonthly_getstatus",
-      "src_components_dashboard_metriccardmonthly_getstatuscolor",
-      "src_components_dashboard_metriccardmonthly_inversemetrics",
-      "src_components_dashboard_metriccardmonthly_isnonaccumulativemetric",
-      "src_components_dashboard_metriccardmonthly_metriccardmonthly",
-      "src_components_dashboard_metriccardmonthly_nonaccumulativekeywords"
-    ],
-    "37": [
+    "35": [
       "package_scripts",
       "package_scripts_build",
       "package_scripts_build_dev",
@@ -995,17 +962,17 @@
       "package_scripts_test",
       "package_scripts_test_watch"
     ],
-    "38": [
-      "src_components_ui_breadcrumb",
-      "src_components_ui_breadcrumb_breadcrumb",
-      "src_components_ui_breadcrumb_breadcrumbellipsis",
-      "src_components_ui_breadcrumb_breadcrumbitem",
-      "src_components_ui_breadcrumb_breadcrumblink",
-      "src_components_ui_breadcrumb_breadcrumblist",
-      "src_components_ui_breadcrumb_breadcrumbpage",
-      "src_components_ui_breadcrumb_breadcrumbseparator"
+    "36": [
+      "src_components_dashboard_metriccardeditable",
+      "src_components_dashboard_metriccardeditable_getstatus",
+      "src_components_dashboard_metriccardeditable_getstatusbg",
+      "src_components_dashboard_metriccardeditable_getstatuscolor",
+      "src_components_dashboard_metriccardeditable_inversemetrics",
+      "src_components_dashboard_metriccardeditable_metriccardeditable",
+      "src_components_dashboard_metriccardeditable_metriccardeditableprops",
+      "src_hooks_usemetrics_useupdatemetric"
     ],
-    "39": [
+    "37": [
       "src_components_ui_drawer",
       "src_components_ui_drawer_drawer",
       "src_components_ui_drawer_drawercontent",
@@ -1015,7 +982,17 @@
       "src_components_ui_drawer_draweroverlay",
       "src_components_ui_drawer_drawertitle"
     ],
-    "40": [
+    "38": [
+      "src_components_ui_dropdown_menu",
+      "src_components_ui_dropdown_menu_dropdownmenucheckboxitem",
+      "src_components_ui_dropdown_menu_dropdownmenulabel",
+      "src_components_ui_dropdown_menu_dropdownmenuradioitem",
+      "src_components_ui_dropdown_menu_dropdownmenuseparator",
+      "src_components_ui_dropdown_menu_dropdownmenushortcut",
+      "src_components_ui_dropdown_menu_dropdownmenusubcontent",
+      "src_components_ui_dropdown_menu_dropdownmenusubtrigger"
+    ],
+    "39": [
       "src_components_ui_navigation_menu",
       "src_components_ui_navigation_menu_navigationmenu",
       "src_components_ui_navigation_menu_navigationmenucontent",
@@ -1025,7 +1002,7 @@
       "src_components_ui_navigation_menu_navigationmenutriggerstyle",
       "src_components_ui_navigation_menu_navigationmenuviewport"
     ],
-    "41": [
+    "40": [
       "supabase_functions_close_month_index",
       "supabase_functions_close_month_index_corsheaders",
       "supabase_functions_close_month_index_jsonresp",
@@ -1034,6 +1011,15 @@
       "supabase_functions_close_month_index_snapshottrafficmonth",
       "supabase_functions_close_month_index_source",
       "supabase_functions_close_month_index_sources"
+    ],
+    "41": [
+      "src_components_dashboard_alertssummary",
+      "src_components_dashboard_alertssummary_abbreviations",
+      "src_components_dashboard_alertssummary_alertssummary",
+      "src_components_dashboard_alertssummary_alertssummaryprops",
+      "src_components_dashboard_alertssummary_getabbreviatedname",
+      "src_components_dashboard_alertssummary_getstatus",
+      "src_components_dashboard_alertssummary_inversemetrics"
     ],
     "42": [
       "src_components_ui_toggle",
@@ -1101,351 +1087,374 @@
       "src_components_dashboard_trainingcard_trainingitem"
     ],
     "51": [
+      "src_components_dashboard_trainingcardeditable",
+      "src_components_dashboard_trainingcardeditable_trainingcardeditable",
+      "src_components_dashboard_trainingcardeditable_trainingitem",
+      "src_hooks_usemetrics_useupdatetraininghours"
+    ],
+    "52": [
+      "src_components_ui_accordion",
+      "src_components_ui_accordion_accordioncontent",
+      "src_components_ui_accordion_accordionitem",
+      "src_components_ui_accordion_accordiontrigger"
+    ],
+    "53": [
+      "src_components_ui_tabs",
+      "src_components_ui_tabs_tabscontent",
+      "src_components_ui_tabs_tabslist",
+      "src_components_ui_tabs_tabstrigger"
+    ],
+    "54": [
       "supabase_functions_send_tasks_to_pipeline_index",
       "supabase_functions_send_tasks_to_pipeline_index_corsheaders",
       "supabase_functions_send_tasks_to_pipeline_index_json",
       "supabase_functions_send_tasks_to_pipeline_index_slugify"
     ],
-    "52": [
+    "55": [
       "src_components_navlink",
       "src_components_navlink_navlink",
       "src_components_navlink_navlinkcompatprops"
     ],
-    "53": [
+    "56": [
+      "src_components_ui_radio_group",
+      "src_components_ui_radio_group_radiogroup",
+      "src_components_ui_radio_group_radiogroupitem"
+    ],
+    "57": [
       "clsx",
       "package_dependencies_clsx"
     ],
-    "54": [
+    "58": [
       "cmdk",
       "package_dependencies_cmdk"
     ],
-    "55": [
+    "59": [
       "date_fns",
       "package_dependencies_date_fns"
     ],
-    "56": [
+    "60": [
       "dnd_kit_core",
       "package_dependencies_dnd_kit_core"
     ],
-    "57": [
+    "61": [
       "dnd_kit_sortable",
       "package_dependencies_dnd_kit_sortable"
     ],
-    "58": [
+    "62": [
       "dnd_kit_utilities",
       "package_dependencies_dnd_kit_utilities"
     ],
-    "59": [
+    "63": [
       "driver_js",
       "package_dependencies_driver_js"
     ],
-    "60": [
+    "64": [
       "embla_carousel_react",
       "package_dependencies_embla_carousel_react"
     ],
-    "61": [
+    "65": [
       "eslint",
       "package_devdependencies_eslint"
     ],
-    "62": [
+    "66": [
       "eslint_js",
       "package_devdependencies_eslint_js"
     ],
-    "63": [
+    "67": [
       "eslint_plugin_react_hooks",
       "package_devdependencies_eslint_plugin_react_hooks"
     ],
-    "64": [
+    "68": [
       "eslint_plugin_react_refresh",
       "package_devdependencies_eslint_plugin_react_refresh"
     ],
-    "65": [
+    "69": [
       "hookform_resolvers",
       "package_dependencies_hookform_resolvers"
     ],
-    "66": [
+    "70": [
       "input_otp",
       "package_dependencies_input_otp"
     ],
-    "67": [
+    "71": [
       "jsdom",
       "package_devdependencies_jsdom"
     ],
-    "68": [
+    "72": [
       "lovable_dev_cloud_auth_js",
       "package_dependencies_lovable_dev_cloud_auth_js"
     ],
-    "69": [
+    "73": [
       "lovable_tagger",
       "package_devdependencies_lovable_tagger"
     ],
-    "70": [
+    "74": [
       "lucide_react",
       "package_dependencies_lucide_react"
     ],
-    "71": [
+    "75": [
       "next_themes",
       "package_dependencies_next_themes"
     ],
-    "72": [
+    "76": [
       "package_dependencies_radix_ui_react_accordion",
       "radix_ui_react_accordion"
     ],
-    "73": [
+    "77": [
       "package_dependencies_radix_ui_react_alert_dialog",
       "radix_ui_react_alert_dialog"
     ],
-    "74": [
+    "78": [
       "package_dependencies_radix_ui_react_aspect_ratio",
       "radix_ui_react_aspect_ratio"
     ],
-    "75": [
+    "79": [
       "package_dependencies_radix_ui_react_avatar",
       "radix_ui_react_avatar"
     ],
-    "76": [
+    "80": [
       "package_dependencies_radix_ui_react_checkbox",
       "radix_ui_react_checkbox"
     ],
-    "77": [
+    "81": [
       "package_dependencies_radix_ui_react_collapsible",
       "radix_ui_react_collapsible"
     ],
-    "78": [
+    "82": [
       "package_dependencies_radix_ui_react_context_menu",
       "radix_ui_react_context_menu"
     ],
-    "79": [
+    "83": [
       "package_dependencies_radix_ui_react_dialog",
       "radix_ui_react_dialog"
     ],
-    "80": [
+    "84": [
       "package_dependencies_radix_ui_react_dropdown_menu",
       "radix_ui_react_dropdown_menu"
     ],
-    "81": [
+    "85": [
       "package_dependencies_radix_ui_react_hover_card",
       "radix_ui_react_hover_card"
     ],
-    "82": [
+    "86": [
       "package_dependencies_radix_ui_react_label",
       "radix_ui_react_label"
     ],
-    "83": [
+    "87": [
       "package_dependencies_radix_ui_react_menubar",
       "radix_ui_react_menubar"
     ],
-    "84": [
+    "88": [
       "package_dependencies_radix_ui_react_navigation_menu",
       "radix_ui_react_navigation_menu"
     ],
-    "85": [
+    "89": [
       "package_dependencies_radix_ui_react_popover",
       "radix_ui_react_popover"
     ],
-    "86": [
+    "90": [
       "package_dependencies_radix_ui_react_progress",
       "radix_ui_react_progress"
     ],
-    "87": [
+    "91": [
       "package_dependencies_radix_ui_react_radio_group",
       "radix_ui_react_radio_group"
     ],
-    "88": [
+    "92": [
       "package_dependencies_radix_ui_react_scroll_area",
       "radix_ui_react_scroll_area"
     ],
-    "89": [
+    "93": [
       "package_dependencies_radix_ui_react_select",
       "radix_ui_react_select"
     ],
-    "90": [
+    "94": [
       "package_dependencies_radix_ui_react_separator",
       "radix_ui_react_separator"
     ],
-    "91": [
+    "95": [
       "package_dependencies_radix_ui_react_switch",
       "radix_ui_react_switch"
     ],
-    "92": [
+    "96": [
       "package_dependencies_radix_ui_react_toast",
       "radix_ui_react_toast"
     ],
-    "93": [
+    "97": [
       "package_dependencies_radix_ui_react_toggle",
       "radix_ui_react_toggle"
     ],
-    "94": [
+    "98": [
       "package_dependencies_radix_ui_react_toggle_group",
       "radix_ui_react_toggle_group"
     ],
-    "95": [
+    "99": [
       "package_dependencies_radix_ui_react_tooltip",
       "radix_ui_react_tooltip"
     ],
-    "96": [
+    "100": [
       "package_dependencies_react",
       "react"
     ],
-    "97": [
+    "101": [
       "package_dependencies_react_day_picker",
       "react_day_picker"
     ],
-    "98": [
+    "102": [
       "package_dependencies_react_router_dom",
       "react_router_dom"
     ],
-    "99": [
+    "103": [
       "package_dependencies_recharts",
       "recharts"
     ],
-    "100": [
+    "104": [
       "package_dependencies_sonner",
       "sonner"
     ],
-    "101": [
+    "105": [
       "package_dependencies_supabase_supabase_js",
       "supabase_supabase_js"
     ],
-    "102": [
+    "106": [
       "package_dependencies_tailwind_merge",
       "tailwind_merge"
     ],
-    "103": [
+    "107": [
       "package_dependencies_tailwindcss_animate",
       "tailwindcss_animate"
     ],
-    "104": [
+    "108": [
       "package_dependencies_tanstack_react_query",
       "tanstack_react_query"
     ],
-    "105": [
+    "109": [
       "package_dependencies_use_gesture_react",
       "use_gesture_react"
     ],
-    "106": [
+    "110": [
       "package_dependencies_vaul",
       "vaul"
     ],
-    "107": [
+    "111": [
       "package_dependencies_zod",
       "zod"
     ],
-    "108": [
+    "112": [
       "package_devdependencies_postcss",
       "postcss"
     ],
-    "109": [
+    "113": [
       "package_devdependencies_tailwindcss",
       "tailwindcss"
     ],
-    "110": [
+    "114": [
       "package_devdependencies_tailwindcss_typography",
       "tailwindcss_typography"
     ],
-    "111": [
+    "115": [
       "package_devdependencies_testing_library_jest_dom",
       "testing_library_jest_dom"
     ],
-    "112": [
+    "116": [
       "package_devdependencies_testing_library_react",
       "testing_library_react"
     ],
-    "113": [
+    "117": [
       "package_devdependencies_types_node",
       "types_node"
     ],
-    "114": [
+    "118": [
       "package_devdependencies_types_react",
       "types_react"
     ],
-    "115": [
+    "119": [
       "package_devdependencies_typescript_eslint",
       "typescript_eslint"
     ],
-    "116": [
+    "120": [
       "package_devdependencies_vite",
       "vite"
     ],
-    "117": [
+    "121": [
       "package_devdependencies_vitejs_plugin_react_swc",
       "vitejs_plugin_react_swc"
     ],
-    "118": [
+    "122": [
       "supabase_functions_auto_close_previous_month_index",
       "supabase_functions_auto_close_previous_month_index_corsheaders"
     ],
-    "119": [
+    "123": [
       "eslint_config"
     ],
-    "120": [
+    "124": [
       "postcss_config"
     ],
-    "121": [
+    "125": [
       "src_components_ui_aspect_ratio"
     ],
-    "122": [
+    "126": [
       "src_test_example_test"
     ],
-    "123": [
+    "127": [
       "src_test_setup"
     ],
-    "124": [
+    "128": [
       "src_vite_env_d"
     ],
-    "125": [
+    "129": [
       "tailwind_config"
     ],
-    "126": [
+    "130": [
       "vite_config"
     ],
-    "127": [
+    "131": [
       "vitest_config"
     ]
   },
   "cohesion": {
-    "0": 0.053992221459620224,
-    "1": 0.0684931506849315,
-    "2": 0.05641025641025641,
+    "0": 0.05274725274725275,
+    "1": 0.059395801331285206,
+    "2": 0.07191961924907457,
     "3": 0.07632850241545894,
-    "4": 0.08846153846153847,
-    "5": 0.0915915915915916,
-    "6": 0.0990990990990991,
+    "4": 0.08658536585365853,
+    "5": 0.1106612685560054,
+    "6": 0.09365079365079365,
     "7": 0.07196969696969698,
     "8": 0.08374384236453201,
     "9": 0.09401709401709402,
     "10": 0.12535612535612536,
     "11": 0.07692307692307693,
-    "12": 0.11067193675889328,
-    "13": 0.12987012987012986,
-    "14": 0.2,
-    "15": 0.1523809523809524,
-    "16": 0.17543859649122806,
-    "17": 0.18128654970760233,
+    "12": 0.10507246376811594,
+    "13": 0.1380952380952381,
+    "14": 0.1523809523809524,
+    "15": 0.21578947368421053,
+    "16": 0.1736842105263158,
+    "17": 0.17543859649122806,
     "18": 0.1111111111111111,
     "19": 0.1568627450980392,
     "20": 0.11764705882352941,
-    "21": 0.16176470588235295,
-    "22": 0.21666666666666667,
+    "21": 0.225,
+    "22": 0.20833333333333334,
     "23": 0.13333333333333333,
-    "24": 0.22857142857142856,
-    "25": 0.2087912087912088,
-    "26": 0.18681318681318682,
-    "27": 0.22727272727272727,
-    "28": 0.18181818181818182,
-    "29": 0.2545454545454545,
+    "24": 0.18681318681318682,
+    "25": 0.21212121212121213,
+    "26": 0.22727272727272727,
+    "27": 0.18181818181818182,
+    "28": 0.2545454545454545,
+    "29": 0.18181818181818182,
     "30": 0.18181818181818182,
     "31": 0.18181818181818182,
-    "32": 0.18181818181818182,
+    "32": 0.26666666666666666,
     "33": 0.26666666666666666,
-    "34": 0.26666666666666666,
-    "35": 0.2,
-    "36": 0.3611111111111111,
+    "34": 0.2,
+    "35": 0.25,
+    "36": 0.39285714285714285,
     "37": 0.25,
     "38": 0.25,
-    "39": 0.25,
-    "40": 0.2857142857142857,
-    "41": 0.25,
+    "39": 0.2857142857142857,
+    "40": 0.25,
+    "41": 0.38095238095238093,
     "42": 0.42857142857142855,
     "43": 0.4666666666666667,
     "44": 0.4666666666666667,
@@ -1455,12 +1464,12 @@
     "48": 0.4,
     "49": 0.5,
     "50": 0.5,
-    "51": 0.5,
-    "52": 0.6666666666666666,
-    "53": 1.0,
-    "54": 1.0,
-    "55": 1.0,
-    "56": 1.0,
+    "51": 0.6666666666666666,
+    "52": 0.5,
+    "53": 0.5,
+    "54": 0.5,
+    "55": 0.6666666666666666,
+    "56": 0.6666666666666666,
     "57": 1.0,
     "58": 1.0,
     "59": 1.0,
@@ -1531,7 +1540,11 @@
     "124": 1.0,
     "125": 1.0,
     "126": 1.0,
-    "127": 1.0
+    "127": 1.0,
+    "128": 1.0,
+    "129": 1.0,
+    "130": 1.0,
+    "131": 1.0
   },
   "gods": [
     {
@@ -1555,14 +1568,14 @@
       "degree": 32
     },
     {
-      "id": "src_utils_formatters_formatnumber",
-      "label": "formatNumber()",
+      "id": "src_pages_index_index",
+      "label": "Index()",
       "degree": 30
     },
     {
-      "id": "src_pages_index_index",
-      "label": "Index()",
-      "degree": 29
+      "id": "src_utils_formatters_formatnumber",
+      "label": "formatNumber()",
+      "degree": 30
     },
     {
       "id": "src_utils_formatters_formatmetricvalue",
@@ -1620,17 +1633,6 @@
       "why": "bridges separate communities; peripheral node `AlertsSummaryProps` unexpectedly reaches hub `Metric`"
     },
     {
-      "source": "AuditPanelProps",
-      "target": "Metric",
-      "source_files": [
-        "src/components/dashboard/AuditPanel.tsx",
-        "src/hooks/useMetrics.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "bridges separate communities; peripheral node `AuditPanelProps` unexpectedly reaches hub `Metric`"
-    },
-    {
       "source": "DataEntrySection()",
       "target": "cn()",
       "source_files": [
@@ -1640,6 +1642,17 @@
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "bridges separate communities; peripheral node `DataEntrySection()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "AlertsPanel()",
+      "target": "cn()",
+      "source_files": [
+        "src/components/dashboard/GoalsPerformanceAnalysis.tsx",
+        "src/lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities; peripheral node `AlertsPanel()` unexpectedly reaches hub `cn()`"
     }
   ],
   "tokens": {
