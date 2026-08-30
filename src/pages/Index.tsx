@@ -1255,11 +1255,11 @@ const Index = () => {
       values["966513fb-82c1-4565-8677-58dd7f4a90be"] = 0;
     } else {
       values[RECEITA_BRUTA_OPERACIONAL_ID] = 0; // Will be set by spreadsheet fallback if available below
-      values[FLUXO_CAIXA_OPERACIONAL_ID] = m.recebimentos_dinheiro_pix || 0;
+      values[FLUXO_CAIXA_OPERACIONAL_ID] = m.total_recebimentos || m.recebimentos_dinheiro_pix || 0;
       values[LUCRATIVIDADE_MENSAL_ID] = m.lucratividade_pct;
       
       const headcountAtivo = pipelineData?.training?.headcount ?? 0;
-      const fluxoCaixa = m.recebimentos_dinheiro_pix || 0;
+      const fluxoCaixa = values[FLUXO_CAIXA_OPERACIONAL_ID];
       values[FOLHA_SOBRE_RECEITA_ID] = headcountAtivo > 0 ? Math.round((fluxoCaixa / headcountAtivo) * 100) / 100 : 0;
       values["966513fb-82c1-4565-8677-58dd7f4a90be"] = values[FOLHA_SOBRE_RECEITA_ID];
     }
