@@ -132,6 +132,15 @@ const categoryOrder: MetricCategory[] = [
 "administrativo"];
 
 
+// Remove chaves vazias (undefined/null/0) para que dados vivos tenham prioridade sobre fallbacks
+function pruneEmpty<T extends Record<string, any>>(obj: T): Partial<T> {
+  const out: Record<string, any> = {};
+  Object.entries(obj || {}).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== 0) out[k] = v;
+  });
+  return out as Partial<T>;
+}
+
 const COMMISSION_USER_EMAIL = "william.rocha@asfnegocios.com.br";
 const SDR_ALLOWED_EMAILS = ["william.rocha@asfnegocios.com.br", "jaderjunior@asfnegocios.com.br"];
 
