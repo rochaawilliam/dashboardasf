@@ -1287,7 +1287,7 @@ const Index = () => {
         receita_outras: 0,
         clientes_assessoria: 10
       };
-      s = s ? { ...s, ...fallbackJuly } : fallbackJuly as any;
+      s = s ? { ...fallbackJuly, ...pruneEmpty(s) } : fallbackJuly as any;
     } else if (ms === "2026-08") {
       const fallbackAugust = {
         receita_emp: 48093.38,
@@ -1304,11 +1304,8 @@ const Index = () => {
         receita_tri_contencioso: 0,
         receita_outras: 0,
         clientes_assessoria: 8,
-        total_recebimentos: 108459.97,
-        total_pagamentos: 75921.98,
-        lucratividade_pct: 30
       };
-      s = s ? { ...s, ...fallbackAugust } : fallbackAugust as any;
+      s = s ? { ...fallbackAugust, ...pruneEmpty(s) } : fallbackAugust as any;
 
     }
 
@@ -1318,8 +1315,10 @@ const Index = () => {
                                              (s.receita_tra_assessoria || 0) + (s.receita_tra_consultoria || 0) + (s.receita_tra_contencioso || 0) +
                                              (s.receita_tri_assessoria || 0) + (s.receita_tri_consultoria || 0) + (s.receita_tri_contencioso || 0) +
                                              (s.receita_outras || 0);
-      values[FLUXO_CAIXA_OPERACIONAL_ID] = s.total_recebimentos || 0;
-      values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
+      // Fluxo de Caixa Operacional sempre vem da planilha de Fluxo de Caixa (integração viva)
+      if (!m) values[FLUXO_CAIXA_OPERACIONAL_ID] = s.total_recebimentos || 0;
+      if (!m?.lucratividade_pct) values[LUCRATIVIDADE_MENSAL_ID] = s.lucratividade_pct || 0;
+
       
       const receitaAssessoriaTotal = (s.receita_emp_assessoria || 0) + (s.receita_tra_assessoria || 0) + (s.receita_tri_assessoria || 0);
       const clientesAssessoria = Number(s.clientes_assessoria) || 0;
