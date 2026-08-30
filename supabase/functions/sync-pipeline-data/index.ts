@@ -32,7 +32,7 @@ function makeExternalClient(url: string, fallbackKey: string, secretEnvName: str
       headers.delete("Authorization");
     }
 
-    return fetch(input, { ...init, headers });
+    return fetch(input, { ...init, headers, signal: init.signal ?? AbortSignal.timeout(20000) });
   };
 
   return createClient(url, key, {
@@ -1031,8 +1031,8 @@ Deno.serve(async (req) => {
 
       // Fetch both CSVs in parallel
       const [collabRes, trainingRes] = await Promise.all([
-        fetch(COLLAB_CSV_URL),
-        fetch(TRAINING_CSV_URL),
+        fetch(COLLAB_CSV_URL, { signal: AbortSignal.timeout(20000), redirect: "follow" }),
+        fetch(TRAINING_CSV_URL, { signal: AbortSignal.timeout(20000), redirect: "follow" }),
       ]);
       const collabCsv = await collabRes.text();
       const trainingCsv = await trainingRes.text();
