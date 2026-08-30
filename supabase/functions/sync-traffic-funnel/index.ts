@@ -4,6 +4,31 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqr_x36mGLJC8-2aTAPPD0opl3txAiAnEmjwtJJI5f5jEy70XVdeAPhgl85HlJMg/pub?gid=1235459084&single=true&output=csv";
 
+const CSV_FETCH_TIMEOUT_MS = 12_000;
+const CSV_FETCH_ATTEMPTS = 2;
+
+async function fetchTrafficCsv(): Promise<string> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= CSV_FETCH_ATTEMPTS; attempt++) {
+    try {
+      const separator = CSV_URL.includes("?") ? "&" : "?";
+      const res = await fetch(`${CSV_URL}${separator}_retry=${attempt}`, {
+        signal: AbortSignal.timeout(CSV_FETCH_TIMEOUT_MS),
+        redirect: "follow",
+        headers: { Accept: "text/csv" },
+      });
+      if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
+      return await res.text();
+    } catch (error) {
+      lastError = error;
+      console.warn(`Traffic CSV attempt ${attempt}/${CSV_FETCH_ATTEMPTS} failed:`, error);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Traffic CSV unavailable");
+}
+
 interface MonthData {
   valor_investido: number;
   impressoes: number;
@@ -207,9 +232,7 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
 
-    const res = await fetch(CSV_URL, { signal: AbortSignal.timeout(20000), redirect: "follow" });
-    if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
-    const csv = await res.text();
+    const csv = await fetchTrafficCsv();
 
     const data = parseCSV(csv, year);
 

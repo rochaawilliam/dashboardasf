@@ -24,13 +24,13 @@ export interface TrafficFunnelData {
 const CACHE_KEY = "traffic-funnel-cache";
 const CACHE_TTL = 10 * 60 * 1000;
 
-function getCached(year: number): TrafficFunnelData | null {
+function getCached(year: number, allowStale = false): TrafficFunnelData | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const { data, timestamp, cacheYear } = JSON.parse(raw);
     if (cacheYear !== year) return null;
-    if (Date.now() - timestamp > CACHE_TTL) return null;
+    if (!allowStale && Date.now() - timestamp > CACHE_TTL) return null;
     return data as TrafficFunnelData;
   } catch {
     return null;
@@ -55,12 +55,18 @@ export function useTrafficFunnelData(year: number) {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
       });
-      if (!res.ok) throw new Error(`Traffic funnel fetch failed: ${res.status}`);
+      if (!res.ok) {
+        const cached = getCached(year, true);
+        if (cached) return cached;
+        throw new Error(`Traffic funnel fetch failed: ${res.status}`);
+      }
       const data = (await res.json()) as TrafficFunnelData;
       setCache(year, data);
       return data;
     },
     placeholderData: () => getCached(year) ?? undefined,
+    initialData: () => getCached(year, true) ?? undefined,
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
     refetchOnWindowFocus: "always",
