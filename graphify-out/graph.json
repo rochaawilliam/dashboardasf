@@ -4012,7 +4012,7 @@
       "file_type": "code",
       "norm_label": "normalize()",
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L26"
+      "source_location": "L24"
     },
     {
       "id": "supabase_functions_sync_marketing_sheet_index_parsecsv",
@@ -4023,7 +4023,7 @@
       "file_type": "code",
       "norm_label": "parsecsv()",
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L35"
+      "source_location": "L33"
     },
     {
       "id": "supabase_functions_sync_marketing_sheet_index_parsenumber",
@@ -4034,7 +4034,7 @@
       "file_type": "code",
       "norm_label": "parsenumber()",
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L67"
+      "source_location": "L65"
     },
     {
       "id": "supabase_functions_sync_traffic_funnel_index_fetchtrafficcsv",
@@ -8993,7 +8993,7 @@
       "file_type": "code",
       "norm_label": "percent_metrics",
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L24"
+      "source_location": "L22"
     },
     {
       "id": "supabase_functions_sync_traffic_funnel_index",
@@ -17372,7 +17372,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/Index.tsx",
-      "source_location": "L1603",
+      "source_location": "L1607",
       "weight": 1.0
     },
     {
@@ -17564,7 +17564,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/Index.tsx",
-      "source_location": "L2158",
+      "source_location": "L2162",
       "weight": 1.0
     },
     {
@@ -17612,7 +17612,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/Index.tsx",
-      "source_location": "L2317",
+      "source_location": "L2321",
       "weight": 1.0
     },
     {
@@ -43705,7 +43705,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L24",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -43716,7 +43716,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L26",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -43727,7 +43727,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L35",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -43738,7 +43738,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/sync-marketing-sheet/index.ts",
-      "source_location": "L67",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -44690,5 +44690,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "38426403676c9a6549a153f8140e21be0959f7bf"
+  "built_at_commit": "a07637d190e490c1781e96dfbc5acfa4088607cb"
 }
