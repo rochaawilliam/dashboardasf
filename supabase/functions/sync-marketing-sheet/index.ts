@@ -17,8 +17,6 @@ const METRIC_IDS: Record<string, string> = {
   "blog": "872794b9-37d4-4fff-b4b4-2192492ed954",
   "visitas ao site": "e4b899d1-8b6b-4017-8b17-dda419c9a5f1",
   "engajamento do site": "33d37ba5-2494-4cea-908c-e0a9a1ed0d84",
-  "investimento em conversao": "c4496b6e-7a8e-4d28-9463-f32e3f1aa71d",
-  "investimento em branding": "d7c1396e-aed1-47f1-84f7-71c2b16860ff",
 };
 
 const PERCENT_METRICS = new Set(["33d37ba5-2494-4cea-908c-e0a9a1ed0d84"]);

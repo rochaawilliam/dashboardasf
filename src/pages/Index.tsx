@@ -1541,7 +1541,11 @@ const Index = () => {
       Object.entries(mktValues).forEach(([id, v]) => {
         merged[id] = v;
       });
+      // Parcerias Totais Ativas = soma de Parcerias Formalizadas em todos os meses
+      merged["b0000001-0000-4000-b000-000000000004"] =
+        marketingSheetData.accumulated?.["2b32e074-e78c-4bf3-a228-29ce95cb97e3"] ?? 0;
     }
+
     
     
     // Copy spreadsheet formulas to merged object
