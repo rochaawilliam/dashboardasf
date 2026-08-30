@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
 
-    const res = await fetch(CSV_URL);
+    const res = await fetch(CSV_URL, { signal: AbortSignal.timeout(20000), redirect: "follow" });
     if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
     const csv = await res.text();
 
