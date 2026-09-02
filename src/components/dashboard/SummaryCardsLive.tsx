@@ -1,33 +1,33 @@
-import { Target, TrendingUp, Users, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { Metric } from "@/hooks/useMetrics";
-import { formatMetricValue, formatNumber } from "@/utils/formatters";
+import { Target, TrendingUp, Users, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { Metric } from '@/hooks/useMetrics';
+import { formatMetricValue, formatNumber } from '@/utils/formatters';
 
 interface SummaryCardsLiveProps {
   metrics: Metric[];
 }
 
-const inverseMetrics = ["Churn de Clientes", "Turnover"];
+const inverseMetrics = ['Churn de Clientes', 'Turnover'];
 
-function getChange(metric: Metric): { text: string; type: "positive" | "negative" | "neutral" } {
+function getChange(metric: Metric): { text: string; type: 'positive' | 'negative' | 'neutral' } {
   const isInverse = inverseMetrics.includes(metric.name);
   const ratio = metric.current_value / metric.target_value;
   
   if (isInverse) {
-    if (ratio <= 1) return { text: "No alvo", type: "positive" };
-    return { text: `+${formatNumber((ratio - 1) * 100, 1)}%`, type: "negative" };
+    if (ratio <= 1) return { text: 'No alvo', type: 'positive' };
+    return { text: `+${formatNumber((ratio - 1) * 100, 1)}%`, type: 'negative' };
   }
   
-  if (ratio >= 1) return { text: "No alvo", type: "positive" };
-  if (ratio >= 0.95) return { text: "Quase lá", type: "neutral" };
-  return { text: `-${formatNumber((1 - ratio) * 100, 1)}%`, type: "negative" };
+  if (ratio >= 1) return { text: 'No alvo', type: 'positive' };
+  if (ratio >= 0.95) return { text: 'Quase lá', type: 'neutral' };
+  return { text: `-${formatNumber((1 - ratio) * 100, 1)}%`, type: 'negative' };
 }
 
 const summaryConfig = [
-  { name: "Cumprimento de Orçamento", icon: Target, colorClass: "bg-primary text-primary-foreground" },
-  { name: "NPS", icon: TrendingUp, colorClass: "bg-success text-success-foreground" },
-  { name: "Churn de Clientes", icon: Users, colorClass: "bg-accent text-accent-foreground" },
-  { name: "Capacidade Ocupada (IC)", icon: Zap, colorClass: "bg-warning text-warning-foreground" },
+  { name: 'Cumprimento de Orçamento', icon: Target, colorClass: 'bg-primary text-primary-foreground' },
+  { name: 'NPS', icon: TrendingUp, colorClass: 'bg-success text-success-foreground' },
+  { name: 'Churn de Clientes', icon: Users, colorClass: 'bg-accent text-accent-foreground' },
+  { name: 'Capacidade Ocupada (IC)', icon: Zap, colorClass: 'bg-warning text-warning-foreground' },
 ];
 
 export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
@@ -47,33 +47,33 @@ export function SummaryCardsLive({ metrics }: SummaryCardsLiveProps) {
   }).filter(Boolean);
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+    <div className='grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 mb-3 sm:mb-4'>
       {summaryData.map((item) => {
         if (!item) return null;
         
         return (
           <div
             key={item.name}
-            className="bg-card rounded-lg border border-border p-2 sm:p-3 lg:p-4 shadow-sm hover:shadow-md transition-shadow"
+            className='bg-card rounded-lg border border-border p-2 sm:p-3 lg:p-4 shadow-sm hover:shadow-md transition-shadow min-w-0 overflow-hidden break-words'
           >
-            <div className="flex items-start justify-between">
-              <div className={cn("p-1.5 lg:p-2 rounded-lg", item.colorClass)}>
-                <item.icon className="h-4 w-4 lg:h-5 lg:w-5" />
+            <div className='flex items-start justify-between gap-1 min-w-0'>
+              <div className={cn('p-1.5 lg:p-2 rounded-lg shrink-0', item.colorClass)}>
+                <item.icon className='h-4 w-4 lg:h-5 lg:w-5' />
               </div>
               <span
                 className={cn(
-                  "text-xs font-medium px-2 py-1 rounded-full",
-                  item.changeType === "positive" && "bg-success/10 text-success",
-                  item.changeType === "negative" && "bg-destructive/10 text-destructive",
-                  item.changeType === "neutral" && "bg-muted text-muted-foreground"
+                  'shrink-0 text-xs font-medium px-2 py-1 rounded-full max-w-[55%] truncate',
+                  item.changeType === 'positive' && 'bg-success/10 text-success',
+                  item.changeType === 'negative' && 'bg-destructive/10 text-destructive',
+                  item.changeType === 'neutral' && 'bg-muted text-muted-foreground'
                 )}
               >
                 {item.change}
               </span>
             </div>
-            <div className="mt-1.5 lg:mt-2.5">
-              <p className="text-sm sm:text-lg lg:text-xl font-bold text-foreground">{item.value}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{item.name}</p>
+            <div className='mt-1.5 lg:mt-2.5 min-w-0'>
+              <p className='text-sm sm:text-lg lg:text-xl font-bold text-foreground truncate'>{item.value}</p>
+              <p className='text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate'>{item.name}</p>
             </div>
           </div>
         );
